@@ -1,0 +1,54 @@
+/* ========================================================================= */
+/* TAILWIND CSS V4 MASTER ENGINE ANBINDUNG                                   */
+/* ========================================================================= */
+@import "tailwindcss";
+
+/* ========================================================================= */
+/* GLOBALES CYBERPUNK BASE STYLING (DEIN ORIGINAL-STAND)                     */
+/* ========================================================================= */
+@layer base {
+  html, body {
+    background-color: #020617; /* Tiefdunkles Slate-Blau als Fundament */
+    color: #f1f5f9;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+
+  /* Saubere Cyber-Scrollbalken, damit das Layout an den Seiten nicht bricht */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #020617;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #22d3ee; /* Leuchtet beim Drüberfahren cyan auf */
+  }
+}
+
+/* ========================================================================= */
+/* UTILITIES & ANIMATIONS (FÜR DIE FLÜSSIGEN SEITEN-ÜBERGÄNGE)               */
+/* ========================================================================= */
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px); /* Sanfter Rutsch nach oben beim Laden */
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

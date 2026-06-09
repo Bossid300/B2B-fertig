@@ -1,0 +1,229 @@
+import React, { useState } from 'react';
+import { Music, MapPin, Users, Radio, ArrowRight, ChevronDown, Sliders, ShieldCheck, Zap, Star, CheckCircle2 } from 'lucide-react';
+import RegisterForm from './RegisterForm';
+import VotingDashboard from './VotingDashboard';
+import UserProfile from './UserProfile';
+import LoginForm from './LoginForm';
+import SearchExplorer from './SearchExplorer';
+import EventPlanner from './EventPlanner';
+import CommunityChat from './CommunityChat';
+import ThreeLanyard from './ThreeLanyard';
+import StageSpecs from './StageSpecs';
+import LocationProfile from './LocationProfile';
+import ContractCenter from './ContractCenter';
+
+export default function App() {
+  const [activeFaq, setActiveFaq] = useState(null);
+  const [view, setView] = useState('landing');
+  const [ticketName, setTicketName] = useState('Gast User');
+  const [inputName, setInputName] = useState('');
+  const [activeTargetRole, setActiveTargetRole] = useState('artist'); // Gast-Vorschau-Tab
+
+  const [progress, setProgress] = useState({
+    profile: 30, stage: 0, search: 0, venue: 50, chat: 20, contract: 0, voting: 0, planner: 25
+  });
+
+  const workflowSteps = [
+    { id: 'profile', label: '1. Profil & Rider', pct: progress.profile },
+    { id: 'stage', label: '🎛️ Rider-Check', pct: progress.stage },
+    { id: 'search', label: '2. Location-Suche', pct: progress.search },
+    { id: 'venue', label: '🏰 Location-Profil', pct: progress.venue },
+    { id: 'chat', label: '3. Verhandlung', pct: progress.chat },
+    { id: 'contract', label: '4. Zusage-Deal', pct: progress.contract },
+    { id: 'voting', label: '5. Team-Voting', pct: progress.voting },
+    { id: 'planner', label: '6. Live-Countdown', pct: progress.planner },
+  ];
+
+  const stats = [
+    { n: "92", l: "Künftige Termine" }, { n: "47", l: "Offene Gesuche" },
+    { n: "22", l: "Vergangene Events" }, { n: "100%", l: "Self-Organization" }
+  ];
+
+  // Rollen-Spezifische Argumente für den Gast-User
+  const roleArguments = {
+    artist: {
+      title: "Schluss mit dem ewigen Booking-Frust.",
+      desc: "Präsentiere dein Portfolio (op-winston.html) professionell vor Veranstaltern. Verhandele Gagen transparent im Vorfeld und stimme Termine demokratisch mit deiner Crew ab.",
+      bullets: ["Digitaler Technical Rider & Stromnetz-Plan", "Integrierte Gagen-Transparenz", "Demokratisches Crew-Voting für Wunschtermine"]
+    },
+    venue: {
+      title: "Volle Hallen bei minimalem Orga-Aufwand.",
+      desc: "Hinterlege deine Bühnen-Spezifikationen, Lärmschutzauflagen und Stromanschlüsse einmalig. Lass Künstler sich direkt digital bewerben und schließe Verträge rechtssicher per Klick.",
+      bullets: ["Visueller Licht- & Tonbelegungsplan", "Automatisierter Vertrags-Zusage-Deal", "Direkter Draht zu verifizierten Acts im Umkreis"]
+    },
+    fan: {
+      title: "Sei hautnah dabei. Unterstütze deine lokale Szene.",
+      desc: "Finde spontane Gigs und Open-Airs in deiner unmittelbaren Umgebung über den Live-Radar. Sichere dir exklusive digitale Festival-Pässe und unterstütze Acts direkt.",
+      bullets: ["Realtime GPS Live-Radar für Events", "Interaktive 3D-Lanyard-Passkarten", "Direkte Verbindung zu deinen Lieblingsbands"]
+    }
+  };
+
+  const handleApplyName = (e) => {
+    e.preventDefault();
+    if (inputName.trim()) {
+      setTicketName(inputName.trim());
+      setInputName('');
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans p-6 selection:bg-emerald-400 selection:text-slate-950">
+      
+      {/* NAV */}
+      <nav className="flex justify-between items-center max-w-7xl mx-auto border-b border-slate-900 pb-4 mb-6 gap-4">
+        <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setView('landing')}>
+          <div className="w-9 h-9 bg-gradient-to-tr from-emerald-500 to-cyan-500 rounded-xl flex items-center justify-center">
+            <Music className="w-5 h-5 text-slate-950 font-bold" />
+          </div>
+          <span className="text-xl font-bold">gigsda<span className="text-emerald-400">.com</span></span>
+        </div>
+        <div className="flex items-center space-x-3">
+          {view === 'landing' ? (
+            <div className="flex items-center space-x-2">
+              <button onClick={() => setView('login')} className="text-xs text-slate-400 hover:text-white px-3 py-2 font-medium">Anmelden</button>
+              <button onClick={() => setView('register')} className="bg-emerald-400 text-slate-950 font-bold px-4 py-2 rounded-xl text-xs shadow-lg shadow-emerald-400/5">Jetzt kostenlos registrieren</button>
+            </div>
+          ) : (
+            <button onClick={() => setView('landing')} className="text-xs text-slate-500 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800">Startseite</button>
+          )}
+        </div>
+      </nav>
+
+      {/* WORKFLOW METRIK (NUR IM EINGELOGGTEN MODUS SICHTBAR) */}
+      {view !== 'landing' && view !== 'login' && view !== 'register' && (
+        <div className="max-w-7xl mx-auto bg-slate-900/40 border border-slate-900 p-3 rounded-2xl mb-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+          <div className="text-[10px] font-mono text-slate-500 uppercase tracking-widest pl-2">Gigsda Fahrplan-Metrik:</div>
+          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+            {workflowSteps.map((step) => (
+              <button
+                key={step.id} onClick={() => setView(step.id)}
+                className={`text-xs px-3 py-2 font-bold rounded-xl border transition-all flex items-center justify-between gap-3 min-w-[130px] ${
+                  view === step.id 
+                    ? 'bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 border-transparent shadow-lg scale-105' 
+                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <span>{step.label}</span>
+                <span className={`px-1.5 py-0.5 rounded text-[9px] font-mono ${view === step.id ? 'bg-slate-950/20 text-slate-950' : step.pct === 100 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-900 text-slate-500'}`}>{step.pct}%</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* PAGES SWITCHER */}
+      {view === 'register' && <RegisterForm onBack={() => setView('landing')} />}
+      {view === 'login' && <LoginForm onLoginSuccess={() => setView('profile')} onBack={() => setView('landing')} onSwitchToRegister={() => setView('register')} />}
+      {view === 'profile' && <UserProfile onBack={() => setView('stage')} onRiderSuccess={() => setProgress({...progress, profile: 100})} />} 
+      {view === 'stage' && <StageSpecs onBack={() => setView('search')} onApproveSuccess={() => setProgress({...progress, stage: 100})} />}
+      {view === 'search' && <SearchExplorer onBack={() => setView('venue')} onSelectProfile={() => setView('venue')} onGPSSuccess={() => setProgress({...progress, search: 100})} />} 
+      {view === 'venue' && <LocationProfile onBack={() => setView('chat')} onStartPlanning={() => setView('chat')} />}
+      {view === 'chat' && <CommunityChat onBack={() => setView('contract')} onChatActive={() => setProgress({...progress, chat: 100})} />} 
+      {view === 'contract' && <ContractCenter onBack={() => setView('voting')} onContractSigned={() => setProgress({...progress, contract: 100, planner: 100})} />}
+      {view === 'voting' && <VotingDashboard onBack={() => setView('planner')} onVoteSuccess={() => setProgress({...progress, voting: 100})} />}
+      {view === 'planner' && <EventPlanner onBack={() => setView('landing')} onStepSuccess={() => setProgress({...progress, planner: 100})} />}
+      
+      {/* 🚀 GAST USER LANDINGPAGE */}
+      {view === 'landing' && (
+        <div className="space-y-20 max-w-7xl mx-auto pt-4 pb-12">
+          
+          {/* HERO SECTION */}
+          <header className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-7 space-y-6">
+              <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-full text-xs font-mono text-emerald-400 font-bold uppercase tracking-wider">// Das Live-Musik Ökosystem</span>
+              <h1 className="text-5xl font-black tracking-tight leading-none text-white sm:text-6xl">Hier sind Gigs für <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">alle</span> da.</h1>
+              <p className="text-slate-400 text-sm sm:text-base leading-relaxed">Vergiss unübersichtliche PDF-Rider, endlose WhatsApp-Gruppen und undurchsichtige Gagenverhandlungen. Gigsda automatisiert die Organisation zwischen Künstlern, Locations und Technikern – dezentral, fair und transparent.</p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button onClick={() => setView('login')} className="bg-emerald-400 text-slate-950 font-black px-6 h-12 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-400/10 hover:scale-[1.02] transition-transform">Plattform testen (Onboarding) <ArrowRight className="w-4 h-4" /></button>
+                <button onClick={() => setView('register')} className="bg-slate-900 border border-slate-800 text-slate-300 font-bold px-6 h-12 rounded-xl hover:text-white transition-colors">Konto erstellen</button>
+              </div>
+            </div>
+            <div className="lg:col-span-5 flex flex-col items-center space-y-4 w-full">
+              <ThreeLanyard ticketName={ticketName} setView={setView} />
+              <form onSubmit={handleApplyName} className="w-64 space-y-2">
+                <div className="p-1 bg-slate-900 border border-slate-800 rounded-xl flex gap-1 shadow-md">
+                  <input type="text" maxLength="14" placeholder="Dein Name auf dem Pass..." value={inputName} onChange={(e) => setInputName(e.target.value)} className="w-full bg-transparent text-xs text-white focus:outline-none px-2" />
+                  <button type="submit" className="bg-slate-950 text-cyan-400 border border-slate-800 font-mono text-[10px] font-bold px-3 py-1.5 rounded-lg">Drucken</button>
+                </div>
+              </form>
+            </div>
+          </header>
+
+          {/* NETZWERK QUICK-STATS */}
+          <section className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center border-y border-slate-900 py-8 bg-slate-900/10 rounded-3xl px-4">
+            {stats.map((s, i) => (
+              <div key={i}><p className="text-3xl font-black text-white tracking-tight">{s.n}</p><p className="text-[10px] text-slate-500 font-mono uppercase mt-1 tracking-wider">{s.l}</p></div>
+            ))}
+          </section>
+
+          {/* INTERAKTIVES ARGUMENTATIONS-CENTER (FÜR DEN GAST-USER) */}
+          <section className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-cyan-500 to-purple-500" />
+            <div className="text-center max-w-2xl mx-auto space-y-2">
+              <h2 className="text-2xl font-black text-white tracking-tight sm:text-3xl">Was ist dein Part bei einem Event?</h2>
+              <p className="text-xs text-slate-400">Wähle deine Rolle aus, um zu sehen, wie gigsda dein Event-Management revolutioniert.</p>
+            </div>
+
+            {/* TABS FÜR DIE ROLLEN */}
+            <div className="flex ju67stify-center gap-2 border-b border-slate-900 pb-4 max-w-md mx-auto">
+              {[
+                { id: 'artist', label: '🎸 Künstler' },
+                { id: 'venue', label: '🏰 Location' },
+                { id: 'fan', label: '🎫 Fan' }
+              ].map(tab => (
+                <button
+                  key={tab.id} type="button" onClick={() => setActiveTargetRole(tab.id)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${activeTargetRole === tab.id ? 'bg-cyan-500 text-slate-950 font-black border-cyan-400 scale-105 shadow-lg shadow-cyan-500/10' : 'bg-slate-950 border-slate-850 text-slate-400 hover:text-slate-200'}`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* ARGUMENTATIONS-INHALT DYNAMISCH */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center pt-2 max-w-5xl mx-auto animate-fade-in">
+              <div className="md:col-span-7 space-y-4">
+                <h3 className="text-lg font-black text-white leading-snug sm:text-xl">{roleArguments[activeTargetRole].title}</h3>
+                <p className="text-xs text-slate-400 leading-relaxed font-sans">{roleArguments[activeTargetRole].desc}</p>
+                <div className="space-y-2 pt-2">
+                  {roleArguments[activeTargetRole].bullets.map((b, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-xs text-slate-300 font-medium">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" /> <span>{b}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="md:col-span-5 bg-slate-950 border border-slate-850 p-5 rounded-2xl space-y-3 text-center border-dashed">
+                <Zap className="w-8 h-8 text-amber-400 mx-auto animate-pulse" />
+                <span className="text-[10px] font-mono text-slate-500 uppercase block tracking-widest">// Bereit im Dashboard</span>
+                <p className="text-[11px] text-slate-400">Nach der Registrierung steht dieses Werkzeug sofort voll funktionsfähig in deinem Kontrollzentrum bereit.</p>
+                <button onClick={() => setView('login')} className="text-[10px] bg-slate-900 border border-slate-800 font-bold px-4 py-2 rounded-xl hover:text-white transition-colors w-full">Vorschau im Onboarding ansehen</button>
+              </div>
+            </div>
+          </section>
+
+          {/* TEASER: WARUM GIGSDA? */}
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-6 bg-slate-900/20 border border-slate-900 rounded-2xl space-y-3">
+              <div className="w-9 h-9 bg-slate-950 rounded-xl flex items-center justify-center border border-slate-850 text-cyan-400"><Sliders className="w-4 h-4" /></div>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Keine Missverständnisse</h3>
+              <p className="text-xs text-slate-400 leading-relaxed font-sans">Durch den visuellen 2D-Bühnenbauplan und die exakten Stromnetz-Spezifikationen weiß das Technik-Team vor Ort schon Wochen vor der Show auf das Watt genau, was gebraucht wird.</p>
+            </div>
+            <div className="p-6 bg-slate-900/20 border border-slate-900 rounded-2xl space-y-3">
+              <div className="w-9 h-9 bg-slate-950 rounded-xl flex items-center justify-center border border-slate-850 text-emerald-400"><ShieldCheck className="w-4 h-4" /></div>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Rechtssichere Zusagen</h3>
+              <p className="text-xs text-slate-400 leading-relaxed font-sans">Mit der digitalen Vertragskomponente (Zusage-Deal) werden Gagen, Uhrzeiten und Lärmschutz-Auflagen unkompliziert per Klick versiegelt. Verbindlichkeit ohne dicke Aktenordner.</p>
+            </div>
+            <div className="p-6 bg-slate-900/20 border border-slate-900 rounded-2xl space-y-3">
+              <div className="w-9 h-9 bg-slate-950 rounded-xl flex items-center justify-center border border-slate-850 text-purple-400"><Users className="w-4 h-4" /></div>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Demokratische Planung</h3>
+              <p className="text-xs text-slate-400 leading-relaxed font-sans">Das integrierte Crew-Voting sorgt dafür, dass Musiker, Tontechniker und Lichtdesigner gemeinsam über Termine entscheiden können. Volle Transparenz im Kollektiv.</p>
+            </div>
+          </section>
+
+        </div>
+      )}
+    </div>
+  );
+}
+
