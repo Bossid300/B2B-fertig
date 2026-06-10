@@ -89,7 +89,8 @@ export default function SearchExplorer({ onNavigate, setFavorites }) {
               {/* OBERES BANNER-BILD */}
               <div className="h-24 w-full relative overflow-hidden bg-slate-900">
                 <img 
-                  src={user.bannerUrl || 'https://unsplash.com'} 
+                  // 🔒 DER UNZERSTÖRBARE BANNER-LINK: Holt das echte slide1_url direkt aus eurem Datenbank-Eintrag!
+                  src={user.slide1_url || user.bannerUrl || 'https://unsplash.com'} 
                   alt="Banner" 
                   className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
                 />

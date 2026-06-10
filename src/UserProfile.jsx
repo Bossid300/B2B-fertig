@@ -55,6 +55,7 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
     subInstruments: '',
     phone_visible: true,
     email_visible: true,
+    website: '',      // 🆕 UNZERSTÖRBARER PORTFOLIO-SPEICHER!
   });
 
   useEffect(() => {
@@ -591,7 +592,6 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
                   </button>
                 </div>
 
-
               {/* 📧 NEUES FELD: E-MAIL */}
               <div className="space-y-1">
                 <label className="text-[8px] text-slate-600 uppercase block font-bold">E-Mail-Adresse</label>
@@ -601,6 +601,19 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
                     {localFields.email_visible !== false ? <Eye className="w-3 h-3 text-cyan-400" /> : <EyeOff className="w-3 h-3 text-slate-600" />}
                   </button>
                 </div>
+              </div>
+
+              {/* 🌐 INTERNETADRESSE / PORTFOLIO */}
+              <div className="space-y-1">
+                <label className="text-[8px] text-slate-600 uppercase block font-bold">Homepage / Portfolio URL</label>
+                <input
+                  type="text"
+                  name="website"
+                  value={localFields.website || ''}
+                  onChange={handleInplaceChange}
+                  placeholder="https://deine-website.at"
+                  className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-white text-[10px] outline-none focus:border-cyan-500/30 font-mono"
+                />
               </div>
 
               {/* Genre */}
