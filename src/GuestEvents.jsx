@@ -1,234 +1,210 @@
-import React, { useState } from 'react';
-import { Calendar, MapPin, ArrowLeft, Ticket, Search, Music } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 
-export default function GuestEvents({ onBack, onTriggerGate, currentCity = "Braunau" }) {
+export default function GuestEvents({ onNavigate }) {
+  const [events, setEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedType, setSelectedType] = useState('all');
-  const [selectedMonth, setSelectedMonth] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('Alle');
+  const [searchRadius, setSearchRadius] = useState(50); // 📡 Live-Suchumkreis
 
-  // Die simulierte Live-Event-Datenbank für den Gast-Modus
-  const [mockEvents] = useState([
-    { id: "G-EVT-01", title: "Winston Jud Unplugged", type: "Rock", date: "Fr, 18. Sept 2026", venue: "Backstage Halle", city: "Braunau" },
-    { id: "G-EVT-02", title: "Stadtpark OpenAir Festival", type: "Festival", date: "Sa, 15. Aug 2026", venue: "Stadtpark Wiese", city: "Braunau" },
-    { id: "G-EVT-05", title: "Cyber Neon Night", type: "Electro-Pop", date: "Sa, 11. Jul 2026", venue: "Club Airport", city: "Braunau" },
-    { id: "G-EVT-06", title: "Kasperl & der Musikdieb", type: "Kasperl", date: "So, 04. Okt 2026", venue: "Stadttheater", city: "Braunau" },
-    { id: "G-EVT-03", title: "The Neon Sparks Live", type: "Clubshow", date: "Sa, 10. Okt 2026", venue: "The Jazz Cave", city: "Linz" },
-    { id: "G-EVT-04", title: "Salzburg Rock-Gala", type: "Open Air", date: "Fr, 04. Sept 2026", venue: "Festungsgelände", city: "Salzburg" }
-  ]);
-
-  // Filtert die Gigs messerscharf nach Stadt, Suchbegriff, Genre und Monat
-  const filteredGigs = mockEvents.filter(gig => {
-    // 1. Stadt-Filter (schneidet Leerzeichen ab und ignoriert Groß-/Kleinschreibung)
-    const matchesCity = gig.city ? gig.city.trim().toLowerCase() === currentCity.trim().toLowerCase() : false;
+  // 📁 EVENT-LOADER: Holt alle Events frisch von der Festplatte
+  useEffect(() => {
+    // Falls Daniel ein separates Array nutzt, liest er 'gigsda_events' aus
+    const localEvents = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
     
-    // 2. Textsuche
-    const matchesSearch = searchTerm === '' || 
-                          (gig.title && gig.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
-                          (gig.venue && gig.venue.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    // 3. Genre/Typ-Filter
-    const currentSelectedType = selectedType ? selectedType.toLowerCase() : 'all';
-    const matchesGenre = currentSelectedType === 'all' || 
-                         (gig.type && gig.type.toLowerCase() === currentSelectedType) ||
-                         (currentSelectedType === 'festivals' && gig.type && gig.type.toLowerCase() === 'festival');
-
-    // 4. Zeitachsen-Filter (Monat)
-    let matchesMonth = true;
-    const currentSelectedMonth = selectedMonth ? selectedMonth.toLowerCase() : 'all';
-    if (currentSelectedMonth !== 'all') {
-      const monthMap = { '07': 'jul', '08': 'aug', '09': 'sept', '10': 'okt' };
-      const targetMonthString = monthMap[currentSelectedMonth];
-      matchesMonth = gig.date ? gig.date.toLowerCase().includes(targetMonthString) : false;
+    // Prototypen-Fallbacks, falls die Event-Tabelle beim allerersten Start noch leer ist
+    if (localEvents.length === 0) {
+      const demoEvents = [
+        { id: "EVT-8192", title: "Neon Club Night", category: "Club-Gigs", city: "Braunau", date: "15.07.2026", organizer: "Bossid", slide1_url: "https://unsplash.com" },
+        { id: "EVT-4431", title: "Rock am Inn Festival", category: "Festivals", city: "Altötting", date: "02.08.2026", organizer: "Winston Jud", slide1_url: "https://unsplash.com" },
+        { id: "EVT-2911", title: "Acoustic Songwriter Session", category: "Konzerte", city: "Linz", date: "22.08.2026", organizer: "Musica", slide1_url: "https://unsplash.com" },
+        { id: "EVT-9921", title: "B2B Gastro Expo", category: "B2B-Messen", city: "Wien", date: "10.09.2026", organizer: "Gigsda Network", slide1_url: "https://unsplash.com" }
+      ];
+      localStorage.setItem('gigsda_events', JSON.stringify(demoEvents));
+      setEvents(demoEvents);
+    } else {
+      setEvents(localEvents.filter(evt => evt && evt.title));
     }
+  }, []);
 
-    return matchesCity && matchesSearch && matchesGenre && matchesMonth;
+  const CATEGORIES_LIST = ['Alle', 'Konzerte', 'Festivals', 'Club-Gigs', 'B2B-Messen'];
+
+  // 🗺️ DIE LIVE-ENTFERNUNGSMATRIX (Exakt identisch zum SearchExplorer von eurer Heimatbasis Braunau)
+  const getDistanceTo = (city) => {
+    const target = (city || '').toLowerCase().trim();
+    if (target.includes('braunau')) return 0;   // Direkt vor Ort
+    if (target.includes('altötting')) return 28; // ca. 28 km entfernt
+    if (target.includes('linz')) return 120;     // ca. 120 km entfernt
+    if (target.includes('wien')) return 290;     // ca. 290 km entfernt
+    return 45; // Fallback
+  };
+
+  // ⚡ DIE ZWILLINGS-FILTER-SCHLEIFE (Filtert nach Name, Kategorie UND Radius!)
+  const filteredEvents = events.filter(event => {
+    const matchesName = event.title?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Kategorie-Weiche
+    const matchesCategory = selectedCategory === 'Alle' || event.category === selectedCategory;
+
+    // 🛰️ REAKTIVE RADIUS-PRÜFUNG gegen den Schieberegler
+    const eventDistance = getDistanceTo(event.city);
+    const matchesRadius = eventDistance <= searchRadius;
+
+    return matchesName && matchesCategory && matchesRadius;
   });
 
-
-
-
   return (
-    <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
+    <div className="p-6 bg-slate-950 text-white min-h-screen font-mono relative">
       
-      {/* HEADER */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl gap-4">
-        <div>
-          <span className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">// Regionaler Gigsda-Scanner</span>
-          <h2 className="text-xl font-bold text-white mt-0.5">Anstehende Gigs in <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 font-black">{currentCity}</span></h2>
-          <p className="text-slate-400 text-[11px]">Hier siehst du alle Live-Termine und Locations in deiner direkten Umgebung.</p>
+      {/* 🌌 HEADER SEKTION */}
+      <div className="mb-8">
+        <h1 className="text-xl font-black text-cyan-400 uppercase tracking-wider mb-2">// EVENT-RADAR</h1>
+        <p className="text-xs text-slate-400">Durchsuche alle anstehenden Veranstaltungen und regionalen B2B-Gigs im Umkreis.</p>
+      </div>
+
+      {/* 🎛️ FILTER-LEISTE (KATEGORIEN) */}
+      <div className="flex flex-wrap gap-2 mb-6 border-b border-slate-900 pb-4">
+        {CATEGORIES_LIST.map((cat) => (
+          <button
+            key={cat}
+            onClick={() => setSelectedCategory(cat)}
+            className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-xl border transition-all duration-300 cursor-pointer ${
+              selectedCategory === cat
+                ? 'bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.2)]'
+                : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
+            }`}
+          >
+            {cat === 'Alle' ? '// ALLES ANZEIGEN' : `// ${cat}`}
+          </button>
+        ))}
+      </div>
+
+      {/* 🎛️ DANIELS SMART-KOMBI: SUCHE & REICHWEITENSKALA IN EXAKTER SYMMETRIE */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 max-w-3xl font-mono">
+        
+        {/* Linke Seite: Nach Event-Namen suchen */}
+        <div className="flex flex-col justify-end">
+          <label className="text-[8px] text-slate-500 uppercase font-black mb-1.5">// Nach Event suchen</label>
+          <input
+            type="text"
+            placeholder="Event-Titel suchen..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-slate-900 border border-slate-800 focus:border-cyan-500/40 rounded-xl px-4 py-2.5 text-xs outline-none text-white placeholder-slate-600 h-[38px]"
+          />
         </div>
-        <button 
-          type="button" 
-          onClick={onBack} 
-          className="w-full sm:w-auto bg-slate-950 border border-slate-800 text-slate-300 hover:text-white px-4 h-10 rounded-xl font-bold flex items-center justify-center gap-1.5 cursor-pointer"
-        >
-          <ArrowLeft className="w-4 h-4 text-cyan-400" /> Zurück zur Suche
-        </button>
-      </div>
 
-      {/* FILTER-LEISTE FÜR DEN GAST */}
-      <div className="relative w-full bg-slate-900/40 border border-slate-900 rounded-3xl p-4">
-        <Search className="absolute left-7 top-6 w-4 h-4 text-slate-600" />
-        <input
-          type="text"
-          placeholder="Events oder Locations in dieser Stadt durchsuchen..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-slate-950 border border-slate-900 rounded-xl pl-10 pr-4 py-2 text-white focus:outline-none focus:border-cyan-400 text-xs h-9"
-        />
-      </div>
-
-      {/* FILTER-PILLS (GENRES) */}
-      <div className="flex gap-2 mt-4 px-4 overflow-x-auto no-scrollbar">
-          {['ALLE', 'ROCK', 'ELECTRO-POP', 'FESTIVALS', 'KASPERL'].map((genre) => (
-              <button
-                  key={genre}
-                  onClick={() => setSelectedType(genre === 'ALLE' ? 'all' : genre.toLowerCase())}
-                  className={`px-4 py-1.5 rounded-full text-xs font-mono uppercase tracking-wider transition-all border ${
-                      (selectedType === genre.toLowerCase() || (genre === 'ALLE' && selectedType === 'all'))
-                          ? 'border-emerald-500 text-emerald-400 bg-emerald-950/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]'
-                          : 'border-slate-800 text-slate-400 bg-slate-900/50 hover:border-slate-700'
-                  }`}
-              >
-                  {genre}
-              </button>
-          ))}
-      </div>
-
-      {/* ZEITACHSE (MONTH TIMELINE) */}
-      <div className="mt-6 mx-4 p-4 bg-slate-900/30 border border-slate-900 rounded-2xl">
-          <div className="text-[10px] font-mono text-cyan-400 mb-4 tracking-widest">// ZEITACHSE: SPIELPLAN 2026</div>
-          
-          <div className="relative flex justify-between items-center px-2">
-              {/* Die durchgehende Verbindungslinie im Hintergrund */}
-              <div className="absolute left-4 right-4 h-[1px] bg-slate-800 z-0"></div>
-              
-              {/* Zeitachsen-Knotenpunkte */}
-              {[
-                  { id: 'all', label: 'GESAMT' },
-                  { id: '07', label: 'JUL' },
-                  { id: '08', label: 'AUG' },
-                  { id: '09', label: 'SEPT' },
-                  { id: '10', label: 'OKT' }
-              ].map((month) => (
-                  <button
-                      key={month.id}
-                      onClick={() => setSelectedMonth(month.id)}
-                      className={`relative z-10 px-4 py-1.5 rounded-xl text-xs font-mono font-bold tracking-wider transition-all ${
-                          selectedMonth === month.id
-                              ? 'bg-cyan-500 text-slate-950 shadow-[0_0_15px_rgba(6,182,212,0.5)]'
-                              : 'bg-slate-900 text-slate-500 border border-slate-800 hover:text-slate-300'
-                      }`}
-                  >
-                      {month.label}
-                  </button>
-              ))}
-          </div>
-      </div>
-
-
-
-
-
-
-
-      {/* EVENT GRID */}
-      <div className="space-y-4">
-        {filteredGigs.length > 0 ? (
-          filteredGigs.map((gig) => (
-            <div key={gig.id} className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-slate-800 transition-all shadow-xl">
-              
-              {/* Links: Datum & Titel */}
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex flex-col items-center justify-center text-cyan-400 text-center shrink-0">
-                  <Calendar className="w-4 h-4 mb-0.5" />
-                  <span className="text-[8px] font-black uppercase">LIVE</span>
-                </div>
-                <div>
-                  <span className="text-[9px] text-slate-500 block uppercase font-bold">#{gig.id} // {gig.type}</span>
-                  <h4 className="text-sm font-black text-white mt-0.5">{gig.title}</h4>
-                  <p className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
-                    <MapPin className="w-3 h-3 text-slate-600" /> {gig.venue} ({gig.date})
-                  </p>
-                </div>
-              </div>
-
-              {/* Rechts: Status & Ticket-Sperre (Gäste dürfen laut Lastenheft nur gucken) */}
-              <div className="flex items-center gap-3 w-full sm:w-auto shrink-0 justify-between sm:justify-end border-t border-slate-950 sm:border-0 pt-3 sm:pt-0">
-                <div className="text-right sm:mr-2">
-                  <span className="text-[9px] text-slate-500 block uppercase">Eintritt:</span>
-                  <span className="text-white font-bold block">{gig.price}</span>
-                </div>
-                
-                <button
-                  type="button"
-                  onClick={() => {
-                    // Lastenheft-Regel: Gäste müssen sich registrieren, um Tickets zu buchen!
-                    if (onTriggerGate) {
-                      onTriggerGate("Um Tickets zu reservieren oder echten Crew-Workflow zu starten, erstelle bitte zuerst ein kostenloses Gigsda-Konto!");
-                    }
-                  }}
-                  className="bg-slate-950 border border-slate-800 text-slate-400 hover:text-white hover:border-cyan-500/40 px-4 h-10 rounded-xl font-bold uppercase tracking-wider transition-all active:scale-[0.97] flex items-center gap-1.5 cursor-pointer text-[10px]"
-                >
-                  <Ticket className="w-3.5 h-3.5 text-cyan-400" /> Tickets sichern ➔
-                </button>
-              </div>
-      {/* 🗺️ EVENT-ROUTENPLANER & INTERAKTIVES RADAR */}
-      <div className="mt-8 space-y-3 font-mono text-left max-w-2xl mx-auto">
-        <div className="flex justify-between items-center border-b border-slate-900 pb-1.5">
-          <span className="text-[9px] text-slate-500 font-bold tracking-widest uppercase">// Event-Routenplaner</span>
-          <span className="text-[9px] text-cyan-400 font-black animate-pulse">MAP CONNECTED</span>
-        </div>
-        <p className="text-[10px] text-slate-400">Finde den schnellsten Weg zu den Gigs in deiner Region.</p>
-
-        {/* DAS VISUELLE KARTENGEHÄUSE */}
-        <div className="bg-slate-950/90 border border-slate-900 rounded-2xl overflow-hidden p-4 shadow-2xl relative group">
-          <div className="absolute top-3 right-3 bg-slate-900/80 border border-slate-800 text-emerald-400 text-[9px] font-black px-2 py-0.5 rounded-full backdrop-blur-sm">
-            ⚡ ~15 Min. (11,4 km)
+        {/* Rechte Seite: Perfekt angeglichene Reichweitenskala (Zwillings-Design) */}
+        <div className="flex flex-col justify-end">
+          <div className="flex justify-between items-center mb-1.5">
+            <label className="text-[8px] text-slate-500 uppercase font-black">// Event-Umkreis</label>
+            <span className="text-[10px] text-cyan-400 font-bold tracking-wider font-mono">
+              🛰️ {searchRadius} KM
+            </span>
           </div>
           
-          <div className="text-[10px] text-slate-400 font-bold mb-3 uppercase tracking-tight">
-            Dein Standort (<span className="text-white">Braunau</span>) ➔ <span className="text-cyan-400">Stadtpark Wiese</span>
+          <div className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 flex items-center gap-3 h-[38px]">
+            <span className="text-[8px] text-slate-600 font-mono font-bold">10KM</span>
+            <input
+              type="range"
+              min="0"
+              max="500" // Kannst du analog zum SearchExplorer auf 150 oder 200 erhöhen
+              step="5"
+              value={searchRadius}
+              onChange={(e) => setSearchRadius(Number(e.target.value))}
+              className="flex-grow bg-slate-950 h-1 rounded-none appearance-none cursor-pointer border border-slate-950
+                accent-cyan-500
+                [&::-webkit-slider-thumb]:appearance-none 
+                [&::-webkit-slider-thumb]:h-2 
+                [&::-webkit-slider-thumb]:w-2 
+                [&::-webkit-slider-thumb]:bg-cyan-400 
+                [&::-webkit-slider-thumb]:border 
+                [&::-webkit-slider-thumb]:border-cyan-500 
+                [&::-webkit-slider-thumb]:shadow-[0_0_6px_rgba(34,211,238,0.6)] 
+                [&::-webkit-slider-thumb]:transition-all 
+                [&::-webkit-slider-thumb]:duration-150
+                [&::-webkit-slider-thumb]:hover:scale-125
+                [&::-moz-range-thumb]:h-2 
+                [&::-moz-range-thumb]:w-2 
+                [&::-moz-range-thumb]:bg-cyan-400 
+                [&::-moz-range-thumb]:border 
+                [&::-moz-range-thumb]:border-cyan-500 
+                [&::-moz-range-thumb]:rounded-none
+                [&::-moz-range-thumb]:shadow-[0_0_6px_rgba(34,211,238,0.6)]"
+            />
+            <span className="text-[8px] text-slate-600 font-mono font-bold">100KM</span>
           </div>
+        </div>
 
-          {/* SIMULIERTE KARTENGRAFIK ODER GOOGLE-MAP-IFRAME CHASSIS */}
-          <div className="w-full h-48 bg-slate-900 border border-slate-800/60 rounded-xl flex items-center justify-center overflow-hidden relative grayscale invert opacity-85 group-hover:opacity-100 transition-opacity">
-            {/* Hier brennt sich später euer echtes Karten-Iframe oder Leaflet-Skript ein */}
-            <div className="text-[10px] text-slate-600 uppercase tracking-widest font-black select-none">// GEOTRACKING MAP COMPONENT //</div>
-            
-            {/* Kleine simulierte Radar-Pins */}
-            <span className="absolute top-1/3 left-1/4 w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_8px_rgba(34,211,238,0.8)] animate-ping" />
-            <span className="absolute top-1/2 right-1/3 w-2 h-2 bg-purple-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.8)]" />
-          </div>
+      </div>
 
-          {/* GOOGLE MAPS API DISPATCH BUTTON */}
-          <div className="pt-3 flex justify-center">
-            <button 
-              type="button"
-              onClick={() => window.open('https://google.com', '_blank')}
-              className="bg-cyan-950/40 border border-cyan-800 hover:border-cyan-500 text-cyan-400 hover:text-white font-black uppercase tracking-widest px-4 py-2 rounded-xl text-[9px] transition-all cursor-pointer shadow-lg"
+      {/* 💳 EVENT-KARTEN-GRID (Zwillings-Struktur) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredEvents.length > 0 ? (
+          filteredEvents.map((event, index) => (
+            <div 
+              key={`${event.id || 'event'}-${index}`} 
+              className="bg-slate-950 border border-slate-900 rounded-2xl shadow-2xl relative overflow-hidden flex flex-col group hover:border-slate-800 transition-all duration-300 min-h-[300px]"
             >
-              Google Maps Route starten 🧭
-            </button>
-          </div>
-        </div>
-      </div>
+              {/* OBERES EVENT-BANNER */}
+              <div className="h-24 w-full relative overflow-hidden bg-slate-900">
+                <img 
+                  src={event.slide1_url || 'https://unsplash.com'} 
+                  alt="Event Banner" 
+                  className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
+                />
+                <span className="absolute top-3 right-3 text-[8px] bg-slate-950/90 border border-slate-800/80 text-cyan-400 font-bold px-2 py-0.5 rounded-md tracking-wider uppercase backdrop-blur-sm z-10">
+                  {event.category}
+                </span>
+              </div>
+
+              {/* DATUMS-BOX ALS ICON-ERSATZ */}
+              <div className="absolute top-12 left-4 z-20">
+                <div className="w-16 h-16 rounded-xl border-2 border-slate-950 overflow-hidden bg-slate-900 shadow-xl flex flex-col items-center justify-center text-center font-mono">
+                  <span className="text-[9px] font-black text-cyan-400 tracking-tighter">DATE</span>
+                  <span className="text-[10px] font-bold text-white leading-none mt-0.5">{event.date?.substring(0, 5)}</span>
+                </div>
+              </div>
+
+              {/* TEXT-KÖRPER DER EVENT-KARTE */}
+              <div className="p-4 pt-7 flex-grow flex flex-col justify-between pl-4">
+                <div className="mb-4">
+                  <h3 className="text-sm font-black uppercase text-white tracking-wide group-hover:text-cyan-400 transition-colors">
+                    {event.title}
+                  </h3>
+                  <p className="text-[9px] text-slate-600 uppercase mt-0.5">// EVENT-ID: {event.id || 'N/A'} • BY {event.organizer}</p>
+                </div>
+
+                {/* LOGISCHE LIVE-VARIABLEN (STADT & ENTFERNUNG) */}
+                <div className="pt-3 border-t border-slate-900 flex justify-between text-[10px] text-slate-400 font-mono">
+                  <span>STADT: <strong className="text-slate-200">{event.city || 'Nicht hinterlegt'}</strong></span>
+                  <span>DISTANZ: <strong className="text-cyan-400">{getDistanceTo(event.city)} KM</strong></span>
+                </div>
+                {/* EVENT-BUTTONS */}
+                <div className="grid grid-cols-2 gap-2 mt-5 pt-3 border-t border-slate-900/60">
+                  <button
+                    onClick={() => alert(`Details für ${event.title} öffnen...`)}
+                    className="bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-[10px] font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center"
+                  >
+                    INFOS
+                  </button>
+
+                  <button
+                    onClick={() => alert(`Ticket-Anfrage für ${event.title} bereit! ✎`)}
+                    className="bg-cyan-500/5 border border-cyan-500/20 hover:border-cyan-500/50 text-cyan-400 text-[10px] font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center"
+                  >
+                    TICKETS ✎
+                  </button>
+                </div>
+              </div>
 
             </div>
           ))
         ) : (
-          <div className="text-center py-12 bg-slate-900/20 border border-dashed border-slate-900 rounded-3xl text-slate-600">
-            Aktuell keine Live-Termine für "{currentCity}" im Gigsda-Scanner hinterlegt. Try "Braunau"!
+          <div className="col-span-full bg-slate-900/10 border border-dashed border-slate-900 rounded-2xl p-12 text-center text-xs text-slate-600 font-mono">
+            // KEINE EVENTS IM GEWÄHLTEN UMKREIS GEFUNDEN 🧹
           </div>
         )}
-
-
-        
       </div>
-
-
-
-
 
     </div>
   );

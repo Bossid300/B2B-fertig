@@ -14,6 +14,7 @@ import GuestNavigation from './GuestNavigation';
 import WhatIsGigsda from './WhatIsGigsda';
 import GuestEvents from './GuestEvents';
 import SearchExplorer from './SearchExplorer';
+import LocationProfile from './LocationProfile'; // 👈 Temporärer Import zum Anschauen
  
 export default function App() {
   // ⚡ BROWSER-SAFE SESSION MEMORY
@@ -39,7 +40,8 @@ export default function App() {
  
   // 🔒 INTELLIGENTER ROUTER-SPEICHER: Merkt sich den Bildschirm auch bei F5!
   const [view, setViewWithStorage] = useState(() => localStorage.getItem('gigsda_current_view') || 'landing');
-  
+  const [showTestLocation, setShowTestLocation] = useState(false); // 🎛️ Schalter für die Live-Vorschau
+
   const setView = (newView) => {
     localStorage.setItem('gigsda_current_view', newView);
     setViewWithStorage(newView);
@@ -241,18 +243,6 @@ export default function App() {
                     {hasNotifications && <span className="absolute -top-1 -right-1 w-2 h-2 bg-rose-500 rounded-full shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse" />}
                   </button>
 
-                  <button 
-                    type="button" 
-                    onClick={() => setView('search')} 
-                    className={`px-2.5 py-1 rounded-lg border font-black transition-all cursor-pointer text-xs font-mono uppercase tracking-wider ${
-                      view === 'search' 
-                        ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
-                        : 'bg-slate-950/40 text-slate-400 border-slate-900 hover:border-slate-800'
-                      }`}
-                  >
-                    🔍 Search-Explorer
-                  </button>
-
                    {/* 🔍 NEUER LINK: guestEvents (EVENT-SUCHE) FÜR EINGELOGGTE USER */}
                   <button
                     type="button"
@@ -264,6 +254,18 @@ export default function App() {
                       }`}
                   >
                     📡 Event-Radar
+                  </button>
+
+                  <button 
+                    type="button" 
+                    onClick={() => setView('search')} 
+                    className={`px-2.5 py-1 rounded-lg border font-black transition-all cursor-pointer text-xs font-mono uppercase tracking-wider ${
+                      view === 'search' 
+                        ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+                        : 'bg-slate-950/40 text-slate-400 border-slate-900 hover:border-slate-800'
+                      }`}
+                  >
+                    🔍 Search-Explorer
                   </button>
 
                   {/* 🧑‍💻 DEIN NEUER INTERAKTIVER PROFIL-BUTTON (Zeigt den echten Usernamen an) */}
@@ -477,7 +479,23 @@ export default function App() {
           </div>
         </div>
       )}
- 
+       {/* 🔮 TEMPORÄRER LIVE-PREVIEW-BUTTON FÜR LOCATION-PROFILE */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <button 
+          onClick={() => setShowTestLocation(!showTestLocation)}
+          className="bg-purple-600 hover:bg-purple-500 text-white font-mono text-[9px] font-bold px-3 py-1.5 rounded-xl uppercase tracking-widest border border-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.4)] cursor-pointer"
+        >
+          {showTestLocation ? '✕ Schließen' : '👁️ View LocationProfile'}
+        </button>
+      </div>
+
+      {/* Die Live-Komponente als Overlay */}
+      {showTestLocation && (
+        <div className="fixed inset-0 bg-slate-950 z-40 overflow-y-auto p-6 pt-20">
+          <LocationProfile ticketName="Winston Jud" onNavigate={() => {}} />
+        </div>
+      )}
+
     </div>
   );
 }

@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 
-export default function SearchExplorer({ onNavigate, setFavorites }) {
+export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat }) {
   const [allUsers, setAllUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchRadius, setSearchRadius] = useState(50); // 📡 Live-Suchumkreis
   const [selectedRole, setSelectedRole] = useState('Alle');
+  const [activeRequestUser, setActiveRequestUser] = useState(null); // Sichert das Anfrage-Popup!
+  const [requestText, setRequestText] = useState(''); // Speichert euren eingetippten Text
+
 
   // 📁 REINER LOCALSTORAGE-FILTER: Holt nur eure echten Profile frisch von der Festplatte
   useEffect(() => {
@@ -208,12 +211,18 @@ export default function SearchExplorer({ onNavigate, setFavorites }) {
                     PROFIL
                   </button>
 
+                  {/* 📬 SCHIESST DAS ECHTE OVERLAY-POPUP AUF */}
                   <button
-                    onClick={() => alert(`Anfrage-Dialog für ${user.name} bereit! ✎`)}
-                    className="bg-cyan-500/5 border border-cyan-500/20 hover:border-cyan-500/50 text-cyan-400 text-[10px] font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center"
+                    onClick={() => {
+                      setActiveRequestUser(user);
+                      setRequestText(`Hallo ${user.name}, wir hätten Interesse an einer B2B-Zusammenarbeit für ein anstehendes Event in Region Gigsda!`);
+                    }}
+                    className="bg-cyan-500/5 border border-cyan-500/20 hover:border-cyan-500/50 text-cyan-400 text-[10px] font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center tracking-wider w-full animate-pulse"
                   >
                     ANFRAGEN ✎
                   </button>
+
+
                 </div>
               </div>
             </div>
@@ -224,6 +233,58 @@ export default function SearchExplorer({ onNavigate, setFavorites }) {
           </div>
         )}
       </div>
+      {/* 🌌 DAS ECHTE NEON-ANFRAGETERMINAL (OVERLAY POPUP) */}
+      {activeRequestUser && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4 font-mono">
+          <div className="bg-slate-950 border-2 border-cyan-500/30 rounded-2xl p-6 max-w-md w-full shadow-[0_0_50px_rgba(34,211,238,0.15)] relative animate-fade-in">
+            
+            {/* Header */}
+            <div className="mb-4 border-b border-slate-900 pb-3">
+              <span className="text-[8px] text-cyan-500 block tracking-widest font-black">// GIGSDA B2B PROTOCOL v2.6</span>
+              <h2 className="text-sm font-black text-white uppercase tracking-wider mt-1">
+                Anfrage an: <span className="text-cyan-400">{activeRequestUser.name}</span>
+              </h2>
+            </div>
+
+            {/* Infobox */}
+            <div className="bg-slate-900/40 border border-slate-900 p-2.5 rounded-xl mb-4 text-[9px] text-slate-400 flex flex-col gap-0.5">
+              <p>📍 REGION: <strong className="text-slate-200">{activeRequestUser.city || 'Nicht hinterlegt'}</strong></p>
+              <p>🗂️ SPARTE: <strong className="text-slate-200">{activeRequestUser.role || activeRequestUser.type || 'Künstler'}</strong></p>
+            </div>
+
+            {/* Nachrichtentext */}
+            <div className="space-y-1.5 mb-5">
+              <label className="text-[8px] text-slate-500 uppercase block font-black">// Nachrichtentext</label>
+              <textarea
+                rows="4"
+                value={requestText}
+                onChange={(e) => setRequestText(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-800 focus:border-cyan-500/40 rounded-xl p-3 text-xs outline-none text-white font-mono resize-none placeholder-slate-600"
+              />
+            </div>
+
+            {/* Buttons */}
+            <div className="grid grid-cols-2 gap-2 border-t border-slate-900 pt-4">
+              <button
+                onClick={() => setActiveRequestUser(null)}
+                className="bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white text-[10px] font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center"
+              >
+                ✕ ABBRECHEN
+              </button>
+              <button
+                onClick={() => {
+                  alert(`B2B-Anfrage an ${activeRequestUser.name} wurde erfolgreich im Gigsda-Protokoll registriert! 🚀`);
+                  setActiveRequestUser(null);
+                }}
+                className="bg-cyan-500/10 border border-cyan-500/40 hover:border-cyan-500 text-cyan-400 hover:text-white text-[10px] font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center shadow-[0_0_15px_rgba(34,211,238,0.1)]"
+              >
+                SENDEN ⚡
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );
