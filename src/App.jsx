@@ -250,7 +250,7 @@ export default function App() {
                         : 'bg-slate-950/40 text-slate-400 border-slate-900 hover:border-slate-800'
                       }`}
                   >
-                    📡 Radar
+                    🔍 Search-Explorer
                   </button>
 
                    {/* 🔍 NEUER LINK: guestEvents (EVENT-SUCHE) FÜR EINGELOGGTE USER */}
@@ -263,7 +263,7 @@ export default function App() {
                         : 'bg-slate-950/40 text-slate-400 border-slate-900 hover:border-slate-800'
                       }`}
                   >
-                    🔍 Event-Radar
+                    📡 Event-Radar
                   </button>
 
                   {/* 🧑‍💻 DEIN NEUER INTERAKTIVER PROFIL-BUTTON (Zeigt den echten Usernamen an) */}

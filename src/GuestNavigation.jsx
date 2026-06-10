@@ -15,14 +15,14 @@ export default function GuestNavigation({ setView, view }) {
         onClick={() => setView('guestEvents')} 
         className={`hover:text-white transition-colors cursor-pointer ${view === 'guestEvents' ? 'text-cyan-400 font-bold' : ''}`}
       >
-        📅 Events
+        📡 Events-Radar
       </button>
       <button 
         type="button" 
         onClick={() => setView('radar')} 
         className={`hover:text-white transition-colors cursor-pointer ${view === 'radar' ? 'text-cyan-400 font-bold' : ''}`}
       >
-        🔍 Sucher
+        🔍 Search-Explorer
       </button>
     </div>
   );

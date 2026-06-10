@@ -62,29 +62,38 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
     try {
       const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles')) || [];
       const currentProj = savedProfiles.find(p => p && p.name && p.name.trim().toLowerCase() === (ticketName || "").toLowerCase());
-      const freshData = currentProj || { name: ticketName, project_name: '', id: "GIGS-" + Math.floor(Math.random() * 9000 + 1000), role: 'Künstler' };
+      
+      // 🔒 DIE UNZERSTÖRBARE CORE-WEICHE: Initialisiert ein Ersatzprofil sofort mit ALLEN Amazon-Variablen!
+      const freshData = currentProj || { 
+        id: "GIGS-" + Math.floor(Math.random() * 9000 + 1000), 
+        name: ticketName, 
+        project_name: '', 
+        vorname: '', 
+        nachname: '', 
+        website: '', 
+        city: '', 
+        genre: '',
+        role: 'Künstler'
+      };
       
       setUserData(freshData);
       
-      // 🔒 UNZERSTÖRBARE AVATAR- & VARIABLEN-WEICHE:
-      // Lädt alle Daten (...freshData), sichert aber zeitgleich euren project_name
-      // und fängt die riesige Bild-URL ab, damit die App beim Speichern nie wieder klont!
+      // Sichert das reaktive Laden und fängt das Avatar-Bild perfekt ab
       setLocalFields({
         ...freshData,
         project_name: freshData.project_name || '',
         vorname: freshData.vorname || '',
         nachname: freshData.nachname || '',
+        website: freshData.website || '',
+        city: freshData.city || freshData.location || '',
         avatarUrl: freshData.avatarUrl || '',
-        bannerUrl: freshData.bannerUrl || '',
-        city: freshData.city || freshData.location || ''
+        bannerUrl: freshData.bannerUrl || ''
       });
     } catch (e) {
       console.error("Fehler beim reaktiven Profil-Load:", e);
     }
   }, [ticketName]);
 
-
-  
 
   // ⏳ DIE AUDIO-ENGINE HOOKS (FÜR DEIN 4-TRACK-STREAMING & TIMEOUT SCHRANKE)
   const [currentAudioTrack, setCurrentAudioTrack] = useState(null);
@@ -297,7 +306,7 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
             <span className="text-[8px] text-purple-400 font-bold uppercase tracking-widest block">// BACKSTAGE-PORTFOLIO CONTROLLER</span>
             <h3 className="text-sm font-black text-white uppercase tracking-tight mt-0.5">⭐ Gigsda All-In-One Board</h3>
           </div>
-          <button type="button" onClick={onBack} className="bg-slate-900 border border-slate-800 text-white px-3 py-1 rounded-xl text-[10px] font-bold cursor-pointer print:hidden">‹ Cockpit</button>
+          <button type="button" onClick={onBack} className="bg-slate-900 border border-slate-800 text-white px-3 py-1 rounded-xl text-[10px] font-bold cursor-pointer print:hidden">‹ Dashboard</button>
         </div>
       </div>
 
@@ -652,6 +661,17 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
               <p>
               <span className="text-slate-500 uppercase font-mono">E-MAIL:</span>{' '}
               {renderField('email', localFields.email || userData?.email, '// nicht hinterlegt')}
+              </p>
+              <p className="text-slate-500 uppercase font-mono">
+                Website:{''}
+                <a
+                  href={localFields.website.startsWith('http') ? localFields.website : `https://${localFields.website}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white hover:text-cyan-400 ml-1 font-normal lowercase transition-colors duration-300"
+                >
+                  {localFields.website}
+                </a>
               </p>
                <p>GENRE: <span className="text-cyan-400 font-bold print:text-cyan-600">{localFields?.genre || userData?.genre || 'ROCK / ALTERNATIVE'}</span></p>
             </div>
@@ -1227,7 +1247,7 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
           onClick={onBack}
           className="bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 font-bold h-11 rounded-2xl px-6 text-xs uppercase transition-colors cursor-pointer"
         >
-          Zurück zum Cockpit
+          Zurück zum Dashboard
         </button>
       </div>
 

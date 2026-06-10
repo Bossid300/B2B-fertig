@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 export default function SearchExplorer({ onNavigate, setFavorites }) {
   const [allUsers, setAllUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchRadius, setSearchRadius] = useState(50); // 📡 Live-Suchumkreis
   const [selectedRole, setSelectedRole] = useState('Alle');
 
   // 📁 REINER LOCALSTORAGE-FILTER: Holt nur eure echten Profile frisch von der Festplatte
@@ -14,13 +15,22 @@ export default function SearchExplorer({ onNavigate, setFavorites }) {
 
   const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veranstalter', 'Techniker'];
 
-  // ⚡ DIE FILTER-SCHLEIFE (Nutzt stur 'role' und fängt Schreibweisen sicher ab)
+  // 🗺️ DIE LIVE-ENTFERNUNGSMATRIX (Gemessen von eurer Heimatbasis Braunau)
+  const getDistanceTo = (city) => {
+    const target = (city || '').toLowerCase().trim();
+    if (target.includes('braunau')) return 0;   // Direkt vor Ort
+    if (target.includes('altötting')) return 28; // ca. 28 km entfernt
+    if (target.includes('linz')) return 120;     // ca. 120 km entfernt
+    if (target.includes('wien')) return 290;     // ca. 290 km entfernt
+    return 45; // Fallback für unbekannte Städte im Bezirk
+  };
+
+  // ⚡ DIE ERWEITERTE FILTER-SCHLEIFE (Filtert nach Name, Rolle UND Radius!)
   const filteredUsers = allUsers.filter(user => {
     const matchesName = user.name?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Liest die Rolle aus der Registrierung ('role') oder den alten 'type'
+    // 1. Rollen-Filter (original von Daniel)
     const userRole = (user.role || user.type || 'Künstler').toLowerCase();
-    
     let matchesRole = false;
     if (selectedRole === 'Alle') {
       matchesRole = true;
@@ -38,8 +48,13 @@ export default function SearchExplorer({ onNavigate, setFavorites }) {
       matchesRole = userRole.includes(selectedRole.toLowerCase());
     }
 
-    return matchesName && matchesRole;
+    // 2. 🛰️ DER REAKTIVE RADIUS-FILTER: Prüft die km-Distanz gegen den Schieberegler!
+    const userDistance = getDistanceTo(user.location || user.city);
+    const matchesRadius = userDistance <= searchRadius;
+
+    return matchesName && matchesRole && matchesRadius;
   });
+
 
   return (
     <div className="p-6 bg-slate-950 text-white min-h-screen font-mono relative">
@@ -67,16 +82,69 @@ export default function SearchExplorer({ onNavigate, setFavorites }) {
         ))}
       </div>
 
-      {/* 🔍 SUCHE */}
-      <div className="mb-8 relative max-w-md">
-        <input
-          type="text"
-          placeholder="Nach Namen suchen..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-slate-900 border border-slate-800 focus:border-cyan-500/40 rounded-xl px-4 py-2.5 text-xs outline-none text-white placeholder-slate-600"
-        />
+  
+
+      {/* 🎛️ SMART-KOMBI: SUCHE & REICHWEITENSKALA IN DANIELS ORIGINAL-STYLE */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 max-w-3xl font-mono">
+        
+        {/* Linke Seite: Nach Namen suchen */}
+        <div className="flex flex-col justify-end">
+          <label className="text-[8px] text-slate-500 uppercase font-black mb-1.5">// Nach Partner suchen</label>
+          <input
+            type="text"
+            placeholder="Nach Namen suchen..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-slate-900 border border-slate-800 focus:border-cyan-500/40 rounded-xl px-4 py-2.5 text-xs outline-none text-white placeholder-slate-600 h-[38px]"
+          />
+        </div>
+
+        {/* Rechte Seite: Perfekt angeglichene Reichweitenskala */}
+        <div className="flex flex-col justify-end">
+          <div className="flex justify-between items-center mb-1.5">
+            <label className="text-[8px] text-slate-500 uppercase font-black">// Such-Umkreis</label>
+            <span className="text-[10px] text-cyan-400 font-bold tracking-wider font-mono">
+              🛰️ {searchRadius} KM
+            </span>
+          </div>
+          
+          {/* Gleicher Kasten wie das Suchfeld daneben */}
+          <div className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 flex items-center gap-3 h-[38px]">
+            <span className="text-[8px] text-slate-600 font-mono font-bold">10KM</span>
+            <input
+              type="range"
+              min="5"
+              max="500"
+              step="5"
+              value={searchRadius}
+              onChange={(e) => setSearchRadius(Number(e.target.value))}
+              className="flex-grow bg-slate-950 h-1 rounded-none appearance-none cursor-pointer border border-slate-950
+                accent-cyan-500
+                [&::-webkit-slider-thumb]:appearance-none 
+                [&::-webkit-slider-thumb]:h-2 
+                [&::-webkit-slider-thumb]:w-2 
+                [&::-webkit-slider-thumb]:bg-cyan-400 
+                [&::-webkit-slider-thumb]:border 
+                [&::-webkit-slider-thumb]:border-cyan-500 
+                [&::-webkit-slider-thumb]:shadow-[0_0_6px_rgba(34,211,238,0.6)] 
+                [&::-webkit-slider-thumb]:transition-all 
+                [&::-webkit-slider-thumb]:duration-150
+                [&::-webkit-slider-thumb]:hover:scale-125
+                [&::-moz-range-thumb]:h-2 
+                [&::-moz-range-thumb]:w-2 
+                [&::-moz-range-thumb]:bg-cyan-400 
+                [&::-moz-range-thumb]:border 
+                [&::-moz-range-thumb]:border-cyan-500 
+                [&::-moz-range-thumb]:rounded-none
+                [&::-moz-range-thumb]:shadow-[0_0_6px_rgba(34,211,238,0.6)]"
+            />
+            <span className="text-[8px] text-slate-600 font-mono font-bold">100KM</span>
+          </div>
+        </div>
+
       </div>
+
+
 
       {/* 💳 VISITENKARTEN-GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
