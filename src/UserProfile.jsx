@@ -39,9 +39,10 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
   
   // Sichert das automatische Nachladen der Felder, sobald im Radar gewechselt wird!
   const [localFields, setLocalFields] = useState({
-    name: '',
-    vorname: '',
-    nachname: '',
+    name: ticketName, // 🔒 DAS LOGIN-KABEL: Bleibt im Hintergrund fest verankert!
+    project_name: '', // Für euren Künstlernamen (z.B. "Fahrradfahrer")
+    vorname: '',      // 🆕 AMAZON-STYL: Eigenes Feld für den Vornamen
+    nachname: '',     // 🆕 AMAZON-STYL: Eigenes Feld für den Nachnamen
     plz: '',
     city: '',
     street: '',
@@ -54,20 +55,33 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
     subInstruments: '',
     phone_visible: true,
     email_visible: true,
-    ...userData
   });
 
   useEffect(() => {
     try {
       const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles')) || [];
       const currentProj = savedProfiles.find(p => p && p.name && p.name.trim().toLowerCase() === (ticketName || "").toLowerCase());
-      const freshData = currentProj || { name: ticketName, id: "GIGS-" + Math.floor(Math.random() * 9000 + 1000), role: 'Künstler' };
+      const freshData = currentProj || { name: ticketName, project_name: '', id: "GIGS-" + Math.floor(Math.random() * 9000 + 1000), role: 'Künstler' };
+      
       setUserData(freshData);
-      setLocalFields(freshData);
+      
+      // 🔒 UNZERSTÖRBARE AVATAR- & VARIABLEN-WEICHE:
+      // Lädt alle Daten (...freshData), sichert aber zeitgleich euren project_name
+      // und fängt die riesige Bild-URL ab, damit die App beim Speichern nie wieder klont!
+      setLocalFields({
+        ...freshData,
+        project_name: freshData.project_name || '',
+        vorname: freshData.vorname || '',
+        nachname: freshData.nachname || '',
+        avatarUrl: freshData.avatarUrl || '',
+        bannerUrl: freshData.bannerUrl || '',
+        city: freshData.city || freshData.location || ''
+      });
     } catch (e) {
       console.error("Fehler beim reaktiven Profil-Load:", e);
     }
   }, [ticketName]);
+
 
   
 
@@ -324,7 +338,7 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
             {localFields.slide1_line1 || userData.slide1_line1 || userData.project_name || userData.name || "Gigsda Act"}
           </h1>
           <p className="text-xs text-slate-400 font-mono tracking-wide uppercase print:text-slate-700">
-            ⚡ {localFields.slide1_line2 || userData.slide1_line2 || "LIVE CONFIG ACTIVE"} • 📍 {userData.location || "Region Gigsda"}
+            ⚡ {localFields.slide1_line2 || userData.slide1_line2 || "LIVE CONFIG ACTIVE"} • 📍 {localFields.city || userData.city || "Region Gigsda"}
           </p>
         </div>
 
@@ -528,9 +542,9 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
               <div className="space-y-1">
                 <label className="text-[8px] text-slate-600 uppercase block font-bold">Vorname (Klarname)</label>
                 <div className="relative">
-                  <input type="text" name="name" value={localFields.name || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg pl-2 pr-8 py-1 text-white text-[10px]" />
-                  <button type="button" onClick={() => setLocalFields(p => ({ ...p, name_visible: p.name_visible === false }))} className="absolute right-2.5 top-1.5 text-slate-600 hover:text-cyan-400 cursor-pointer">
-                    {localFields.name_visible !== false ? <Eye className="w-3 h-3 text-cyan-400" /> : <EyeOff className="w-3 h-3 text-slate-600" />}
+                  <input type="text" name="vorname" value={localFields.vorname || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-white text-[10px]" />
+                  <button type="button" onClick={() => setLocalFields(p => ({ ...p, vorname_visible: p.vorname_visible === false }))} className="absolute right-2.5 top-1.5 text-slate-600 hover:text-cyan-400 cursor-pointer">
+                    {localFields.vorname_visible !== false ? <Eye className="w-3 h-3 text-cyan-400" /> : <EyeOff className="w-3 h-3 text-slate-600" />}
                   </button>
                 </div>
               </div>
@@ -539,7 +553,7 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
               <div className="space-y-1">
                 <label className="text-[8px] text-slate-600 uppercase block font-bold">Nachname (Klarname)</label>
                 <div className="relative">
-                  <input type="text" name="nachname" value={localFields.nachname || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg pl-2 pr-8 py-1 text-white text-[10px]" />
+                  <input type="text" name="nachname" value={localFields.nachname || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-white text-[10px]" />
                   <button type="button" onClick={() => setLocalFields(p => ({ ...p, nachname_visible: p.nachname_visible === false }))} className="absolute right-2.5 top-1.5 text-slate-600 hover:text-cyan-400 cursor-pointer">
                     {localFields.nachname_visible !== false ? <Eye className="w-3 h-3 text-cyan-400" /> : <EyeOff className="w-3 h-3 text-slate-600" />}
                   </button>
@@ -554,7 +568,7 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
                 </div>
                 <div className="space-y-1">
                   <label className="text-[8px] text-slate-600 uppercase block font-bold">Stadt</label>
-                  <input type="text" name="location" value={localFields.location || ''} onChange={handleInplaceChange} placeholder="Braunau" className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-white text-[10px]" />
+                  <input type="text" name="city" value={localFields.city || ''} onChange={handleInplaceChange} placeholder="Braunau" className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-white text-[10px]" />
                 </div>
               </div>
 

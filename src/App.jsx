@@ -15,8 +15,6 @@ import WhatIsGigsda from './WhatIsGigsda';
 import GuestEvents from './GuestEvents';
 import SearchExplorer from './SearchExplorer';
  
- 
- 
 export default function App() {
   // ⚡ BROWSER-SAFE SESSION MEMORY
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
@@ -39,9 +37,14 @@ export default function App() {
     }
   }, [isLoggedIn]);
  
-  const [view, setView] = useState('login');
+  // 🔒 INTELLIGENTER ROUTER-SPEICHER: Merkt sich den Bildschirm auch bei F5!
+  const [view, setViewWithStorage] = useState(() => localStorage.getItem('gigsda_current_view') || 'landing');
+  
+  const setView = (newView) => {
+    localStorage.setItem('gigsda_current_view', newView);
+    setViewWithStorage(newView);
+  };
 
- 
   const [successBanner, setSuccessBanner] = useState(null);
   const [activeEvent, setActiveEvent] = useState(null);
   const [isRegInitial, setIsRegInitial] = useState(false);

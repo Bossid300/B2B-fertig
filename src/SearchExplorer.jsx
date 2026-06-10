@@ -1,24 +1,24 @@
 import React, { useState, useEffect } from 'react';
 
-export default function SearchExplorer({ onNavigate, onViewProfile }) {
+export default function SearchExplorer({ onNavigate, setFavorites }) {
   const [allUsers, setAllUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRole, setSelectedRole] = useState('Alle');
-  const [activeRequestUser, setActiveRequestUser] = useState(null);
-  const [requestText, setRequestText] = useState('');
 
-  // 📁 REINER LOCALSTORAGE-FILTER: Holt nur eure echten Profile
+  // 📁 REINER LOCALSTORAGE-FILTER: Holt nur eure echten Profile frisch von der Festplatte
   useEffect(() => {
     const localProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
-    const validUsers = localProfiles.filter(user => user && user.name);
-    setAllUsers(validUsers);
-  }, []);
+    // Filtert leere Einträge heraus und sorgt dafür, dass die Live-Daten (Stadt, Genre) geladen werden
+    setAllUsers(localProfiles.filter(user => user && user.name));
+  }, [onNavigate]); // Aktualisiert sich auch beim Zurückwechseln aus dem Profil
 
   const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veranstalter', 'Techniker'];
 
-  // ⚡ DIE FILTER-SCHLEIFE
+  // ⚡ DIE FILTER-SCHLEIFE (Nutzt stur 'role' und fängt Schreibweisen sicher ab)
   const filteredUsers = allUsers.filter(user => {
     const matchesName = user.name?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Liest die Rolle aus der Registrierung ('role') oder den alten 'type'
     const userRole = (user.role || user.type || 'Künstler').toLowerCase();
     
     let matchesRole = false;
@@ -78,7 +78,7 @@ export default function SearchExplorer({ onNavigate, onViewProfile }) {
         />
       </div>
 
-      {/* 💳 DANIELS VISITENKARTEN-GRID */}
+      {/* 💳 VISITENKARTEN-GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredUsers.length > 0 ? (
           filteredUsers.map((user, index) => (
@@ -94,7 +94,7 @@ export default function SearchExplorer({ onNavigate, onViewProfile }) {
                   className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
                 />
                 <span className="absolute top-3 right-3 text-[8px] bg-slate-950/90 border border-slate-800/80 text-cyan-400 font-bold px-2 py-0.5 rounded-md tracking-wider uppercase backdrop-blur-sm z-10">
-                  {user.role || 'Künstler'}
+                  {user.role || user.type || 'Künstler'}
                 </span>
               </div>
 
@@ -120,32 +120,27 @@ export default function SearchExplorer({ onNavigate, onViewProfile }) {
                   <p className="text-[9px] text-slate-600 uppercase mt-0.5">// MEMBER-ID: {user.id || 'N/A'}</p>
                 </div>
 
+                {/* 🔒 UNZERSTÖRBARE LIVE-VARIABLEN: Holt die echten Werte direkt aus gigsda_profiles! */}
                 <div className="pt-3 border-t border-slate-900 flex justify-between text-[10px] text-slate-400 font-mono">
-                  <span>STADT: <strong className="text-slate-200">{user.city || 'X'}</strong></span>
+                  <span>STADT: <strong className="text-slate-200">{user.city || 'Nicht hinterlegt'}</strong></span>
                   <span>GENRE: <strong className="text-slate-200">{user.genre || 'Allround'}</strong></span>
                 </div>
 
                 {/* BUTTONS */}
                 <div className="grid grid-cols-2 gap-2 mt-5 pt-3 border-t border-slate-900/60">
-                {/* 🔒 DANIELS ORIGINALES VERBINDUNGS-KABEL (Komplett ohne erfundene Variablen) */}
-                <button
-                  onClick={() => {
-                    // Zündet Daniels originale Funktion aus der App.jsx
-                    if (typeof onViewProfile === 'function') {
-                      onViewProfile(user.name); // Gibt den Namen weiter, den Daniel im Hauptgehirn sucht
-                    }
-                    if (typeof onNavigate === 'function') {
-                      onNavigate('profile'); // Wechselt den Bildschirm auf die Profilkarte
-                    }
-                  }}
-                  className="bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-[10px] font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center"
-                >
-                  PROFIL
-                </button>
-
+                  <button
+                    onClick={() => {
+                      if (typeof setFavorites === 'function') {
+                        setFavorites(user.name); // Schickt den Namen reaktiv an Daniels echte Weiche!
+                      }
+                    }}
+                    className="bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-[10px] font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center"
+                  >
+                    PROFIL
+                  </button>
 
                   <button
-                    onClick={() => setActiveRequestUser(user)}
+                    onClick={() => alert(`Anfrage-Dialog für ${user.name} bereit! ✎`)}
                     className="bg-cyan-500/5 border border-cyan-500/20 hover:border-cyan-500/50 text-cyan-400 text-[10px] font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center"
                   >
                     ANFRAGEN ✎
@@ -156,32 +151,10 @@ export default function SearchExplorer({ onNavigate, onViewProfile }) {
           ))
         ) : (
           <div className="col-span-full bg-slate-900/10 border border-dashed border-slate-900 rounded-2xl p-12 text-center text-xs text-slate-600 font-mono">
-            // KEINE PASSENDEN B2B-PARTNER IN DIESER KATEGORIE GEFUNDEN 🧹
+            // KEINE PASSENDEN B2B-PARTNER GEFUNDEN 🧹
           </div>
         )}
       </div>
-
-      {/* ANFRAGE MODAL */}
-      {activeRequestUser && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 max-w-md w-full shadow-2xl relative">
-            <h3 className="text-xs font-black text-cyan-400 uppercase tracking-widest mb-1">// NEUE DIREKT-ANFRAGE</h3>
-            <p className="text-[11px] text-slate-400 mb-4">An: <strong className="text-white">{activeRequestUser.name}</strong></p>
-            
-            <textarea
-              value={requestText}
-              onChange={(e) => setRequestText(e.target.value)}
-              placeholder="Beschreibe dein Projekt..."
-              className="w-full h-28 bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs outline-none text-white placeholder-slate-700 resize-none mb-4 focus:border-cyan-500/40"
-            />
-
-            <div className="flex justify-end gap-2 text-[10px] font-bold uppercase">
-              <button onClick={() => { setActiveRequestUser(null); setRequestText(''); }} className="px-4 py-2 border border-slate-800 text-slate-400 rounded-xl hover:text-white cursor-pointer">Abbrechen</button>
-              <button onClick={() => { alert(`Anfrage an ${activeRequestUser.name} gesendet! 🚀`); setActiveRequestUser(null); setRequestText(''); }} className="px-4 py-2 bg-cyan-500/10 border border-cyan-500 text-cyan-400 rounded-xl hover:bg-cyan-500/20 cursor-pointer">Senden ⚡</button>
-            </div>
-          </div>
-        </div>
-      )}
 
     </div>
   );
