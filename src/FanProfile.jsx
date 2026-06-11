@@ -80,6 +80,19 @@ export default function FanProfile({ ticketName, onNavigate }) {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl relative">
+            
+      {/* ========================================================================= */}
+      {/* HEADER & ASSISTENT                                                        */}
+      {/* ========================================================================= */}
+      <div className="bg-gradient-to-r from-purple-950/20 to-slate-900/20 border border-purple-500/10 rounded-3xl p-5 space-y-4 shadow-xl mb-6">
+        <div className="flex justify-between items-start">
+          <div>
+            <span className="text-[8px] text-purple-400 font-bold uppercase tracking-widest block">// BACKSTAGE-PORTFOLIO CONTROLLER</span>
+            <h3 className="text-sm font-black text-white uppercase tracking-tight mt-0.5">⭐ Gigsda All-In-One Board</h3>
+          </div>
+          <button type="button" onClick={() => onNavigate('radar')} className="bg-slate-900 border border-slate-800 text-white px-3 py-1 rounded-xl text-[10px] font-bold cursor-pointer print:hidden">‹ Dashboard</button>
+        </div>
+      </div>
       
       {/* 🌌 VISUELLES FAN-BANNER */}
       <div className="h-64 w-full rounded-2xl overflow-hidden bg-slate-900 border border-slate-800/60 relative mb-6">
