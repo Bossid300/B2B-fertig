@@ -189,6 +189,16 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
     }, 4000);
     return () => clearInterval(timer);
   }, [editSection]);
+  
+  // 🎛️ MANUELLE PFEIL-STEUERUNG (Ergänzt Daniels Automatik)
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
 
   // 🛑 UNZERSTÖRBARER AUDIO-LIMITER (OPTION B)
   useEffect(() => {
@@ -323,7 +333,26 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
             "/profiles/Jud-Winston/banner.jpg"
           }')` 
         }}
+        
         >
+        {/* ‹ LINKER PFEIL (Schaltet manuell zurück) */}
+        <button 
+          type="button"
+          onClick={() => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-slate-950/70 hover:bg-slate-950 border border-slate-800 hover:border-cyan-500/40 text-slate-400 hover:text-cyan-400 w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer font-black text-sm shadow-xl"
+        >
+          ‹
+        </button>
+
+        {/* › RECHTER PFEIL (Schaltet manuell weiter) */}
+        <button 
+          type="button"
+          onClick={() => setCurrentSlide((prev) => (prev + 1) % slides.length)}
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-slate-950/70 hover:bg-slate-950 border border-slate-800 hover:border-cyan-500/40 text-slate-400 hover:text-cyan-400 w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer font-black text-sm shadow-xl"
+        >
+          ›
+        </button>
+
         {/* Dunkler Cyber-Verlauf über dem Cloud-Bild für gestochen scharfe Lesbarkeit */}
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent z-10 print:hidden" />
 
@@ -635,7 +664,7 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
             </div>
           ) : (
             <div className="space-y-1.5 flex flex-col justify-center h-full pt-4">
-                            {/* 📸 KLEINES AVATAR-BILD ALS KACHEL-KOPF */}
+              {/* 📸 KLEINES AVATAR-BILD ALS KACHEL-KOPF */}
               {(localFields.avatarUrl || userData?.avatarUrl) && (
                 <div className="pb-2 mb-1 border-b border-slate-900/50 flex justify-start">
                   <img 

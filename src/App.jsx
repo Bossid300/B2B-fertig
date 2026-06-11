@@ -383,22 +383,33 @@ export default function App() {
             />
           )}
 
-          {/* 🔍 SUCHER-WEICHE: ÖFFNET IMMER DAS ANGEKLICKTE PROFIL SCHREIBGESCHÜTZT */}
+          {/* 🏟️ INTERAKTIVE B2B ROLLEN-WEICHE: ENTSCHEIDET ZWISCHEN KÜNSTLER & LOCATION */}
           {view === 'profile' && activeGuestArtist && (
-            <UserProfile 
-              ticketName={activeGuestArtist} 
-              onBack={() => setView('radar')} 
-              isOwner={false} // <-- Keine Rechte für Fremde!
-            />
+            (() => {
+              const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
+              const currentProfile = savedProfiles.find(p => p && p.name && p.name.trim().toLowerCase() === activeGuestArtist.trim().toLowerCase());
+              const isLocation = currentProfile?.role === 'Location';
+
+              return isLocation ? (
+                <LocationProfile ticketName={activeGuestArtist} onNavigate={setView} isOwner={false} />
+              ) : (
+                <UserProfile ticketName={activeGuestArtist} onBack={() => setView('radar')} isOwner={false} />
+              );
+            })()
           )}
 
-          {/* 🎸 KÜNSTLER-WEICHE: ÖFFNET DEIN EIGENES PROFIL MIT EDIT-RECHTEN */}
           {view === 'userProfile' && isLoggedIn && (
-            <UserProfile 
-              ticketName={ticketName} 
-              onBack={() => setView('projects')} 
-              isOwner={true} // <-- Volle Edit-Rechte für dich selbst!
-            />
+            (() => {
+              const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
+              const currentProfile = savedProfiles.find(p => p && p.name && p.name.trim().toLowerCase() === ticketName.trim().toLowerCase());
+              const isLocation = currentProfile?.role === 'Location';
+
+              return isLocation ? (
+                <LocationProfile ticketName={ticketName} onNavigate={setView} isOwner={true} />
+              ) : (
+                <UserProfile ticketName={ticketName} onBack={() => setView('projects')} isOwner={true} />
+              );
+            })()
           )}
 
           {/* ⚡ DIE ECHTE DIREKTLEITUNG ZU DEINEN PROFILE-SETTINGS */}
