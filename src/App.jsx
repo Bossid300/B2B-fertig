@@ -1,4 +1,3 @@
-import UserProfile from './UserProfile';
 import React, { useState, useEffect } from 'react';
 import LandingPage from './LandingPage';
 import LoginRegisterMask from './LoginRegisterMask';
@@ -14,7 +13,10 @@ import GuestNavigation from './GuestNavigation';
 import WhatIsGigsda from './WhatIsGigsda';
 import GuestEvents from './GuestEvents';
 import SearchExplorer from './SearchExplorer';
+// 👈 Lade Profile
+import UserProfile from './UserProfile'; // 👈 Temporärer Import zum Anschauen
 import LocationProfile from './LocationProfile'; // 👈 Temporärer Import zum Anschauen
+import FanProfile from './FanProfile'; // 👈 Schaltet die Fan-Zentrale im System frei!
  
 export default function App() {
   // ⚡ BROWSER-SAFE SESSION MEMORY
@@ -345,8 +347,6 @@ export default function App() {
             />
 
           )}
-
-
  
           {/* 📑 GAST-WEICHE 1: WAS IST GIGSDA? */}
           {view === 'whatIsGigsda' && <WhatIsGigsda />}
@@ -383,18 +383,19 @@ export default function App() {
             />
           )}
 
-          {/* 🏟️ INTERAKTIVE B2B ROLLEN-WEICHE: ENTSCHEIDET ZWISCHEN KÜNSTLER & LOCATION */}
+          {/* 🏟️ INTERAKTIVE ROLLER-WEICHE: KÜNSTLER, LOCATION & FAN */}
           {view === 'profile' && activeGuestArtist && (
             (() => {
               const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
               const currentProfile = savedProfiles.find(p => p && p.name && p.name.trim().toLowerCase() === activeGuestArtist.trim().toLowerCase());
-              const isLocation = currentProfile?.role === 'Location';
-
-              return isLocation ? (
-                <LocationProfile ticketName={activeGuestArtist} onNavigate={setView} isOwner={false} />
-              ) : (
-                <UserProfile ticketName={activeGuestArtist} onBack={() => setView('radar')} isOwner={false} />
-              );
+              
+              if (currentProfile?.role === 'Location') {
+                return <LocationProfile ticketName={activeGuestArtist} onNavigate={setView} />;
+              } else if (currentProfile?.role === 'Fan') {
+                return <FanProfile ticketName={activeGuestArtist} onNavigate={setView} />;
+              } else {
+                return <UserProfile ticketName={activeGuestArtist} onBack={() => setView('radar')} isOwner={false} />;
+              }
             })()
           )}
 
@@ -402,13 +403,14 @@ export default function App() {
             (() => {
               const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
               const currentProfile = savedProfiles.find(p => p && p.name && p.name.trim().toLowerCase() === ticketName.trim().toLowerCase());
-              const isLocation = currentProfile?.role === 'Location';
-
-              return isLocation ? (
-                <LocationProfile ticketName={ticketName} onNavigate={setView} isOwner={true} />
-              ) : (
-                <UserProfile ticketName={ticketName} onBack={() => setView('projects')} isOwner={true} />
-              );
+              
+              if (currentProfile?.role === 'Location') {
+                return <LocationProfile ticketName={ticketName} onNavigate={setView} />;
+              } else if (currentProfile?.role === 'Fan') {
+                return <FanProfile ticketName={ticketName} onNavigate={setView} />;
+              } else {
+                return <UserProfile ticketName={ticketName} onBack={() => setView('projects')} isOwner={true} />;
+              }
             })()
           )}
 
