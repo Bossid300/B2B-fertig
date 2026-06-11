@@ -31,7 +31,9 @@ export default function CrewShortlist({ onBack, progress, onNavigateToStep, acti
   }, [crewIds]);
 
   return (
-    <div className="space-y-6 font-mono text-xs text-slate-300 animate-fade-in">
+    <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
+      
+      {/* GLOBALER FAHRPLAN */}
       <FahrplanMetrics progress={progress} activeStep="shortlist" onNavigate={onNavigateToStep} />
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl gap-4">
