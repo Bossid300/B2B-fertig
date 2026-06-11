@@ -17,6 +17,8 @@ import SearchExplorer from './SearchExplorer';
 import UserProfile from './UserProfile'; // 👈 Temporärer Import zum Anschauen
 import LocationProfile from './LocationProfile'; // 👈 Temporärer Import zum Anschauen
 import FanProfile from './FanProfile'; // 👈 Schaltet die Fan-Zentrale im System frei!
+import VerleiherProfile from './VerleiherProfile'; // 🔌 Schaltet das Rental-Cockpit im System frei!
+
  
 export default function App() {
   // ⚡ BROWSER-SAFE SESSION MEMORY
@@ -383,7 +385,8 @@ export default function App() {
             />
           )}
 
-          {/* 🏟️ INTERAKTIVE ROLLER-WEICHE: KÜNSTLER, LOCATION & FAN */}
+          {/* ========================================================================= */}
+          {/* 🏟️ INTERAKTIVE 4-WEGE ROLLER-WEICHE: KÜNSTLER, LOCATION, FAN & MATERIAL (RENTAL) */}
           {view === 'profile' && activeGuestArtist && (
             (() => {
               const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
@@ -393,6 +396,8 @@ export default function App() {
                 return <LocationProfile ticketName={activeGuestArtist} onNavigate={setView} />;
               } else if (currentProfile?.role === 'Fan') {
                 return <FanProfile ticketName={activeGuestArtist} onNavigate={setView} />;
+              } else if (currentProfile?.role === 'Material' || currentProfile?.role === 'Verleiher') {
+                return <VerleiherProfile ticketName={activeGuestArtist} onNavigate={setView} />;
               } else {
                 return <UserProfile ticketName={activeGuestArtist} onBack={() => setView('radar')} isOwner={false} />;
               }
@@ -408,11 +413,14 @@ export default function App() {
                 return <LocationProfile ticketName={ticketName} onNavigate={setView} />;
               } else if (currentProfile?.role === 'Fan') {
                 return <FanProfile ticketName={ticketName} onNavigate={setView} />;
+              } else if (currentProfile?.role === 'Material' || currentProfile?.role === 'Verleiher') {
+                return <VerleiherProfile ticketName={ticketName} onNavigate={setView} />;
               } else {
                 return <UserProfile ticketName={ticketName} onBack={() => setView('projects')} isOwner={true} />;
               }
             })()
           )}
+
 
           {/* ⚡ DIE ECHTE DIREKTLEITUNG ZU DEINEN PROFILE-SETTINGS */}
           {view === 'profileSettings' && isLoggedIn && (
