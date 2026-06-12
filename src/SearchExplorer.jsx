@@ -55,7 +55,7 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
     setAllUsers(localProfiles.filter(user => user && user.name));
   }, [onNavigate]); // Aktualisiert sich auch beim Zurückwechseln aus dem Profil
 
-  const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veranstalter', 'Techniker'];
+const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veranstalter', 'Techniker', 'Logistik', 'Security', 'Design'];
 
   // 🗺️ DIE LIVE-ENTFERNUNGSMATRIX (Gemessen von eurer Heimatbasis Braunau)
   const getDistanceTo = (city) => {

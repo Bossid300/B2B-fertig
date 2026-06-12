@@ -33,7 +33,41 @@ export default function TechnikerProfile({ ticketName, onNavigate }) {
 
 
   });
+  // ⭐ PRÜFT, OB DIESER TECHNIKER BEREITS EIN FAVORIT IST
+  const [isFavorite, setIsFavorite] = useState(false);
 
+  useEffect(() => {
+    try {
+      const savedFavs = JSON.parse(localStorage.getItem('gigsda_favorites') || '[]');
+      const found = savedFavs.some(f => f && f.name && f.name.toLowerCase() === (ticketName || "").toLowerCase());
+      setIsFavorite(found);
+    } catch (e) { console.error(e); }
+  }, [ticketName]);
+
+  // ⚡ TOGGLE-FUNKTION: TECHNIKER-FAVORIT
+  const handleToggleFavorite = () => {
+    try {
+      let savedFavs = JSON.parse(localStorage.getItem('gigsda_favorites') || '[]');
+      
+      if (isFavorite) {
+        savedFavs = savedFavs.filter(f => f && f.name && f.name.toLowerCase() !== ticketName.toLowerCase());
+        setIsFavorite(false);
+        alert("Techniker aus den B2B-Favoriten entfernt! ☆");
+      } else {
+        const newFav = {
+          name: ticketName,
+          role: 'Techniker',
+          city: localFields.city || 'Nicht hinterlegt',
+          avatarUrl: localFields.avatarUrl || '',
+          note: localFields.project_name ? `Tech-Spezialist: ${localFields.project_name}` : 'Gemerkter Crew-Support'
+        };
+        savedFavs.push(newFav);
+        setIsFavorite(true);
+        alert("Techniker erfolgreich zu den Favoriten hinzugefügt! ★");
+      }
+      localStorage.setItem('gigsda_favorites', JSON.stringify(savedFavs));
+    } catch (e) { console.error("Fehler beim Favoriten-Toggle:", e); }
+  }
   // 📡 CRASH-SICHERER LOAD-MECHANISMUS
   useEffect(() => {
     try {
@@ -272,12 +306,24 @@ export default function TechnikerProfile({ ticketName, onNavigate }) {
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Stadt: <span className="text-white ml-1 font-normal uppercase">{localFields.city || 'Nicht hinterlegt'}</span></p>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Kontakt: <span className="text-white ml-1 font-normal uppercase">{localFields.vorname} {localFields.nachname || ''}</span></p>
           </div>
-
           {!isEditing && (
-            <div className="pt-4">
-              <button onClick={() => setIsEditing(true)} className="w-full bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 text-[9px] font-bold uppercase py-1.5 rounded-xl text-center tracking-wider">⚙️ PROTOCOL EDITIEREN</button>
+            <div className="pt-4 space-y-2">
+              {/* ⭐ CYBERPUNK FAVORITEN TRIGGER BUTTON */}
+              <button 
+                onClick={handleToggleFavorite}
+                className={`w-full text-[9px] font-bold uppercase py-1.5 rounded-xl text-center border font-mono transition-all cursor-pointer tracking-wider ${
+                  isFavorite 
+                    ? 'bg-amber-500/10 border-amber-500 text-amber-400 hover:bg-amber-500/20' 
+                    : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
+                }`}
+              >
+                {isFavorite ? '★ AUS FAVORITEN ENTFERNEN' : '☆ ZU DEN FAVORITEN'}
+              </button>
+
+              <button onClick={() => setIsEditing(true)} className="w-full bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 text-[9px] font-bold uppercase py-1.5 rounded-xl text-center tracking-wider font-mono cursor-pointer">⚙️ TECH EDITIEREN</button>
             </div>
           )}
+
         </div>
 
       </div>

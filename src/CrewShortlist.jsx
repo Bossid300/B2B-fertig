@@ -32,7 +32,15 @@ export default function CrewShortlist({ onBack, progress, onNavigateToStep, acti
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
-      
+              {/* ⭐ DIREKT-LINK ZU DEN REAKTIVEN B2B PROFIL-FAVORITEN */}
+          <div className="mb-4 flex justify-end font-mono">
+            <button
+              onClick={() => onNavigateToStep('crewfavoriten')}
+              className="px-3 py-1.5 bg-amber-500/10 border border-amber-500 hover:border-amber-400 text-amber-400 hover:text-white text-[9px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-[0_0_15px_rgba(245,158,11,0.08)] animate-pulse"
+            >
+              <span>★ MEINE FAVORITEN AUFRUFEN</span>
+            </button>
+          </div>
       {/* GLOBALER FAHRPLAN */}
       <FahrplanMetrics progress={progress} activeStep="shortlist" onNavigate={onNavigateToStep} />
 

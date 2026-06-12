@@ -20,8 +20,14 @@ import FanProfile from './FanProfile'; // 👈 Schaltet die Fan-Zentrale im Syst
 import VerleiherProfile from './VerleiherProfile'; // 🔌 Schaltet das Rental-Cockpit im System frei!
 import TechnikerProfile from './TechnikerProfile'; // 🎛️ Schaltet das Crew-Cockpit im System frei!
 import CaterProfile from './CaterProfile'; // 🔒 Schaltet das vollwertige Gastro-Profil frei!
-import CrewRequestCenter from './CrewRequestCenter'; // 👈 Das B2B-Uhrwerk laden
+import VeranstalterProfile from './VeranstalterProfile'; // 💼 Schaltet das Orga-Cockpit im System frei!
+import LogistikProfile from './LogistikProfile';   // 🚛 Schaltet das Cargo- & Shuttle-Cockpit frei
+import SecurityProfile from './SecurityProfile';   // 🛡️ Schaltet das Sicherheitsdienst-Cockpit frei
+import DesignProfile from './DesignProfile';       // 🎭 Schaltet das Stage-Design- & Deko-Cockpit frei
 
+
+import CrewRequestCenter from './CrewRequestCenter'; // 👈 Das B2B-Uhrwerk laden
+import CrewFavoritenListe from './CrewFavoritenListe'; // ⭐ Schaltet die Favoriten-Matrix frei!
 
  
 export default function App() {
@@ -462,7 +468,7 @@ export default function App() {
           )}
 
           {/* ========================================================================= */}
-          {/* 🏟️ INTERAKTIVE 6-WEGE ROLLER-WEICHE: KÜNSTLER, LOCATION, FAN, MATERIAL, TECHNIKER & CATERING */}
+          {/* 🏟️ INTERAKTIVE 10-WEGE ROLLER-WEICHE: DAS KOMPLETTE GIGSDA-B2B-UNIVERSUM */}
           {view === 'profile' && activeGuestArtist && (
             (() => {
               const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
@@ -473,6 +479,10 @@ export default function App() {
               else if (currentProfile?.role === 'Material' || currentProfile?.role === 'Verleiher') { return <VerleiherProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
               else if (currentProfile?.role === 'Techniker') { return <TechnikerProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
               else if (currentProfile?.role === 'Catering') { return <CaterProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
+              else if (currentProfile?.role === 'Veranstalter') { return <VeranstalterProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
+              else if (currentProfile?.role === 'Logistik') { return <LogistikProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
+              else if (currentProfile?.role === 'Security') { return <SecurityProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
+              else if (currentProfile?.role === 'Design' || currentProfile?.role === 'Deko') { return <DesignProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
               else { return <UserProfile ticketName={activeGuestArtist} onBack={() => setView('radar')} isOwner={false} />; }
             })()
           )}
@@ -487,6 +497,10 @@ export default function App() {
               else if (currentProfile?.role === 'Material' || currentProfile?.role === 'Verleiher') { return <VerleiherProfile ticketName={ticketName} onNavigate={setView} />; }
               else if (currentProfile?.role === 'Techniker') { return <TechnikerProfile ticketName={ticketName} onNavigate={setView} />; }
               else if (currentProfile?.role === 'Catering') { return <CaterProfile ticketName={ticketName} onNavigate={setView} />; }
+              else if (currentProfile?.role === 'Veranstalter') { return <VeranstalterProfile ticketName={ticketName} onNavigate={setView} />; }
+              else if (currentProfile?.role === 'Logistik') { return <LogistikProfile ticketName={ticketName} onNavigate={setView} />; }
+              else if (currentProfile?.role === 'Security') { return <SecurityProfile ticketName={ticketName} onNavigate={setView} />; }
+              else if (currentProfile?.role === 'Design' || currentProfile?.role === 'Deko') { return <DesignProfile ticketName={ticketName} onNavigate={setView} />; }
               else { return <UserProfile ticketName={ticketName} onBack={() => setView('projects')} isOwner={true} />; }
             })()
           )}
@@ -516,6 +530,12 @@ export default function App() {
             />
           )}
 
+          {/* ⭐ UNZERSTÖRBARE GIGSDA FAVORITEN POOL EXPRESS-PIPELINE */}
+          {view === 'crewfavoriten' && (
+            (() => {
+              return <CrewFavoritenListe onNavigate={setView} />;
+            })()
+          )}
 
           {view === 'shortlist' && isLoggedIn && (
             <CrewShortlist onBack={() => setView('projects')} progress={progress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} setFavorites={handleUpdateCrewForEvent} />

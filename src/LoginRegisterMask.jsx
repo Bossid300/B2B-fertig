@@ -136,10 +136,13 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
                   {[
                     { id: 'Fan', icon: '🎫', label: 'Fan', code: '[FAN_ZONE]' },
                     { id: 'Veranstalter', icon: '💼', label: 'Promoter', code: '[ORG_CENTER]' },
-                    { id: 'Künstler', icon: '🧑‍🎤', label: 'Künstler', code: '[ACT_READY]' },
-                    { id: 'Techniker', icon: '⚙️', label: 'Crew', code: '[CREW_PATCH]' },
-                    { id: 'Caterer', icon: '🍻', label: 'Catering', code: '[FOOD_SUPP]' },
-                    { id: 'Material', icon: '🔊', label: 'Rental', code: '[PA_BACKLINE]' }
+                    { id: 'Künstler', icon: '🎤', label: 'Künstler', code: '[ACT_READY]' },
+                    { id: 'Techniker', icon: '🎛️', label: 'Crew', code: '[CREW_PATCH]' },
+                    { id: 'Catering', icon: '🍽️', label: 'Catering', code: '[FOOD_SUPP]' },
+                    { id: 'Material', icon: '🔌', label: 'Rental', code: '[PA_BACKLINE]' },
+                    { id: 'Logistik', icon: '🚛', label: 'Logistik', code: '[CARGO_HUB]' },
+                    { id: 'Security', icon: '🛡️', label: 'Security', code: '[GUARD_SYS]' },
+                    { id: 'Design', icon: '🎭', label: 'Deko/Stage', code: '[STAGE_FX]' }
                   ].map(role => (
                     <button
                       key={role.id}

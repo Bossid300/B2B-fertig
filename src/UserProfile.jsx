@@ -18,7 +18,41 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
       return { name: ticketName, role: 'Künstler' };
     }
   };
+  // ⭐ PRÜFT, OB DIESER KÜNSTLER BEREITS EIN FAVORIT IST
+  const [isFavorite, setIsFavorite] = useState(false);
 
+  useEffect(() => {
+    try {
+      const savedFavs = JSON.parse(localStorage.getItem('gigsda_favorites') || '[]');
+      const found = savedFavs.some(f => f && f.name && f.name.toLowerCase() === (ticketName || "").toLowerCase());
+      setIsFavorite(found);
+    } catch (e) { console.error(e); }
+  }, [ticketName]);
+
+  // ⚡ TOGGLE-FUNKTION: KÜNSTLER-FAVORIT
+  const handleToggleFavorite = () => {
+    try {
+      let savedFavs = JSON.parse(localStorage.getItem('gigsda_favorites') || '[]');
+      
+      if (isFavorite) {
+        savedFavs = savedFavs.filter(f => f && f.name && f.name.toLowerCase() !== ticketName.toLowerCase());
+        setIsFavorite(false);
+        alert("Künstler aus den B2B-Favoriten entfernt! ☆");
+      } else {
+        const newFav = {
+          name: ticketName,
+          role: 'Künstler',
+          city: userData?.city || 'Nicht hinterlegt',
+          avatarUrl: userData?.avatarUrl || '',
+          note: 'Gespeicherter Live-Act Option'
+        };
+        savedFavs.push(newFav);
+        setIsFavorite(true);
+        alert("Künstler erfolgreich zu den Favoriten hinzugefügt! ★");
+      }
+      localStorage.setItem('gigsda_favorites', JSON.stringify(savedFavs));
+    } catch (e) { console.error("Fehler beim Favoriten-Toggle:", e); }
+  };
   // --- REAKTIVER DATEN-ANSTICH AUS DEM GIGSDA-POOL ---
   const [userData, setUserData] = useState(() => {
     try {
@@ -703,6 +737,18 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
                 </a>
               </p>
                <p>GENRE: <span className="text-cyan-400 font-bold print:text-cyan-600">{localFields?.genre || userData?.genre || 'ROCK / ALTERNATIVE'}</span></p>
+                      {/* ⭐ CYBERPUNK FAVORITEN TRIGGER BUTTON */}
+          <button 
+            onClick={handleToggleFavorite}
+            className={`w-full text-[9px] font-bold uppercase py-1.5 rounded-xl text-center border font-mono transition-all cursor-pointer tracking-wider ${
+              isFavorite 
+                ? 'bg-amber-500/10 border-amber-500 text-amber-400 hover:bg-amber-500/20' 
+                : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
+            }`}
+          >
+            {isFavorite ? '★ AUS FAVORITEN ENTFERNEN' : '☆ ZU DEN FAVORITEN'}
+          </button>
+            
             </div>
           )}
         </div>
