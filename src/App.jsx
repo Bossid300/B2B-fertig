@@ -18,9 +18,61 @@ import UserProfile from './UserProfile'; // 👈 Temporärer Import zum Anschaue
 import LocationProfile from './LocationProfile'; // 👈 Temporärer Import zum Anschauen
 import FanProfile from './FanProfile'; // 👈 Schaltet die Fan-Zentrale im System frei!
 import VerleiherProfile from './VerleiherProfile'; // 🔌 Schaltet das Rental-Cockpit im System frei!
+import TechnikerProfile from './TechnikerProfile'; // 🎛️ Schaltet das Crew-Cockpit im System frei!
+import CaterProfile from './CaterProfile'; // 🔒 Schaltet das vollwertige Gastro-Profil frei!
+import CrewRequestCenter from './CrewRequestCenter'; // 👈 Das B2B-Uhrwerk laden
+
 
  
 export default function App() {
+    // 📡 REAKTIVER CREW-ALARM EMPFÄNGER
+  const [hasPendingRequests, setHasPendingRequests] = useState(false);
+
+  const checkPendingRequests = () => {
+    try {
+      const savedReqs = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
+      const currentUserName = (localStorage.getItem('gigsda_user_name') || '').trim().toLowerCase();
+      
+      const hasPending = savedReqs.some(r => {
+        if (!r) return false;
+        
+        const reqName = (r.requestedProfile || '').trim().toLowerCase();
+        const senderName = (r.requesterName || '').trim().toLowerCase();
+        const reqStatus = (r.status || '').trim().toLowerCase();
+        
+        // 🟢 WEG 1: Ich bin der angefragte Partner (Empfänger) und die Anfrage ist neu
+        const isIncomingPending = (reqName === currentUserName && reqStatus === 'pending');
+        
+        // 🟡 WEG 2: Ich bin der Absender (Veranstalter) und der Partner hat mir ein Gegenangebot geschickt
+        const isOutgoingCounter = (senderName === currentUserName && reqStatus === 'counter_offer');
+        
+        return isIncomingPending || isOutgoingCounter;
+      });
+      
+      setHasPendingRequests(hasPending);
+    } catch (e) {
+      setHasPendingRequests(false);
+    }
+  };
+
+
+
+
+
+
+  // Horcht auf das globale Sendesignal der Plattform
+  useEffect(() => {
+    checkPendingRequests(); // Einmal direkt beim Start prüfen
+    
+    window.addEventListener('request-sent', checkPendingRequests);
+    window.addEventListener('route-change', checkPendingRequests);
+    
+    return () => {
+      window.removeEventListener('request-sent', checkPendingRequests);
+      window.removeEventListener('route-change', checkPendingRequests);
+    };
+  }, []);
+
   // ⚡ BROWSER-SAFE SESSION MEMORY
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return localStorage.getItem('gigsda_logged_in') === 'true';
@@ -214,6 +266,15 @@ export default function App() {
         <div className="absolute top-[-10%] left-[-20%] w-[60%] aspect-square rounded-full bg-purple-900/10 blur-[120px]" />
         <div className="absolute top-[20%] right-[-20%] w-[50%] aspect-square rounded-full bg-cyan-900/10 blur-[120px]" />
       </div>
+
+      {/* 📡 AUTOMATISCHES CREW-REQUEST-CENTER (BLITZT BEI NEUEN ANFRAGEN & GEGENANGEBOTEN GANZ OBEN AUF) */}
+      {view === 'projects' && isLoggedIn && (
+        <div className="max-w-4xl mx-auto px-6 pt-4">
+          <CrewRequestCenter currentProfileName={ticketName} />
+        </div>
+      )}
+
+
  
       <div className="relative z-10 w-full min-h-screen flex flex-col justify-between">
  
@@ -234,18 +295,33 @@ export default function App() {
             <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-wider">
               {isLoggedIn ? (
                 <>
-                  <button 
-                    type="button" 
-                    onClick={() => { setView('projects'); setHasNotifications(false); }} 
-                    className={`px-2.5 py-1 rounded-lg border font-black transition-all cursor-pointer text-xs font-mono uppercase tracking-wider ${
-                      view === 'projects' 
-                      ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' 
-                      : 'bg-slate-950/40 text-slate-400 border-slate-900 hover:border-slate-800'
-                      }`}
-                  > 
-                    🧑‍💻 Meine Projekte 
-                    {hasNotifications && <span className="absolute -top-1 -right-1 w-2 h-2 bg-rose-500 rounded-full shadow-[0_0_8px_rgba(244,63,94,0.8)] animate-pulse" />}
-                  </button>
+
+
+
+
+
+
+              {/* 📊 DANIELS ORIGINAL-BUTTON MIT REAKTIVEM ALARM-SIGNAL */}
+              <button 
+                onClick={() => setView('projects')} 
+                className="relative px-2.5 py-1 bg-slate-900/60 border border-slate-800 hover:border-slate-700 rounded-xl text-slate-300 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 font-mono"
+              >
+                <span>Meine Projekte</span>
+                
+                {/* Das Alarmsignal leuchtet völlig autark und stört Daniels Klick-Funktion nicht */}
+                {hasPendingRequests && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping inline-block shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+                )}
+              </button>
+
+
+
+
+
+
+
+
+
 
                    {/* 🔍 NEUER LINK: guestEvents (EVENT-SUCHE) FÜR EINGELOGGTE USER */}
                   <button
@@ -386,21 +462,18 @@ export default function App() {
           )}
 
           {/* ========================================================================= */}
-          {/* 🏟️ INTERAKTIVE 4-WEGE ROLLER-WEICHE: KÜNSTLER, LOCATION, FAN & MATERIAL (RENTAL) */}
+          {/* 🏟️ INTERAKTIVE 6-WEGE ROLLER-WEICHE: KÜNSTLER, LOCATION, FAN, MATERIAL, TECHNIKER & CATERING */}
           {view === 'profile' && activeGuestArtist && (
             (() => {
               const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
               const currentProfile = savedProfiles.find(p => p && p.name && p.name.trim().toLowerCase() === activeGuestArtist.trim().toLowerCase());
               
-              if (currentProfile?.role === 'Location') {
-                return <LocationProfile ticketName={activeGuestArtist} onNavigate={setView} />;
-              } else if (currentProfile?.role === 'Fan') {
-                return <FanProfile ticketName={activeGuestArtist} onNavigate={setView} />;
-              } else if (currentProfile?.role === 'Material' || currentProfile?.role === 'Verleiher') {
-                return <VerleiherProfile ticketName={activeGuestArtist} onNavigate={setView} />;
-              } else {
-                return <UserProfile ticketName={activeGuestArtist} onBack={() => setView('radar')} isOwner={false} />;
-              }
+              if (currentProfile?.role === 'Location') { return <LocationProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
+              else if (currentProfile?.role === 'Fan') { return <FanProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
+              else if (currentProfile?.role === 'Material' || currentProfile?.role === 'Verleiher') { return <VerleiherProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
+              else if (currentProfile?.role === 'Techniker') { return <TechnikerProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
+              else if (currentProfile?.role === 'Catering') { return <CaterProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
+              else { return <UserProfile ticketName={activeGuestArtist} onBack={() => setView('radar')} isOwner={false} />; }
             })()
           )}
 
@@ -409,15 +482,19 @@ export default function App() {
               const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
               const currentProfile = savedProfiles.find(p => p && p.name && p.name.trim().toLowerCase() === ticketName.trim().toLowerCase());
               
-              if (currentProfile?.role === 'Location') {
-                return <LocationProfile ticketName={ticketName} onNavigate={setView} />;
-              } else if (currentProfile?.role === 'Fan') {
-                return <FanProfile ticketName={ticketName} onNavigate={setView} />;
-              } else if (currentProfile?.role === 'Material' || currentProfile?.role === 'Verleiher') {
-                return <VerleiherProfile ticketName={ticketName} onNavigate={setView} />;
-              } else {
-                return <UserProfile ticketName={ticketName} onBack={() => setView('projects')} isOwner={true} />;
-              }
+              if (currentProfile?.role === 'Location') { return <LocationProfile ticketName={ticketName} onNavigate={setView} />; }
+              else if (currentProfile?.role === 'Fan') { return <FanProfile ticketName={ticketName} onNavigate={setView} />; }
+              else if (currentProfile?.role === 'Material' || currentProfile?.role === 'Verleiher') { return <VerleiherProfile ticketName={ticketName} onNavigate={setView} />; }
+              else if (currentProfile?.role === 'Techniker') { return <TechnikerProfile ticketName={ticketName} onNavigate={setView} />; }
+              else if (currentProfile?.role === 'Catering') { return <CaterProfile ticketName={ticketName} onNavigate={setView} />; }
+              else { return <UserProfile ticketName={ticketName} onBack={() => setView('projects')} isOwner={true} />; }
+            })()
+          )}
+
+          {/* 🍽️ STANDALONE B2B CATERING PROFILE VIEW */}
+          {view === 'catering' && (
+            (() => {
+              return <CaterProfile ticketName={ticketName} onNavigate={setView} />;
             })()
           )}
 
@@ -431,12 +508,14 @@ export default function App() {
           )}
  
           {view === 'projects' && isLoggedIn && (
-            <ProjectDashboard 
-              ticketName={ticketName} 
-              onNavigateToStep={setView} 
-              progress={progress} 
+            <ProjectDashboard
+              ticketName={ticketName}
+              onNavigateToStep={setView}
+              progress={progress}
+              currentProfileName={ticketName}
             />
           )}
+
 
           {view === 'shortlist' && isLoggedIn && (
             <CrewShortlist onBack={() => setView('projects')} progress={progress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} setFavorites={handleUpdateCrewForEvent} />

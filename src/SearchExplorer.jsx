@@ -7,6 +7,45 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
   const [selectedRole, setSelectedRole] = useState('Alle');
   const [activeRequestUser, setActiveRequestUser] = useState(null); // Sichert das Anfrage-Popup!
   const [requestText, setRequestText] = useState(''); // Speichert euren eingetippten Text
+  
+  // ⚡ DAS DIGITALE B2B-SENDE-UHRWERK FÜR CREW-ANFRAGEN
+  const handleSendCrewRequest = () => {
+    if (!activeRequestUser || !activeRequestUser.name) {
+      alert("Fehler: Kein gültiger Benutzer für die Anfrage ausgewählt!");
+      return;
+    }
+
+    try {
+      // 1. Holt die bereits existierenden Anfragen aus dem Speicher
+      const allRequests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
+      
+      // 2. Erstellt das neue, saubere B2B-Anfrage-Objekt
+      const newRequest = {
+        requestId: "REQ-" + Math.floor(Math.random() * 9000 + 1000), // Eindeutige ID
+        eventName: "B2B Marktplatz-Kooperation", // Standard-Eventname oder dynamisch
+        date: "Datum auf Anfrage",
+        requestedProfile: activeRequestUser.name, // Der Empfänger (z. B. "Winston Jud")
+        requesterName: localStorage.getItem('gigsda_user_name') || "Unbekannter Absender", // Wer ist eingeloggt?
+        status: "pending", // 🚨 WICHTIG: Startet immer im Status offen!
+        note: requestText || "Standard-B2B Konditionen laut Profil."
+      };
+      
+      // 3. Schiebt die neue Anfrage in die Liste und speichert sie ab
+      allRequests.push(newRequest);
+      localStorage.setItem('gigsda_crew_requests', JSON.stringify(allRequests));
+      
+      // 4. Feuert den globalen Live-Funkspruch ab, damit die App.jsx sofort anspringt
+      window.dispatchEvent(new CustomEvent('request-sent'));
+      
+      // 5. Maske zurücksetzen & schließen
+      setRequestText('');
+      setActiveRequestUser(null);
+      
+      alert(`B2B-Crew-Anfrage erfolgreich an ${newRequest.requestedProfile} übermittelt! ↗️⚡`);
+    } catch (e) {
+      console.error("Fehler beim Absenden der Crew-Anfrage:", e);
+    }
+  };
 
 
   // 📁 REINER LOCALSTORAGE-FILTER: Holt nur eure echten Profile frisch von der Festplatte
@@ -113,7 +152,7 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
           
           {/* Gleicher Kasten wie das Suchfeld daneben */}
           <div className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 flex items-center gap-3 h-[38px]">
-            <span className="text-[8px] text-slate-600 font-mono font-bold">10KM</span>
+            <span className="text-[8px] text-slate-600 font-mono font-bold">600KM</span>
             <input
               type="range"
               min="5"
@@ -272,11 +311,8 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
                 ✕ ABBRECHEN
               </button>
               <button
-                onClick={() => {
-                  alert(`B2B-Anfrage an ${activeRequestUser.name} wurde erfolgreich im Gigsda-Protokoll registriert! 🚀`);
-                  setActiveRequestUser(null);
-                }}
-                className="bg-cyan-500/10 border border-cyan-500/40 hover:border-cyan-500 text-cyan-400 hover:text-white text-[10px] font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center shadow-[0_0_15px_rgba(34,211,238,0.1)]"
+                onClick={handleSendCrewRequest}
+                className="bg-cyan-500/10 border border-cyan-500/40 hover:border-cyan-500 text-cyan-400 hover:text-white text-[10px] font-bold uppercase tracking-wider py-1.5 rounded-xl transition-all cursor-pointer text-center font-mono"
               >
                 SENDEN ⚡
               </button>
