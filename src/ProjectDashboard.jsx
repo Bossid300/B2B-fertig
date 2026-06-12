@@ -70,6 +70,21 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
         />
       ) : (
         <>
+                  {/* 🎛️ GLOBALER EXPRESS-ACCESS ZUR RIDER- & GEWERKEZENTRALE */}
+        <button 
+          type="button"
+          onClick={() => {
+            if (typeof onNavigateToStep === 'function') {
+              onNavigateToStep('riderzentrale');
+            } else if (typeof setView === 'function') {
+              setView('riderzentrale');
+            }
+          }}
+          className="px-4 py-2.5 bg-gradient-to-r from-purple-600/30 to-cyan-600/30 border border-cyan-500/40 hover:border-cyan-400 text-cyan-400 hover:text-white text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-1.5 font-mono shadow-[0_0_15px_rgba(6,182,212,0.1)] mr-2"
+        >
+          <span>🎛️ RIDER- & GEWERKEZENTRALE</span>
+        </button>
+
           <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl">
             <div className="flex justify-between items-center">
               <div>

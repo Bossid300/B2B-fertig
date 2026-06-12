@@ -28,6 +28,7 @@ import DesignProfile from './DesignProfile';       // 🎭 Schaltet das Stage-De
 
 import CrewRequestCenter from './CrewRequestCenter'; // 👈 Das B2B-Uhrwerk laden
 import CrewFavoritenListe from './CrewFavoritenListe'; // ⭐ Schaltet die Favoriten-Matrix frei!
+import RiderZentrale from './RiderZentrale'; // 🎛️ Schaltet das geteilte B2B-Rider-Uhrwerk plattformweit frei!
 
  
 export default function App() {
@@ -526,6 +527,12 @@ export default function App() {
               progress={progress}
               currentProfileName={ticketName}
             />
+          )}
+          {/* 🎛️ REALTIME B2B RIDER & GEWERKE EXPRESS-PIPELINE */}
+          {view === 'riderzentrale' && (
+            (() => {
+              return <RiderZentrale onBack={() => setView('projects')} activeEvent={activeEvent} onNavigateToStep={setView} />;
+            })()
           )}
 
           {/* ⭐ UNZERSTÖRBARE GIGSDA FAVORITEN POOL EXPRESS-PIPELINE */}
