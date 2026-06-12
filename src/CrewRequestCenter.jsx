@@ -54,25 +54,55 @@ export default function CrewRequestCenter({ currentProfileName }) {
     }
   }, [currentProfileName]);
 
-  // 🟢 / 🔴 LOGIK FÜR DIREKTE ZUSAGE ODER ABSAGE
-  const handleResponse = (reqId, newStatus) => {
+  const handleResponse = (requestId, newStatus) => {
     try {
-      const allRequests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
-      const index = allRequests.findIndex(r => r.requestId === reqId);
+      // 1. Aktualisiert den globalen Request-Status
+      const savedRequests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
+      const reqIndex = savedRequests.findIndex(r => r && r.requestId === requestId);
       
-      if (index > -1) {
-        allRequests[index].status = newStatus;
-        localStorage.setItem('gigsda_crew_requests', JSON.stringify(allRequests));
+      if (reqIndex > -1) {
+        const targetReq = savedRequests[reqIndex];
+        targetReq.status = newStatus;
+        savedRequests[reqIndex] = targetReq;
+        localStorage.setItem('gigsda_crew_requests', JSON.stringify(savedRequests));
+
+        // 2. 🔗 PANZERGLAS-PROJEKT-SYNCHRONISATION
+        const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || localStorage.getItem('gigsda_projects') || '[]');
         
-        // Reaktives UI-Update
-        setRequests(prev => prev.filter(r => r.requestId !== reqId));
-        alert(`B2B-Status erfolgreich übermittelt: ${newStatus === 'accepted' ? 'ZUGESAGT! 🟢' : 'ABGESAGT! 🔴'}`);
+        // WEG A: Versucht das Event über den exakten Namen aus der Anfrage zu finden
+        let eventIndex = savedEvents.findIndex(ev => ev && (ev.title === targetReq.eventName || ev.name === targetReq.eventName));
+        
+        // WEG B (Sicherheits-Fallback): Wenn der Name ein Test-Typo ist (z.B. "sdf"), nehmen wir das aktuell im Dashboard aktive Projekt!
+        if (eventIndex === -1 && savedEvents.length > 0) {
+          // Holt den Titel des Events, das der User gerade im Dashboard geöffnet hat
+          const activeView = localStorage.getItem('gigsda_current_view') || '';
+          // Wir nehmen als Fallback einfach das erste Event, oder das, dessen Name im Profil passt
+          eventIndex = 0; 
+        }
+
+        if (eventIndex > -1 && savedEvents[eventIndex].crew) {
+          // Sucht das Crewmitglied (z.B. Winston Jud) im Event heraus
+          const memberIndex = savedEvents[eventIndex].crew.findIndex(m => m && m.name.toLowerCase() === targetReq.requestedProfile.toLowerCase());
+          
+          if (memberIndex > -1) {
+            savedEvents[eventIndex].crew[memberIndex].status = newStatus;
+            
+            // Speichert den aktualisierten Stand in beiden Keys ab
+            localStorage.setItem('gigsda_events', JSON.stringify(savedEvents));
+            localStorage.setItem('gigsda_projects', JSON.stringify(savedEvents));
+          }
+        }
+
+        // 3. Feuert die globalen Live-Funksprüche für das reaktive UI-Update
+        window.dispatchEvent(new CustomEvent('request-sent'));
+        window.dispatchEvent(new CustomEvent('route-change'));
+        
+        alert(`B2B-Status erfolgreich auf ${newStatus.toUpperCase()} aktualisiert! ⚡`);
       }
     } catch (e) {
-      console.error("Fehler beim Speichern des Anfrage-Status:", e);
+      console.error("Fehler beim Verarbeiten der B2B-Antwort:", e);
     }
   };
-
   // 🟡 LOGIK FÜR DAS GEGENANGEBOT (COUNTER OFFER)
   const handleCounterOfferSubmit = (reqId) => {
     if (!counterText.trim()) return alert("Bitte gib eine kurze Notiz für das Gegenangebot ein!");

@@ -17,6 +17,38 @@ export default function CrewShortlist({ onBack, progress, onNavigateToStep, acti
   const crewIds = activeEvent?.crewIds && Array.isArray(activeEvent.crewIds) ? activeEvent.crewIds : [];
   const currentCrew = Array.isArray(radarDatabase) ? radarDatabase.filter(m => m && m.id && crewIds.includes(m.id)) : [];
 
+  // 📡 REALTIME DB-INJEKTION: Holt die frisch hinzugefügten Favoriten aus dem Speicher
+  const [dbCrew, setDbCrew] = useState([]);
+
+  useEffect(() => {
+    const loadRealtimeCrew = () => {
+      try {
+        const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || localStorage.getItem('gigsda_projects') || '[]');
+        // Sucht das aktuell geöffnete Event anhand der übergebenen ID heraus
+        const targetId = activeEvent?.id || activeEvent?.eventId || activeEvent?._id;
+        const matchedEvent = savedEvents.find(ev => ev && (ev.id === targetId || ev.eventId === targetId || ev._id === targetId));
+        
+        if (matchedEvent && matchedEvent.crew) {
+          setDbCrew(matchedEvent.crew);
+        } else {
+          setDbCrew([]);
+        }
+      } catch (e) {
+        console.error("Fehler beim Live-Crew-Load:", e);
+      }
+    };
+
+    loadRealtimeCrew();
+    // Horcht auf unsere globalen Funksprüche, um die Liste in derselben Millisekunde upzudaten!
+    window.addEventListener('request-sent', loadRealtimeCrew);
+    window.addEventListener('route-change', loadRealtimeCrew);
+    return () => {
+      window.removeEventListener('request-sent', loadRealtimeCrew);
+      window.removeEventListener('route-change', loadRealtimeCrew);
+    };
+  }, [activeEvent]);
+
+
   // 🚦 DER INTERAKTIVE VERHANDLUNGS-SIMULATOR
   useEffect(() => {
     currentCrew.forEach(member => {
@@ -30,6 +62,8 @@ export default function CrewShortlist({ onBack, progress, onNavigateToStep, acti
     });
   }, [crewIds]);
 
+
+  
   return (
     <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
               {/* ⭐ DIREKT-LINK ZU DEN REAKTIVEN B2B PROFIL-FAVORITEN */}
@@ -80,10 +114,55 @@ export default function CrewShortlist({ onBack, progress, onNavigateToStep, acti
               </div>
             );
           })
+          
         ) : (
           <div className="text-center py-12 bg-slate-900/20 border border-dashed border-slate-900 rounded-3xl text-slate-600">Keine aktiven Buchungsanfragen gesendet. Klicke auf "Crew im Radar suchen".</div>
         )}
       </div>
+      {/* 📊 LIVE-GEWERKE AUS DER FAVORITEN-INJEKTION */}
+      {dbCrew.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-900/60 mt-4 font-mono">
+          {dbCrew.map((member, idx) => {
+            if (!member) return null;
+            
+            // 🟢🔴🟡 REAKTIVE AMPELSTATUS LOGIK FÜR DIE FAVORITEN
+            const status = (member.status || 'pending').trim().toLowerCase();
+            let statusColor = "text-amber-400 border-amber-500/30 bg-amber-500/5";
+            let statusLabel = "⏳ PENDING";
+
+            if (status === 'accepted' || status === 'gebucht') {
+              statusColor = "text-emerald-400 border-emerald-500/30 bg-emerald-500/5";
+              statusLabel = "🟢 ACCEPTED";
+            } else if (status === 'declined' || status === 'absage') {
+              statusColor = "text-red-400 border-red-500/30 bg-red-500/5";
+              statusLabel = "🔴 DECLINED";
+            } else if (status === 'counter_offer' || status === 'gegenangebot') {
+              statusColor = "text-cyan-400 border-cyan-500/30 bg-cyan-500/5";
+              statusLabel = "⚡ COUNTER";
+            }
+
+            return (
+              <div key={idx} className="bg-slate-950 border border-slate-900 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-xl relative overflow-hidden">
+                <div className="space-y-1">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[7px] bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded text-slate-400 font-bold uppercase tracking-wider">
+                      {member.role || 'Gewerk'}
+                    </span>
+                    <span className={`text-[7px] border px-1.5 py-0.5 rounded font-black tracking-widest uppercase ${statusColor}`}>
+                      {statusLabel}
+                    </span>
+                  </div>
+                  <h3 className="text-xs font-black text-white uppercase tracking-wide pt-1">{member.name}</h3>
+                </div>
+                <div className="text-[8px] text-slate-400 italic bg-slate-900/40 border border-slate-900/60 p-2 rounded-xl">
+                  ✓ Aus Favoritenliste zugewiesen. Realtime B2B-Uhrwerk aktiv.
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
     {/* 🔊 GIGSDA COMMUNITY FUNKRAUM */}
     <div className="mt-8 bg-slate-950/40 border border-slate-900/60 rounded-2xl p-4 shadow-xl">
       <div className="text-[9px] text-slate-500 uppercase tracking-widest font-black mb-3 border-b border-slate-900 pb-1.5">// GIGSDA COMMUNITY FUNKRAUM</div>

@@ -8,42 +8,74 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
   const [activeRequestUser, setActiveRequestUser] = useState(null); // Sichert das Anfrage-Popup!
   const [requestText, setRequestText] = useState(''); // Speichert euren eingetippten Text
   
-  // ⚡ DAS DIGITALE B2B-SENDE-UHRWERK FÜR CREW-ANFRAGEN
-  const handleSendCrewRequest = () => {
-    if (!activeRequestUser || !activeRequestUser.name) {
-      alert("Fehler: Kein gültiger Benutzer für die Anfrage ausgewählt!");
-      return;
-    }
+  // 🏟️ ECHTZEIT-PROJEKTLISTE FÜR DIE EXPLORER-DIREKTANFRAGE
+  const [events, setEvents] = useState([]);
+  const [showProjectSelect, setShowProjectSelect] = useState(false);
 
+  useEffect(() => {
     try {
-      // 1. Holt die bereits existierenden Anfragen aus dem Speicher
+      const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || localStorage.getItem('gigsda_projects') || '[]');
+      setEvents(savedEvents);
+    } catch (e) {
+      console.error("Fehler beim Laden der Events im Explorer:", e);
+    }
+  }, [activeRequestUser]);
+
+  // ⚡ AUTOMATISCHE DIREKT-PROJEKT-BUCHUNG BEIM ABSENDEN
+  const handleSendRequestToProject = (eventId) => {
+    try {
       const allRequests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
+      const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || localStorage.getItem('gigsda_projects') || '[]');
       
-      // 2. Erstellt das neue, saubere B2B-Anfrage-Objekt
+      const targetEvent = savedEvents.find(ev => ev && (ev.id === eventId || ev.eventId === eventId || ev._id === eventId));
+      if (!targetEvent) return;
+
+      const eventTitle = targetEvent.title || targetEvent.name || "B2B Event";
+
+      // 1. Schreibt die Anfrage sauber in gigsda_crew_requests für das goldene Fenster
       const newRequest = {
-        requestId: "REQ-" + Math.floor(Math.random() * 9000 + 1000), // Eindeutige ID
-        eventName: "B2B Marktplatz-Kooperation", // Standard-Eventname oder dynamisch
-        date: "Datum auf Anfrage",
-        requestedProfile: activeRequestUser.name, // Der Empfänger (z. B. "Winston Jud")
-        requesterName: localStorage.getItem('gigsda_user_name') || "Unbekannter Absender", // Wer ist eingeloggt?
-        status: "pending", // 🚨 WICHTIG: Startet immer im Status offen!
+        requestId: "REQ-" + Math.floor(Math.random() * 9000 + 1000),
+        eventName: eventTitle,
+        date: targetEvent.date || "Termin auf Anfrage",
+        requestedProfile: activeRequestUser.name,
+        requesterName: localStorage.getItem('gigsda_user_name') || "Veranstalter",
+        status: "pending", // Startet offen beim Empfänger
         note: requestText || "Standard-B2B Konditionen laut Profil."
       };
-      
-      // 3. Schiebt die neue Anfrage in die Liste und speichert sie ab
       allRequests.push(newRequest);
       localStorage.setItem('gigsda_crew_requests', JSON.stringify(allRequests));
-      
-      // 4. Feuert den globalen Live-Funkspruch ab, damit die App.jsx sofort anspringt
+
+      // 2. Schleust den Partner zeitgleich direkt als "pending" in das Event-Crew-Array ein!
+      const eventIndex = savedEvents.findIndex(ev => ev && (ev.id === eventId || ev.eventId === eventId || ev._id === eventId));
+      if (eventIndex > -1) {
+        if (!savedEvents[eventIndex].crew) savedEvents[eventIndex].crew = [];
+        
+        const alreadyInCrew = savedEvents[eventIndex].crew.some(m => m && m.name.toLowerCase() === activeRequestUser.name.toLowerCase());
+        if (!alreadyInCrew) {
+          savedEvents[eventIndex].crew.push({
+            name: activeRequestUser.name,
+            role: activeRequestUser.role || 'Crew',
+            status: 'pending', // Gelbe Ampelkachel im Dashboard!
+            city: activeRequestUser.city || '',
+            addedAt: new Date().toLocaleDateString('de-DE')
+          });
+          localStorage.setItem('gigsda_events', JSON.stringify(savedEvents));
+          localStorage.setItem('gigsda_projects', JSON.stringify(savedEvents));
+        }
+      }
+
+      // 3. Globale Funksprüche abfeuern, damit alles synchron springt
       window.dispatchEvent(new CustomEvent('request-sent'));
-      
-      // 5. Maske zurücksetzen & schließen
+      window.dispatchEvent(new CustomEvent('route-change'));
+
+      // 4. UI zurücksetzen & Schließen
       setRequestText('');
+      setShowProjectSelect(false);
       setActiveRequestUser(null);
-      
-      alert(`B2B-Crew-Anfrage erfolgreich an ${newRequest.requestedProfile} übermittelt! ↗️⚡`);
+
+      alert(`B2B-Crew-Anfrage für "${eventTitle}" erfolgreich übermittelt! ↗️⚡`);
     } catch (e) {
-      console.error("Fehler beim Absenden der Crew-Anfrage:", e);
+      console.error("Fehler beim Absenden der Direkt-Projekt-Anfrage:", e);
     }
   };
 
@@ -310,12 +342,32 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veran
               >
                 ✕ ABBRECHEN
               </button>
-              <button
-                onClick={handleSendCrewRequest}
-                className="bg-cyan-500/10 border border-cyan-500/40 hover:border-cyan-500 text-cyan-400 hover:text-white text-[10px] font-bold uppercase tracking-wider py-1.5 rounded-xl transition-all cursor-pointer text-center font-mono"
-              >
-                SENDEN ⚡
-              </button>
+              {/* 🏟️ REAKTIVE PROJEKT-AUSWAHL-MATRIX DIREKT IM RADAR-POPUP */}
+              <div className="pt-2 font-mono text-[9px] w-full space-y-2">
+                <span className="text-[7px] text-cyan-400 block font-black uppercase tracking-widest">// WÄHLE DAS ZIEL-PROJEKT FÜR DIE ANFRAGE:</span>
+                
+                {events.length === 0 ? (
+                  <div className="text-center py-4 border border-dashed border-slate-900 rounded-xl text-slate-600 uppercase text-[8px]">
+                    // Keine aktiven Events im Dashboard gefunden.
+                  </div>
+                ) : (
+                  <div className="max-h-32 overflow-y-auto space-y-1 pr-1 border border-slate-900 p-1.5 rounded-xl bg-slate-950/40">
+                    {events.map(ev => {
+                      if (!ev) return null;
+                      return (
+                        <button 
+                          key={ev.id || ev.eventId || ev._id} 
+                          onClick={() => handleSendRequestToProject(ev.id || ev.eventId || ev._id)}
+                          className="w-full text-left px-3 py-2 bg-slate-900 hover:bg-cyan-500/10 border border-slate-800 hover:border-cyan-500/40 text-slate-300 hover:text-white rounded-xl text-[9px] transition-all truncate cursor-pointer block font-bold"
+                        >
+                          📅 {ev.title || ev.name || "Unbenanntes Event"}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
             </div>
 
           </div>

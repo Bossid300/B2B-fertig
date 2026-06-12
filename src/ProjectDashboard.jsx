@@ -120,7 +120,13 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
                       onClick={() => {
                         try {
                           if (typeof onSelectEvent === 'function' && evt) {
-                            onSelectEvent(evt); 
+                            onSelectEvent(evt);
+                            
+                            // 📡 Schaltet dieses Projekt plattformweit scharf für den Search-Explorer!
+                            localStorage.setItem('gigsda_active_event', JSON.stringify({
+                              id: evt.id || evt.eventId || evt._id,
+                              title: evt.title || evt.name
+                            }));
                           }
                           if (typeof onNavigateToStep === 'function') {
                             onNavigateToStep('shortlist'); 

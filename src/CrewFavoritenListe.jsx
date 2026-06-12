@@ -7,24 +7,14 @@ export default function CrewFavoritenListe({ onNavigate }) {
   // SYSTEM-ROLES FÜR DIE GEWERKE-FILTER MATRIX
   const ROLES_LIST = ['all', 'Künstler', 'Catering', 'Rental', 'Location', 'Techniker', 'Logistik', 'Security', 'Design'];
 
-  // LADE DEINE MERKLISTE AUS DEM SPEICHER
+  // 📡 SAUBERE PROD-LEITUNG: Lädt nur echte, vom User gewählte Favoriten
   useEffect(() => {
     try {
       const savedFavs = JSON.parse(localStorage.getItem('gigsda_favorites') || '[]');
-      
-      // DEMO-DATEN FALLBACK FÜR DEN PROBELAUF
-      if (savedFavs.length === 0) {
-        const demo = [
-          { name: "Winston Jud", role: "Künstler", city: "Braunau", note: "Main-Act Option für die Hauptbühne" },
-          { name: "Cater John", role: "Catering", city: "Innviertel", note: "Premium Galabuffet & Full-Service" },
-          { name: "Security Guard GmbH", role: "Security", city: "Linz", note: "Einlasskontrolle & Ordner nach §34a" }
-        ];
-        localStorage.setItem('gigsda_favorites', JSON.stringify(demo));
-        setFavorites(demo);
-      } else {
-        setFavorites(savedFavs);
-      }
-    } catch (e) { console.error(e); }
+      setFavorites(savedFavs);
+    } catch (e) { 
+      console.error("Fehler beim Laden der Favoriten:", e); 
+    }
   }, []);
 
   const removeFavorite = (name) => {
@@ -34,7 +24,79 @@ export default function CrewFavoritenListe({ onNavigate }) {
   };
 
   const filteredFavs = favorites.filter(f => filterRole === 'all' || f.role === filterRole);
+  // 🏟️ STATE FÜR DIE PROJEKT-AUSWAHL
+  const [events, setEvents] = useState([]);
+  const [activeSelectFav, setActiveSelectFav] = useState(null); // Welcher Favorit wird gerade hinzugefügt?
 
+  // Lade die aktuell erstellten Events des Veranstalters beim Start
+  useEffect(() => {
+    try {
+      const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || localStorage.getItem('gigsda_projects') || '[]');
+      setEvents(savedEvents);
+    } catch (e) { console.error("Fehler beim Event-Load:", e); }
+  }, [activeSelectFav]);
+
+  // ⚡ INJIZIERT DEN FAVORITEN IN DIE CREWLISTE DES AUSGEWÄHLTEN EVENTS
+  const handleAddFavToProject = (eventId, fav) => {
+    try {
+      const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || localStorage.getItem('gigsda_projects') || '[]');
+      const eventIndex = savedEvents.findIndex(ev => ev && ev.id === eventId);
+
+      if (eventIndex > -1) {
+        // Sicherstellen, dass das Event ein Crew-Array besitzt
+        if (!savedEvents[eventIndex].crew) {
+          savedEvents[eventIndex].crew = [];
+        }
+
+        // Doppelbuchungen im selben Event verhindern
+        const alreadyInCrew = savedEvents[eventIndex].crew.some(member => member && member.name.toLowerCase() === fav.name.toLowerCase());
+        if (alreadyInCrew) {
+          alert(`${fav.name} ist bereits in der Crewliste dieses Projekts eingetragen!`);
+          setActiveSelectFav(null);
+          return;
+        }
+
+        // Neues B2B-Crewmitglied mit Standardstatus 'pending' anlegen
+        const newCrewMember = {
+          name: fav.name,
+          role: fav.role,
+          status: 'pending', // Startet offen für die Anfrage
+          city: fav.city || '',
+          addedAt: new Date().toLocaleDateString('de-DE')
+        };
+
+        savedEvents[eventIndex].crew.push(newCrewMember);
+        
+        // Speichern in den korrekten Keys (Sicherheits-Fallback für beide Schreibweisen)
+        localStorage.setItem('gigsda_events', JSON.stringify(savedEvents));
+        localStorage.setItem('gigsda_projects', JSON.stringify(savedEvents));
+// ⚡ ZÜNDET DEN REAKTIVEN LIVE-FUNKSPRUCH FÜR DANIELS DASHBOARD!
+window.dispatchEvent(new CustomEvent('request-sent'));
+window.dispatchEvent(new CustomEvent('route-change'));
+
+        // Zusätzlich direkt eine Crew-Anfrage im globalen System anlegen!
+        const allRequests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
+        allRequests.push({
+          requestId: "REQ-" + Math.floor(Math.random() * 9000 + 1000),
+          eventName: savedEvents[eventIndex].title || savedEvents[eventIndex].name || "B2B Event",
+          date: savedEvents[eventIndex].date || "Termin folgt",
+          requestedProfile: fav.name,
+          requesterName: localStorage.getItem('gigsda_user_name') || "Veranstalter",
+          status: "pending",
+          note: `Automatisch über Crew-Favoritenliste hinzugefügt.`
+        });
+        localStorage.setItem('gigsda_crew_requests', JSON.stringify(allRequests));
+
+        // Globalen Funkspruch feuern, damit alle Dashboards live updaten!
+        window.dispatchEvent(new CustomEvent('request-sent'));
+
+        alert(`✓ ${fav.name} wurde erfolgreich als ${fav.role} zum Projekt hinzugefügt und angefragt! ⚡`);
+        setActiveSelectFav(null);
+      }
+    } catch (e) {
+      console.error("Fehler beim Hinzufügen zum Projekt:", e);
+    }
+  };
   return (
     <div className="max-w-4xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl">
       
@@ -70,6 +132,42 @@ export default function CrewFavoritenListe({ onNavigate }) {
               <p className="text-[8px] text-slate-500">📍 {fav.city}</p>
               <p className="text-[9px] text-slate-400 italic mt-2">"{fav.note || 'Keine Notiz hinterlegt.'}"</p>
             </div>
+
+
+              {/* ➕ REAKTIVE PROJEKT-ANREIHUNG */}
+              <div className="pt-1 font-mono text-[9px]">
+                {activeSelectFav === fav.name ? (
+                  <div className="bg-slate-950 border border-amber-500/20 rounded-xl p-2 space-y-1.5 animate-fade-in">
+                    <span className="text-[6px] text-amber-400 block font-black uppercase">// WÄHLE DAS ZIEL-PROJEKT:</span>
+                    {events.length === 0 ? (
+                      <p className="text-slate-600 text-[8px] italic">// Keine aktiven Events im Speicher gefunden.</p>
+                    ) : (
+                      <div className="max-h-24 overflow-y-auto space-y-1 pr-1 scrollbar-thin">
+                        {events.map(ev => (
+                          <button 
+                            key={ev.id} 
+                            onClick={() => handleAddFavToProject(ev.id, fav)}
+                            className="w-full text-left px-2 py-1 bg-slate-900 hover:bg-amber-500/10 border border-slate-800 text-slate-300 hover:text-white rounded text-[8px] transition-all truncate cursor-pointer block"
+                          >
+                            📅 {ev.title || ev.name || "Unbenanntes Event"}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    <button onClick={() => setActiveSelectFav(null)} className="w-full text-center text-[7px] text-slate-500 font-bold uppercase mt-1">Abbrechen</button>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => setActiveSelectFav(fav.name)}
+                    className="w-full py-1.5 bg-cyan-500/5 border border-cyan-500/20 hover:border-cyan-500 hover:text-white text-cyan-400 rounded-xl transition-all cursor-pointer font-bold uppercase tracking-wider text-center"
+                  >
+                    ➕ Zum Projekt hinzufügen
+                  </button>
+                )}
+              </div>
+
+
+
             <button onClick={() => removeFavorite(fav.name)} className="w-full py-1 bg-red-500/5 border border-red-500/20 hover:border-red-500 hover:text-white text-red-400 text-[8px] font-bold uppercase rounded-lg transition-all cursor-pointer">
               ✕ ENTFERNEN
             </button>

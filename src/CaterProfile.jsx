@@ -321,11 +321,7 @@ export default function CaterProfile({ ticketName, onNavigate }) {
               <button onClick={() => setIsEditing(true)} className="w-full bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 text-[9px] font-bold uppercase py-1.5 rounded-xl text-center tracking-wider font-mono cursor-pointer">⚙️ GASTRO EDITIEREN</button>
             </div>
           )}
-          {!isEditing && (
-            <div className="pt-4">
-              <button onClick={() => setIsEditing(true)} className="w-full bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 text-[9px] font-bold uppercase py-1.5 rounded-xl text-center tracking-wider font-mono">⚙️ GASTRO EDITIEREN</button>
-            </div>
-          )}
+
         </div>
 
       </div>

@@ -37,6 +37,7 @@ export default function App() {
   const checkPendingRequests = () => {
     try {
       const savedReqs = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
+      
       const currentUserName = (localStorage.getItem('gigsda_user_name') || '').trim().toLowerCase();
       
       const hasPending = savedReqs.some(r => {
@@ -273,15 +274,7 @@ export default function App() {
         <div className="absolute top-[20%] right-[-20%] w-[50%] aspect-square rounded-full bg-cyan-900/10 blur-[120px]" />
       </div>
 
-      {/* 📡 AUTOMATISCHES CREW-REQUEST-CENTER (BLITZT BEI NEUEN ANFRAGEN & GEGENANGEBOTEN GANZ OBEN AUF) */}
-      {view === 'projects' && isLoggedIn && (
-        <div className="max-w-4xl mx-auto px-6 pt-4">
-          <CrewRequestCenter currentProfileName={ticketName} />
-        </div>
-      )}
 
-
- 
       <div className="relative z-10 w-full min-h-screen flex flex-col justify-between">
  
         {/* ========================================================================= */}
@@ -395,7 +388,12 @@ export default function App() {
  
           </div>
         </header>
- 
+       {/* 📡 AUTOMATISCHES CREW-REQUEST-CENTER (BLITZT BEI NEUEN ANFRAGEN & GEGENANGEBOTEN GANZ OBEN AUF) */}
+      {view === 'projects' && isLoggedIn && (
+        <div className="max-w-4xl mx-auto px-6 pt-4">
+          <CrewRequestCenter currentProfileName={ticketName} />
+        </div>
+      )}
         {/* ========================================================================= */}
         {/* MAIN ROUTER PORT                                                          */}
         {/* ========================================================================= */}
