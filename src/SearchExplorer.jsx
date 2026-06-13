@@ -14,23 +14,29 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
 
   useEffect(() => {
     try {
-      const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || localStorage.getItem('gigsda_projects') || '[]');
+      const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
       setEvents(savedEvents);
     } catch (e) {
       console.error("Fehler beim Laden der Events im Explorer:", e);
     }
   }, [activeRequestUser]);
 
-  // ⚡ AUTOMATISCHE DIREKT-PROJEKT-BUCHUNG BEIM ABSENDEN
+  // ⚡ AUTOMATISCHE DIREKT-PROJEKT-BUCHUNG BEIM ABSENDEN (PERFEKT SYNCED!)
   const handleSendRequestToProject = (eventId) => {
     try {
       const allRequests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
-      const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || localStorage.getItem('gigsda_projects') || '[]');
+      const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
       
       const targetEvent = savedEvents.find(ev => ev && (ev.id === eventId || ev.eventId === eventId || ev._id === eventId));
       if (!targetEvent) return;
 
       const eventTitle = targetEvent.title || targetEvent.name || "B2B Event";
+
+      // 📡 LIVE-SPEICHER-KOPPLUNG: Zwingt den Browser, sofort reaktiv auf dieses aktive Projekt umzuschalten!
+      localStorage.setItem('gigsda_active_event', JSON.stringify({
+        id: eventId,
+        title: eventTitle
+      }));
 
       // 1. Schreibt die Anfrage sauber in gigsda_crew_requests für das goldene Fenster
       const newRequest = {
@@ -39,32 +45,61 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
         date: targetEvent.date || "Termin auf Anfrage",
         requestedProfile: activeRequestUser.name,
         requesterName: localStorage.getItem('gigsda_user_name') || "Veranstalter",
-        status: "pending", // Startet offen beim Empfänger
+        status: "pending",
         note: requestText || "Standard-B2B Konditionen laut Profil."
       };
       allRequests.push(newRequest);
       localStorage.setItem('gigsda_crew_requests', JSON.stringify(allRequests));
 
       // 2. Schleust den Partner zeitgleich direkt als "pending" in das Event-Crew-Array ein!
-      const eventIndex = savedEvents.findIndex(ev => ev && (ev.id === eventId || ev.eventId === eventId || ev._id === eventId));
+      // 2. Schleust den Partner zeitgleich direkt als "pending" in das Event-Crew-Array ein!
+      // 📡 UNZERSTÖRBARE DOPPEL-BRÜCKE: Findet das Projekt oder legt es vollautomatisch neu an!
+      let eventIndex = savedEvents.findIndex(ev => ev && (
+        (eventId && (ev.id === eventId || ev.eventId === eventId || ev._id === eventId)) ||
+        (eventTitle && (ev.title === eventTitle || ev.name === eventTitle))
+      ));
+
+      // 🚨 AUTOMATISCHE INITIALISIERUNG: Falls das Event in gigsda_events fehlt, erschaffen wir es live!
+      if (eventIndex === -1) {
+        const newEventPlaceholder = {
+          id: eventId || "EVT-" + Math.floor(Math.random() * 9000 + 1000),
+          title: eventTitle,
+          name: eventTitle,
+          date: targetEvent?.date || new Date().toLocaleDateString('de-DE'),
+          crew: []
+        };
+        savedEvents.push(newEventPlaceholder);
+        eventIndex = savedEvents.length - 1;
+        console.log(`📡 B2B-AutoCreation: Projekt "${eventTitle}" wurde frisch in gigsda_events verankert!`);
+      }
+
       if (eventIndex > -1) {
-        if (!savedEvents[eventIndex].crew) savedEvents[eventIndex].crew = [];
+        if (!savedEvents[eventIndex].crew) {
+          savedEvents[eventIndex].crew = [];
+        }
         
-        const alreadyInCrew = savedEvents[eventIndex].crew.some(m => m && m.name.toLowerCase() === activeRequestUser.name.toLowerCase());
+        // Klongeschützte Namens-Extraktion
+        const targetProfileName = activeRequestUser?.name || activeRequestUser?.user?.name || activeRequestUser?.username || "Crew-Mitglied";
+        const targetProfileRole = activeRequestUser?.role || activeRequestUser?.gewerk || "Crew";
+        const targetProfileCity = activeRequestUser?.city || activeRequestUser?.ort || "";
+
+        const alreadyInCrew = savedEvents[eventIndex].crew.some(m => m && m.name && m.name.toLowerCase() === targetProfileName.toLowerCase());
+        
         if (!alreadyInCrew) {
           savedEvents[eventIndex].crew.push({
-            name: activeRequestUser.name,
-            role: activeRequestUser.role || 'Crew',
-            status: 'pending', // Gelbe Ampelkachel im Dashboard!
-            city: activeRequestUser.city || '',
+            name: targetProfileName,
+            role: targetProfileRole,
+            status: 'pending', // Gelbe Ampelkachel!
+            city: targetProfileCity,
             addedAt: new Date().toLocaleDateString('de-DE')
           });
+          
           localStorage.setItem('gigsda_events', JSON.stringify(savedEvents));
-          localStorage.setItem('gigsda_projects', JSON.stringify(savedEvents));
+          console.log(`✓ B2B-Injektion: ${targetProfileName} erfolgreich in Crew von "${eventTitle}" verbucht!`);
         }
       }
 
-      // 3. Globale Funksprüche abfeuern, damit alles synchron springt
+      // 3. Globale Funksprüche abfeuern, damit alles reaktiv ohne F5 mitspringt
       window.dispatchEvent(new CustomEvent('request-sent'));
       window.dispatchEvent(new CustomEvent('route-change'));
 

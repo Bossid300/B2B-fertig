@@ -17,27 +17,36 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
   const [errorMsg, setErrorMsg] = useState('');
 
   // 💥 FUNKTION 1: DAS INTELLIGENTE LOGIN (Durchsucht die Festplatte)
+  // 🛠️ REAKTIVES LOGIN-UHRWERK (BOMBENFEST UND IMMUN GEGEN VARIABLEN-CRASHES)
   const handleLoginSubmit = (e) => {
     e.preventDefault();
-    
-    const inputName = loginField.trim();
+
+    const inputName = loginField ? loginField.trim() : "";
     if (!inputName) {
-      setErrorMsg('Bitte gib deine Künstler-ID oder deinen Namen ein!');
+      if (typeof setErrorMsg === 'function') setErrorMsg('Bitte gib deine Künstler-ID oder deinen Namen ein! 💡');
       return;
     }
 
-    // 1. Entwickler-Schnellzugriff abfangen
+    // 🚨 ABSOLUTER SYSTEM-FALLBACK: Loggt Winston IMMER ein, egal was in gigsda_users steht!
     if (inputName.toLowerCase() === 'winston jud') {
-      setErrorMsg('');
-      onLoginSuccess('Winston Jud', 'Veranstalter');
+      if (typeof setErrorMsg === 'function') setErrorMsg('');
+      localStorage.setItem('gigsda_reg_role', 'Künstler');
+      localStorage.setItem('gigsda_user_name', 'Winston Jud');
+      localStorage.setItem('gigsda_logged_in', 'true');
+      
+      window.dispatchEvent(new CustomEvent('request-sent'));
+      window.dispatchEvent(new CustomEvent('route-change'));
+      
+      if (typeof onLoginSuccess === 'function') {
+        onLoginSuccess('Winston Jud', 'Künstler');
+      }
       return;
     }
 
-    // 2. Durchsuche die Festplatte nach registrierten Nutzern (Browser-Safe-Parsing)
+    // Normaler Datenbank-Abgleich für alle anderen User
     let registeredUsers = [];
     try {
       const localData = localStorage.getItem('gigsda_users');
-      // Verhindert Typen-Konflikte im Browser-Cache
       if (localData) {
         registeredUsers = JSON.parse(localData);
       }
@@ -45,19 +54,28 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
       registeredUsers = [];
     }
 
-    // Sicherstellen, dass wir mit einem echten Array arbeiten
     const userArray = Array.isArray(registeredUsers) ? registeredUsers : [];
-    
-    // Messerscharfer Abgleich ohne Leerzeichen-Fehler
     const matchedUser = userArray.find(
       user => user && user.name && user.name.trim().toLowerCase() === inputName.toLowerCase()
     );
 
     if (matchedUser) {
-      setErrorMsg('');
-      onLoginSuccess(matchedUser.name, matchedUser.role);
+      if (typeof setErrorMsg === 'function') setErrorMsg('');
+      const userLiveRole = matchedUser.role || matchedUser.gewerk || 'Veranstalter';
+      localStorage.setItem('gigsda_reg_role', userLiveRole);
+      localStorage.setItem('gigsda_user_name', matchedUser.name);
+      localStorage.setItem('gigsda_logged_in', 'true');
+
+      window.dispatchEvent(new CustomEvent('request-sent'));
+      window.dispatchEvent(new CustomEvent('route-change'));
+
+      if (typeof onLoginSuccess === 'function') {
+        onLoginSuccess(matchedUser.name, userLiveRole);
+      }
     } else {
-      setErrorMsg(`Der Name "${inputName}" ist im Gigsda-Protokoll des Browsers nicht registriert. Bitte erstelle zuerst ein Konto!`);
+      if (typeof setErrorMsg === 'function') {
+        setErrorMsg(`Der Name "${inputName}" ist im Gigsda-Protokoll des Browsers nicht registriert. Bitte erstelle zuerst ein Konto! ✕`);
+      }
     }
   };
 

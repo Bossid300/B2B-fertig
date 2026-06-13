@@ -154,34 +154,38 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
                       ✕
                     </button>
 
+                    {/* ⚙️ DANIELS REPARIERTE TÜR ZUM EVENT: ÜBERGEBT ID UND ÖFFNET DIE CREWLISTE */}
                     <button 
                       type="button"
-                      // ⚡ DIE ABSOLUT CRASHSICHERE DATENBANK-BRÜCKE
                       onClick={() => {
-                        try {
-                          if (typeof onSelectEvent === 'function' && evt) {
+                        if (evt) {
+                          const eventId = evt.id || evt.eventId || evt._id;
+                          const eventTitle = evt.title || evt.name || "B2B Event";
+
+                          // 📡 1. Schreibt haargenau die ID dieses Projekts reaktiv in den Speicher!
+                          localStorage.setItem('gigsda_active_event', JSON.stringify({
+                            id: eventId,
+                            title: eventTitle
+                          }));
+
+                          // 📡 2. Zündet Daniels originalen Event-Wechsler im RAM
+                          if (typeof onSelectEvent === 'function') {
                             onSelectEvent(evt);
-                            
-                            // 📡 Schaltet dieses Projekt plattformweit scharf für den Search-Explorer!
-                            localStorage.setItem('gigsda_active_event', JSON.stringify({
-                              id: evt.id || evt.eventId || evt._id,
-                              title: evt.title || evt.name
-                            }));
                           }
+
+                          // 📡 3. Öffnet die Crew-Shortlist-Ebene, genau wie du es gestern geplant hast!
                           if (typeof onNavigateToStep === 'function') {
-                            onNavigateToStep('shortlist'); 
-                          }
-                        } catch (error) {
-                          console.error("Navigation blockiert:", error);
-                          if (typeof onNavigateToStep === 'function') {
-                            onNavigateToStep('projects'); // Fallback: Zurück zum sicheren Dashboard
+                            onNavigateToStep('shortlist'); // oder Daniels Navigations-Key für eure Crew-Ansicht
+                          } else if (typeof setView === 'function') {
+                            setView('shortlist');
                           }
                         }
                       }}
-                      className="bg-slate-900/80 border border-slate-800 hover:border-cyan-500/40 text-slate-300 hover:text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 cursor-pointer shadow-lg transition-colors"
+                      className="px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer font-mono shadow-md flex items-center gap-1.5"
                     >
-                      Konfigurieren ⚙️
+                      <span>KONFIGURIEREN ⚙️</span>
                     </button>
+
 
 
                   </div>

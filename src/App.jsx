@@ -295,94 +295,83 @@ export default function App() {
             <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-wider">
               {isLoggedIn ? (
                 <>
-
-
-
-
-
-
               {/* 📊 DANIELS ORIGINAL-BUTTON MIT REAKTIVEM ALARM-SIGNAL */}
               <button 
+                type="button"
                 onClick={() => setView('projects')} 
-                className="relative px-2.5 py-1 bg-slate-900/60 border border-slate-800 hover:border-slate-700 rounded-xl text-slate-300 hover:text-white text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 font-mono"
-              >
+                    className={`px-2.5 py-1 rounded-lg border font-black transition-all cursor-pointer text-xs font-mono uppercase tracking-wider ${
+                      view === 'projects' 
+                        ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+                        : 'bg-slate-950/40 text-slate-400 border-slate-900 hover:border-slate-800'
+                      }`}
+                  >
                 <span>Meine Projekte</span>
-                
                 {/* Das Alarmsignal leuchtet völlig autark und stört Daniels Klick-Funktion nicht */}
                 {hasPendingRequests && (
                   <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping inline-block shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
                 )}
               </button>
 
+              {/* 🔍 NEUER LINK: guestEvents (EVENT-SUCHE) FÜR EINGELOGGTE USER */}
+              <button
+                type="button"
+                onClick={() => setView('guestEvents')}
+                className={`px-2.5 py-1 rounded-lg border font-black transition-all cursor-pointer text-xs font-mono uppercase tracking-wider ${
+                  view === 'guestEvents'
+                    ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+                    : 'bg-slate-950/40 text-slate-400 border-slate-900 hover:border-slate-800'
+                  }`}
+                >
+                📡 Event-Radar
+              </button>
 
+              <button 
+                type="button" 
+                onClick={() => setView('search')} 
+                className={`px-2.5 py-1 rounded-lg border font-black transition-all cursor-pointer text-xs font-mono uppercase tracking-wider ${
+                  view === 'search' 
+                    ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
+                    : 'bg-slate-950/40 text-slate-400 border-slate-900 hover:border-slate-800'
+                  }`}
+                >
+                  🔍 Search-Explorer
+                </button>
 
+                {/* 🧑‍💻 DEIN NEUER INTERAKTIVER PROFIL-BUTTON (Zeigt den echten Usernamen an) */}
+                <button 
+                  type="button" 
+                  onClick={() => setView('userProfile')} 
+                  className={`px-3 py-1 rounded-lg border font-black transition-all cursor-pointer ${view === 'profile' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' : 'bg-slate-950 border-slate-900 text-cyan-400 hover:border-cyan-500/40 shadow-md'}`}
+                >
+                  🧑‍💻 {ticketName}
+                </button>
+  
+                <button 
+                  type="button" 
+                  onClick={() => { 
+                    localStorage.removeItem('gigsda_logged_in');
+                    localStorage.removeItem('gigsda_user_name');
+                    setIsLoggedIn(false); 
+                    setTicketName('Gast'); 
+                    setView('landing'); 
+                  }} 
+                  className="text-rose-500 hover:text-rose-400 px-1 font-bold cursor-pointer"
+                >
+                  [ Exit ]
+                </button>
+              </>
+            ) : (
+              <>
+              <button type="button" onClick={() => setView('landing')} className={`px-2 py-1 cursor-pointer ${view === 'landing' ? 'text-cyan-400 font-bold' : 'text-slate-400 hover:text-white'}`}>Startseite</button>
 
-
-
-
-
-
-
-                   {/* 🔍 NEUER LINK: guestEvents (EVENT-SUCHE) FÜR EINGELOGGTE USER */}
-                  <button
-                    type="button"
-                    onClick={() => setView('guestEvents')}
-                    className={`px-2.5 py-1 rounded-lg border font-black transition-all cursor-pointer text-xs font-mono uppercase tracking-wider ${
-                      view === 'guestEvents'
-                        ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
-                        : 'bg-slate-950/40 text-slate-400 border-slate-900 hover:border-slate-800'
-                      }`}
-                  >
-                    📡 Event-Radar
-                  </button>
-
-                  <button 
-                    type="button" 
-                    onClick={() => setView('search')} 
-                    className={`px-2.5 py-1 rounded-lg border font-black transition-all cursor-pointer text-xs font-mono uppercase tracking-wider ${
-                      view === 'search' 
-                        ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
-                        : 'bg-slate-950/40 text-slate-400 border-slate-900 hover:border-slate-800'
-                      }`}
-                  >
-                    🔍 Search-Explorer
-                  </button>
-
-                  {/* 🧑‍💻 DEIN NEUER INTERAKTIVER PROFIL-BUTTON (Zeigt den echten Usernamen an) */}
-                  <button 
-                    type="button" 
-                    onClick={() => setView('userProfile')} 
-                    className={`px-3 py-1 rounded-lg border font-black transition-all cursor-pointer ${view === 'profile' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' : 'bg-slate-950 border-slate-900 text-cyan-400 hover:border-cyan-500/40 shadow-md'}`}
-                  >
-                    🧑‍💻 {ticketName}
-                  </button>
- 
-                  <button 
-                    type="button" 
-                    onClick={() => { 
-                      localStorage.removeItem('gigsda_logged_in');
-                      localStorage.removeItem('gigsda_user_name');
-                      setIsLoggedIn(false); 
-                      setTicketName('Gast'); 
-                      setView('landing'); 
-                    }} 
-                    className="text-rose-500 hover:text-rose-400 px-1 font-bold cursor-pointer"
-                  >
-                    [ Exit ]
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button type="button" onClick={() => setView('landing')} className={`px-2 py-1 cursor-pointer ${view === 'landing' ? 'text-cyan-400 font-bold' : 'text-slate-400 hover:text-white'}`}>Startseite</button>
- 
-                  {/* Für uneingeloggte Nutzer steht oben nur noch der saubere Login-Button */}
-                  <button 
-                    type="button" 
-                    onClick={() => { setIsRegInitial(false); setView('login'); }} 
-                    className="bg-cyan-400 text-slate-950 font-black px-3 py-1 rounded-lg hover:bg-cyan-300 transition-colors cursor-pointer"
-                  >
-                    Login
-                  </button>
+              {/* Für uneingeloggte Nutzer steht oben nur noch der saubere Login-Button */}
+              <button 
+                type="button" 
+                onClick={() => { setIsRegInitial(false); setView('login'); }} 
+                className="bg-cyan-400 text-slate-950 font-black px-3 py-1 rounded-lg hover:bg-cyan-300 transition-colors cursor-pointer"
+              >
+                Login
+              </button>
                 </>
               )}
             </div>

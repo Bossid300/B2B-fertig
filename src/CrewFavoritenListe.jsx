@@ -31,7 +31,7 @@ export default function CrewFavoritenListe({ onNavigate }) {
   // Lade die aktuell erstellten Events des Veranstalters beim Start
   useEffect(() => {
     try {
-      const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || localStorage.getItem('gigsda_projects') || '[]');
+      const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
       setEvents(savedEvents);
     } catch (e) { console.error("Fehler beim Event-Load:", e); }
   }, [activeSelectFav]);
@@ -39,14 +39,36 @@ export default function CrewFavoritenListe({ onNavigate }) {
   // ⚡ INJIZIERT DEN FAVORITEN IN DIE CREWLISTE DES AUSGEWÄHLTEN EVENTS
   const handleAddFavToProject = (eventId, fav) => {
     try {
-      const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || localStorage.getItem('gigsda_projects') || '[]');
-      const eventIndex = savedEvents.findIndex(ev => ev && ev.id === eventId);
+        const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+        
+        // 📡 Sucht das Event über die ID heraus
+        let eventIndex = savedEvents.findIndex(ev => ev && (ev.id === eventId || ev.eventId === eventId || ev._id === eventId));
 
-      if (eventIndex > -1) {
-        // Sicherstellen, dass das Event ein Crew-Array besitzt
-        if (!savedEvents[eventIndex].crew) {
-          savedEvents[eventIndex].crew = [];
+        // 🚨 AUTOMATISCHE INITIALISIERUNG: Falls das Event fehlt, erschaffen wir es blitzschnell live!
+        if (eventIndex === -1) {
+          let activeTitle = "WAYNESTOCK 2";
+          try {
+            const activeData = localStorage.getItem('gigsda_active_event');
+            if (activeData) activeTitle = JSON.parse(activeData).title;
+          } catch (e) {}
+
+          const newEventPlaceholder = {
+            id: eventId || "EVT-" + Math.floor(Math.random() * 9000 + 1000),
+            title: activeTitle,
+            name: activeTitle,
+            date: new Date().toLocaleDateString('de-DE'),
+            crew: []
+          };
+          savedEvents.push(newEventPlaceholder);
+          eventIndex = savedEvents.length - 1;
+          console.log(`📡 Favoriten-AutoCreation: Projekt "${activeTitle}" wurde frisch angelegt!`);
         }
+
+        // Sicherstellen, dass das gefundene/erstellte Event ein gültiges Crew-Array hat
+        if (eventIndex > -1) {
+          if (!savedEvents[eventIndex].crew) {
+            savedEvents[eventIndex].crew = [];
+          }
 
         // Doppelbuchungen im selben Event verhindern
         const alreadyInCrew = savedEvents[eventIndex].crew.some(member => member && member.name.toLowerCase() === fav.name.toLowerCase());
@@ -69,10 +91,10 @@ export default function CrewFavoritenListe({ onNavigate }) {
         
         // Speichern in den korrekten Keys (Sicherheits-Fallback für beide Schreibweisen)
         localStorage.setItem('gigsda_events', JSON.stringify(savedEvents));
-        localStorage.setItem('gigsda_projects', JSON.stringify(savedEvents));
-// ⚡ ZÜNDET DEN REAKTIVEN LIVE-FUNKSPRUCH FÜR DANIELS DASHBOARD!
-window.dispatchEvent(new CustomEvent('request-sent'));
-window.dispatchEvent(new CustomEvent('route-change'));
+
+        // ⚡ ZÜNDET DEN REAKTIVEN LIVE-FUNKSPRUCH FÜR DANIELS DASHBOARD!
+        window.dispatchEvent(new CustomEvent('request-sent'));
+        window.dispatchEvent(new CustomEvent('route-change'));
 
         // Zusätzlich direkt eine Crew-Anfrage im globalen System anlegen!
         const allRequests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');

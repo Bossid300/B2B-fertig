@@ -101,6 +101,23 @@ export default function EventPlanner({ onBack, progress, onNavigateToStep, onSte
           )}
           <h2 className="text-xl font-bold text-white mt-0.5">Event-Planner & Ablaufplan</h2>
           <p className="text-slate-400 text-[11px]">Regle die zeitliche Taktung für den Einlass, Soundcheck und den Live-Auftritt vor Ort.</p>
+          {/* 🚨 REKTIVES PROJEKT-BADGE DIREKT UNTER DER ÜBERSCHRIFT */}
+          <div className="bg-slate-950/90 border border-cyan-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2 w-max shadow-[0_0_15px_rgba(6,182,212,0.05)] text-[10px]">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500"></span>
+            </span>
+            <span className="text-slate-500 font-bold uppercase tracking-wider text-[8px]">// ACTIVE TARGET:</span>
+            <span className="font-black text-cyan-400 uppercase tracking-wide">
+              {(() => {
+                try {
+                  const activeData = localStorage.getItem('gigsda_active_event');
+                  if (activeData) return JSON.parse(activeData).title || "WAYNESTOCK 2";
+                } catch(e) {}
+                return activeEvent?.title || activeEvent?.name || "WAYNESTOCK 2";
+              })()}
+            </span>
+          </div>
         </div>
         <button type="button" onClick={onBack} className="bg-slate-950 border border-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer">
           ‹ Zurück
