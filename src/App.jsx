@@ -528,10 +528,34 @@ export default function App() {
               currentProfileName={ticketName}
             />
           )}
-          {/* 🎛️ REALTIME B2B RIDER & GEWERKE EXPRESS-PIPELINE */}
+
+          {/* 🎛️ REALTIME B2B RIDER & GEWERKE EXPRESS-PIPELINE (IMMUN GEGEN ID-FEHLER!) */}
           {view === 'riderzentrale' && (
             (() => {
-              return <RiderZentrale onBack={() => setView('projects')} activeEvent={activeEvent} onNavigateToStep={setView} />;
+              // 📡 Doppel-Sicherheits-Brücke: Vergleicht ID UND Titel parallel!
+              let targetedEvent = activeEvent;
+              try {
+                const activeData = localStorage.getItem('gigsda_active_event');
+                if (activeData) {
+                  const parsedActive = JSON.parse(activeData);
+                  const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || localStorage.getItem('gigsda_projects') || '[]');
+                  
+                  // Sucht erst nach der ID, und falls das fehlschlägt oder doppelt ist, nach dem exakten Titel!
+                  const found = savedEvents.find(ev => ev && (
+                    (ev.id && ev.id === parsedActive.id) || 
+                    (ev.eventId && ev.eventId === parsedActive.id) || 
+                    (ev._id && ev._id === parsedActive.id) ||
+                    (ev.title && ev.title === parsedActive.title) ||
+                    (ev.name && ev.name === parsedActive.title)
+                  ));
+                  
+                  if (found) {
+                    targetedEvent = found;
+                  }
+                }
+              } catch (e) { console.error("Fehler in App.jsx Express-Weiche:", e); }
+
+              return <RiderZentrale onBack={() => setView('projects')} activeEvent={targetedEvent} onNavigateToStep={setView} />;
             })()
           )}
 

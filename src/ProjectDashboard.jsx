@@ -70,21 +70,6 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
         />
       ) : (
         <>
-                  {/* 🎛️ GLOBALER EXPRESS-ACCESS ZUR RIDER- & GEWERKEZENTRALE */}
-        <button 
-          type="button"
-          onClick={() => {
-            if (typeof onNavigateToStep === 'function') {
-              onNavigateToStep('riderzentrale');
-            } else if (typeof setView === 'function') {
-              setView('riderzentrale');
-            }
-          }}
-          className="px-4 py-2.5 bg-gradient-to-r from-purple-600/30 to-cyan-600/30 border border-cyan-500/40 hover:border-cyan-400 text-cyan-400 hover:text-white text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer flex items-center gap-1.5 font-mono shadow-[0_0_15px_rgba(6,182,212,0.1)] mr-2"
-        >
-          <span>🎛️ RIDER- & GEWERKEZENTRALE</span>
-        </button>
-
           <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl">
             <div className="flex justify-between items-center">
               <div>
@@ -119,6 +104,46 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
                   </div>
                   
                   <div className="flex items-center gap-2 w-full sm:w-auto shrink-0 justify-end">
+                    {/* 🎛️ TARGETED B2B ACCESS: WEIST JEDEM BUTTON REAKTIV SEIN EIGENES PROJEKT ZU */}
+                    <button 
+                      type="button"
+                      onClick={() => {
+                        // 📡 1. Holt die Variablen aus der aktuellen Zeile (Sicherheits-Fallback für alle Benennungen)
+                        const currentEvt = typeof evt !== 'undefined' ? evt : (typeof event !== 'undefined' ? event : project);
+                        
+                        if (!currentEvt) {
+                          alert("Fehler: Das Projekt-Objekt konnte in der Schleife nicht identifiziert werden.");
+                          return;
+                        }
+
+                        const eventId = currentEvt.id || currentEvt.eventId || currentEvt._id;
+                        const eventTitle = currentEvt.title || currentEvt.name || "B2B Event";
+
+                        // 📡 2. Schaltet EXAKT dieses eine Projekt plattformweit im Speicher scharf!
+                        localStorage.setItem('gigsda_active_event', JSON.stringify({
+                          id: eventId,
+                          title: eventTitle
+                        }));
+                        
+                        // 📡 3. Löst Daniels originalen Event-Auswahl-Trigger aus, falls vorhanden
+                        if (typeof onSelectEvent === 'function') {
+                          onSelectEvent(currentEvt);
+                        } else if (typeof setActiveEvent === 'function') {
+                          setActiveEvent(currentEvt);
+                        }
+
+                        // 📡 4. Jagt das Navigations-Signal direkt zur RiderZentrale durch die Rohre
+                        if (typeof onNavigateToStep === 'function') {
+                          onNavigateToStep('riderzentrale');
+                        } else if (typeof setView === 'function') {
+                          setView('riderzentrale');
+                        }
+                      }}
+                      className="px-3 py-1.5 bg-gradient-to-r from-purple-600/20 to-cyan-600/20 border border-cyan-500/40 hover:border-cyan-400 text-cyan-400 hover:text-white text-[9px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer font-mono mr-2 shadow-[0_0_10px_rgba(6,182,212,0.05)]"
+                    >
+                      🎛️ Rider & Gewerke
+                    </button>
+
                     {/* DEIN ECHTER LÖSCH-HEBEL PRO EVENT */}
                     <button
                       type="button"

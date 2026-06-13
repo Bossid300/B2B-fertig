@@ -16,7 +16,7 @@ export default function RiderZentrale({ onBack, activeEvent }) {
   const [backline, setBackline] = useState('');
   const [guards, setGuards] = useState('');
 
-  // 📡 1. REALTIME DATA PULL AUS DANIELS EXTRA-VARIABLEN
+  // 📡 1. TARGETED DATA PULL: Lädt strikt die isolierten Daten des ausgewählten Projekts!
   useEffect(() => {
     try {
       const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || localStorage.getItem('gigsda_projects') || '[]');
@@ -36,58 +36,68 @@ export default function RiderZentrale({ onBack, activeEvent }) {
         setBackline(matched.logistikPlan?.backlineCargo || 'Standard Backline');
         setGuards(matched.securityPlan?.guardsCount || '4');
 
-        // 🎤 AUTOMATISCHER KÜNSTLER-RIDER PULL ÜBER DIE EVENT-CREWLISTE
-        const eventTitle = (matched.title || matched.name || '').toLowerCase();
-        const eventCrew = matched.crew || [];
-        
-        let targetArtistName = "";
-        const foundByTitle = profiles.find(p => p && (p.role === 'Künstler' || p.role === 'Artist') && eventTitle.includes((p.name || '').toLowerCase()));
-        
-        if (foundByTitle) {
-          targetArtistName = foundByTitle.name;
-        } else {
-          const crewArtist = eventCrew.find(m => m && (m.role === 'Künstler' || m.role === 'Artist'));
-          if (crewArtist) {
-            targetArtistName = crewArtist.name;
+        // 🚨 WEG 1: Wenn dieses spezifische Event BEREITS einen eigenen Rider gespeichett hat, laden wir NUR diesen!
+        if (matched.riderSpecs?.patchplan && Array.isArray(matched.riderSpecs.patchplan) && matched.riderSpecs.patchplan.length > 0) {
+          setArtistRider(matched.riderSpecs.patchplan);
+          setLiveStageplotUrl(matched.riderSpecs.stageplot_url || '');
+          setLiveBandaufstellung(matched.riderSpecs.bandaufstellung || 'Räumliche Positionierung im Event verankert.');
+          setLiveBackline(matched.riderSpecs.backline || 'Backline im Event verankert.');
+        } 
+        // 🚨 WEG 2 (FALLBACK): Nur wenn das Event ganz neu ist, ziehen wir die Daten aus dem Künstler-Profil
+        else {
+          const eventTitle = (matched.title || matched.name || '').toLowerCase();
+          const eventCrew = matched.crew || [];
+          
+          let targetArtistName = "";
+          const foundByTitle = profiles.find(p => p && (p.role === 'Künstler' || p.role === 'Artist') && eventTitle.includes((p.name || '').toLowerCase()));
+          
+          if (foundByTitle) {
+            targetArtistName = foundByTitle.name;
+          } else {
+            const crewArtist = eventCrew.find(m => m && (m.role === 'Künstler' || m.role === 'Artist'));
+            if (crewArtist) targetArtistName = crewArtist.name;
           }
-        }
 
-        const artistProfile = profiles.find(p => p && p.name && p.name.toLowerCase() === targetArtistName.toLowerCase());
-        
-        if (artistProfile) {
-          // 🖼️ GIGSDA REALTIME EXTRACTION PIPELINE: Holt die Texte und die Grafik!
-          setLiveStageplotUrl(artistProfile.stageplot_url || '');
-          setLiveBandaufstellung(artistProfile.bandaufstellung || 'Keine räumliche Positionierung im Profil hinterlegt.');
-          setLiveBackline(artistProfile.backline || 'Keine mitgebrachte Backline spezifiziert.');
+          const artistProfile = profiles.find(p => p && p.name && p.name.toLowerCase() === targetArtistName.toLowerCase());
+          
+          if (artistProfile) {
+            setLiveStageplotUrl(artistProfile.stageplot_url || '');
+            setLiveBandaufstellung(artistProfile.bandaufstellung || 'Keine Angabe');
+            setLiveBackline(artistProfile.backline || 'Keine Angabe');
 
-          // 🔎 Wandelt Daniels flache chX_-Variablen dynamisch in eine Liste um!
-          const parsedChannels = [];
-          for (let i = 1; i <= 10; i++) {
-            const signalKey = `ch${i}_signal`;
-            const micKey = `ch${i}_mic`;
-            const standKey = artistProfile[`ch${i}_stand`] !== undefined ? `ch${i}_stand` : `ch${i}_tew`;
+            // Kanäle aus Daniels flacher Struktur chX_ einsammeln
+            const parsedChannels = [];
+            for (let i = 1; i <= 10; i++) {
+              const signalKey = `ch${i}_signal`;
+              const micKey = `ch${i}_mic`;
+              const standKey = artistProfile[`ch${i}_stand`] !== undefined ? `ch${i}_stand` : `ch${i}_tew`;
 
-            if (artistProfile[signalKey] !== undefined) {
-              parsedChannels.push({
-                ch: i,
-                source: artistProfile[signalKey] || 'Signal-Quelle',
-                mic: artistProfile[micKey] || 'wet',
-                stand: artistProfile[standKey] || 'wet'
-              });
+              if (artistProfile[signalKey] !== undefined) {
+                parsedChannels.push({
+                  ch: i,
+                  source: artistProfile[signalKey] || 'Signal-Quelle',
+                  mic: artistProfile[micKey] || 'freies Mikrofon',
+                  stand: artistProfile[standKey] || 'freies Stativ'
+                });
+              }
             }
-          }
-
-          if (parsedChannels.length > 0) {
-            setArtistRider(parsedChannels);
+            setArtistRider(parsedChannels.length > 0 ? parsedChannels : [{ ch: 1, source: "Standard Vocals", mic: "freies Mikrofon", stand: "freies Stativ" }]);
+          } else {
+            // Absoluter Sicherheits-Standard für leere Test-Projekte
+            setArtistRider([
+              { ch: 1, source: `Kanal 01 (${matched.title || 'Event'})`, mic: "freies Mikrofon", stand: "freies Stativ" },
+              { ch: 2, source: "Kanal 02", mic: "freies Mikrofon", stand: "freies Stativ" }
+            ]);
+            setLiveStageplotUrl('');
+            setLiveBandaufstellung('Keine Bandaufstellung für dieses separate Event hinterlegt.');
+            setLiveBackline('Keine Backline für dieses separate Event hinterlegt.');
           }
         }
       }
-    } catch (e) {
-      console.error("Fehler beim B2B-Daten-Pull:", e);
-    }
+    } catch (e) { console.error("Fehler beim B2B-Daten-Pull:", e); }
   }, [activeEvent]);
 
-  // 💾 2. MASTER-SPEICHERUNG BEI ABSEGNUNG
+  // 💾 2. MASTER-SPEICHERUNG: Brennt die Daten exakt in DIESES EINE Event ein!
   const handleSaveSharedData = (customStatus = null) => {
     try {
       const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || localStorage.getItem('gigsda_projects') || '[]');
@@ -95,8 +105,12 @@ export default function RiderZentrale({ onBack, activeEvent }) {
       const index = savedEvents.findIndex(ev => ev && (ev.id === targetId || ev.eventId === targetId || ev._id === targetId));
 
       if (index > -1) {
+        // Speichert alle Rider-Spezifikationen isoliert im Event-Objekt ab!
         savedEvents[index].riderSpecs = {
           patchplan: artistRider,
+          stageplot_url: liveStageplotUrl,
+          bandaufstellung: liveBandaufstellung,
+          backline: liveBackline,
           status: customStatus || savedEvents[index].riderSpecs?.status || 'pending',
           lastModifiedBy: localStorage.getItem('gigsda_user_name') || 'B2B System'
         };
@@ -110,7 +124,7 @@ export default function RiderZentrale({ onBack, activeEvent }) {
         window.dispatchEvent(new CustomEvent('request-sent'));
         window.dispatchEvent(new CustomEvent('route-change'));
 
-        alert(customStatus === 'verified' ? "🟩 TECH-RIDER ERFOLGREICH VERIFIZIERT!" : "💾 Geteilte Daten synchronisiert!");
+        alert(customStatus === 'verified' ? "🟩 PROJEKT-RIDER ERFOLGREICH VERIFIZIERT!" : "💾 Projektdaten synchronisiert!");
       }
     } catch (e) { console.error(e); }
   };
@@ -120,29 +134,42 @@ export default function RiderZentrale({ onBack, activeEvent }) {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl relative">
       
-      {/* 🌌 COLLABORATIVE TOP BANNER */}
-      <div className="h-24 w-full rounded-2xl bg-gradient-to-r from-purple-500/10 via-cyan-500/5 to-slate-900 border border-slate-800 p-4 flex justify-between items-center mb-6">
-        <div>
-          <span className="text-[8px] bg-cyan-500/10 border border-cyan-500 text-cyan-400 font-bold px-2 py-0.5 rounded-md uppercase tracking-widest">
-            📡 DANIEL-ENGINE DATEN-KOPPLUNG ACTIVATED // ROLE: {userRole.toUpperCase()}
+      {/* 🌌 HIGH-VISIBILITY COLLABORATIVE TOP BANNER */}
+      <div className="w-full rounded-2xl bg-gradient-to-r from-purple-500/10 via-cyan-500/5 to-slate-900 border border-slate-900/80 p-5 flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 relative overflow-hidden">
+        
+        {/* LINKE SPALTE: LOG & FUNK-ROLLE */}
+        <div className="space-y-1">
+          <span className="text-[8px] bg-cyan-500/10 border border-cyan-500 text-cyan-400 font-bold px-2 py-0.5 rounded-md uppercase tracking-widest block w-max">
+            📡 ENGINE CONNECTED // LIVE-ROLLE: {userRole.toUpperCase()}
           </span>
-          <h1 className="text-base font-black uppercase text-white mt-1">🎛️ Rider- & Gewerke-Zentrale</h1>
-          <p className="text-[8px] text-slate-500 uppercase mt-0.5">Projekt: <span className="text-white">{currentEvent.title || currentEvent.name}</span></p>
+          <h1 className="text-base font-black uppercase text-white tracking-wide">
+            🎛️ Rider- & Gewerke-Zentrale
+          </h1>
         </div>
+
+        {/* 🚨 DAS SCHARFE PROJEKT-ZENTRUM (MAXIMALE SICHTBARKEIT) */}
+        <div className="bg-slate-950/80 border-2 border-cyan-500/40 px-5 py-2.5 rounded-2xl flex flex-col items-center justify-center min-w-[240px] shadow-[0_0_20px_rgba(6,182,212,0.08)] font-mono animate-fade-in mx-auto md:mx-0">
+          <span className="text-[7px] text-cyan-400 font-black tracking-widest uppercase block">// AKTIVES TARGET-PROJEKT:</span>
+          <span className="text-sm font-black text-white uppercase tracking-wider block pt-0.5 animate-pulse">
+            🎬 {currentEvent.title || currentEvent.name || "UNBEKANNTES EVENT"}
+          </span>
+        </div>
+
+        {/* RECHTE SPALTE: BUTTON ACTIONS */}
+        <div className="flex gap-2 shrink-0 w-full md:w-auto justify-end font-bold text-[9px] uppercase">
           <button 
             onClick={onBack} 
-            className="text-[9px] bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white px-4 py-2 rounded-xl transition-all cursor-pointer font-bold uppercase tracking-wider"
+            className="px-4 py-2 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white rounded-xl transition-all cursor-pointer font-bold font-mono tracking-wider"
           >
-            ‹ DASHBOARD
+            ‹ Dashboard
           </button>
-          
-          {/* 📄 REAKTIVER CYBERPUNK B2B PRINT- TO-PDF TRIGGER */}
           <button 
             onClick={() => window.print()} 
-            className="text-[9px] bg-purple-500/10 border border-purple-500 hover:border-purple-400 text-purple-400 hover:text-white px-4 py-2 rounded-xl transition-all cursor-pointer font-bold uppercase tracking-wider shadow-[0_0_15px_rgba(168,85,247,0.1)] flex items-center gap-1.5"
+            className="px-4 py-2 bg-purple-500/10 border border-purple-500 hover:border-purple-400 text-purple-400 hover:text-white rounded-xl transition-all cursor-pointer font-bold font-mono tracking-wider shadow-[0_0_15px_rgba(168,85,247,0.1)] flex items-center gap-1.5"
           >
-            <span>🖨️ PDF / PRINT</span>
+            🖨️ PDF / PRINT
           </button>
+        </div>
 
       </div>
 
