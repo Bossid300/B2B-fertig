@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat }) {
   const [allUsers, setAllUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchRadius, setSearchRadius] = useState(50); // 📡 Live-Suchumkreis
+  const [searchRadius, setSearchRadius] = useState(500); // 📡 Live-Suchumkreis
   const [selectedRole, setSelectedRole] = useState('Alle');
   const [activeRequestUser, setActiveRequestUser] = useState(null); // Sichert das Anfrage-Popup!
   const [requestText, setRequestText] = useState(''); // Speichert euren eingetippten Text
@@ -219,12 +219,12 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veran
           
           {/* Gleicher Kasten wie das Suchfeld daneben */}
           <div className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 flex items-center gap-3 h-[38px]">
-            <span className="text-[8px] text-slate-600 font-mono font-bold">600KM</span>
+            <span className="text-[8px] text-slate-600 font-mono font-bold">500KM</span>
             <input
               type="range"
-              min="5"
+              min="0"
               max="500"
-              step="5"
+              step="10"
               value={searchRadius}
               onChange={(e) => setSearchRadius(Number(e.target.value))}
               className="flex-grow bg-slate-950 h-1 rounded-none appearance-none cursor-pointer border border-slate-950

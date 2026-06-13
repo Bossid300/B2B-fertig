@@ -4,7 +4,7 @@ export default function GuestEvents({ onNavigate }) {
   const [events, setEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Alle');
-  const [searchRadius, setSearchRadius] = useState(50); // 📡 Live-Suchumkreis
+  const [searchRadius, setSearchRadius] = useState(500); // 📡 Live-Suchumkreis
 
   // 📁 EVENT-LOADER: Holt alle Events frisch von der Festplatte
   useEffect(() => {
@@ -103,12 +103,12 @@ export default function GuestEvents({ onNavigate }) {
           </div>
           
           <div className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 flex items-center gap-3 h-[38px]">
-            <span className="text-[8px] text-slate-600 font-mono font-bold">10KM</span>
+            <span className="text-[8px] text-slate-600 font-mono font-bold">500KM</span>
             <input
               type="range"
               min="0"
               max="500" // Kannst du analog zum SearchExplorer auf 150 oder 200 erhöhen
-              step="5"
+              step="10"
               value={searchRadius}
               onChange={(e) => setSearchRadius(Number(e.target.value))}
               className="flex-grow bg-slate-950 h-1 rounded-none appearance-none cursor-pointer border border-slate-950
