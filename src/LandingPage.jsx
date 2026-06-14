@@ -4,9 +4,9 @@ import GuestPass from './GuestPass';
 
 // 📡 Daniels originale Testdaten (Bands, Termine und geile Locations)
 const initialGigs = [
-  { id: 1, title: "Band", date: "27.08.2026", location: "Bambug", img: "/public/profiles/Jud-Herbert/banner.jpg" },
-  { id: 2, title: "Band", date: "23.09.2026", location: "Bombug", img: "/public/profiles/Jud-Herbert/banner.jpg" },
-  { id: 3, title: "Band", date: "27.08.2026", location: "Exrnwkug", img: "/public/profiles/Jud-Herbert/banner.jpg" }
+  { id: 1, title: "Band", date: "27.08.2026", location: "Bambug", img: "/profiles/Jud-Herbert/banner.jpg" },
+  { id: 2, title: "Band", date: "23.09.2026", location: "Bombug", img: "/profiles/Jud-Herbert/banner.jpg" },
+  { id: 3, title: "Band", date: "27.08.2026", location: "Exrnwkug", img: "/profiles/Jud-Herbert/banner.jpg" }
 ];
 
 export default function LandingPage({ onEnterCenter, onCreateAccount }) {
@@ -31,7 +31,7 @@ export default function LandingPage({ onEnterCenter, onCreateAccount }) {
         style={{ 
           // Holt das Bild direkt aus eurem public/logos/ oder assets-Ordner, falls lokal abgelegt. 
           // Hier als absolut sicherer, kristallklarer Live-Konzert-Stream eingesetzt!
-          backgroundImage: `url('/public/vibrant-concert-scene-stockcake.jpg')` 
+          backgroundImage: `url('/profiles/vibrant-concert-scene-stockcake.jpg')` 
         }}
       >
         {/* SCHWARZE VERLAUFS-BLENDE NACH UNTEN (Verhindert harte Kanten bei den Kacheln!) */}
@@ -206,7 +206,7 @@ export default function LandingPage({ onEnterCenter, onCreateAccount }) {
                   <span className="animate-ping absolute inline-flex h-24 w-24 md:h-36 md:w-36 rounded-full bg-cyan-500/10 border border-cyan-500/20 opacity-40"></span>
                   {/* DAS ECHTE LOGO (Frisch aus eurem Assets-Ordner!) */}
                   <img 
-                    src="/public/logos/gigsda-logo-1.svg" 
+                    src="/logos/gigsda-logo-1.svg" 
                     alt="Gigsda Portal Logo" 
                     className="h-36 md:h-48 w-auto object-contain relative z-10 drop-shadow-[0_0_15px_rgba(6,182,212,0.25)]"
                     onError={(e) => {
