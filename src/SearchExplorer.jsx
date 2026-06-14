@@ -164,7 +164,6 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veran
     return matchesName && matchesRole && matchesRadius;
   });
 
-
   return (
     <div className="p-6 bg-slate-950 text-white min-h-screen font-mono relative">
       
@@ -190,8 +189,6 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veran
           </button>
         ))}
       </div>
-
-  
 
       {/* 🎛️ SMART-KOMBI: SUCHE & REICHWEITENSKALA IN DANIELS ORIGINAL-STYLE */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 max-w-3xl font-mono">
@@ -252,8 +249,6 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veran
         </div>
 
       </div>
-
-
 
       {/* 💳 VISITENKARTEN-GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

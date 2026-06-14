@@ -9,10 +9,14 @@ import TeamVoting from './TeamVoting';
 import EventPlanner from './EventPlanner';
 import LiveCountdown from './LiveCountdown';
 import ProfileSettings from './ProfileSettings';
+// 👈 Lade Navigation
 import GuestNavigation from './GuestNavigation';
+import GlobalNavigation from './GlobalNavigation';
+
 import WhatIsGigsda from './WhatIsGigsda';
 import GuestEvents from './GuestEvents';
 import SearchExplorer from './SearchExplorer';
+
 // 👈 Lade Profile
 import UserProfile from './UserProfile'; // 👈 Temporärer Import zum Anschauen
 import LocationProfile from './LocationProfile'; // 👈 Temporärer Import zum Anschauen
@@ -274,110 +278,62 @@ export default function App() {
         <div className="absolute top-[-10%] left-[-20%] w-[60%] aspect-square rounded-full bg-purple-900/10 blur-[120px]" />
         <div className="absolute top-[20%] right-[-20%] w-[50%] aspect-square rounded-full bg-cyan-900/10 blur-[120px]" />
       </div>
-
-
       <div className="relative z-10 w-full min-h-screen flex flex-col justify-between">
  
         {/* ========================================================================= */}
         {/* NAVIGATIONSMENÜ & LOGO-HEADER                                             */}
         {/* ========================================================================= */}
-        <header className="w-full border-b border-slate-900/60 bg-slate-950/80 backdrop-blur-md sticky top-0 z-40 px-4 py-3">
-          <div className="max-w-4xl mx-auto flex justify-between items-center">
-            <div onClick={() => setView(isLoggedIn ? 'projects' : 'landing')} className="flex items-center gap-2 cursor-pointer group">
-              <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-cyan-500 to-purple-500 flex items-center justify-center text-slate-950 font-black text-xs shadow-[0_0_10px_rgba(6,182,212,0.3)] group-hover:scale-105 transition-all">G</div>
-              <span className="font-mono font-black text-xs tracking-widest text-white uppercase group-hover:text-cyan-400 transition-colors">Gigsda // Protocol</span>
-            </div>
- 
-            {/* ⚡ INTELLIGENTE HEADER-NAVIGATION WEICHE */}
-            {/* 📡 GAST MENÜ: REISST NUR AUF WENN DER USER AUSGELOGGT IST */}
-            {!isLoggedIn && <GuestNavigation setView={setView} view={view} />}
- 
-            <div className="flex items-center gap-3 font-mono text-[10px] uppercase tracking-wider">
-              {isLoggedIn ? (
-                <>
-              {/* 📊 DANIELS ORIGINAL-BUTTON MIT REAKTIVEM ALARM-SIGNAL */}
-              <button 
-                type="button"
-                onClick={() => setView('projects')} 
-                    className={`px-2.5 py-1 rounded-lg border font-black transition-all cursor-pointer text-xs font-mono uppercase tracking-wider ${
-                      view === 'projects' 
-                        ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
-                        : 'bg-slate-950/40 text-slate-400 border-slate-900 hover:border-slate-800'
-                      }`}
-                  >
-                <span>Meine Projekte</span>
-                {/* Das Alarmsignal leuchtet völlig autark und stört Daniels Klick-Funktion nicht */}
-                {hasPendingRequests && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping inline-block shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
-                )}
-              </button>
-
-              {/* 🔍 NEUER LINK: guestEvents (EVENT-SUCHE) FÜR EINGELOGGTE USER */}
+        {/* 🌌 TEMPORÄRER VERGLEICHS-HEADER: KOMPLETT FLACH UND TIEFSCHWARZ OHNE NEON-RAHMEN */}
+        <header className="fixed top-0 left-0 right-0 z-50 bg-[#0b0f19] border-b border-slate-900/60 shadow-lg font-mono">
+          <div className="w-full bg-[#0b0f19]/95 backdrop-blur-md rounded-b-[14px]">
+            {/* 🚨 DANIELS ORIGINALER ZENTRIER-CONTAINER: REPARIERT DAS LAYOUT DER RESTLICHEN SEITE! */}
+            <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+              
+              {/* 🌌 REAKTIVES INTERAKTIVES NAVBAR-LOGO MIT GAST-LINK & HOVER-EFFEKT */}
               <button
                 type="button"
-                onClick={() => setView('guestEvents')}
-                className={`px-2.5 py-1 rounded-lg border font-black transition-all cursor-pointer text-xs font-mono uppercase tracking-wider ${
-                  view === 'guestEvents'
-                    ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
-                    : 'bg-slate-950/40 text-slate-400 border-slate-900 hover:border-slate-800'
-                  }`}
-                >
-                📡 Event-Radar
-              </button>
-
-              <button 
-                type="button" 
-                onClick={() => setView('search')} 
-                className={`px-2.5 py-1 rounded-lg border font-black transition-all cursor-pointer text-xs font-mono uppercase tracking-wider ${
-                  view === 'search' 
-                    ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
-                    : 'bg-slate-950/40 text-slate-400 border-slate-900 hover:border-slate-800'
-                  }`}
-                >
-                  🔍 Search-Explorer
-                </button>
-
-                {/* 🧑‍💻 DEIN NEUER INTERAKTIVER PROFIL-BUTTON (Zeigt den echten Usernamen an) */}
-                <button 
-                  type="button" 
-                  onClick={() => setView('userProfile')} 
-                  className={`px-3 py-1 rounded-lg border font-black transition-all cursor-pointer ${view === 'profile' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' : 'bg-slate-950 border-slate-900 text-cyan-400 hover:border-cyan-500/40 shadow-md'}`}
-                >
-                  🧑‍💻 {ticketName}
-                </button>
-  
-                <button 
-                  type="button" 
-                  onClick={() => { 
-                    localStorage.removeItem('gigsda_logged_in');
-                    localStorage.removeItem('gigsda_user_name');
-                    setIsLoggedIn(false); 
-                    setTicketName('Gast'); 
-                    setView('landing'); 
-                  }} 
-                  className="text-rose-500 hover:text-rose-400 px-1 font-bold cursor-pointer"
-                >
-                  [ Exit ]
-                </button>
-              </>
-            ) : (
-              <>
-              <button type="button" onClick={() => setView('landing')} className={`px-2 py-1 cursor-pointer ${view === 'landing' ? 'text-cyan-400 font-bold' : 'text-slate-400 hover:text-white'}`}>Startseite</button>
-
-              {/* Für uneingeloggte Nutzer steht oben nur noch der saubere Login-Button */}
-              <button 
-                type="button" 
-                onClick={() => { setIsRegInitial(false); setView('login'); }} 
-                className="bg-cyan-400 text-slate-950 font-black px-3 py-1 rounded-lg hover:bg-cyan-300 transition-colors cursor-pointer"
+                onClick={() => {
+                  // 📡 DER LIVE-RÜCKFLUG: Schießt den Gast-Router sofort zurück auf die Landingpage!
+                  if (typeof setView === 'function') {
+                    setView('landing');
+                  } else if (typeof setCurrentView === 'function') {
+                    setCurrentView('landing');
+                  }
+                }}
+                className="relative flex items-center justify-center select-none mr-2 shrink-0 group transition-all duration-300 transform hover:scale-[1.03] active:scale-[0.98] bg-transparent border-none p-0 cursor-pointer outline-none"
+                title="Zurück zur Startseite"
               >
-                Login
+                {/* 📡 INTERAKTIVE HOVER-AURA: Leuchtet nur auf, wenn die Maus drüberstreift! */}
+                <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/5 rounded-xl filter blur-sm scale-110 transition-all duration-300"></div>
+                
+                {/* DAS LOGO */}
+                <img 
+                  src="/logos/gigsda-logo-2.svg" 
+                  alt="Gigsda Logo" 
+                  className="h-6 w-auto object-contain relative z-10 opacity-90 brightness-100 group-hover:opacity-100 group-hover:brightness-125 transition-all duration-300"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.style.display = 'none';
+                    e.target.parentNode.insertAdjacentHTML('beforeend', `
+                      <div class="h-6 w-6 bg-gradient-to-br from-cyan-500 to-purple-500 rounded-lg flex items-center justify-center font-sans font-black text-[10px] text-white">G</div>
+                    `);
+                  }}
+                />
               </button>
-                </>
+
+
+              {/* 📡 REAKTIVE COCKPIT-WEICHE */}
+              {localStorage.getItem('gigsda_logged_in') === 'true' ? (
+                <GlobalNavigation view={view} setView={setView} />
+              ) : (
+                <GuestNavigation view={view} setView={setView} />
               )}
+
             </div>
- 
           </div>
         </header>
+
+
        {/* 📡 AUTOMATISCHES CREW-REQUEST-CENTER (BLITZT BEI NEUEN ANFRAGEN & GEGENANGEBOTEN GANZ OBEN AUF) */}
       {view === 'projects' && isLoggedIn && (
         <div className="max-w-4xl mx-auto px-6 pt-4">
@@ -387,9 +343,9 @@ export default function App() {
         {/* ========================================================================= */}
         {/* MAIN ROUTER PORT                                                          */}
         {/* ========================================================================= */}
-        <main className="flex-grow w-full px-4 py-6">
+        <main className="w-full pt-24 min-h-screen bg-[#070913] text-white">
  
-          {view === 'landing' && !isLoggedIn && (
+          {view === 'landing' && (
             <LandingPage 
               onEnterCenter={(selectedCity) => {
                 // Merkt sich die gesuchte Stadt temporär im System
