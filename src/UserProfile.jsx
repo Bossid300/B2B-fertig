@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Eye, EyeOff, Calendar, MapPin, Award, Layers, CheckCircle2, Landmark, FileText, Link, ShieldCheck, Printer, Share2, Volume2, Edit3, Save, X, Settings } from 'lucide-react';
+import ProfileHeaderBox from './components/ProfileHeaderBox'; // Ganz oben importieren
 
 export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
   // 🔒 DER UNBESTECHLICHE IDENTITÄTS-RIEGEL (DIREKT-PROP)
@@ -341,6 +342,9 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
   return (
     <div className="max-w-3xl mx-auto space-y-6 my-4 p-4 font-mono text-xs text-slate-300 animate-fade-in">
       
+      {/* 🔥 BOX 1: Deine ausgelagerte Master-Headerbox wird hier als unzerstörbarer Anker gezündet! */}
+      <ProfileHeaderBox currentProfileName={ticketName} />
+
       {/* ========================================================================= */}
       {/* HEADER & ASSISTENT                                                        */}
       {/* ========================================================================= */}

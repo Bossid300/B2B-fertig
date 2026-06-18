@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ProfileHeaderBox from './components/ProfileHeaderBox'; // Ganz oben importieren
 
 export default function FanProfile({ ticketName, onNavigate }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -80,7 +81,9 @@ export default function FanProfile({ ticketName, onNavigate }) {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl relative">
-            
+      {/* 🔥 BOX 1: Deine ausgelagerte Master-Headerbox wird hier als unzerstörbarer Anker gezündet! */}
+      <ProfileHeaderBox currentProfileName={ticketName} />
+
       {/* ========================================================================= */}
       {/* HEADER & ASSISTENT                                                        */}
       {/* ========================================================================= */}

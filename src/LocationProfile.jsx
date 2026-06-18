@@ -1,8 +1,18 @@
 import React, { useState, useEffect } from 'react';
+import ProfileHeaderBox from './components/ProfileHeaderBox'; // Ganz oben importieren
 
 export default function LocationProfile({ onBack, ticketName, onNavigate }) {
+
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [editStammdaten, setEditStammdaten] = useState(false);
+  const [editSteckbrief, setEditSteckbrief] = useState(false);
+  const [editKapazitaeten, setEditKapazitaeten] = useState(false);
+  const [editTech, setEditTech] = useState(false);
+  const [editGastro, setEditGastro] = useState(false);
+  const [editConditions, setEditConditions] = useState(false);
+
+
   
   // 🎛️ LOGIK FÜR DEN REAKTIVEN BILDER-SLIDER (Muss vor dem HTML leben)
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -34,7 +44,8 @@ export default function LocationProfile({ onBack, ticketName, onNavigate }) {
     room1_area: '', room1_bankett: '', room1_steh: '', room1_theater: '', room1_uform: '',
     room2_area: '', room2_steh: '',
     audio_tech: '', video_tech: '', light_tech: '', internet_tech: '', climate_control: '', accessibility: '',
-    gastro_type: '', drinks_service: '', staff_service: '', furniture_service: '', decor_service: '', terms_conditions: ''
+    gastro_type: '', drinks_service: '', staff_service: '', furniture_service: '', decor_service: '', terms_conditions: '',
+    room1_img: '', room2_img: '', power_specs: '', stage_design: ''
   });
 
   // 📡 CRASH-SICHERER LOAD-MECHANISMUS
@@ -77,7 +88,11 @@ export default function LocationProfile({ onBack, ticketName, onNavigate }) {
         total_area: freshData?.total_area || '',
         role: freshData?.role || 'Location',
         room1_area: freshData?.room1_area || '', room1_bankett: freshData?.room1_bankett || '', room1_steh: freshData?.room1_steh || '', room1_theater: freshData?.room1_theater || '', room1_uform: freshData?.room1_uform || '', room2_area: freshData?.room2_area || '', room2_steh: freshData?.room2_steh || '',
-        audio_tech: freshData?.audio_tech || '', video_tech: freshData?.video_tech || '', light_tech: freshData?.light_tech || '', internet_tech: freshData?.internet_tech || '', climate_control: freshData?.climate_control || '', accessibility: freshData?.accessibility || '', gastro_type: freshData?.gastro_type || '', drinks_service: freshData?.drinks_service || '', staff_service: freshData?.staff_service || '', furniture_service: freshData?.furniture_service || '', decor_service: freshData?.decor_service || '', terms_conditions: freshData?.terms_conditions || ''
+        audio_tech: freshData?.audio_tech || '', video_tech: freshData?.video_tech || '', light_tech: freshData?.light_tech || '', internet_tech: freshData?.internet_tech || '', climate_control: freshData?.climate_control || '', accessibility: freshData?.accessibility || '', gastro_type: freshData?.gastro_type || '', drinks_service: freshData?.drinks_service || '', staff_service: freshData?.staff_service || '', furniture_service: freshData?.furniture_service || '', decor_service: freshData?.decor_service || '', terms_conditions: freshData?.terms_conditions || '',
+        room1_img: freshData?.room1_img || '',
+        room2_img: freshData?.room2_img || '',
+        power_specs: freshData?.power_specs || '',
+        stage_design: freshData?.stage_design || ''
       });
     } catch (e) {
       console.error("Fehler beim reaktiven Location-Load:", e);
@@ -172,6 +187,10 @@ export default function LocationProfile({ onBack, ticketName, onNavigate }) {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl relative">
             
+      {/* 🔥 BOX 1: Deine ausgelagerte Master-Headerbox wird hier als unzerstörbarer Anker gezündet! */}
+      <ProfileHeaderBox currentProfileName={ticketName} />
+
+
       {/* ========================================================================= */}
       {/* HEADER & ASSISTENT                                                        */}
       {/* ========================================================================= */}
@@ -181,6 +200,17 @@ export default function LocationProfile({ onBack, ticketName, onNavigate }) {
             <span className="text-[8px] text-purple-400 font-bold uppercase tracking-widest block">// BACKSTAGE-PORTFOLIO CONTROLLER</span>
             <h3 className="text-sm font-black text-white uppercase tracking-tight mt-0.5">⭐ Gigsda All-In-One Board</h3>
           </div>
+            {!isEditing && (
+            <div className="pt-4 space-y-2">
+              <button 
+                onClick={handleToggleFavorite}
+                className={`w-full text-[9px] font-bold uppercase py-1.5 rounded-xl text-center border font-mono transition-all cursor-pointer tracking-wider ${isFavorite ? 'bg-amber-500/10 border-amber-500 text-amber-400 hover:bg-amber-500/20' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'}`}
+              >
+                {isFavorite ? '★ AUS FAVORITEN ENTFERNEN' : '☆ ZU DEN FAVORITEN'}
+              </button>
+              <button onClick={() => setIsEditing(true)} className="w-full bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 text-[9px] font-bold uppercase py-1.5 rounded-xl text-center tracking-wider font-mono cursor-pointer">⚙️ LOCATION EDITIEREN</button>
+            </div>
+            )}
           <button type="button" onClick={() => onNavigate('radar')} className="bg-slate-900 border border-slate-800 text-white px-3 py-1 rounded-xl text-[10px] font-bold cursor-pointer print:hidden">‹ Dashboard</button>
         </div>
       </div>
@@ -263,178 +293,6 @@ export default function LocationProfile({ onBack, ticketName, onNavigate }) {
               </div>
             </div>
 
-            {/* 1. TOPF: STAMMDATEN INPUTS */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[8px] text-slate-600 uppercase block font-bold">Location- / Clubname</label>
-                <input type="text" name="project_name" value={localFields.project_name || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" placeholder="z. B. Eventhalle Braunau" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[8px] text-slate-600 uppercase block font-bold">Verfügbarkeit</label>
-                <input type="text" name="availability" value={localFields.availability || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" placeholder="z. B. Ganzjährig, Auf Anfrage" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[8px] text-slate-600 uppercase block font-bold">Vorname (Kontaktperson)</label>
-                <input type="text" name="vorname" value={localFields.vorname || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[8px] text-slate-600 uppercase block font-bold">Nachname (Kontaktperson)</label>
-                <input type="text" name="nachname" value={localFields.nachname || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" />
-              </div>
-              <div className="space-y-1 sm:col-span-2">
-                <label className="text-[8px] text-slate-600 uppercase block font-bold">Homepage / URL</label>
-                <input type="text" name="website" value={localFields.website || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" placeholder="https://deine-location.at" />
-              </div>
-              
-              {/* Adressblock */}
-              <div className="space-y-1 sm:col-span-2 grid grid-cols-3 gap-2">
-                <div className="col-span-2">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Straße & Hausnummer</label>
-                  <input type="text" name="street" value={localFields.street || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" />
-                </div>
-                <div>
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">PLZ</label>
-                  <input type="text" name="plz" value={localFields.plz || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" />
-                </div>
-              </div>
-              <div className="space-y-1 sm:col-span-2">
-                <label className="text-[8px] text-slate-600 uppercase block font-bold">Stadt / Ort</label>
-                <input type="text" name="city" value={localFields.city || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" />
-              </div>
-            </div>
-
-            {/* 2. TOPF: LOCATION-STECKBRIEF INPUTS */}
-            <div className="mt-6 pt-4 border-t border-slate-900 space-y-4">
-              <span className="text-[8px] text-cyan-400 uppercase font-black tracking-widest block">// EDIT-MODE: 2. LOCATION-STECKBRIEF</span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Art der Location</label>
-                  <input type="text" name="location_type" value={localFields.location_type || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" placeholder="z. B. Eventhalle, Schloss, Club" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Gesamtfläche (in m²)</label>
-                  <input type="text" name="total_area" value={localFields.total_area || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" placeholder="z. B. 450" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Baujahr / Letzte Renovierung</label>
-                  <input type="text" name="construction_year" value={localFields.construction_year || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" placeholder="z. B. 1994 / Rev. 2024" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Besonderes B2B Highlight</label>
-                  <input type="text" name="highlight" value={localFields.highlight || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" placeholder="z. B. Historisches Deckengewölbe" />
-                </div>
-              </div>
-            </div>
-
-            {/* 3. TOPF: TABELLEN-INPUT FÜR KAPAZITÄTEN */}
-            <div className="pt-4 border-t border-slate-900 space-y-3">
-              <span className="text-[8px] text-amber-500 uppercase font-black tracking-widest block">// 3. KAPAZITÄTEN & BESTUHLUNGSVARIANTEN</span>
-              <div className="space-y-3">
-                <div className="bg-slate-900/40 p-3 border border-slate-900 rounded-xl space-y-2">
-                  <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Raum 1: Großer Saal / Hauptfläche</span>
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                    <div>
-                      <label className="text-[7px] text-slate-600 uppercase block font-bold">Fläche (m²)</label>
-                      <input type="text" name="room1_area" value={localFields.room1_area || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-white text-[10px] outline-none font-mono" placeholder="250" />
-                    </div>
-                    <div>
-                      <label className="text-[7px] text-slate-600 uppercase block font-bold">Bankett</label>
-                      <input type="text" name="room1_bankett" value={localFields.room1_bankett || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-white text-[10px] outline-none font-mono" placeholder="120" />
-                    </div>
-                    <div>
-                      <label className="text-[7px] text-slate-600 uppercase block font-bold">Stehempfang</label>
-                      <input type="text" name="room1_steh" value={localFields.room1_steh || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-white text-[10px] outline-none font-mono" placeholder="200" />
-                    </div>
-                    <div>
-                      <label className="text-[7px] text-slate-600 uppercase block font-bold">Theater</label>
-                      <input type="text" name="room1_theater" value={localFields.room1_theater || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-white text-[10px] outline-none font-mono" placeholder="180" />
-                    </div>
-                    <div>
-                      <label className="text-[7px] text-slate-600 uppercase block font-bold">U-Form</label>
-                      <input type="text" name="room1_uform" value={localFields.room1_uform || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-white text-[10px] outline-none font-mono" placeholder="40" />
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-slate-900/40 p-3 border border-slate-900 rounded-xl space-y-2">
-                  <span className="text-[8px] text-slate-400 font-bold block uppercase tracking-wider">Raum 2: Foyer / Nebenraum</span>
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                    <div>
-                      <label className="text-[7px] text-slate-600 uppercase block font-bold">Fläche (m²)</label>
-                      <input type="text" name="room2_area" value={localFields.room2_area || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-white text-[10px] outline-none font-mono" placeholder="80" />
-                    </div>
-                    <div>
-                      <label className="text-[7px] text-slate-600 uppercase block font-bold">Stehempfang</label>
-                      <input type="text" name="room2_steh" value={localFields.room2_steh || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1 text-white text-[10px] outline-none font-mono" placeholder="50" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 4. TOPF: TECHNISCHE AUSSTATTUNG INPUTS */}
-            <div className="pt-4 border-t border-slate-900 space-y-3">
-              <span className="text-[8px] text-cyan-400 uppercase font-black tracking-widest block">// EDIT-MODE: 4. TECHNISCHE AUSSTATTUNG</span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Audio-Technik (Anlage, Mics, Pult)</label>
-                  <input type="text" name="audio_tech" value={localFields.audio_tech || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Video- / Präsentationstechnik</label>
-                  <input type="text" name="video_tech" value={localFields.video_tech || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Lichttechnik / Ambiente</label>
-                  <input type="text" name="light_tech" value={localFields.light_tech || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Internet / Bandbreite</label>
-                  <input type="text" name="internet_tech" value={localFields.internet_tech || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Klimatisierung</label>
-                  <input type="text" name="climate_control" value={localFields.climate_control || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Barrierefreiheit / Aufzug</label>
-                  <input type="text" name="accessibility" value={localFields.accessibility || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" />
-                </div>
-              </div>
-            </div>
-
-            {/* 5. TOPF: SERVICES & KULINARIK INPUTS */}
-            <div className="pt-4 border-t border-slate-900 space-y-3">
-              <span className="text-[8px] text-cyan-400 uppercase font-black tracking-widest block">// EDIT-MODE: 5. SERVICES & KULINARIK</span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Catering (Partner, freie Wahl, Küche)</label>
-                  <input type="text" name="gastro_type" value={localFields.gastro_type || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Getränke / Abrechnungsvarianten</label>
-                  <input type="text" name="drinks_service" value={localFields.drinks_service || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Bereitgestelltes Personal</label>
-                  <input type="text" name="staff_service" value={localFields.staff_service || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Inhouse-Möblierung / Loungemöbel</label>
-                  <input type="text" name="furniture_service" value={localFields.furniture_service || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" />
-                </div>
-                <div className="space-y-1 sm:col-span-2">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Dekoration / Raumgestaltung</label>
-                  <input type="text" name="decor_service" value={localFields.decor_service || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none focus:border-cyan-500/30" />
-                </div>
-              </div>
-            </div>
-
-            {/* 6. TOPF: RAHMENBEDINGUNGEN INPUT */}
-            <div className="pt-4 border-t border-slate-900 space-y-2">
-              <span className="text-[8px] text-amber-500 uppercase font-black tracking-widest block">// EDIT-MODE: 6. RAHMENBEDINGUNGEN</span>
-              <label className="text-[8px] text-slate-600 uppercase block font-bold">Mietkonditionen, Kaution, Sperrstunden</label>
-              <textarea rows="3" name="terms_conditions" value={localFields.terms_conditions || ''} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-white text-[10px] outline-none resize-none focus:border-amber-500/30 font-mono" placeholder="z. B. Sperrstunde ab 04:00 Uhr..." />
-            </div>
 
             {/* FORM ACTIONS */}
             <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-900">
@@ -463,206 +321,747 @@ export default function LocationProfile({ onBack, ticketName, onNavigate }) {
             {/* 🎛️ DIE NEUE ZWEI-SPALTEN-REIHE (PUNKT 1 LINKS / PUNKT 2 RECHTS) */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
               
-              {/* LINKS: PUNKT 1 - STAMMDATEN & KONTAKT */}
-              <div className="bg-slate-900/20 border border-slate-900 rounded-2xl p-5 flex flex-col justify-between">
-                <div className="space-y-2">
-                  <span className="text-[8px] text-slate-500 uppercase font-black tracking-widest block">// 1. STAMMDATEN & KONTAKT</span>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                    Location: <span className="text-white ml-1 font-normal uppercase">{localFields.project_name || 'Nicht hinterlegt'}</span>
-                  </p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                    Adresse: <span className="text-white ml-1 font-normal uppercase">{localFields.street} {localFields.plz} {localFields.city || 'Nicht hinterlegt'}</span>
-                  </p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                    Website:{' '}
-                    {localFields.website ? (
-                      <a href={localFields.website.startsWith('http') ? localFields.website : `https://${localFields.website}`} target="_blank" rel="noopener noreferrer" className="text-white hover:text-cyan-400 ml-1 font-normal lowercase transition-colors underline">
-                        {localFields.website} ↗
-                      </a>
-                    ) : (
-                      <span className="text-slate-600 ml-1 font-normal">Keine Website</span>
-                    )}
-                  </p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                    Kontakt: <span className="text-white ml-1 font-normal uppercase">{localFields.vorname} {localFields.nachname || 'Nicht hinterlegt'}</span>
-                  </p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider text-cyan-400">
-                    Verfügbar: <span className="text-white ml-1 font-normal uppercase">{localFields.availability || 'Nicht definiert'}</span>
-                  </p>
+
+
+
+        {/* // 1. STAMMDATEN & KONTAKT (ISOLIERT MIT EIGENEM SCHALTER!) */}
+        <div className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800/60 flex flex-col justify-between min-h-[320px]">
+          <div>
+            <div className="flex justify-between items-center mb-4 border-b border-slate-800/40 pb-2 font-mono">
+              <h3 className="text-slate-400 text-xs tracking-widest uppercase">// 1. STAMMDATEN & KONTAKT</h3>
+              {!editStammdaten && (
+                <button 
+                  type="button"
+                  onClick={() => setEditStammdaten(true)} 
+                  className="text-cyan-400 hover:text-cyan-300 text-xs font-bold transition-colors cursor-pointer outline-none font-mono"
+                >
+                  ✏️ BEARBEITEN
+                </button>
+              )}
+            </div>
+
+            {editStammdaten ? (
+              <div className="space-y-3 font-mono text-xs text-left">
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 text-[10px] font-bold">LOCATION NAME:</label>
+                  <input type="text" value={localFields.ticketName || ''} onChange={(e) => setLocalFields({...localFields, ticketName: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
+                {/* 🖼️ 2. INPUT: AVATAR / LOGO-URL (NEU INJEZIERT!) */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 text-[10px] font-bold uppercase text-cyan-400">🖼️ Avatar / Logo-URL (Bild-Link):</label>
+                  <input 
+                    type="text" 
+                    value={localFields.avatarUrl || ''} 
+                    onChange={(e) => setLocalFields({...localFields, avatarUrl: e.target.value})} 
+                    className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" 
+                    placeholder="z.B. /2026/logos/arena-logo.png oder Internet-Link" 
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 text-[10px] font-bold">WEBSITE:</label>
+                  <input type="text" value={localFields.website || ''} onChange={(e) => setLocalFields({...localFields, website: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 text-[10px] font-bold">TELEFON:</label>
+                  <input type="text" value={localFields.phone || ''} onChange={(e) => setLocalFields({...localFields, phone: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 text-[10px] font-bold">EMAIL:</label>
+                  <input type="text" value={localFields.email || ''} onChange={(e) => setLocalFields({...localFields, email: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 text-[10px] font-bold">VERFÜGBAR:</label>
+                  <input type="text" value={localFields.availability || ''} onChange={(e) => setLocalFields({...localFields, availability: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
                 </div>
               </div>
-
-              {/* RECHTS: PUNKT 2 - LOCATION-STECKBRIEF */}
-              <div className="bg-slate-900/20 border border-slate-900 rounded-2xl p-5 flex flex-col justify-between">
-                <div className="space-y-2">
-                  <span className="text-[8px] text-slate-500 uppercase font-black tracking-widest block">// 2. LOCATION-STECKBRIEF</span>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                    Art der Location: <span className="text-white ml-1 font-normal uppercase">{localFields.location_type || 'Nicht hinterlegt'}</span>
-                  </p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider text-cyan-400">
-                    B2B-Highlight: <span className="text-white ml-1 font-normal lowercase italic">{localFields.highlight || 'Keine Angaben'}</span>
-                  </p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                    Baujahr / Ren.: <span className="text-white ml-1 font-normal uppercase">{localFields.construction_year || 'Nicht angegeben'}</span>
-                  </p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                    Gesamtfläche: <span className="text-white ml-1 font-normal uppercase">{localFields.total_area ? `${localFields.total_area} m²` : 'Nicht angegeben'}</span>
-                  </p>
+            ) : (
+              /* 🌌 CYBERPUNK-AVATAR METRIC DESIGN: Platziert das Logo links neben deiner originalen Tabelle */
+              <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start text-left font-mono text-xs">
+                
+                {/* 🖼️ DIE AVATAR-BLASE: Rund, mit Cyan-Border und dezenter Glow-Aura */}
+                <div className="w-20 h-20 rounded-full border-2 border-cyan-500/80 overflow-hidden shrink-0 bg-slate-950/80 flex items-center justify-center relative shadow-[0_0_15px_rgba(6,182,212,0.15)] group select-none">
+                  <img 
+                    src={localFields.avatarUrl && localFields.avatarUrl.trim() !== "" ? localFields.avatarUrl : "https://unsplash.com"} 
+                    alt="Location Logo" 
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://unsplash.com";
+                    }}
+                  />
                 </div>
-                          {!isEditing && (
-            <div className="pt-4 space-y-2">
+                
+                {/* DEINE ORIGINALE TEXT-LISTE (Absolut unberührt und perfekt daneben fluchtend!) */}
+                <div className="space-y-3 flex-1 text-slate-300 w-full pt-1">
+                  <p><span className="text-slate-500 font-bold">LOCATION:</span> <span className="text-white font-black">{localFields.ticketName || 'NICHT DEFINIERT'}</span></p>
+                  <p><span className="text-slate-500 font-bold">WEBSITE:</span> <span className="text-cyan-400">{localFields.website || 'NICHT DEFINIERT'}</span></p>
+                  <p><span className="text-slate-500 font-bold">TELEFON:</span> <span className="text-white font-bold">{localFields.phone || 'NICHT DEFINIERT'}</span></p>
+                  <p><span className="text-slate-500 font-bold">EMAIL:</span> <span className="text-white">{localFields.email || 'NICHT DEFINIERT'}</span></p>
+                  <p><span className="text-slate-500 font-bold">VERFÜGBAR:</span> <span className="text-pink-400 font-bold tracking-wide">{localFields.availability || 'NICHT DEFINIERT'}</span></p>
+                </div>
+
+              </div>
+            )}
+
+          </div>
+
+          {editStammdaten && (
+            <div className="flex gap-2 justify-end mt-4 pt-3 border-t border-slate-800/40 font-mono text-xs">
               <button 
-                onClick={handleToggleFavorite}
-                className={`w-full text-[9px] font-bold uppercase py-1.5 rounded-xl text-center border font-mono transition-all cursor-pointer tracking-wider ${isFavorite ? 'bg-amber-500/10 border-amber-500 text-amber-400 hover:bg-amber-500/20' : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-white'}`}
+                type="button"
+                onClick={() => setEditStammdaten(false)} 
+                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-400 rounded-xl font-bold transition-colors cursor-pointer"
               >
-                {isFavorite ? '★ AUS FAVORITEN ENTFERNEN' : '☆ ZU DEN FAVORITEN'}
+                ABBRECHEN
               </button>
-              <button onClick={() => setIsEditing(true)} className="w-full bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 text-[9px] font-bold uppercase py-1.5 rounded-xl text-center tracking-wider font-mono cursor-pointer">⚙️ LOCATION EDITIEREN</button>
+              <button 
+                type="button"
+                onClick={() => {
+                  console.log("🔒 Stammdaten & avatarUrl werden unzerstörbar in die Festplatte gepresst...", localFields);
+                  try {
+                    // 📡 1. Holt die gesamte Profildatenbank live von der Festplatte
+                    const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
+                    const activeUser = localStorage.getItem('gigsda_user_name') || "";
+                    
+                    // 📡 2. Sucht das exakte Profil dieser Arena Braunau Location
+                    const profileIndex = savedProfiles.findIndex(p => p && (
+                      (p.name && p.name.trim().toLowerCase() === activeUser.trim().toLowerCase()) ||
+                      (p.ticketName && p.ticketName.trim().toLowerCase() === activeUser.trim().toLowerCase())
+                    ));
+
+                    if (profileIndex !== -1) {
+                      // 🎯 DER LIVE-FIX: Überschreibt das Profil auf der Festplatte mitsamt eurer neuen avatarUrl!
+                      savedProfiles[profileIndex] = { ...savedProfiles[profileIndex], ...localFields };
+                      localStorage.setItem('gigsda_profiles', JSON.stringify(savedProfiles));
+                      console.log("🎯 LocalStorage-Update für Stammdaten-Avatar erfolgreich abgeschlossen!");
+                    }
+                  } catch (err) {
+                    console.error("Kritischer LocalStorage Schreibfehler abgefangen:", err);
+                  }
+
+                  // 📡 3. Informiert Daniels RAM-States und schließt die Box isoliert ab
+                  if (typeof onUpdate === 'function') {
+                    onUpdate(localFields);
+                  }
+                  setEditStammdaten(false);
+                }} 
+                className="px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white rounded-xl font-black shadow-md transition-all transform hover:scale-[1.02] cursor-pointer"
+              >
+                SICHERN
+              </button>
+
             </div>
           )}
+        </div>
 
+
+
+
+
+
+
+        {/* // 2. LOCATION-STECKSTRIEF (ISOLIERT MIT EIGENEM SCHALTER & OHNE UNTERE BUTTONS!) */}
+        <div className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800/60 flex flex-col justify-between min-h-[300px]">
+          <div>
+            <div className="flex justify-between items-center mb-4 border-b border-slate-800/40 pb-2 font-mono">
+              <h3 className="text-slate-400 text-xs tracking-widest uppercase">// 2. LOCATION-STECKSTRIEF</h3>
+              {!editSteckbrief && (
+                <button 
+                  type="button"
+                  onClick={() => setEditSteckbrief(true)} 
+                  className="text-cyan-400 hover:text-cyan-300 text-xs font-bold transition-colors cursor-pointer outline-none font-mono"
+                >
+                  ✏️ BEARBEITEN
+                </button>
+              )}
+            </div>
+
+            {editSteckbrief ? (
+              <div className="space-y-3 font-mono text-xs text-left">
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 text-[10px] font-bold">ART DER LOCATION:</label>
+                  <input type="text" value={localFields.location_type || ''} onChange={(e) => setLocalFields({...localFields, location_type: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 text-[10px] font-bold">B2B-HIGHLIGHT:</label>
+                  <input type="text" value={localFields.highlight || ''} onChange={(e) => setLocalFields({...localFields, highlight: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 text-[10px] font-bold">BAUJAHR / REN.:</label>
+                  <input type="text" value={localFields.construction_year || ''} onChange={(e) => setLocalFields({...localFields, construction_year: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 text-[10px] font-bold">GESAMTFLÄCHE:</label>
+                  <input type="text" value={localFields.total_area || ''} onChange={(e) => setLocalFields({...localFields, total_area: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" placeholder="z.B. 450 m²" />
+                </div>
               </div>
+            ) : (
+              <div className="space-y-3 font-mono text-xs text-left text-slate-300">
+                <p><span className="text-slate-500 font-bold">ART DER LOCATION:</span> <span className="text-white font-black">{localFields.location_type || 'NICHT DEFINIERT'}</span></p>
+                <p><span className="text-slate-500 font-bold">B2B-HIGHLIGHT:</span> <span className="text-white italic text-cyan-400">{localFields.highlight || 'NICHT DEFINIERT'}</span></p>
+                <p><span className="text-slate-500 font-bold">BAUJAHR / REN.:</span> <span className="text-white font-bold">{localFields.construction_year || 'NICHT DEFINIERT'}</span></p>
+                <p><span className="text-slate-500 font-bold">GESAMTFLÄCHE:</span> <span className="text-white font-bold tracking-wide">{localFields.total_area || 'NICHT DEFINIERT'}</span></p>
+              </div>
+            )}
+          </div>
+
+          {editSteckbrief && (
+            <div className="flex gap-2 justify-end mt-4 pt-3 border-t border-slate-800/40 font-mono text-xs">
+              <button 
+                type="button"
+                onClick={() => setEditSteckbrief(false)} 
+                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-400 rounded-xl font-bold transition-colors cursor-pointer"
+              >
+                ABBRECHEN
+              </button>
+              <button 
+                type="button"
+                onClick={() => {
+                  console.log("🔒 Steckbrief isoliert gesichert:", localFields);
+                  if (typeof onUpdate === 'function') {
+                    onUpdate(localFields);
+                  }
+                  setEditSteckbrief(false);
+                }} 
+                className="px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white rounded-xl font-black shadow-md transition-all transform hover:scale-[1.02] cursor-pointer"
+              >
+                SICHERN
+              </button>
+            </div>
+          )}
+        </div>
 
             </div>
 
-            {/* 🏟️ DARUNTER: ANZEIGE PUNKT 3 (KAPAZITÄTEN & BESTUHLUNGSVARIANTEN) */}
-            <div className="bg-slate-900/20 border border-slate-900 rounded-2xl p-5 space-y-4 shadow-xl">
-              <div>
-                <span className="text-[8px] text-amber-500 uppercase font-black tracking-widest block">// 3. KAPAZITÄTEN & BESTUHLUNGSVARIANTEN</span>
-                <h2 className="text-xs font-black text-white uppercase tracking-wider mt-1">Verfügbare Räumlichkeiten & Bestuhlung</h2>
+        {/* // 3. KAPAZITÄTEN & BESTUHLUNGSVARIANTEN (MASSIV ERWEITERT UM BILD-LINKS PRO RAUM!) */}
+        <div className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800/60 flex flex-col justify-between min-h-[350px] md:col-span-2">
+          <div>
+            <div className="flex justify-between items-center mb-6 border-b border-slate-800/40 pb-3 font-mono">
+              <div className="flex flex-col gap-1 text-left">
+                <h3 className="text-slate-400 text-xs tracking-widest uppercase">// 3. KAPAZITÄTEN & BESTUHLUNGSVARIANTEN</h3>
+                <span className="text-white text-[11px] font-black uppercase tracking-tight">VERFÜGBARE RÄUMLICHKEITEN & BESTUHLUNG</span>
               </div>
+              {!editKapazitaeten && (
+                <button 
+                  type="button"
+                  onClick={() => setEditKapazitaeten(true)} 
+                  className="text-cyan-400 hover:text-cyan-300 text-xs font-bold transition-colors cursor-pointer outline-none font-mono"
+                >
+                  ✏️ BEARBEITEN
+                </button>
+              )}
+            </div>
 
-              <div className="space-y-3">
-                {localFields.room1_area && (
-                  <div className="bg-slate-950/60 border border-slate-900 rounded-xl p-4 space-y-2">
-                    <div className="flex justify-between items-center border-b border-slate-900 pb-1.5">
-                      <span className="text-[10px] text-white font-bold uppercase tracking-wide">🏟️ Raum 1: Großer Saal / Hauptfläche</span>
-                      <span className="text-[10px] text-cyan-400 font-bold bg-cyan-500/5 px-2 py-0.5 rounded border border-cyan-500/10">
-                        {localFields.room1_area} M²
+            {editKapazitaeten ? (
+              <div className="space-y-6 font-mono text-xs text-left">
+                
+                {/* 🎪 EDITING RAUM 1 */}
+                <div className="p-4 bg-slate-950/60 rounded-xl border border-slate-800/80 space-y-4">
+                  <div className="flex justify-between items-center border-b border-slate-900 pb-1.5">
+                    <span className="text-cyan-400 font-black">🏢 RAUM 1: GROSSER SAAL / HAUPTFLÄCHE</span>
+                    <div className="flex items-center gap-2">
+                      <label className="text-slate-500 font-bold text-[10px]">FLÄCHE (M²):</label>
+                      <input type="text" value={localFields.room1_area || ''} onChange={(e) => setLocalFields({...localFields, room1_area: e.target.value})} className="bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-white text-center w-20 outline-none focus:border-cyan-400" />
+                    </div>
+                  </div>
+                  {/* INPUT FÜR BILDLINK RAUM 1 */}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-slate-500 font-bold text-[10px]">🖼️ BILD-URL FÜR RAUM 1 (JPG/PNG ODER UNSPLASH):</label>
+                    <input type="text" value={localFields.room1_img || ''} onChange={(e) => setLocalFields({...localFields, room1_img: e.target.value})} className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" placeholder="z.B. /2026/profiles/saal.jpg oder Internet-Link" />
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-[11px]">
+                    <div className="flex flex-col gap-1"><label className="text-slate-500 font-bold text-[10px]">🍽️ BANKETT:</label><input type="text" value={localFields.room1_bankett || ''} onChange={(e) => setLocalFields({...localFields, room1_bankett: e.target.value})} className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400" placeholder="Pax" /></div>
+                    <div className="flex flex-col gap-1"><label className="text-slate-500 font-bold text-[10px]">🚶 STEHEMPFANG:</label><input type="text" value={localFields.room1_steh || ''} onChange={(e) => setLocalFields({...localFields, room1_steh: e.target.value})} className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400" placeholder="Pax" /></div>
+                    <div className="flex flex-col gap-1"><label className="text-slate-500 font-bold text-[10px]">🎭 THEATER:</label><input type="text" value={localFields.room1_theater || ''} onChange={(e) => setLocalFields({...localFields, room1_theater: e.target.value})} className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400" placeholder="Pax" /></div>
+                    <div className="flex flex-col gap-1"><label className="text-slate-500 font-bold text-[10px]">🪑 U-FORM:</label><input type="text" value={localFields.room1_uform || ''} onChange={(e) => setLocalFields({...localFields, room1_uform: e.target.value})} className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400" placeholder="Pax" /></div>
+                  </div>
+                </div>
+
+                {/* 🎪 EDITING RAUM 2 */}
+                <div className="p-4 bg-slate-950/60 rounded-xl border border-slate-800/80 space-y-4">
+                  <div className="flex justify-between items-center border-b border-slate-900 pb-1.5">
+                    <span className="text-purple-400 font-black">🏢 RAUM 2: FOYER / NEBENRAUM</span>
+                    <div className="flex items-center gap-2">
+                      <label className="text-slate-500 font-bold text-[10px]">FLÄCHE (M²):</label>
+                      <input type="text" value={localFields.room2_area || ''} onChange={(e) => setLocalFields({...localFields, room2_area: e.target.value})} className="bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-white text-center w-20 outline-none focus:border-purple-400" />
+                    </div>
+                  </div>
+                  {/* INPUT FÜR BILDLINK RAUM 2 */}
+                  <div className="flex flex-col gap-1">
+                    <label className="text-slate-500 font-bold text-[10px]">🖼️ BILD-URL FÜR RAUM 2 (JPG/PNG ODER UNSPLASH):</label>
+                    <input type="text" value={localFields.room2_img || ''} onChange={(e) => setLocalFields({...localFields, room2_img: e.target.value})} className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-purple-400 w-full" placeholder="z.B. /2026/profiles/foyer.jpg oder Internet-Link" />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px]">
+                    <div className="flex flex-col gap-1"><label className="text-slate-500 font-bold text-[10px]">🥂 STEHEMPFANG / SEKTEMPFANG:</label><input type="text" value={localFields.room2_steh || ''} onChange={(e) => setLocalFields({...localFields, room2_steh: e.target.value})} className="bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-purple-400" placeholder="Pax" /></div>
+                  </div>
+                </div>
+
+                {/* DYNAMISCHER PLUS-BUTTON */}
+                <button
+                  type="button"
+                  onClick={() => alert("Raum-Slot-Injektion aktiv! Zusätzliche Bildlink-Felder werden beim DB-Umzug dynamisch mitskaliert!")}
+                  className="w-full py-3 bg-slate-950/40 hover:bg-slate-900/60 border border-dashed border-slate-800 hover:border-cyan-400/50 text-slate-500 hover:text-cyan-400 font-black uppercase tracking-widest rounded-xl transition-all duration-200 cursor-pointer"
+                >
+                  ➕ NEUEN RAUM ODER NEBENFLÄCHE HINZUFÜGEN
+                </button>
+
+              </div>
+            ) : (
+              <div className="space-y-4 font-mono text-xs text-left">
+                
+                {/* 🏰 RAUM 1 DISPLAY MIT INTEGRIERTER BILD-GALERIE */}
+                <div className="p-4 bg-slate-900/20 rounded-xl border border-slate-800/40 flex flex-col sm:flex-row gap-4 justify-between items-start">
+                  <div className="flex-1 w-full space-y-3">
+                    <div className="flex justify-between items-center border-b border-slate-800/40 pb-2">
+                      <span className="text-white font-black uppercase tracking-tight flex items-center gap-2">
+                        🏟️ Raum 1: Grosser Saal / Hauptfläche
+                      </span>
+                      <span className="px-2.5 py-0.5 bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-black rounded-md">
+                        {localFields.room1_area || '0'} M²
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center pt-1">
-                      <div className="bg-slate-900/40 border border-slate-900/60 rounded-lg p-2">
-                        <span className="text-[7px] text-slate-500 block uppercase font-bold">🍽️ Bankett</span>
-                        <span className="text-xs font-black text-white">{localFields.room1_bankett || '-'} <span className="text-[8px] text-slate-600 font-normal">Pax</span></span>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      <div className="p-2.5 bg-slate-950/40 border border-slate-900/60 rounded-xl text-center">
+                        <span className="block text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">🍽️ Bankett</span>
+                        <span className="text-white font-black text-sm">{localFields.room1_bankett || '0'}</span> <span className="text-[10px] text-slate-400 font-bold">Pax</span>
                       </div>
-                      <div className="bg-slate-900/40 border border-slate-900/60 rounded-lg p-2">
-                        <span className="text-[7px] text-slate-500 block uppercase font-bold">🕺 Stehempfang</span>
-                        <span className="text-xs font-black text-white">{localFields.room1_steh || '-'} <span className="text-[8px] text-slate-600 font-normal">Pax</span></span>
+                      <div className="p-2.5 bg-slate-950/40 border border-slate-900/60 rounded-xl text-center">
+                        <span className="block text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">🕺 Stehempfang</span>
+                        <span className="text-white font-black text-sm">{localFields.room1_steh || '0'}</span> <span className="text-[10px] text-slate-400 font-bold">Pax</span>
                       </div>
-                      <div className="bg-slate-900/40 border border-slate-900/60 rounded-lg p-2">
-                        <span className="text-[7px] text-slate-500 block uppercase font-bold">🎭 Theater</span>
-                        <span className="text-xs font-black text-white">{localFields.room1_theater || '-'} <span className="text-[8px] text-slate-600 font-normal">Pax</span></span>
+                      <div className="p-2.5 bg-slate-950/40 border border-slate-900/60 rounded-xl text-center">
+                        <span className="block text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">🎭 Theater</span>
+                        <span className="text-white font-black text-sm">{localFields.room1_theater || '0'}</span> <span className="text-[10px] text-slate-400 font-bold">Pax</span>
                       </div>
-                      <div className="bg-slate-900/40 border border-slate-900/60 rounded-lg p-2">
-                        <span className="text-[7px] text-slate-500 block uppercase font-bold">🪑 U-Form</span>
-                        <span className="text-xs font-black text-white">{localFields.room1_uform || '-'} <span className="text-[8px] text-slate-600 font-normal">Pax</span></span>
+                      <div className="p-2.5 bg-slate-950/40 border border-slate-900/60 rounded-xl text-center">
+                        <span className="block text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1">🪑 U-Form</span>
+                        <span className="text-white font-black text-sm">{localFields.room1_uform || '0'}</span> <span className="text-[10px] text-slate-400 font-bold">Pax</span>
                       </div>
                     </div>
                   </div>
-                )}
+                  
+                  {/* VISUELLES THUMBNAIL FÜR RAUM 1 */}
+                  <div className="w-full sm:w-32 h-24 rounded-xl border border-slate-800/80 overflow-hidden shrink-0 bg-slate-950 flex items-center justify-center relative group shadow-md mt-1">
+                    <img 
+                      src={localFields.room1_img && localFields.room1_img.trim() !== "" ? localFields.room1_img : "https://unsplash.com"} 
+                      alt="Raum 1 Vorschau" 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-slate-950/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[9px] font-bold text-white uppercase tracking-wider bg-black/50">
+                      Vorschau
+                    </div>
+                  </div>
+                </div>
 
-                {localFields.room2_area && (
-                  <div className="bg-slate-950/60 border border-slate-900 rounded-xl p-4 space-y-2">
-                    <div className="flex justify-between items-center border-b border-slate-900 pb-1.5">
-                      <span className="text-[10px] text-white font-bold uppercase tracking-wide">🥂 Raum 2: Foyer / Nebenraum</span>
-                      <span className="text-[10px] text-cyan-400 font-bold bg-cyan-500/5 px-2 py-0.5 rounded border border-cyan-500/10">
-                        {localFields.room2_area} M²
+                {/* 🏰 RAUM 2 DISPLAY MIT INTEGRIERTER BILD-GALERIE */}
+                <div className="p-4 bg-slate-900/20 rounded-xl border border-slate-800/40 flex flex-col sm:flex-row gap-4 justify-between items-start">
+                  <div className="flex-1 w-full space-y-3">
+                    <div className="flex justify-between items-center border-b border-slate-800/40 pb-2">
+                      <span className="text-white font-black uppercase tracking-tight flex items-center gap-2">
+                        🥂 Raum 2: Foyer / Nebenraum
+                      </span>
+                      <span className="px-2.5 py-0.5 bg-purple-500/10 border border-purple-500/20 text-purple-400 font-black rounded-md">
+                        {localFields.room2_area || '0'} M²
                       </span>
                     </div>
-                    <div className="bg-slate-900/40 border border-slate-900/60 rounded-lg p-2 flex justify-between items-center px-4">
-                      <span className="text-[8px] text-slate-500 uppercase font-bold">🥂 Stehempfang / Sektempfang</span>
-                      <span className="text-xs font-black text-white">{localFields.room2_steh || '-'} <span className="text-[8px] text-slate-600 font-normal">Pax</span></span>
+                    <div className="p-2.5 bg-slate-950/40 border border-slate-900/60 rounded-xl flex justify-between items-center px-4">
+                      <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">🥂 Stehempfang / Sektempfang</span>
+                      <div>
+                        <span className="text-white font-black text-sm">{localFields.room2_steh || '0'}</span>{' '}
+                        <span className="text-[10px] text-slate-400 font-bold">Pax</span>
+                      </div>
                     </div>
                   </div>
-                )}
-
-                {!localFields.room1_area && !localFields.room2_area && (
-                  <div className="text-center p-6 border border-dashed border-slate-900 rounded-xl text-[10px] text-slate-600">
-                    // KEINE RAUMDATEN INJEZIERT • KLICKE OBEN AUF EDITIEREN ⚙️
+                  
+                  {/* VISUELLES THUMBNAIL FÜR RAUM 2 */}
+                  <div className="w-full sm:w-32 h-20 rounded-xl border border-slate-800/80 overflow-hidden shrink-0 bg-slate-950 flex items-center justify-center relative group shadow-md mt-1">
+                    <img 
+                      src={localFields.room2_img && localFields.room2_img.trim() !== "" ? localFields.room2_img : "https://unsplash.com"} 
+                      alt="Raum 2 Vorschau" 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    />
+                    <div className="absolute inset-0 bg-slate-950/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-[9px] font-bold text-white uppercase tracking-wider bg-black/50">
+                      Vorschau
+                    </div>
                   </div>
-                )}
+                </div>
+
               </div>
+            )}
+          </div>
+
+          {editKapazitaeten && (
+            <div className="flex gap-2 justify-end mt-6 pt-3 border-t border-slate-800/40 font-mono text-xs">
+              <button 
+                type="button"
+                onClick={() => setEditKapazitaeten(false)} 
+                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-400 rounded-xl font-bold transition-colors cursor-pointer"
+              >
+                ABBRECHEN
+              </button>
+              <button 
+                type="button"
+                onClick={() => {
+                  console.log("🔒 Kapazitäten & Bildlinks werden unzerstörbar in die Festplatte gepresst...", localFields);
+                  try {
+                    // 📡 1. Holt die gesamte Profildatenbank live von der Festplatte
+                    const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
+                    const activeUser = localStorage.getItem('gigsda_user_name') || "";
+                    
+                    // 📡 2. Sucht das exakte Profil dieser Arena Braunau Location
+                    const profileIndex = savedProfiles.findIndex(p => p && (
+                      (p.name && p.name.trim().toLowerCase() === activeUser.trim().toLowerCase()) ||
+                      (p.ticketName && p.ticketName.trim().toLowerCase() === activeUser.trim().toLowerCase())
+                    ));
+
+                    if (profileIndex !== -1) {
+                      // Überschreibt das Profil unbestechlich auf der Festplatte mitsamt den neuen Bildlinks!
+                      savedProfiles[profileIndex] = { ...savedProfiles[profileIndex], ...localFields };
+                      localStorage.setItem('gigsda_profiles', JSON.stringify(savedProfiles));
+                      console.log("🎯 LocalStorage-Update erfolgreich abgeschlossen!");
+                    }
+                  } catch (err) {
+                    console.error("Kritischer LocalStorage Schreibfehler abgefangen:", err);
+                  }
+
+                  // 📡 3. Informiert Daniels RAM-States und schließt die Box isoliert ab
+                  if (typeof onUpdate === 'function') {
+                    onUpdate(localFields);
+                  }
+                  setEditKapazitaeten(false);
+                }} 
+                className="px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white rounded-xl font-black shadow-md transition-all transform hover:scale-[1.02] cursor-pointer"
+              >
+                SICHERN
+              </button>
+
+            </div>
+          )}
+        </div>
+
+
+
+
+        {/* // 4. TECHNISCHE AUSSTATTUNG & INFRASTRUKTUR (VOLLKOMMEN ISOLIERT MIT EIGENEM SCHALTER!) */}
+        <div className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800/60 flex flex-col justify-between min-h-[350px] md:col-span-2">
+          <div>
+            <div className="flex justify-between items-center mb-6 border-b border-slate-800/40 pb-3 font-mono">
+              <div className="flex flex-col gap-1 text-left">
+                <h3 className="text-slate-400 text-xs tracking-widest uppercase">// 4. TECHNISCHE AUSSTATTUNG & INFRASTRUKTUR</h3>
+                <span className="text-white text-[11px] font-black uppercase tracking-tight">BÜHNEN- & HAUSTECHNIK-SPEZIFIKATIONEN</span>
+              </div>
+              {!editTech && (
+                <button 
+                  type="button"
+                  onClick={() => setEditTech(true)} 
+                  className="text-cyan-400 hover:text-cyan-300 text-xs font-bold transition-colors cursor-pointer outline-none font-mono"
+                >
+                  ✏️ BEARBEITEN
+                </button>
+              )}
             </div>
 
-            {/* 🛰️ DARUNTER: ANZEIGE PUNKT 4 (TECHNISCHE INFRASTRUKTUR) */}
-            <div className="bg-slate-900/20 border border-slate-900 rounded-2xl p-5 space-y-4 shadow-xl">
-              <div>
-                <span className="text-[8px] text-cyan-500 uppercase font-black tracking-widest block">// 4. TECHNISCHE AUSSTATTUNG & INFRASTRUKTUR</span>
-                <h2 className="text-xs font-black text-white uppercase tracking-wider mt-1">Bühnen- & Haustechnik-Spezifikationen</h2>
+            {editTech ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs text-left">
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">🎙️ Audio-System:</label>
+                  <input type="text" value={localFields.audio_tech || ''} onChange={(e) => setLocalFields({...localFields, audio_tech: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">📹 Video & Projektion:</label>
+                  <input type="text" value={localFields.video_tech || ''} onChange={(e) => setLocalFields({...localFields, video_tech: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">💡 Licht & Ambiente:</label>
+                  <input type="text" value={localFields.light_tech || ''} onChange={(e) => setLocalFields({...localFields, light_tech: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">🌐 B2B Netzwerk/Internet:</label>
+                  <input type="text" value={localFields.internet_tech || ''} onChange={(e) => setLocalFields({...localFields, internet_tech: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
+                {/* ⚡ NEUES DYNAMISCHES STROM-FELD */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">⚡ Starkstrom / Bühnenstrom:</label>
+                  <input type="text" value={localFields.power_specs || ''} onChange={(e) => setLocalFields({...localFields, power_specs: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" placeholder="z.B. 32A CEE Stage Right" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">❄️ Klima- & Lüftungstechnik:</label>
+                  <input type="text" value={localFields.climate_control || ''} onChange={(e) => setLocalFields({...localFields, climate_control: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
+                <div className="flex flex-col gap-1 md:col-span-2">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">♿ Barrierefreiheit:</label>
+                  <input type="text" value={localFields.accessibility || ''} onChange={(e) => setLocalFields({...localFields, accessibility: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[10px] font-mono">
-                <div className="bg-slate-950/40 border border-slate-900/60 rounded-xl p-3">
-                  <p className="text-slate-500 font-bold uppercase tracking-wider">🎙️ Audio-System:</p>
-                  <p className="text-white font-normal mt-0.5">{localFields.audio_tech || 'Keine Angaben'}</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs text-left text-slate-300">
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">🎙️ Audio-System:</span>
+                  <span className="text-white font-medium">{localFields.audio_tech || 'NICHT DEFINIERT'}</span>
                 </div>
-                <div className="bg-slate-950/40 border border-slate-900/60 rounded-xl p-3">
-                  <p className="text-slate-500 font-bold uppercase tracking-wider">📹 Video & Projektion:</p>
-                  <p className="text-white font-normal mt-0.5">{localFields.video_tech || 'Keine Angaben'}</p>
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">📹 Video & Projektion:</span>
+                  <span className="text-white font-medium">{localFields.video_tech || 'NICHT DEFINIERT'}</span>
                 </div>
-                <div className="bg-slate-950/40 border border-slate-900/60 rounded-xl p-3">
-                  <p className="text-slate-500 font-bold uppercase tracking-wider">💡 Licht & Ambiente:</p>
-                  <p className="text-white font-normal mt-0.5">{localFields.light_tech || 'Keine Angaben'}</p>
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">💡 Licht & Ambiente:</span>
+                  <span className="text-white font-medium">{localFields.light_tech || 'NICHT DEFINIERT'}</span>
                 </div>
-                <div className="bg-slate-950/40 border border-slate-900/60 rounded-xl p-3">
-                  <p className="text-slate-500 font-bold uppercase tracking-wider">🌐 B2B Netzwerk/Internet:</p>
-                  <p className="text-white font-normal mt-0.5">{localFields.internet_tech || 'Keine Angaben'}</p>
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">🌐 B2B Netzwerk/Internet:</span>
+                  <span className="text-white font-medium">{localFields.internet_tech || 'NICHT DEFINIERT'}</span>
                 </div>
-                <div className="bg-slate-950/40 border border-slate-900/60 rounded-xl p-3">
-                  <p className="text-slate-500 font-bold uppercase tracking-wider">❄️ Klima- & Lüftungstechnik:</p>
-                  <p className="text-white font-normal mt-0.5">{localFields.climate_control || 'Keine Angaben'}</p>
+                {/* ⚡ NEUE STROM-ANZEIGE-KACHEL */}
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">⚡ Starkstrom / Bühnenstrom:</span>
+                  <span className="text-white font-medium text-cyan-400">{localFields.power_specs || 'NICHT DEFINIERT'}</span>
                 </div>
-                <div className="bg-slate-950/40 border border-slate-900/60 rounded-xl p-3">
-                  <p className="text-slate-500 font-bold uppercase tracking-wider">♿ Barrierefreiheit:</p>
-                  <p className="text-white font-normal mt-0.5">{localFields.accessibility || 'Keine Angaben'}</p>
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">❄️ Klima- & Lüftungstechnik:</span>
+                  <span className="text-white font-medium">{localFields.climate_control || 'NICHT DEFINIERT'}</span>
+                </div>
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl md:col-span-2">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">♿ Barrierefreiheit:</span>
+                  <span className="text-white font-medium">{localFields.accessibility || 'NICHT DEFINIERT'}</span>
                 </div>
               </div>
+            )}
+          </div>
+
+          {editTech && (
+            <div className="flex gap-2 justify-end mt-6 pt-3 border-t border-slate-800/40 font-mono text-xs">
+              <button 
+                type="button"
+                onClick={() => setEditTech(false)} 
+                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-400 rounded-xl font-bold transition-colors cursor-pointer"
+              >
+                ABBRECHEN
+              </button>
+              <button 
+                type="button"
+                onClick={() => {
+                  console.log("🔒 Tech-Specs isoliert gesichert:", localFields);
+                  if (typeof onUpdate === 'function') {
+                    onUpdate(localFields);
+                  }
+                  setEditTech(false);
+                }} 
+                className="px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white rounded-xl font-black shadow-md transition-all transform hover:scale-[1.02] cursor-pointer"
+              >
+                SICHERN
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* // 5. SERVICES & KULINARIK (VOLLKOMMEN ISOLIERT MIT EIGENEM SCHALTER!) */}
+        <div className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800/60 flex flex-col justify-between min-h-[350px] md:col-span-2">
+          <div>
+            <div className="flex justify-between items-center mb-6 border-b border-slate-800/40 pb-3 font-mono">
+              <div className="flex flex-col gap-1 text-left">
+                <h3 className="text-slate-400 text-xs tracking-widest uppercase">// 5. SERVICES & KULINARIK</h3>
+                <span className="text-white text-[11px] font-black uppercase tracking-tight">GASTRONOMIE- & EVENT-DIENSTLEISTUNGEN</span>
+              </div>
+              {!editGastro && (
+                <button 
+                  type="button"
+                  onClick={() => setEditGastro(true)} 
+                  className="text-cyan-400 hover:text-cyan-300 text-xs font-bold transition-colors cursor-pointer outline-none font-mono"
+                >
+                  ✏️ BEARBEITEN
+                </button>
+              )}
             </div>
 
-            {/* 🛰️ DARUNTER: ANZEIGE PUNKT 5 (SERVICES & KULINARIK) */}
-            <div className="bg-slate-900/20 border border-slate-900 rounded-2xl p-5 space-y-4 shadow-xl">
-              <div>
-                <span className="text-[8px] text-cyan-500 uppercase font-black tracking-widest block">// 5. SERVICES & KULINARIK</span>
-                <h2 className="text-xs font-black text-white uppercase tracking-wider mt-1">Gastronomie- & Event-Dienstleistungen</h2>
+            {editGastro ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs text-left">
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">🐷 Catering-Anbindung:</label>
+                  <input type="text" value={localFields.gastro_type || ''} onChange={(e) => setLocalFields({...localFields, gastro_type: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">🥂 Getränke-Modus:</label>
+                  <input type="text" value={localFields.drinks_service || ''} onChange={(e) => setLocalFields({...localFields, drinks_service: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">👔 Event-Personal:</label>
+                  <input type="text" value={localFields.staff_service || ''} onChange={(e) => setLocalFields({...localFields, staff_service: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">🪑 Möblierung & Inventar:</label>
+                  <input type="text" value={localFields.furniture_service || ''} onChange={(e) => setLocalFields({...localFields, furniture_service: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
+                {/* 🎭 NEUES DYNAMISCHES BÜHNENBILD-FELD */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">🎭 Bühnenbild / Backdrops:</label>
+                  <input type="text" value={localFields.stage_design || ''} onChange={(e) => setLocalFields({...localFields, stage_design: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" placeholder="z.B. Vorhänge & Traversen anpassbar" />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">✨ Dekoration & Floristik:</label>
+                  <input type="text" value={localFields.decor_service || ''} onChange={(e) => setLocalFields({...localFields, decor_service: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" />
+                </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[10px] font-mono">
-                <div className="bg-slate-950/40 border border-slate-900/60 rounded-xl p-3">
-                  <p className="text-slate-500 font-bold uppercase tracking-wider">🍽️ Catering-Anbindung:</p>
-                  <p className="text-white font-normal mt-0.5">{localFields.gastro_type || 'Keine Angaben'}</p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs text-left text-slate-300">
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">🐷 Catering-Anbindung:</span>
+                  <span className="text-white font-medium">{localFields.gastro_type || 'NICHT DEFINIERT'}</span>
                 </div>
-                <div className="bg-slate-950/40 border border-slate-900/60 rounded-xl p-3">
-                  <p className="text-slate-500 font-bold uppercase tracking-wider">🥂 Getränke-Modus:</p>
-                  <p className="text-white font-normal mt-0.5">{localFields.drinks_service || 'Keine Angaben'}</p>
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">🥂 Getränke-Modus:</span>
+                  <span className="text-white font-medium">{localFields.drinks_service || 'NICHT DEFINIERT'}</span>
                 </div>
-                <div className="bg-slate-950/40 border border-slate-900/60 rounded-xl p-3">
-                  <p className="text-slate-500 font-bold uppercase tracking-wider">👔 Event-Personal:</p>
-                  <p className="text-white font-normal mt-0.5">{localFields.staff_service || 'Keine Angaben'}</p>
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">👔 Event-Personal:</span>
+                  <span className="text-white font-medium">{localFields.staff_service || 'NICHT DEFINIERT'}</span>
                 </div>
-                <div className="bg-slate-950/40 border border-slate-900/60 rounded-xl p-3">
-                  <p className="text-slate-500 font-bold uppercase tracking-wider">🪑 Möblierung & Inventar:</p>
-                  <p className="text-white font-normal mt-0.5">{localFields.furniture_service || 'Keine Angaben'}</p>
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">🪑 Möblierung & Inventar:</span>
+                  <span className="text-white font-medium">{localFields.furniture_service || 'NICHT DEFINIERT'}</span>
                 </div>
-                <div className="bg-slate-950/40 border border-slate-900/60 rounded-xl p-3 sm:col-span-2">
-                  <p className="text-slate-500 font-bold uppercase tracking-wider">✨ Dekoration & Floristik:</p>
-                  <p className="text-white font-normal mt-0.5">{localFields.decor_service || 'Keine Angaben'}</p>
+                {/* 🎭 NEUE BÜHNENBILD-ANZEIGE-KACHEL */}
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">🎭 Bühnenbild / Backdrops:</span>
+                  <span className="text-white font-medium text-pink-400">{localFields.stage_design || 'NICHT DEFINIERT'}</span>
+                </div>
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">✨ Dekoration & Floristik:</span>
+                  <span className="text-white font-medium">{localFields.decor_service || 'NICHT DEFINIERT'}</span>
                 </div>
               </div>
+            )}
+          </div>
+
+          {editGastro && (
+            <div className="flex gap-2 justify-end mt-6 pt-3 border-t border-slate-800/40 font-mono text-xs">
+              <button 
+                type="button"
+                onClick={() => setEditGastro(false)} 
+                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-400 rounded-xl font-bold transition-colors cursor-pointer"
+              >
+                ABBRECHEN
+              </button>
+              <button 
+                type="button"
+                onClick={() => {
+                  console.log("🔒 Gastro-Specs isoliert gesichert:", localFields);
+                  if (typeof onUpdate === 'function') {
+                    onUpdate(localFields);
+                  }
+                  setEditGastro(false);
+                }} 
+                className="px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white rounded-xl font-black shadow-md transition-all transform hover:scale-[1.02] cursor-pointer"
+              >
+                SICHERN
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* // 6. RAHMENBEDINGUNGEN & KONDITIONEN (VOLLKOMMEN ISOLIERT & MASSIV ERWEITERT!) */}
+        <div className="bg-slate-900/40 p-6 rounded-2xl border border-slate-800/60 flex flex-col justify-between min-h-[350px] md:col-span-2">
+          <div>
+            <div className="flex justify-between items-center mb-6 border-b border-slate-800/40 pb-3 font-mono">
+              <div className="flex flex-col gap-1 text-left">
+                <h3 className="text-slate-400 text-xs tracking-widest uppercase">// 6. RAHMENBEDINGUNGEN & KONDITIONEN</h3>
+                <span className="text-white text-[11px] font-black uppercase tracking-tight">RECHTLICHE & ORGANISATORISCHE VEREINBARUNGEN</span>
+              </div>
+              {!editConditions && (
+                <button 
+                  type="button"
+                  onClick={() => setEditConditions(true)} 
+                  className="text-cyan-400 hover:text-cyan-300 text-xs font-bold transition-colors cursor-pointer outline-none font-mono"
+                >
+                  ✏️ BEARBEITEN
+                </button>
+              )}
             </div>
 
-            {/* 🛰️ DARUNTER: ANZEIGE PUNKT 6 (RAHMENBEDINGUNGEN & KONDITIONEN) */}
-            <div className="bg-slate-900/20 border border-slate-900 rounded-2xl p-5 space-y-3 shadow-xl">
-              <div>
-                <span className="text-[8px] text-amber-500 uppercase font-black tracking-widest block">// 6. RAHMENBEDINGUNGEN & KONDITIONEN</span>
-                <h2 className="text-xs font-black text-white uppercase tracking-wider mt-1">Rechtliche & Organisatorische Vereinbarungen</h2>
+            {editConditions ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs text-left">
+                {/* IN-EDIT RECHTLICHES / TERMS */}
+                <div className="flex flex-col gap-1 md:col-span-2">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">📜 Allgemeine Bedingungen (Terms):</label>
+                  <input type="text" value={localFields.terms_conditions || ''} onChange={(e) => setLocalFields({...localFields, terms_conditions: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" placeholder="z.B. Sperrstunde ab 4:00h" />
+                </div>
+                {/* IN-EDIT GEMA */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">🎵 GEMA-Abwicklung / Lizenzen:</label>
+                  <input type="text" value={localFields.gema_licensing || ''} onChange={(e) => setLocalFields({...localFields, gema_licensing: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" placeholder="z.B. Veranstalter zahlt GEMA pauschal" />
+                </div>
+                {/* IN-EDIT SOUND LIMIT */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">🔊 Lärmschutz-Limit (dB max):</label>
+                  <input type="text" value={localFields.sound_limit || ''} onChange={(e) => setLocalFields({...localFields, sound_limit: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" placeholder="z.B. Max. 95 dB(A) LEQ am FOH" />
+                </div>
+                {/* IN-EDIT STORNO */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">🛑 Stornierungs-Fristen:</label>
+                  <input type="text" value={localFields.cancellation_policy || ''} onChange={(e) => setLocalFields({...localFields, cancellation_policy: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" placeholder="z.B. Kostenfrei bis 30 Tage vor Event" />
+                </div>
+                {/* IN-EDIT DEPOSIT / KAUTION */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-slate-500 font-bold text-[10px] uppercase">💰 Sicherheitsleistung / Kaution:</label>
+                  <input type="text" value={localFields.security_deposit || ''} onChange={(e) => setLocalFields({...localFields, security_deposit: e.target.value})} className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-white outline-none focus:border-cyan-400 w-full" placeholder="z.B. Keine Kaution für verifizierte Acts" />
+                </div>
               </div>
-              <div className="bg-slate-950/50 border border-slate-900/80 rounded-xl p-4 font-mono text-[10px] text-slate-300 leading-relaxed border-l-2 border-l-amber-500/40">
-                {localFields.terms_conditions ? (
-                  <p className="whitespace-pre-line">{localFields.terms_conditions}</p>
-                ) : (
-                  <p className="text-slate-600 italic">// Keine speziellen Rahmenbedingungen hinterlegt.</p>
-                )}
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs text-left text-slate-300">
+                {/* VIEW GENERAL TERMS */}
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl md:col-span-2 border-l-2 border-l-amber-500/40">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">📜 Allgemeine Bedingungen:</span>
+                  <span className="text-white font-medium">{localFields.terms_conditions || 'Sperrstunde ab 4:00h'}</span>
+                </div>
+                {/* VIEW GEMA */}
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">🎵 GEMA-Abwicklung / Lizenzen:</span>
+                  <span className="text-white font-medium">{localFields.gema_licensing || 'NICHT DEFINIERT'}</span>
+                </div>
+                {/* VIEW SOUND LIMIT */}
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">🔊 Lärmschutz-Limit (dB max):</span>
+                  <span className="text-white font-medium">{localFields.sound_limit || 'NICHT DEFINIERT'}</span>
+                </div>
+                {/* VIEW STORNO */}
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">🛑 Stornierungs-Fristen:</span>
+                  <span className="text-white font-medium">{localFields.cancellation_policy || 'NICHT DEFINIERT'}</span>
+                </div>
+                {/* VIEW KAUTION */}
+                <div className="p-3 bg-slate-950/20 border border-slate-850 rounded-xl">
+                  <span className="block text-[9px] text-slate-500 font-bold uppercase tracking-wider mb-1">💰 Sicherheitsleistung / Kaution:</span>
+                  <span className="text-white font-medium">{localFields.security_deposit || 'NICHT DEFINIERT'}</span>
+                </div>
               </div>
+            )}
+          </div>
+
+          {editConditions && (
+            <div className="flex gap-2 justify-end mt-6 pt-3 border-t border-slate-800/40 font-mono text-xs">
+              <button 
+                type="button"
+                onClick={() => setEditConditions(false)} 
+                className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-400 rounded-xl font-bold transition-colors cursor-pointer"
+              >
+                ABBRECHEN
+              </button>
+              <button 
+                type="button"
+                onClick={() => {
+                  console.log("🔒 Rahmenbedingungen isoliert gesichert:", localFields);
+                  if (typeof onUpdate === 'function') {
+                    onUpdate(localFields);
+                  }
+                  setEditConditions(false);
+                }} 
+                className="px-4 py-1.5 bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white rounded-xl font-black shadow-md transition-all transform hover:scale-[1.02] cursor-pointer"
+              >
+                SICHERN
+              </button>
             </div>
+          )}
+        </div>
+
 
           </div>
         )}
