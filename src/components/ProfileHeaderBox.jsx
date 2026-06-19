@@ -112,7 +112,7 @@ const ProfileHeaderBox = ({ currentProfileName }) => {
           </h1>
         </div>
         <button 
-          onClick={() => console.log('Dashboard Klick')}
+          onClick={() => window.history.back()}
           className="bg-[#08060c] border border-gray-800 text-gray-300 px-5 py-2 rounded-2xl text-sm font-bold tracking-wide hover:bg-purple-950/20 hover:border-purple-500/50 transition-all duration-300 shadow-md flex items-center gap-2"
         >
           &lt; Dashboard
@@ -146,51 +146,87 @@ const ProfileHeaderBox = ({ currentProfileName }) => {
             <Pencil size={12} /> {isEditingSlider ? 'Schließen' : 'Edit Slider'}
           </button>
         )}
+      {/* ========================================================================= */}
+      {/* ⚙️ INPLACE EDIT-MASK: VOLLSTÄNDIGE MATRIX FÜR ALLE 4 CLOUD-SLIDES         */}
+      {/* ========================================================================= */}
+        {editSection === 'slider' && isMyOwnProfile && (
 
-        {/* Edit Panel */}
-        {isEditingSlider && isOwnProfile && (
-          <div className="absolute top-20 right-6 bg-[#0d0a14]/95 border border-purple-500/30 w-96 rounded-2xl p-5 shadow-2xl backdrop-blur-xl z-20 max-h-[300px] overflow-y-auto font-mono text-xs text-gray-300 custom-scrollbar">
-            <div className="flex justify-between items-center mb-4 pb-2 border-b border-gray-800">
-              <span className="text-purple-400 font-bold uppercase">Slider Konfiguration</span>
-              <button onClick={() => setIsEditingSlider(false)} className="text-gray-500 hover:text-white"><X size={14} /></button>
-            </div>
+        <div className="bg-slate-950 border border-slate-900 p-4 rounded-3xl space-y-3 animate-fade-in print:hidden">
+          <div className="text-[9px] text-amber-400 font-bold uppercase tracking-widest">// CLOUD-BANNER TEXT & MEDIEN KONFIGURATION (VOLLSTÄNDIG)</div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             
-            <div className="space-y-4">
-              <div>
-                <label className="block text-gray-500 mb-1 uppercase tracking-tight">Überschrift (Headline)</label>
-                <input type="text" name="headline" value={editSliderData.headline} onChange={handleSliderInputChange} className="w-full bg-[#050307] border border-gray-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500" />
+            {/* CONFIG SLIDE 1 */}
+            <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-950 space-y-2">
+              <span className="text-cyan-400 text-[8px] font-black block">// SLIDE 1 CONFIGURATION</span>
+              <div className="space-y-1">
+                <label className="text-[8px] text-slate-500 uppercase block">Fette Hauptüberschrift</label>
+                <input type="text" name="slide1_line1" value={localFields.slide1_line1 || ''} onChange={handleInplaceChange} placeholder="z.B. FESTIVAL SETUP" className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1 text-white text-[11px]" />
               </div>
-              <div>
-                <label className="block text-gray-500 mb-1 uppercase tracking-tight">Unterüberschrift</label>
-                <input type="text" name="subheadline" value={editSliderData.subheadline} onChange={handleSliderInputChange} className="w-full bg-[#050307] border border-gray-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500" />
+              <div className="space-y-1">
+                <label className="text-[8px] text-slate-500 uppercase block">Unterüberschrift (Cyan)</label>
+                <input type="text" name="slide1_line2" value={localFields.slide1_line2 || ''} onChange={handleInplaceChange} placeholder="z.B. ZUVERLÄSSIGE SYSTEMTECHNIK" className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1 text-white text-[11px]" />
               </div>
-              <div>
-                <label className="block text-gray-500 mb-1 uppercase tracking-tight">Ort / Location</label>
-                <input type="text" name="location" value={editSliderData.location} onChange={handleSliderInputChange} className="w-full bg-[#050307] border border-gray-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500" />
+              <div className="space-y-1">
+                <label className="text-[8px] text-purple-400 uppercase block font-bold">Externe Internet-Bild URL</label>
+                <input type="text" name="slide1_url" value={localFields.slide1_url || ''} onChange={handleInplaceChange} placeholder="https://unsplash.com... oder Cloud-Link" className="w-full bg-slate-950 border border-purple-500/20 rounded-lg px-2.5 py-1 text-purple-300 text-[11px]" />
               </div>
-
-              {[0, 1, 2, 3].map((idx) => (
-                <div key={idx}>
-                  <label className="block text-gray-500 mb-1 uppercase tracking-tight">Bild-URL {idx + 1}</label>
-                  <input 
-                    type="text" 
-                    value={editSliderData?.images?.[idx] || ''} 
-                    onChange={(e) => handleSliderInputChange(e, idx)} 
-                    className="w-full bg-[#050307] border border-gray-800 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-purple-500 text-[10px]" 
-                    placeholder="https://..." 
-                  />
-                </div>
-              ))}
-
-              <button 
-                onClick={saveSliderData} 
-                className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2.5 rounded-xl uppercase tracking-wider shadow-lg shadow-purple-600/20 transition-all duration-200 mt-2"
-              >
-                Änderungen Speichern
-              </button>
             </div>
+
+            {/* CONFIG SLIDE 2 */}
+            <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-950 space-y-2">
+              <span className="text-cyan-400 text-[8px] font-black block">// SLIDE 2 CONFIGURATION</span>
+              <div className="space-y-1">
+                <label className="text-[8px] text-slate-500 uppercase block">Fette Hauptüberschrift</label>
+                <input type="text" name="slide2_line1" value={localFields.slide2_line1 || ''} onChange={handleInplaceChange} placeholder="z.B. LIVE-PRODUKTION" className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1 text-white text-[11px]" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[8px] text-slate-500 uppercase block">Unterüberschrift (Cyan)</label>
+                <input type="text" name="slide2_line2" value={localFields.slide2_line2 || ''} onChange={handleInplaceChange} placeholder="z.B. GROSSBÜHNEN & LICHT-DESIGN" className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1 text-white text-[11px]" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[8px] text-purple-400 uppercase block font-bold">Externe Internet-Bild URL</label>
+                <input type="text" name="slide2_url" value={localFields.slide2_url || ''} onChange={handleInplaceChange} placeholder="https://..." className="w-full bg-slate-950 border border-purple-500/20 rounded-lg px-2.5 py-1 text-purple-300 text-[11px]" />
+              </div>
+            </div>
+
+            {/* CONFIG SLIDE 3 */}
+            <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-950 space-y-2">
+              <span className="text-cyan-400 text-[8px] font-black block">// SLIDE 3 CONFIGURATION</span>
+              <div className="space-y-1">
+                <label className="text-[8px] text-slate-500 uppercase block">Fette Hauptüberschrift</label>
+                <input type="text" name="slide3_line1" value={localFields.slide3_line1 || ''} onChange={handleInplaceChange} placeholder="z.B. GALA & CLUB-BETREUUNG" className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1 text-white text-[11px]" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[8px] text-slate-500 uppercase block">Unterüberschrift (Cyan)</label>
+                <input type="text" name="slide3_line2" value={localFields.slide3_line2 || ''} onChange={handleInplaceChange} placeholder="z.B. PERFEKTER SOUND & ATMOSPHÄRE" className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1 text-white text-[11px]" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[8px] text-purple-400 uppercase block font-bold">Externe Internet-Bild URL</label>
+                <input type="text" name="slide3_url" value={localFields.slide3_url || ''} onChange={handleInplaceChange} placeholder="https://..." className="w-full bg-slate-950 border border-purple-500/20 rounded-lg px-2.5 py-1 text-purple-300 text-[11px]" />
+              </div>
+            </div>
+
+            {/* CONFIG SLIDE 4 */}
+            <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-950 space-y-2">
+              <span className="text-cyan-400 text-[8px] font-black block">// SLIDE 4 CONFIGURATION</span>
+              <div className="space-y-1">
+                <label className="text-[8px] text-slate-500 uppercase block">Fette Hauptüberschrift</label>
+                <input type="text" name="slide4_line1" value={localFields.slide4_line1 || ''} onChange={handleInplaceChange} placeholder="z.B. FESTIVAL SETUP" className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1 text-white text-[11px]" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[8px] text-slate-500 uppercase block">Unterüberschrift (Cyan)</label>
+                <input type="text" name="slide4_line2" value={localFields.slide4_line2 || ''} onChange={handleInplaceChange} placeholder="z.B. ZUVERLÄSSIGE SYSTEMTECHNIK" className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1 text-white text-[11px]" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[8px] text-purple-400 uppercase block font-bold">Externe Internet-Bild URL</label>
+                <input type="text" name="slide4_url" value={localFields.slide4_url || ''} onChange={handleInplaceChange} placeholder="https://..." className="w-full bg-slate-950 border border-purple-500/20 rounded-lg px-2.5 py-1 text-purple-300 text-[11px]" />
+              </div>
+            </div>
+
           </div>
-        )}
+          <button type="button" onClick={handleInplaceSave} className="w-full bg-amber-400 text-slate-950 font-black h-8 rounded-xl uppercase tracking-wider text-[10px] cursor-pointer shadow-md transition-transform hover:scale-[1.005]">Cloud-Ticker einbrennen ✓</button>
+        </div>
+      )}
 
         {/* Text-Overlays unten links */}
         <div className="absolute bottom-10 left-10 z-10 pointer-events-none">
