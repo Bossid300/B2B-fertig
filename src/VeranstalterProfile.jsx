@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import CrewRequestCenter from './CrewRequestCenter';
+import ProfileHeaderBox from './components/ProfileHeaderBox'; // Ganz oben importieren
 
 export default function VeranstalterProfile({ ticketName, onNavigate }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -132,9 +133,15 @@ export default function VeranstalterProfile({ ticketName, onNavigate }) {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl relative">
-      
-      {/* 📡 AUTOMATISCHES CREW-REQUEST-CENTER */}
-      <CrewRequestCenter currentProfileName={ticketName} />
+          {/* BOX 1: Deine ausgelagerte Master-HeaderBox wird hier als unzerstörbarer Anker gezündet! */}
+          <ProfileHeaderBox
+            currentProfileName={ticketName}
+            localFields={localFields}
+            isFavorite={isFavorite}
+            handleToggleFavorite={handleToggleFavorite}
+          />
+
+
 
       {/* 🌌 INTERAKTIVER CYBERPUNK-BILDER-SLIDER MIT PFEILEN */}
       <div className="h-64 w-full rounded-2xl overflow-hidden bg-slate-900 border border-slate-800/60 relative mb-6 group">

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import CrewRequestCenter from './CrewRequestCenter';
 import ProfileHeaderBox from './components/ProfileHeaderBox'; // Ganz oben importieren
 
 export default function TechnikerProfile({ ticketName, onNavigate }) {
@@ -148,8 +149,9 @@ export default function TechnikerProfile({ ticketName, onNavigate }) {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl relative">
-      {/* 🔥 BOX 1: Deine ausgelagerte Master-Headerbox wird hier als unzerstörbarer Anker gezündet! */}
+
       <ProfileHeaderBox currentProfileName={ticketName} />
+      <CrewRequestCenter currentProfileName={ticketName} />
 
       {/* 🌌 INTERAKTIVER CYBERPUNK-BILDER-SLIDER MIT PFEILEN */}
       <div className="h-64 w-full rounded-2xl overflow-hidden bg-slate-900 border border-slate-800/60 relative mb-6 group">

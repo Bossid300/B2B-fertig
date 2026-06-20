@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import CrewRequestCenter from './CrewRequestCenter';
+import ProfileHeaderBox from './components/ProfileHeaderBox'; // Ganz oben importieren
 
 export default function VerleiherProfile({ ticketName, onNavigate }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -134,7 +136,10 @@ export default function VerleiherProfile({ ticketName, onNavigate }) {
   // 🪐 HIER STARTET EUER DESIGN-GERÜST:
   return (
     <div className="max-w-4xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl relative">
-            
+
+      <ProfileHeaderBox currentProfileName={ticketName} />
+      <CrewRequestCenter currentProfileName={ticketName} />
+
       {/* ========================================================================= */}
       {/* HEADER & ASSISTENT                                                        */}
       {/* ========================================================================= */}
