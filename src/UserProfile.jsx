@@ -346,6 +346,7 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
       <ProfileHeaderBox currentProfileName={ticketName} />
       <CrewRequestCenter currentProfileName={ticketName} />
 
+
       {/* ========================================================================= */}
       {/* HEADER & ASSISTENT                                                        */}
       {/* ========================================================================= */}

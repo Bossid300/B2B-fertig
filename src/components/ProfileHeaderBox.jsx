@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Pencil, X, Shield, Music, Landmark, Briefcase, MessageSquare, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil, X, Shield, Music, Landmark, Briefcase, MessageSquare } from 'lucide-react';
 
-export default function ProfileHeaderBox({ currentProfileName, editSection, setEditSection }) {
+export default function ProfileHeaderBox({ currentProfileName, editSection, setEditSection, localFields, handleInplaceChange, handleInplaceSave, isFavorite, handleToggleFavorite, setView, onNavigateToStep }) {
+  
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isRequestMaskOpen, setIsRequestMaskOpen] = useState(false);
   const [myProjects, setMyProjects] = useState([]);
-  
-  // Autarke Zustände für Favoriten und Profildaten
   const [profileData, setProfileData] = useState(null);
-  const [isFavorite, setIsFavorite] = useState(false);
 
   const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
   const isMyOwnProfile = targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+  const canEditSlider = isMyOwnProfile;
 
-  // 1. AUTARKER DATA-LOADER: Holt sich die Profildaten direkt aus gigsda_profiles
+  // Lädt die Profildaten für Fremdprofile
   useEffect(() => {
     const savedProfiles = localStorage.getItem('gigsda_profiles');
     if (savedProfiles) {
@@ -23,30 +22,7 @@ export default function ProfileHeaderBox({ currentProfileName, editSection, setE
           const found = allProfiles.find(
             p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
           );
-          if (found) {
-            setProfileData(found);
-          }
-        }
-      } catch (e) {
-        console.error("Fehler beim Laden des Profils:", e);
-      }
-    }
-  }, [targetUser, editSection]);
-
-  // 2. AUTARKES FAVORITEN-UHRWERK: Liest den Zustand direkt aus gigsda_favorites (Wie von früher vorgesehen!)
-  useEffect(() => {
-    const savedFavs = localStorage.getItem('gigsda_favorites');
-    if (savedFavs) {
-      try {
-        const favsList = JSON.parse(savedFavs) || [];
-        if (Array.isArray(favsList)) {
-          // Prüft, ob der Name des Profils (oder ein Objekt mit dem Namen) in den Favoriten existiert
-          const foundFav = favsList.some(fav => {
-            if (!fav) return false;
-            const favName = (typeof fav === 'string' ? fav : fav.name || '').trim().toLowerCase();
-            return favName === targetUser.trim().toLowerCase();
-          });
-          setIsFavorite(foundFav);
+          if (found) setProfileData(found);
         }
       } catch (e) {
         console.error(e);
@@ -54,7 +30,7 @@ export default function ProfileHeaderBox({ currentProfileName, editSection, setE
     }
   }, [targetUser]);
 
-  // LÄDT DEINE EIGENEN B2B-PROJEKTE FÜR DIE AUSWAHLMASKE
+  // Lädt die B2B-Projekte für die Anfragemaske
   useEffect(() => {
     if (isRequestMaskOpen) {
       const savedProjects = localStorage.getItem('gigsda_projects');
@@ -64,116 +40,36 @@ export default function ProfileHeaderBox({ currentProfileName, editSection, setE
     }
   }, [isRequestMaskOpen]);
 
-  // KLICK-HANDLER FÜR DEN AUTARKEN STERN (Brennt die Daten fehlerfrei ein oder löscht sie)
-  const handleLocalToggleFavorite = () => {
-    const rawFavs = localStorage.getItem('gigsda_favorites');
-    let favsList = [];
-    try { favsList = rawFavs ? JSON.parse(rawFavs) : []; } catch (e) { favsList = []; }
-    if (!Array.isArray(favsList)) favsList = [];
-
-    const currentUserName = profileData?.name || targetUser;
-
-    if (isFavorite) {
-      // Entfernen aus gigsda_favorites
-      favsList = favsList.filter(fav => {
-        if (!fav) return false;
-        const favName = typeof fav === 'string' ? fav : fav.name;
-        return favName?.trim().toLowerCase() !== currentUserName.trim().toLowerCase();
-      });
-      setIsFavorite(false);
-    } else {
-      // Hinzufügen als sauberes B2B-Objekt für deine Tabelle
-      favsList.push({
-        name: currentUserName,
-        role: profileData?.role || profileData?.user_type || "Künstler",
-        city: profileData?.city || "Nicht hinterlegt",
-        note: profileData?.note || "Gemerktes Profil",
-        avatarUrl: profileData?.avatarUrl || ""
-      });
-      setIsFavorite(true);
-    }
-    localStorage.setItem('gigsda_favorites', JSON.stringify(favsList));
-  };
-
-  // LIVE-AMPEL PROTOKOLL: Schreibt das Profil sofort als "pending" in beide Tabellen!
+  // B2B Anfragen absenden
   const submitB2BRequest = (projectTitle) => {
     if (!projectTitle) return;
-
-    // 1. Lade deine echte Projektdatenbank
-    const rawEvents = localStorage.getItem('gigsda_events');
-    if (!rawEvents) return;
-
+    const rawRequests = localStorage.getItem('gigsda_crew_requests') || '[]';
     try {
-      let eventsList = JSON.parse(rawEvents);
-      if (!Array.isArray(eventsList)) return;
-
-      // Findet das Projekt unempfindlich gegenüber Groß- und Kleinschreibung
-      const targetEvent = eventsList.find(
-        evt => evt && evt.title && evt.title.trim().toLowerCase() === projectTitle.trim().toLowerCase()
-      );
-
-      if (!targetEvent) return;
-
-      if (!Array.isArray(targetEvent.crew)) {
-        targetEvent.crew = [];
-      }
-
-      const currentEntityName = activeFields?.display_name || activeFields?.name || targetUser || "Unbekannte Crew";
+      let requestsList = JSON.parse(rawRequests);
+      if (!Array.isArray(requestsList)) requestsList = [];
+      const newRequestId = `REQ-${Math.floor(1000 + Math.random() * 9000)}`;
+      const currentEntityName = activeFields?.display_name || activeFields?.name || targetUser;
       const currentLoggedUser = localStorage.getItem('gigsda_user_name') || 'Grober Lackl';
 
-      // Prüfen, ob der Mitarbeiter schon in der Crew dieses Events drinsteckt
-      const alreadyInCrew = targetEvent.crew.some(
-        member => member && member.name && member.name.trim().toLowerCase() === currentEntityName.trim().toLowerCase()
-      );
-
-      if (alreadyInCrew) {
-        alert(`${currentEntityName} ist bereits in der Crew-Liste hinterlegt.`);
-        setIsRequestMaskOpen(false);
-        return;
-      }
-
-      // 2. Schreibt den Eintrag SOFORT als "pending" in das Event (Mitarbeiter wird sofort gelistet!)
-      targetEvent.crew.push({
-        name: currentEntityName,
-        role: activeFields?.role || activeFields?.user_type || "Crew",
-        status: "pending", // Startet als offene gelbe Anfrage direkt auf dem Dashboard
-        city: activeFields?.city || "Nicht hinterlegt",
-        addedAt: new Date().toLocaleDateString('de-DE')
+      requestsList.push({
+        requestId: newRequestId,
+        eventName: projectTitle,
+        date: "25.9.2026",
+        requestedProfile: currentEntityName,
+        requesterName: currentLoggedUser,
+        status: 'pending'
       });
 
-      localStorage.setItem('gigsda_events', JSON.stringify(eventsList));
-
-      // 3. Schreibt den Eintrag parallel fehlerfrei in gigsda_crew_requests (MIT REQUESTERNAME)
-      const rawRequests = localStorage.getItem('gigsda_crew_requests') || '[]';
-      let requestsList = JSON.parse(rawRequests);
-      if (Array.isArray(requestsList)) {
-        requestsList.push({
-          requestId: `REQ-${Math.floor(1000 + Math.random() * 9000)}`,
-          eventName: projectTitle,
-          date: new Date().toLocaleDateString('de-DE'),
-          requestedProfile: currentEntityName,
-          requesterName: currentLoggedUser, // Sichert den Absender, damit die Kette nicht blockiert
-          status: 'pending'
-        });
-        localStorage.setItem('gigsda_crew_requests', JSON.stringify(requestsList));
-      }
-
+      localStorage.setItem('gigsda_crew_requests', JSON.stringify(requestsList));
       alert(`B2B-Crew-Anfrage für '${projectTitle}' erfolgreich übermittelt! 📐`);
-      
-      // Schließt das lila Overlay lautlos, Seite bleibt taghell stehen
       setIsRequestMaskOpen(false);
-
-      // UI-Schubs: Aktualisiert das CrewRequestCenter live auf dem Bildschirm
       window.dispatchEvent(new Event('storage'));
-
     } catch (e) {
-      console.error("Fehler im Gigsda-Crew-Protokoll:", e);
+      console.error(e);
     }
   };
 
-
-  // Fallback-Sicherung für die Optik
-  const activeFields = profileData || { name: targetUser, role: "Künstler" };
+  const activeFields = profileData || localFields || { name: targetUser, role: "Künstler" };
 
   const getRoleBadge = (role) => {
     const cleanRole = role ? role.trim().toLowerCase() : 'künstler';
@@ -195,7 +91,7 @@ export default function ProfileHeaderBox({ currentProfileName, editSection, setE
   return (
     <div className="w-full max-w-5xl mx-auto space-y-3 mb-6 text-white select-none">
       
-      {/* ── BACKSTAGE-PORTFOLIO CONTROLLER ── */}
+      {/* CONTROLLER BAR */}
       <div className="w-full bg-slate-950 border border-slate-900 p-4 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
         <div className="flex items-center gap-3">
           <span className="text-xl">⭐</span>
@@ -206,19 +102,34 @@ export default function ProfileHeaderBox({ currentProfileName, editSection, setE
         </div>
         
         <div className="flex items-center gap-2">
-          {/* BUTTON 1: ANFRAGE_SENDEN */}
           <button type="button" onClick={() => setIsRequestMaskOpen(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-950/40 border border-purple-900/50 text-purple-400 text-xs font-mono hover:border-purple-500 transition-all cursor-pointer shadow-md"><MessageSquare size={12} /> // ANFRAGE_SENDEN</button>
+          <button type="button" onClick={handleToggleFavorite} className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-xs font-mono transition-all cursor-pointer shadow-md ${isFavorite ? 'bg-amber-950/40 border-amber-500 text-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.1)]' : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'}`}><span>{isFavorite ? '★' : '☆'}</span> {isFavorite ? 'FAVORIT_AKTIV' : '// ZU_FAVORITEN'}</button>
 
-          {/* BUTTON 2: ZU_FAVORITEN (VÖLLIG AUTARK) */}
+          {/* BUTTON: ZUM FAVORITEN-POOL (GLOBALER DIREKT-TRIGGER – UNKAPUTTBAR!) */}
           <button 
-            type="button"
-            onClick={handleLocalToggleFavorite}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-xs font-mono transition-all cursor-pointer shadow-md ${isFavorite ? 'bg-amber-950/40 border-amber-500 text-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.1)]' : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'}`}
+            type="button" 
+            onClick={() => {
+              console.log("📡 Globaler Direkt-Push -> Schalte um auf crewfavoriten...");
+              
+              // 1. Schreibt die Ansicht direkt in den LocalStorage, damit das System sie beim Laden kennt
+              localStorage.setItem('gigsda_current_view', 'crewfavoriten');
+              
+              // 2. Falls ein lokales setView da ist, nutzen wir es als Anschubser
+              if (typeof setView === 'function') {
+                setView('crewfavoriten');
+              }
+              
+              // 3. DER UNBESTECHLICHE REFRESH: Zwingt deine App.jsx (Zeile 508), das Profil sofort 
+              // auszublenden und deine CrewFavoritenListe taghell auf den Bildschirm zu brennen!
+              window.location.reload();
+            }} 
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-cyan-900/50 bg-cyan-950/20 text-cyan-400 text-xs font-mono hover:border-cyan-500 transition-all cursor-pointer shadow-md"
           >
-            <span>{isFavorite ? '★' : '☆'}</span> {isFavorite ? 'FAVORIT_AKTIV' : '// ZU_FAVORITEN'}
+            ⭐ ZUM FAVORITEN-POOL
           </button>
 
-          {/* BUTTON 3: ZURÜCK */}
+
+
           <button type="button" onClick={() => window.history.back()} className="flex items-center gap-1 px-4 py-2 rounded-xl bg-slate-900/80 border border-slate-800 text-white text-xs font-mono cursor-pointer">&lt; Zurück</button>
         </div>
       </div>
@@ -234,22 +145,98 @@ export default function ProfileHeaderBox({ currentProfileName, editSection, setE
             <div className="pt-1"><div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded border text-[10px] font-mono font-bold uppercase tracking-wider ${badge.style}`}>{badge.icon} {badge.text}</div></div>
           </div>
 
-          <button onClick={() => setCurrentSlide(p => (p - 1 + slides.length) % slides.length)} className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-950/60 border border-slate-800 text-white hover:bg-slate-900 opacity-0 group-hover:opacity-100 z-20 cursor-pointer">&lt;</button>
-          <button onClick={() => setCurrentSlide(p => (p + 1) % slides.length)} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-950/60 border border-slate-800 text-white hover:bg-slate-900 opacity-0 group-hover:opacity-100 z-20 cursor-pointer">&gt;</button>
+          <button type="button" onClick={() => setCurrentSlide(p => (p - 1 + slides.length) % slides.length)} className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-950/60 border border-slate-800 text-white hover:bg-slate-900 opacity-0 group-hover:opacity-100 z-20 cursor-pointer">&lt;</button>
+          <button type="button" onClick={() => setCurrentSlide(p => (p + 1) % slides.length)} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-950/60 border border-slate-800 text-white hover:bg-slate-900 opacity-0 group-hover:opacity-100 z-20 cursor-pointer">&gt;</button>
+
+          {/* SLIDER EDITIEREN BUTTON (DER UNKAPUTTBARE MASTER-TRIGGER) */}
+          {canEditSlider && (
+            <button 
+              type="button"
+              onClick={() => {
+                // 1. Schließt radikal die lila Maske, um die Bahn frei zu machen
+                setIsRequestMaskOpen(false);
+                
+                // 2. Öffnet die Ticker-Konfiguration ohne Verzögerung
+                if (typeof setEditSection === 'function') {
+                  setEditSection('slider');
+                }
+              }} 
+              className="absolute top-4 right-4 flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 border border-slate-700 text-cyan-400 text-xs font-mono hover:border-cyan-500 shadow-lg backdrop-blur-sm z-30 cursor-pointer"
+            >
+              ✏️ SLIDER EDITIEREN
+            </button>
+          )}
         </div>
 
-        {/* ── B2B ANFRAGEMASKE ── */}
+        {/* B2B ANFRAGEMASKE */}
         {isRequestMaskOpen && (
           <div className="absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-md p-6 font-mono text-sm text-slate-300 overflow-y-auto rounded-3xl">
-            <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-2"><h3 className="text-purple-400 text-xs tracking-widest font-bold uppercase">// CREW-REQUISITION PROTOCOL</h3><button onClick={() => setIsRequestMaskOpen(false)} className="text-slate-500 hover:text-white cursor-pointer">✕</button></div>
+            <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-2"><h3 className="text-purple-400 text-xs tracking-widest font-bold uppercase">// CREW-REQUISITION PROTOCOL</h3><button type="button" onClick={() => setIsRequestMaskOpen(false)} className="text-slate-500 hover:text-white cursor-pointer">✕</button></div>
             <div className="space-y-4">
               <div className="p-4 bg-purple-950/10 border border-purple-900/30 rounded-xl text-xs text-purple-300">Wähle das B2B-Zielprojekt aus, für das du <span className="text-white font-bold">{activeFields.display_name || activeFields.name}</span> anfragen möchtest.</div>
               <div className="grid grid-cols-1 gap-2 max-h-[180px] overflow-y-auto pr-1">
                 {myProjects.length > 0 ? (myProjects.map((proj, idx) => (
-                  <button key={idx} onClick={() => submitB2BRequest(proj.title || proj.name)} className="w-full text-left p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-white hover:border-purple-500 hover:bg-purple-950/10 transition-all cursor-pointer">📐 Projekt: <span className="text-purple-400 font-bold">{proj.title || proj.name}</span></button>
+                  <button key={idx} type="button" onClick={() => submitB2BRequest(proj.title || proj.name)} className="w-full text-left p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-white hover:border-purple-500 hover:bg-purple-950/10 transition-all cursor-pointer">📐 Projekt: <span className="text-purple-400 font-bold">{proj.title || proj.name}</span></button>
                 ))) : (<div className="text-slate-500 text-xs">// KEINE AKTIVEN PROJEKTE GEFUNDEN</div>)}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ── 2. CLOUD-TICKER CONFIGURATION MASKE (ENDGÜLTIG BEFREIT) ── */}
+        {editSection === 'slider' && (
+          <div className="absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-md p-6 font-mono text-sm text-slate-300 overflow-y-auto rounded-3xl">
+            <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-2">
+              <h3 className="text-cyan-400 text-xs tracking-widest font-bold uppercase">// CLOUD-TICKER CONFIGURATION MASKE</h3>
+              <button type="button" onClick={() => { if (typeof setEditSection === 'function') setEditSection(null); }} className="text-slate-500 hover:text-white cursor-pointer">✕</button>
+            </div>
+            <form onSubmit={(e) => { e.preventDefault(); if (handleInplaceSave) handleInplaceSave(); }} className="space-y-4 pb-4">
+              
+              {/* SLIDE 1 */}
+              <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl space-y-2">
+                <div className="text-cyan-400 text-[9px] tracking-wide font-bold">// SLIDE 1 PARAMETER</div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <input type="text" name="slide1_url" placeholder="Bild URL" value={localFields?.slide1_url || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" />
+                  <input type="text" name="slide1_line1" placeholder="Subline" value={localFields?.slide1_line1 || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" />
+                  <input type="text" name="slide1_line2" placeholder="Headline" value={localFields?.slide1_line2 || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" />
+                </div>
+              </div>
+
+              {/* SLIDE 2 */}
+              <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl space-y-2">
+                <div className="text-cyan-400 text-[9px] tracking-wide font-bold">// SLIDE 2 PARAMETER</div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <input type="text" name="slide2_url" placeholder="Bild URL" value={localFields?.slide2_url || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" />
+                  <input type="text" name="slide2_line1" placeholder="Subline" value={localFields?.slide2_line1 || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" />
+                  <input type="text" name="slide2_line2" placeholder="Headline" value={localFields?.slide2_line2 || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" />
+                </div>
+              </div>
+
+              {/* SLIDE 3 */}
+              <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl space-y-2">
+                <div className="text-cyan-400 text-[9px] tracking-wide font-bold">// SLIDE 3 PARAMETER</div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <input type="text" name="slide3_url" placeholder="Bild URL" value={localFields?.slide3_url || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" />
+                  <input type="text" name="slide3_line1" placeholder="Subline" value={localFields?.slide3_line1 || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" />
+                  <input type="text" name="slide3_line2" placeholder="Headline" value={localFields?.slide3_line2 || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" />
+                </div>
+              </div>
+
+              {/* SLIDE 4 */}
+              <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl space-y-2">
+                <div className="text-cyan-400 text-[9px] tracking-wide font-bold">// SLIDE 4 PARAMETER</div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                  <input type="text" name="slide4_url" placeholder="Bild URL" value={localFields?.slide4_url || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" />
+                  <input type="text" name="slide4_line1" placeholder="Subline" value={localFields?.slide4_line1 || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" />
+                  <input type="text" name="slide4_line2" placeholder="Headline" value={localFields?.slide4_line2 || ''} onChange={handleInplaceChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2 border-t border-slate-900">
+                <button type="button" onClick={() => { if (typeof setEditSection === 'function') setEditSection(null); }} className="px-4 py-2 rounded border border-slate-800 text-slate-400 text-xs uppercase hover:text-white cursor-pointer">Abbrechen</button>
+                <button type="submit" className="px-5 py-2 rounded bg-amber-400 text-slate-950 text-xs font-black uppercase tracking-wider hover:bg-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.3)] cursor-pointer">Cloud-Ticker einbrennen ✓</button>
+              </div>
+            </form>
           </div>
         )}
       </div>
