@@ -343,9 +343,15 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
   return (
     <div className="max-w-3xl mx-auto space-y-6 my-4 p-4 font-mono text-xs text-slate-300 animate-fade-in">
       
-      <ProfileHeaderBox currentProfileName={ticketName} />
       <CrewRequestCenter currentProfileName={ticketName} />
-
+      <ProfileHeaderBox
+        currentProfileName={ticketName}
+        localFields={getProfileData()}
+        isFavorite={isFavorite}
+        handleToggleFavorite={handleToggleFavorite}
+        editSection={editSection}       // Der lokale State aus Zeile 72
+        setEditSection={setEditSection} // Der lokale State aus Zeile 72
+      />
 
       {/* ========================================================================= */}
       {/* HEADER & ASSISTENT                                                        */}

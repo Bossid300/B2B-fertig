@@ -92,7 +92,7 @@ export default function ProfileHeaderBox({ currentProfileName, editSection, setE
     <div className="w-full max-w-5xl mx-auto space-y-3 mb-6 text-white select-none">
       
       {/* CONTROLLER BAR */}
-      <div className="w-full bg-slate-950 border border-slate-900 p-4 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl">
+      <div className="bg-gradient-to-r from-purple-950/20 to-slate-900/20 border border-purple-500/10 rounded-3xl p-5 space-y-4 shadow-xl">
         <div className="flex items-center gap-3">
           <span className="text-xl">⭐</span>
           <div className="flex flex-col">
@@ -102,8 +102,12 @@ export default function ProfileHeaderBox({ currentProfileName, editSection, setE
         </div>
         
         <div className="flex items-center gap-2">
-          <button type="button" onClick={() => setIsRequestMaskOpen(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-950/40 border border-purple-900/50 text-purple-400 text-xs font-mono hover:border-purple-500 transition-all cursor-pointer shadow-md"><MessageSquare size={12} /> // ANFRAGE_SENDEN</button>
-          <button type="button" onClick={handleToggleFavorite} className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-xs font-mono transition-all cursor-pointer shadow-md ${isFavorite ? 'bg-amber-950/40 border-amber-500 text-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.1)]' : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'}`}><span>{isFavorite ? '★' : '☆'}</span> {isFavorite ? 'FAVORIT_AKTIV' : '// ZU_FAVORITEN'}</button>
+          <button type="button" onClick={() => setIsRequestMaskOpen(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-950/40 border border-purple-900/50 text-purple-400 text-xs font-mono hover:border-purple-500 transition-all cursor-pointer shadow-md"><MessageSquare size={12} />
+          ANFRAGE SENDEN
+          </button>
+          <button type="button" onClick={handleToggleFavorite} className={`flex items-center gap-1.5 px-4 py-2 rounded-xl border text-xs font-mono transition-all cursor-pointer shadow-md ${isFavorite ? 'bg-amber-950/40 border-amber-500 text-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.1)]' : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'}`}>
+            <span>{isFavorite ? '★' : '☆'}
+            </span> {isFavorite ? 'FAVORIT AKTIV' : 'ZU FAVORITEN'}</button>
 
           {/* BUTTON: ZUM FAVORITEN-POOL (GLOBALER DIREKT-TRIGGER – UNKAPUTTBAR!) */}
           <button 
@@ -123,14 +127,14 @@ export default function ProfileHeaderBox({ currentProfileName, editSection, setE
               // auszublenden und deine CrewFavoritenListe taghell auf den Bildschirm zu brennen!
               window.location.reload();
             }} 
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-cyan-900/50 bg-cyan-950/20 text-cyan-400 text-xs font-mono hover:border-cyan-500 transition-all cursor-pointer shadow-md"
+            className="flex items-center gap-1 px-4 py-2 rounded-xl border border-cyan-900/50 bg-cyan-950/20 text-cyan-400 text-xs font-mono hover:border-cyan-500 transition-all cursor-pointer shadow-md"
           >
-            ⭐ ZUM FAVORITEN-POOL
+            ⭐ FAVORITEN POOL
           </button>
 
-
-
-          <button type="button" onClick={() => window.history.back()} className="flex items-center gap-1 px-4 py-2 rounded-xl bg-slate-900/80 border border-slate-800 text-white text-xs font-mono cursor-pointer">&lt; Zurück</button>
+          <button type="button" onClick={() => window.history.back()} className="flex items-center gap-1 px-4 py-2 rounded-xl bg-slate-900/80 border border-slate-800 text-white text-xs font-mono cursor-pointer">&lt; 
+            Zurück
+          </button>
         </div>
       </div>
 
@@ -171,7 +175,7 @@ export default function ProfileHeaderBox({ currentProfileName, editSection, setE
         {/* B2B ANFRAGEMASKE */}
         {isRequestMaskOpen && (
           <div className="absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-md p-6 font-mono text-sm text-slate-300 overflow-y-auto rounded-3xl">
-            <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-2"><h3 className="text-purple-400 text-xs tracking-widest font-bold uppercase">// CREW-REQUISITION PROTOCOL</h3><button type="button" onClick={() => setIsRequestMaskOpen(false)} className="text-slate-500 hover:text-white cursor-pointer">✕</button></div>
+            <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-2"><h3 className="text-purple-400 text-xs tracking-widest font-bold uppercase">// CREW-REQUISITION PROTOCOL</h3><button type="button" onClick={() => setIsRequestMaskOpen(false)} className="text-slate-500 hover:text-white cursor-pointer">schließen</button></div>
             <div className="space-y-4">
               <div className="p-4 bg-purple-950/10 border border-purple-900/30 rounded-xl text-xs text-purple-300">Wähle das B2B-Zielprojekt aus, für das du <span className="text-white font-bold">{activeFields.display_name || activeFields.name}</span> anfragen möchtest.</div>
               <div className="grid grid-cols-1 gap-2 max-h-[180px] overflow-y-auto pr-1">
@@ -188,7 +192,7 @@ export default function ProfileHeaderBox({ currentProfileName, editSection, setE
           <div className="absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-md p-6 font-mono text-sm text-slate-300 overflow-y-auto rounded-3xl">
             <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-2">
               <h3 className="text-cyan-400 text-xs tracking-widest font-bold uppercase">// CLOUD-TICKER CONFIGURATION MASKE</h3>
-              <button type="button" onClick={() => { if (typeof setEditSection === 'function') setEditSection(null); }} className="text-slate-500 hover:text-white cursor-pointer">✕</button>
+              <button type="button" onClick={() => { if (typeof setEditSection === 'function') setEditSection(null); }} className="text-slate-500 hover:text-white cursor-pointer">schließen</button>
             </div>
             <form onSubmit={(e) => { e.preventDefault(); if (handleInplaceSave) handleInplaceSave(); }} className="space-y-4 pb-4">
               
