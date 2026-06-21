@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import CrewRequestCenter from './CrewRequestCenter'; // 👈 Das B2B-Uhrwerk laden
+import CrewRequestCenter from './CrewRequestCenter';
+import ProfileHeaderBox from './components/ProfileHeaderBox'; // Ganz oben importieren
 
-export default function CaterProfile({ ticketName, onNavigate }) {
+export default function CaterProfile({ onBack, ticketName, setView, isOwner, onNavigate }) {
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
   
   // 🔒 CRASH-SICHERER COCKPIT-SPEICHER FÜR DEN CATERER
   const [localFields, setLocalFields] = useState({
@@ -12,10 +12,6 @@ export default function CaterProfile({ ticketName, onNavigate }) {
     project_name: '',      // Firmenname (e.g. "Braunau Premium Catering")
     vorname: '', nachname: '', website: '', city: '', plz: '', street: '', phone: '', email: '',
     avatarUrl: '', 
-    bannerUrl: '',   // 🔒 Visitenkarte & Slide 1
-    slide1_url: '',  // 🖼️ Slider Bild 2
-    slide2_url: '',  // 🖼️ Slider Bild 3
-    slide3_url: '',  // 🖼️ Slider Bild 4
     availability: '', 
     role: 'Catering', // Fest auf Daniels System-ID verdrahtet
     
@@ -42,8 +38,7 @@ export default function CaterProfile({ ticketName, onNavigate }) {
       
       const freshData = currentProj || { 
         id: "CATER-" + Math.floor(Math.random() * 9000 + 1000), 
-        name: ticketName || '', project_name: '', vorname: '', nachname: '', website: '', city: '', role: 'Catering',
-        bannerUrl: '', slide1_url: '', slide2_url: '', slide3_url: '', avatarUrl: ''
+        name: ticketName || '', project_name: '', vorname: '', nachname: '', website: '', city: '', role: 'Catering', avatarUrl: ''
       };
       
       setUserData(freshData);
@@ -59,10 +54,6 @@ export default function CaterProfile({ ticketName, onNavigate }) {
         street: freshData?.street || '',
         plz: freshData?.plz || '',
         avatarUrl: freshData?.avatarUrl || '',
-        bannerUrl: freshData?.bannerUrl || '',
-        slide1_url: freshData?.slide1_url || '',
-        slide2_url: freshData?.slide2_url || '',
-        slide3_url: freshData?.slide3_url || '',
         availability: freshData?.availability || '',
         foodForm: freshData?.foodForm || '',
         foodMenu: freshData?.foodMenu || '',
@@ -81,16 +72,6 @@ export default function CaterProfile({ ticketName, onNavigate }) {
     } catch (e) { console.error("Fehler beim Caterer-Load:", e); }
   }, [ticketName]);
 
-  // 🎛️ SLIDER-ARRAY (VISITENKARTE ALS ERSTES BILD)
-  const slides = [
-    localFields.bannerUrl || 'https://unsplash.com', 
-    localFields.slide1_url || 'https://unsplash.com',
-    localFields.slide2_url || 'https://unsplash.com',
-    localFields.slide3_url || 'https://unsplash.com'
-  ];
-
-  const nextSlide = () => { setCurrentSlide((prev) => (prev + 1) % slides.length); };
-  const prevSlide = () => { setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length); };
 
   const handleInplaceChange = (e) => {
     const { name, value } = e.target;
@@ -153,27 +134,12 @@ export default function CaterProfile({ ticketName, onNavigate }) {
       
       {/* 📡 AUTOMATISCHES CREW-REQUEST-CENTER (BLITZT NUR BEI NEUEN ANFRAGEN AUF) */}
       <CrewRequestCenter currentProfileName={ticketName} />
-
-      {/* 🌌 INTERAKTIVER BILDER-SLIDER */}
-      <div className="h-44 w-full rounded-2xl overflow-hidden bg-slate-900 border border-slate-800/60 relative mb-6 group">
-        <img src={slides[currentSlide]} alt={`Cater Slide ${currentSlide + 1}`} className="w-full h-full object-cover opacity-20 transition-all duration-500" />
-        <button onClick={prevSlide} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-slate-950/70 hover:bg-slate-950 border border-slate-800 text-slate-400 hover:text-cyan-400 w-7 h-7 rounded-xl flex items-center justify-center transition-all cursor-pointer font-black text-xs">‹</button>
-        <button onClick={nextSlide} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-slate-950/70 hover:bg-slate-950 border border-slate-800 text-slate-400 hover:text-cyan-400 w-7 h-7 rounded-xl flex items-center justify-center transition-all cursor-pointer font-black text-xs">›</button>
-
-        <div className="absolute bottom-4 left-4 z-10">
-          <span className="text-[8px] bg-emerald-500/10 border border-emerald-500 text-emerald-400 font-bold px-2 py-0.5 rounded-md uppercase tracking-widest shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-            🍽️ CATERING / GASTRO PARTNER
-          </span>
-          <h1 className="text-lg font-black uppercase text-white tracking-wide mt-1">{localFields.project_name || 'Unbenannter Gastro-Service'}</h1>
-        </div>
-
-        <div className="absolute bottom-4 right-4 z-10 flex gap-1">
-          {slides.map((_, idx) => (
-            <div key={idx} className={`h-1 transition-all duration-300 ${idx === currentSlide ? 'w-4 bg-emerald-400' : 'w-1 bg-slate-700'}`} />
-          ))}
-        </div>
-      </div>
-
+      <ProfileHeaderBox
+        currentProfileName={ticketName}
+        localFields={localFields} // oder wie dein Daten-State in dieser Datei heißt
+        isFavorite={isFavorite}
+        handleToggleFavorite={handleToggleFavorite}
+      />
 
       {/* 📊 ASYMMETRISCHES 2-SPALTEN-LAYOUT */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
@@ -184,33 +150,6 @@ export default function CaterProfile({ ticketName, onNavigate }) {
             <div className="bg-slate-950 border border-slate-900 rounded-2xl p-5 space-y-4 shadow-xl">
               <span className="text-[8px] text-emerald-400 uppercase font-black tracking-widest block">// EDIT-MODE: CATERING PROTOCOL</span>
               
-              {/* 🌌 DIE 4 PROFIL-MEDIEN INPUTS */}
-              <div className="space-y-2 pb-3 border-b border-slate-900/60 font-mono">
-                <span className="text-[8px] text-emerald-400 block tracking-widest font-black">// PROFILMEDIEN & SLIDER-CONFIG</span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <label className="text-[7px] text-slate-600 uppercase block font-bold">Profilbild / Avatar URL</label>
-                    <input type="text" name="avatarUrl" value={localFields.avatarUrl} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-white text-[10px] outline-none" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[7px] text-cyan-400 uppercase block font-bold">Visitenkarte & Slide 1 (bannerUrl)</label>
-                    <input type="text" name="bannerUrl" value={localFields.bannerUrl} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-white text-[10px] outline-none" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[7px] text-slate-600 block font-bold">Slider Bild 2 (slide1_url)</label>
-                    <input type="text" name="slide1_url" value={localFields.slide1_url} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-white text-[10px] outline-none" />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[7px] text-slate-600 block font-bold">Slider Bild 3 (slide2_url)</label>
-                    <input type="text" name="slide2_url" value={localFields.slide2_url} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-white text-[10px] outline-none" />
-                  </div>
-                  <div className="space-y-1 sm:col-span-2">
-                    <label className="text-[7px] text-slate-600 block font-bold">Slider Bild 4 (slide3_url)</label>
-                    <input type="text" name="slide3_url" value={localFields.slide3_url} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-white text-[10px] outline-none" />
-                  </div>
-                </div>
-              </div>
-
               {/* GASTRO INPUTS */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 <div className="space-y-1">

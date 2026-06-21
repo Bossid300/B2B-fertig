@@ -15,7 +15,6 @@ export default function FanProfile({ ticketName, onNavigate }) {
     city: '',
     plz: '',
     avatarUrl: '',
-    bannerUrl: '',         // Lieblings-Festival / Band Hintergrund
     favorite_genres: '',   // Musik-Vorlieben
     attended_gigs: '0',    // Erlebte Gigs Zähler
     role: 'Fan'            // Fest verdrahtet
@@ -32,7 +31,7 @@ export default function FanProfile({ ticketName, onNavigate }) {
         name: ticketName || '', 
         project_name: ticketName || '', 
         vorname: '', nachname: '', city: '', role: 'Fan',
-        bannerUrl: '', favorite_genres: 'Rock, Pop', attended_gigs: '12'
+        favorite_genres: 'Rock, Pop', attended_gigs: '12'
       };
       
       setUserData(freshData);
@@ -46,7 +45,6 @@ export default function FanProfile({ ticketName, onNavigate }) {
         city: freshData?.city || '',
         plz: freshData?.plz || '',
         avatarUrl: freshData?.avatarUrl || '',
-        bannerUrl: freshData?.bannerUrl || '',
         favorite_genres: freshData?.favorite_genres || '',
         attended_gigs: freshData?.attended_gigs || '0',
         role: 'Fan'
@@ -86,35 +84,9 @@ export default function FanProfile({ ticketName, onNavigate }) {
       <ProfileHeaderBox currentProfileName={ticketName} />
       <CrewRequestCenter currentProfileName={ticketName} />
       
-      {/* ========================================================================= */}
-      {/* HEADER & ASSISTENT                                                        */}
-      {/* ========================================================================= */}
-      <div className="bg-gradient-to-r from-purple-950/20 to-slate-900/20 border border-purple-500/10 rounded-3xl p-5 space-y-4 shadow-xl mb-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <span className="text-[8px] text-purple-400 font-bold uppercase tracking-widest block">// BACKSTAGE-PORTFOLIO CONTROLLER</span>
-            <h3 className="text-sm font-black text-white uppercase tracking-tight mt-0.5">⭐ Gigsda All-In-One Board</h3>
-          </div>
-          <button type="button" onClick={() => onNavigate('radar')} className="bg-slate-900 border border-slate-800 text-white px-3 py-1 rounded-xl text-[10px] font-bold cursor-pointer print:hidden">‹ Dashboard</button>
-        </div>
-      </div>
+
       
-      {/* 🌌 VISUELLES FAN-BANNER */}
-      <div className="h-64 w-full rounded-2xl overflow-hidden bg-slate-900 border border-slate-800/60 relative mb-6">
-        <img 
-          src={localFields.bannerUrl || 'https://unsplash.com'} 
-          alt="Fan Banner" 
-          className="w-full h-full object-cover opacity-30"
-        />
-        <div className="absolute bottom-4 left-4 z-10">
-          <span className="text-[8px] bg-purple-500/10 border border-purple-500 text-purple-400 font-bold px-2 py-0.5 rounded-md uppercase tracking-widest shadow-[0_0_10px_rgba(168,85,247,0.2)]">
-            🎟️ {localFields.role}
-          </span>
-          <h1 className="text-lg font-black uppercase text-white tracking-wide mt-1">
-            {localFields.project_name || 'Gigsda Supporter'}
-          </h1>
-        </div>
-      </div>
+
 
       {/* SYMMETRISCHES 2-SPALTEN-LAYOUT */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
@@ -147,11 +119,6 @@ export default function FanProfile({ ticketName, onNavigate }) {
                 <div className="space-y-1">
                   <label className="text-[8px] text-slate-600 uppercase block font-bold">Wohnort / Stadt</label>
                   <input type="text" name="city" value={localFields.city} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none" />
-                </div>
-                
-                <div className="space-y-1">
-                  <label className="text-[8px] text-slate-600 uppercase block font-bold">Banner-Bild URL</label>
-                  <input type="text" name="bannerUrl" value={localFields.bannerUrl} onChange={handleInplaceChange} className="w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-1.5 text-white text-[10px] outline-none" placeholder="https://..." />
                 </div>
               </div>
 

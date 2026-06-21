@@ -5,11 +5,10 @@ import ProfileHeaderBox from './components/ProfileHeaderBox'; // Ganz oben impor
 export default function DesignProfile({ ticketName, onNavigate }) {
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
   
   const [localFields, setLocalFields] = useState({
     name: ticketName || '', project_name: '', vorname: '', nachname: '', website: '', city: '', plz: '', street: '', phone: '', email: '',
-    avatarUrl: '', bannerUrl: '', slide1_url: '', slide2_url: '', slide3_url: '', availability: '', role: 'Design',
+    avatarUrl: '', availability: '', role: 'Design',
     design_focus: '', inventory_specs: '', pyro_license: '', company_uid: '', terms_conditions: ''
   });
 
@@ -28,15 +27,7 @@ export default function DesignProfile({ ticketName, onNavigate }) {
     } catch (e) { console.error(e); }
   }, [ticketName]);
 
-  const slides = [
-    localFields.bannerUrl || 'https://unsplash.com',
-    localFields.slide1_url || 'https://unsplash.com',
-    localFields.slide2_url || 'https://unsplash.com',
-    localFields.slide3_url || 'https://unsplash.com'
-  ];
 
-  const nextSlide = () => { setCurrentSlide((prev) => (prev + 1) % slides.length); };
-  const prevSlide = () => { setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length); };
   const handleInplaceChange = (e) => { setLocalFields(prev => ({ ...prev, [e.target.name]: e.target.value })); };
   // ⭐ PRÜFT, OB DIESES DESIGN BEREITS EIN FAVORIT IST
   const [isFavorite, setIsFavorite] = useState(false);
@@ -92,15 +83,7 @@ export default function DesignProfile({ ticketName, onNavigate }) {
       <ProfileHeaderBox currentProfileName={ticketName} />
       <CrewRequestCenter currentProfileName={ticketName} />
 
-      <div className="h-44 w-full rounded-2xl overflow-hidden bg-slate-900 border border-slate-800/60 relative mb-6 group">
-        <img src={slides[currentSlide]} alt="Design Slide" className="w-full h-full object-cover opacity-20 transition-all duration-500" />
-        <button onClick={prevSlide} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-slate-950/70 hover:bg-slate-950 border border-slate-800 text-slate-400 hover:text-cyan-400 w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs">‹</button>
-        <button onClick={nextSlide} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-slate-950/70 hover:bg-slate-950 border border-slate-800 text-slate-400 hover:text-cyan-400 w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs">›</button>
-        <div className="absolute bottom-4 left-4 z-10">
-          <span className="text-[8px] bg-pink-500/10 border border-pink-500 text-pink-400 font-bold px-2 py-0.5 rounded-md uppercase tracking-widest">🎨 STAGE DESIGN & DECO</span>
-          <h1 className="text-lg font-black uppercase text-white tracking-wide mt-1">{localFields.project_name || 'Unbenannter Stage Designer'}</h1>
-        </div>
-      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
         <div className="space-y-4">
           {isEditing ? (

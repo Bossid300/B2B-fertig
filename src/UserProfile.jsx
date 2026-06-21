@@ -68,7 +68,6 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
 
   // --- REAKTIVE ZUSTÄNDE (HOOKS) ---
   const [activeTab, setActiveTab] = useState('einleitung');
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [editSection, setEditSection] = useState(null);
   const [editPortfolio, setEditPortfolio] = useState(false);
   const [editRider, setEditRider] = useState(false);
@@ -193,49 +192,6 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
   const [audioProgress, setAudioProgress] = useState({});
   const audioRef = useRef(null);
 
-  // ⏳ DIE DYNAMISCHE SLIDER-STRUKTUR (VOLLSTÄNDIG CLOUD-BASIERT)
-  const slides = [
-    { 
-      line1: localFields?.slide1_line1 || "Festival Setup", 
-      line2: localFields?.slide1_line2 || "ZUVERLÄSSIGE SYSTEMTECHNIK",
-      bg: localFields?.slide1_bg || "https://unsplash.com" 
-    },
-    { 
-      line1: localFields?.slide2_line1 || "Live-Produktion", 
-      line2: localFields?.slide2_line2 || "Großbühnen & Licht-Design",
-      bg: localFields?.slide2_bg || "https://unsplash.com"
-    },
-    { 
-      line1: localFields?.slide3_line1 || "Gala & Club-Betreuung", 
-      line2: localFields?.slide3_line2 || "Perfekter Sound & Atmosphäre",
-      bg: localFields?.slide3_bg || "https://unsplash.com"
-    },
-    { 
-      line1: localFields?.slide4_line1 || "Festival Setup", 
-      line2: localFields?.slide4_line2 || "Zuverlässige Systemtechnik",
-      bg: localFields?.slide4_bg || "https://unsplash.com"
-    }
-  ];
-
-  // 🔄 Slider-Intervall (Stoppt automatisch, wenn die Editmaske für den Slider offen ist)
-  useEffect(() => {
-    if (editSection === 'slider') return;
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [editSection]);
-  
-  // 🎛️ MANUELLE PFEIL-STEUERUNG (Ergänzt Daniels Automatik)
-  const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  };
-
-
   // 🛑 UNZERSTÖRBARER AUDIO-LIMITER (OPTION B)
   useEffect(() => {
     if (!playingTrack) return;
@@ -349,168 +305,9 @@ export default function UserProfile({ onBack, ticketName, setView, isOwner }) {
         localFields={getProfileData()}
         isFavorite={isFavorite}
         handleToggleFavorite={handleToggleFavorite}
-        editSection={editSection}       // Der lokale State aus Zeile 72
-        setEditSection={setEditSection} // Der lokale State aus Zeile 72
+        editSection={editSection}
+        setEditSection={setEditSection}
       />
-
-      {/* ========================================================================= */}
-      {/* HEADER & ASSISTENT                                                        */}
-      {/* ========================================================================= */}
-      <div className="bg-gradient-to-r from-purple-950/20 to-slate-900/20 border border-purple-500/10 rounded-3xl p-5 space-y-4 shadow-xl">
-        <div className="flex justify-between items-start">
-          <div>
-            <span className="text-[8px] text-purple-400 font-bold uppercase tracking-widest block">// BACKSTAGE-PORTFOLIO CONTROLLER</span>
-            <h3 className="text-sm font-black text-white uppercase tracking-tight mt-0.5">⭐ Gigsda All-In-One Board</h3>
-          </div>
-          <button type="button" onClick={onBack} className="bg-slate-900 border border-slate-800 text-white px-3 py-1 rounded-xl text-[10px] font-bold cursor-pointer print:hidden">‹ Dashboard</button>
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 🖼️ SEKTION 2: REAKTIVER CLOUD-BILD-SLIDER WITH INPLACE-ENGINE (ALL 4)     */}
-      {/* ========================================================================= */}
-      <section 
-        className="w-full h-64 rounded-3xl overflow-hidden relative border border-slate-900 shadow-2xl bg-slate-950 bg-cover bg-center transition-all duration-700"
-        style={{ 
-          // 📡 DYNAMISCHE HINTERGRUND-WEICHE: Rotiert live alle 4 eingetippten Web-Bilder!
-          backgroundImage: `url('${
-            slides[currentSlide]?.bg_url || 
-            userData[`slide${currentSlide + 1}_url`] || 
-            "/profiles/Jud-Winston/banner.jpg"
-          }')` 
-        }}
-        
-        >
-        {/* ‹ LINKER PFEIL (Schaltet manuell zurück) */}
-        <button 
-          type="button"
-          onClick={() => setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length)}
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-slate-950/70 hover:bg-slate-950 border border-slate-800 hover:border-cyan-500/40 text-slate-400 hover:text-cyan-400 w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer font-black text-sm shadow-xl"
-        >
-          ‹
-        </button>
-
-        {/* › RECHTER PFEIL (Schaltet manuell weiter) */}
-        <button 
-          type="button"
-          onClick={() => setCurrentSlide((prev) => (prev + 1) % slides.length)}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-30 bg-slate-950/70 hover:bg-slate-950 border border-slate-800 hover:border-cyan-500/40 text-slate-400 hover:text-cyan-400 w-8 h-8 rounded-xl flex items-center justify-center transition-all cursor-pointer font-black text-sm shadow-xl"
-        >
-          ›
-        </button>
-
-        {/* Dunkler Cyber-Verlauf über dem Cloud-Bild für gestochen scharfe Lesbarkeit */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent z-10 print:hidden" />
-
-        {/* Oben rechts: Einheitlicher, dezenter Inplace-Edit-Stift (SCHRANKE ENTGEGENGELÖTET) */}
-        {isMyOwnProfile && (
-          <div className="absolute top-4 right-4 z-20 print:hidden">
-            <button 
-              type="button"
-              onClick={() => setEditSection(editSection === 'slider' ? null : 'slider')}
-              className="bg-slate-950/80 backdrop-blur-md border border-slate-800 hover:border-purple-500/40 text-slate-400 hover:text-purple-400 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider flex items-center gap-1 cursor-pointer shadow-lg transition-colors"
-            >
-              <Edit3 className="w-3 h-3" /> {editSection === 'slider' ? 'Close' : 'Edit Slider'}
-            </button>
-          </div>
-        )}
-        {/* ⚡ DIE LIVE-TEXT-PROJECTION AUF DEM BANNER */}
-        <div className="absolute bottom-6 left-6 space-y-1 z-10 text-left">
-          <span className="text-[9px] text-cyan-400 font-bold tracking-widest block uppercase font-mono">
-            // {localFields.genre || userData.genre || "REALTIME PORTFOLIO STREAM"}
-          </span>
-          <h1 className="text-2xl font-black text-white uppercase tracking-tight font-sans print:text-black">
-            {localFields.slide1_line1 || userData.slide1_line1 || userData.project_name || userData.name || "Gigsda Act"}
-          </h1>
-          <p className="text-xs text-slate-400 font-mono tracking-wide uppercase print:text-slate-700">
-            ⚡ {localFields.slide1_line2 || userData.slide1_line2 || "LIVE CONFIG ACTIVE"} • 📍 {localFields.city || userData.city || "Region Gigsda"}
-          </p>
-        </div>
-
-
-      </section>
-
-      {/* ========================================================================= */}
-      {/* ⚙️ INPLACE EDIT-MASK: VOLLSTÄNDIGE MATRIX FÜR ALLE 4 CLOUD-SLIDES         */}
-      {/* ========================================================================= */}
-        {editSection === 'slider' && isMyOwnProfile && (
-
-        <div className="bg-slate-950 border border-slate-900 p-4 rounded-3xl space-y-3 animate-fade-in print:hidden">
-          <div className="text-[9px] text-amber-400 font-bold uppercase tracking-widest">// CLOUD-BANNER TEXT & MEDIEN KONFIGURATION (VOLLSTÄNDIG)</div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            
-            {/* CONFIG SLIDE 1 */}
-            <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-950 space-y-2">
-              <span className="text-cyan-400 text-[8px] font-black block">// SLIDE 1 CONFIGURATION</span>
-              <div className="space-y-1">
-                <label className="text-[8px] text-slate-500 uppercase block">Fette Hauptüberschrift</label>
-                <input type="text" name="slide1_line1" value={localFields.slide1_line1 || ''} onChange={handleInplaceChange} placeholder="z.B. FESTIVAL SETUP" className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1 text-white text-[11px]" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[8px] text-slate-500 uppercase block">Unterüberschrift (Cyan)</label>
-                <input type="text" name="slide1_line2" value={localFields.slide1_line2 || ''} onChange={handleInplaceChange} placeholder="z.B. ZUVERLÄSSIGE SYSTEMTECHNIK" className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1 text-white text-[11px]" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[8px] text-purple-400 uppercase block font-bold">Externe Internet-Bild URL</label>
-                <input type="text" name="slide1_url" value={localFields.slide1_url || ''} onChange={handleInplaceChange} placeholder="https://unsplash.com... oder Cloud-Link" className="w-full bg-slate-950 border border-purple-500/20 rounded-lg px-2.5 py-1 text-purple-300 text-[11px]" />
-              </div>
-            </div>
-
-            {/* CONFIG SLIDE 2 */}
-            <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-950 space-y-2">
-              <span className="text-cyan-400 text-[8px] font-black block">// SLIDE 2 CONFIGURATION</span>
-              <div className="space-y-1">
-                <label className="text-[8px] text-slate-500 uppercase block">Fette Hauptüberschrift</label>
-                <input type="text" name="slide2_line1" value={localFields.slide2_line1 || ''} onChange={handleInplaceChange} placeholder="z.B. LIVE-PRODUKTION" className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1 text-white text-[11px]" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[8px] text-slate-500 uppercase block">Unterüberschrift (Cyan)</label>
-                <input type="text" name="slide2_line2" value={localFields.slide2_line2 || ''} onChange={handleInplaceChange} placeholder="z.B. GROSSBÜHNEN & LICHT-DESIGN" className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1 text-white text-[11px]" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[8px] text-purple-400 uppercase block font-bold">Externe Internet-Bild URL</label>
-                <input type="text" name="slide2_url" value={localFields.slide2_url || ''} onChange={handleInplaceChange} placeholder="https://..." className="w-full bg-slate-950 border border-purple-500/20 rounded-lg px-2.5 py-1 text-purple-300 text-[11px]" />
-              </div>
-            </div>
-
-            {/* CONFIG SLIDE 3 */}
-            <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-950 space-y-2">
-              <span className="text-cyan-400 text-[8px] font-black block">// SLIDE 3 CONFIGURATION</span>
-              <div className="space-y-1">
-                <label className="text-[8px] text-slate-500 uppercase block">Fette Hauptüberschrift</label>
-                <input type="text" name="slide3_line1" value={localFields.slide3_line1 || ''} onChange={handleInplaceChange} placeholder="z.B. GALA & CLUB-BETREUUNG" className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1 text-white text-[11px]" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[8px] text-slate-500 uppercase block">Unterüberschrift (Cyan)</label>
-                <input type="text" name="slide3_line2" value={localFields.slide3_line2 || ''} onChange={handleInplaceChange} placeholder="z.B. PERFEKTER SOUND & ATMOSPHÄRE" className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1 text-white text-[11px]" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[8px] text-purple-400 uppercase block font-bold">Externe Internet-Bild URL</label>
-                <input type="text" name="slide3_url" value={localFields.slide3_url || ''} onChange={handleInplaceChange} placeholder="https://..." className="w-full bg-slate-950 border border-purple-500/20 rounded-lg px-2.5 py-1 text-purple-300 text-[11px]" />
-              </div>
-            </div>
-
-            {/* CONFIG SLIDE 4 */}
-            <div className="bg-slate-900/50 p-3 rounded-xl border border-slate-950 space-y-2">
-              <span className="text-cyan-400 text-[8px] font-black block">// SLIDE 4 CONFIGURATION</span>
-              <div className="space-y-1">
-                <label className="text-[8px] text-slate-500 uppercase block">Fette Hauptüberschrift</label>
-                <input type="text" name="slide4_line1" value={localFields.slide4_line1 || ''} onChange={handleInplaceChange} placeholder="z.B. FESTIVAL SETUP" className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1 text-white text-[11px]" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[8px] text-slate-500 uppercase block">Unterüberschrift (Cyan)</label>
-                <input type="text" name="slide4_line2" value={localFields.slide4_line2 || ''} onChange={handleInplaceChange} placeholder="z.B. ZUVERLÄSSIGE SYSTEMTECHNIK" className="w-full bg-slate-950 border border-slate-850 rounded-lg px-2.5 py-1 text-white text-[11px]" />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[8px] text-purple-400 uppercase block font-bold">Externe Internet-Bild URL</label>
-                <input type="text" name="slide4_url" value={localFields.slide4_url || ''} onChange={handleInplaceChange} placeholder="https://..." className="w-full bg-slate-950 border border-purple-500/20 rounded-lg px-2.5 py-1 text-purple-300 text-[11px]" />
-              </div>
-            </div>
-
-          </div>
-          <button type="button" onClick={handleInplaceSave} className="w-full bg-amber-400 text-slate-950 font-black h-8 rounded-xl uppercase tracking-wider text-[10px] cursor-pointer shadow-md transition-transform hover:scale-[1.005]">Cloud-Ticker einbrennen ✓</button>
-        </div>
-      )}
 
       {/* ========================================================================= */}
       {/* 📋 SEKTION 3: TABS & PORTFOLIO                                            */}

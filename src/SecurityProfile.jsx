@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import CrewRequestCenter from './CrewRequestCenter';
-import ProfileHeaderBox from './components/ProfileHeaderBox'; // Ganz oben importieren
+import ProfileHeaderBox from './components/ProfileHeaderBox';
 
 export default function SecurityProfile({ ticketName, onNavigate }) {
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
   
   const [localFields, setLocalFields] = useState({
     name: ticketName || '', project_name: '', vorname: '', nachname: '', website: '', city: '', plz: '', street: '', phone: '', email: '',
-    avatarUrl: '', bannerUrl: '', slide1_url: '', slide2_url: '', slide3_url: '', availability: '', role: 'Security',
+    avatarUrl: '', availability: '', role: 'Security',
     // Specific fields
     guard_count: '', certifications: '', crowd_management: '', company_uid: '', terms_conditions: ''
   });
@@ -29,16 +28,6 @@ export default function SecurityProfile({ ticketName, onNavigate }) {
     } catch (e) { console.error(e); }
   }, [ticketName]);
 
-  const slides = [
-    localFields.bannerUrl || 'https://unsplash.com',
-    localFields.slide1_url || 'https://unsplash.com',
-    localFields.slide2_url || 'https://unsplash.com',
-    localFields.slide3_url || 'https://unsplash.com'
-  ];
-
-  const nextSlide = () => { setCurrentSlide((prev) => (prev + 1) % slides.length); };
-  const prevSlide = () => { setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length); };
-  const handleInplaceChange = (e) => { setLocalFields(prev => ({ ...prev, [e.target.name]: e.target.value })); };
   // ⭐ PRÜFT, OB DIESE SECURITY BEREITS EIN FAVORIT IST
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -90,19 +79,15 @@ export default function SecurityProfile({ ticketName, onNavigate }) {
   return (
     <div className="max-w-4xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl relative">
 
-      <ProfileHeaderBox currentProfileName={ticketName} />
       <CrewRequestCenter currentProfileName={ticketName} />
+      <ProfileHeaderBox
+        currentProfileName={ticketName}
+        localFields={localFields} // oder wie dein Daten-State in dieser Datei heißt
+        isFavorite={isFavorite}
+        handleToggleFavorite={handleToggleFavorite}
+      />
 
 
-      <div className="h-44 w-full rounded-2xl overflow-hidden bg-slate-900 border border-slate-800/60 relative mb-6 group">
-        <img src={slides[currentSlide]} alt="Sec Slide" className="w-full h-full object-cover opacity-20 transition-all duration-500" />
-        <button onClick={prevSlide} className="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-slate-950/70 hover:bg-slate-950 border border-slate-800 text-slate-400 hover:text-cyan-400 w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs">‹</button>
-        <button onClick={nextSlide} className="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-slate-950/70 hover:bg-slate-950 border border-slate-800 text-slate-400 hover:text-cyan-400 w-7 h-7 rounded-xl flex items-center justify-center font-black text-xs">›</button>
-        <div className="absolute bottom-4 left-4 z-10">
-          <span className="text-[8px] bg-red-500/10 border border-red-500 text-red-400 font-bold px-2 py-0.5 rounded-md uppercase tracking-widest">🛡️ SECURITY SERVICE</span>
-          <h1 className="text-lg font-black uppercase text-white tracking-wide mt-1">{localFields.project_name || 'Unbenannter Sicherheitsdienst'}</h1>
-        </div>
-      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
         <div className="space-y-4">
           {isEditing ? (
