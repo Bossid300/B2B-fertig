@@ -112,9 +112,11 @@ const NavButtons = ({ view, triggerNav, mobile }) => {
   
   return (
     <>
+      <button onClick={() => triggerNav('artists')} className={`${baseClass} ${view === 'artists' ? activeClass : inactiveClass}`}>🔍 Matrix-Suche</button>
       <button onClick={() => triggerNav('radar')} className={`${baseClass} ${view === 'radar' ? activeClass : inactiveClass}`}>🗣 Search</button>
       <button onClick={() => triggerNav('guestEvents')} className={`${baseClass} ${view === 'guestEvents' ? activeClass : inactiveClass}`}>🏃 Events</button>
       <button onClick={() => triggerNav('projects')} className={`${baseClass} ${view === 'projects' ? activeClass : inactiveClass}`}>📁 Projekte</button>
+
     </>
   );
 };

@@ -35,6 +35,15 @@ export default function GuestNavigation({ setView, activeView }) {
           <button onClick={() => handleNavClick('radar')} className={`${desktopBase} ${activeView === 'radar' ? activeClass : inactiveClass}`}>
             🗣 Search-Explorer
           </button>
+          <button
+            onClick={() => handleNavClick('artists')}
+            className={`px-3 py-1 text-[11px] font-bold uppercase tracking-wider transition-colors ${
+              activeView === 'artists' ? 'text-cyan-400' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            🔍 Matrix-Suche
+          </button>
+
         </div>
 
         {/* ── LILA LOGIN BUTTON (MIT DEINEM ORIGINALEN CYBERPUNK-FARBVERLAUF) & BURGER ── */}

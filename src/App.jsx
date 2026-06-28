@@ -15,12 +15,13 @@ import GlobalNavigation from './GlobalNavigation';
 
 import WhatIsGigsda from './WhatIsGigsda';
 import GuestEvents from './GuestEvents';
-import SearchExplorer from './SearchExplorer';
+import SearchExplorer from './SearchExplorer.jsx';
+import ArtistSearchPage from './components/ArtistSearchPage'; // Pfad anpassen, falls im Unterordner
+import UniversalSearchPage from './components/UniversalSearchPage'; // Pfad anpassen, falls im Unterordner
 
 // 👈 Lade Profile
 import UserProfile from './UserProfile'; // 👈 Temporärer Import zum Anschauen
 import LocationProfile from './LocationProfile'; // 👈 Temporärer Import zum Anschauen
-import FanProfile from './FanProfile'; // 👈 Schaltet die Fan-Zentrale im System frei!
 import VerleiherProfile from './VerleiherProfile'; // 🔌 Schaltet das Rental-Cockpit im System frei!
 import TechnikerProfile from './TechnikerProfile'; // 🎛️ Schaltet das Crew-Cockpit im System frei!
 import CaterProfile from './CaterProfile'; // 🔒 Schaltet das vollwertige Gastro-Profil frei!
@@ -28,11 +29,15 @@ import VeranstalterProfile from './VeranstalterProfile'; // 💼 Schaltet das Or
 import LogistikProfile from './LogistikProfile';   // 🚛 Schaltet das Cargo- & Shuttle-Cockpit frei
 import SecurityProfile from './SecurityProfile';   // 🛡️ Schaltet das Sicherheitsdienst-Cockpit frei
 import DesignProfile from './DesignProfile';       // 🎭 Schaltet das Stage-Design- & Deko-Cockpit frei
+import FanProfile from './FanProfile'; // 👈 Schaltet die Fan-Zentrale im System frei!
 
 
 import CrewRequestCenter from './CrewRequestCenter'; // 👈 Das B2B-Uhrwerk laden
 import CrewFavoritenListe from './CrewFavoritenListe'; // ⭐ Schaltet die Favoriten-Matrix frei!
 import RiderZentrale from './RiderZentrale'; // 🎛️ Schaltet das geteilte B2B-Rider-Uhrwerk plattformweit frei!
+
+
+import { initialUsers, initialProfiles } from './data/mockData';
 
  
 export default function App() {
@@ -75,10 +80,18 @@ export default function App() {
   // Horcht auf das globale Sendesignal der Plattform
   useEffect(() => {
     checkPendingRequests(); // Einmal direkt beim Start prüfen
-    
+
+      // === GIGSDA CORE AUTO-INITIALISIERUNG AUS VS CODE ===
+    const storedUsers = localStorage.getItem('gigsda_users');
+    if (!storedUsers || JSON.parse(storedUsers).length === 0) {
+      localStorage.setItem('gigsda_users', JSON.stringify(initialUsers));
+    }
+    const storedProfiles = localStorage.getItem('gigsda_profiles');
+    if (!storedProfiles || JSON.parse(storedProfiles).length === 0) {
+      localStorage.setItem('gigsda_profiles', JSON.stringify(initialProfiles));
+    }
     window.addEventListener('request-sent', checkPendingRequests);
     window.addEventListener('route-change', checkPendingRequests);
-    
     return () => {
       window.removeEventListener('request-sent', checkPendingRequests);
       window.removeEventListener('route-change', checkPendingRequests);
@@ -108,7 +121,6 @@ export default function App() {
  
   // 🔒 INTELLIGENTER ROUTER-SPEICHER: Merkt sich den Bildschirm auch bei F5!
   const [view, setViewWithStorage] = useState(() => localStorage.getItem('gigsda_current_view') || 'landing');
-  const [showTestLocation, setShowTestLocation] = useState(false); // 🎛️ Schalter für die Live-Vorschau
 
   const setView = (newView) => {
     localStorage.setItem('gigsda_current_view', newView);
@@ -449,13 +461,6 @@ export default function App() {
             })()
           )}
 
-          {/* 🍽️ STANDALONE B2B CATERING PROFILE VIEW */}
-          {view === 'catering' && (
-            (() => {
-              return <CaterProfile ticketName={ticketName} onNavigate={setView} />;
-            })()
-          )}
-
 
           {/* ⚡ DIE ECHTE DIREKTLEITUNG ZU DEINEN PROFILE-SETTINGS */}
           {view === 'profileSettings' && isLoggedIn && (
@@ -552,6 +557,18 @@ export default function App() {
             />
           )}
 
+          {/* DIE UNIVERSELLE GIGSDA B2B MATRIXSUCHE IN APP.JSX */}
+          {view === 'artists' && (
+            <UniversalSearchPage 
+              onNavigate={(name) => {
+                setActiveGuestArtist(name); // Setzt den Namen exakt wie in Zeile 543
+                setView('profile');          // Wechselt in dein funktionierendes Profil aus Zeile 544
+              }}
+              setView={setView}
+            />
+          )}
+
+
  
         </main>
  
@@ -573,22 +590,7 @@ export default function App() {
           </div>
         </div>
       )}
-       {/* 🔮 TEMPORÄRER LIVE-PREVIEW-BUTTON FÜR LOCATION-PROFILE */}
-      <div className="fixed bottom-4 right-4 z-50">
-        <button 
-          onClick={() => setShowTestLocation(!showTestLocation)}
-          className="bg-purple-600 hover:bg-purple-500 text-white font-mono text-[9px] font-bold px-3 py-1.5 rounded-xl uppercase tracking-widest border border-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.4)] cursor-pointer"
-        >
-          {showTestLocation ? '✕ Schließen' : '👁️ View LocationProfile'}
-        </button>
-      </div>
 
-      {/* Die Live-Komponente als Overlay */}
-      {showTestLocation && (
-        <div className="fixed inset-0 bg-slate-950 z-40 overflow-y-auto p-6 pt-20">
-          <LocationProfile ticketName="Winston Jud" onNavigate={() => {}} />
-        </div>
-      )}
 
     </div>
   );

@@ -21,7 +21,7 @@ import ProfileStatusMatrix from './components/ProfileStatusMatrix';
 import ProfileHilfeBox from './components/ProfileHilfeBox';
 
 
-export default function VerleiherProfile({ onBack, ticketName, isOwner }) {
+export default function VorlageProfile({ onBack, ticketName, isOwner }) {
   const [profileData, setProfileData] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -99,12 +99,20 @@ export default function VerleiherProfile({ onBack, ticketName, isOwner }) {
       <ProfileStammBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileStatusMatrix currentProfileName={targetUser} />
       <ProfileBioTabsBox currentProfileName={targetUser} isOwner={isOwner} />
-      <ProfileEquipmentBox currentProfileName={targetUser} isOwner={isOwner} />
+      <ProfileSkillBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileGalleryBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileNetworkBox currentProfileName={targetUser} isOwner={isOwner} />
-      <ProfileProjekteBox currentProfileName={targetUser} isOwner={isOwner} />
-      <ProfileBewertungsBox currentProfileName={targetUser} isOwner={isOwner} />
+      <ProfileAvailBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileFinanzBox currentProfileName={targetUser} isOwner={isOwner} />
+      <ProfileProjekteBox currentProfileName={targetUser} isOwner={isOwner} />
+      <ProfileEquipmentBox currentProfileName={targetUser} isOwner={isOwner} />
+      <ProfileBewertungsBox currentProfileName={targetUser} isOwner={isOwner} />
+      <ProfileDokumenteBox currentProfileName={targetUser} isOwner={isOwner} />
+      <ProfileLogistikBox currentProfileName={targetUser} isOwner={isOwner} />
+      <ProfileComplianceBox currentProfileName={targetUser} isOwner={isOwner} />
+      <ProfileSocialBox currentProfileName={targetUser} isOwner={isOwner} />
+      <ProfileVertretungBox currentProfileName={targetUser} isOwner={isOwner} />
+      <ProfileHilfeBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileLokalBox currentProfileName={targetUser} isOwner={isOwner} />
 
     </div>
