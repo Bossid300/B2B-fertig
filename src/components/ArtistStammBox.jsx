@@ -10,7 +10,8 @@ export default function ArtistStammBox({ profileOwnerName, isOwner }) {
     formation: 'solo',
     rider_monitors: '',
     rider_backline: '',
-    setup_time: ''
+    setup_time: '',
+    event_types: ''
   });
 
   // 1. Profildaten aus gigsda_profiles laden anhand des Namens
@@ -29,7 +30,8 @@ export default function ArtistStammBox({ profileOwnerName, isOwner }) {
             formation: currentProfile.formation || 'solo',
             rider_monitors: currentProfile.rider_monitors || '',
             rider_backline: currentProfile.rider_backline || '',
-            setup_time: currentProfile.setup_time || ''
+            setup_time: currentProfile.setup_time || '',
+            event_types: currentProfile.event_types || ''
           });
         }
       }
@@ -59,7 +61,8 @@ export default function ArtistStammBox({ profileOwnerName, isOwner }) {
         formation: formData.formation,
         rider_monitors: formData.rider_monitors,
         rider_backline: formData.rider_backline,
-        setup_time: formData.setup_time !== '' ? Number(formData.setup_time) : ''
+        setup_time: formData.setup_time !== '' ? Number(formData.setup_time) : '',
+        event_types: formData.event_types
       };
 
       if (profileIndex !== -1) {
@@ -80,7 +83,16 @@ export default function ArtistStammBox({ profileOwnerName, isOwner }) {
     }
   };
 
-  const { mainInstrument, subInstruments, genre, formation, rider_monitors, rider_backline, setup_time } = formData;
+  const { 
+    mainInstrument, 
+    subInstruments, 
+    genre, 
+    formation, 
+    rider_monitors, 
+    rider_backline, 
+    setup_time, 
+    event_types 
+  } = formData;
 
   return (
     <div className="bg-[#0b111e] border border-slate-800 p-6 rounded-xl max-w-4xl mx-auto my-4 shadow-xl">
@@ -119,6 +131,14 @@ export default function ArtistStammBox({ profileOwnerName, isOwner }) {
             <div className="flex flex-col">
               <span className="text-[10px] text-slate-500 uppercase">Genre / Stil</span>
               <span className="text-emerald-400 text-xs font-semibold">{genre || 'Nicht definiert'}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-[10px] text-slate-500 uppercase">
+                Eventtypen
+              </span>
+              <span className="text-indigo-400 text-xs font-semibold">
+                {event_types || 'Nicht definiert'}
+              </span>
             </div>
           </div>
 
@@ -197,6 +217,20 @@ export default function ArtistStammBox({ profileOwnerName, isOwner }) {
                   className="w-full bg-[#11192e]/40 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
                 />
               </div>
+              <div>
+                <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1">
+                  // EVENTTYPEN (EINSATZ)
+                </label>
+                <input
+                  type="text"
+                  name="event_types"
+                  value={formData.event_types || ""}
+                  onChange={handleChange}
+                  placeholder="z.B. club / festival / wedding"
+                  className="w-full bg-[#11192e]/40 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
+                />
+              </div>
+
             </div>
 
             {/* Rechte Box: B2B- & Logistik-Eingaben */}

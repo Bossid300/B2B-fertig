@@ -1,164 +1,61 @@
-import React, { useState, useEffect } from 'react';
-import { Search, ShieldCheck, RotateCcw, List, LayoutGrid } from 'lucide-react';
-import UniversalSearchCard from './UniversalSearchCard';
-import { matchArtistFilters, matchLocationFilters, matchEquipmentFilters, matchCrewFilters } from '../utils/searchFilters';
+import React, { useState } from "react";
+import { Search, ShieldCheck, RotateCcw, List, LayoutGrid } from "lucide-react";
+import UniversalSearchCard from "./UniversalSearchCard";
+import { useUniversalSearch } from "../hooks/useUniversalSearch";
 
 export default function UniversalSearchPage({ onNavigate, setView }) {
-  // Sektoren & Ansichten
-  const [currentSector, setCurrentSector] = useState('artists');
-  const [viewMode, setViewMode] = useState('compact');
-  
-  // Filter-States
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedGenre, setSelectedGenre] = useState('all');
-  const [selectedType, setSelectedType] = useState('all');
-  const [selectedBudget, setSelectedBudget] = useState('all');
-  const [selectedRadius, setSelectedRadius] = useState('all');
-  const [onlyVerified, setOnlyVerified] = useState(false);
-  const [selectedPax, setSelectedPax] = useState('all');
-  const [selectedArea, setSelectedArea] = useState('all');
-  const [selectedPower, setSelectedPower] = useState('all');
-  const [selectedCurfew, setSelectedCurfew] = useState('all');
-  const [selectedMaterialCategory, setSelectedMaterialCategory] = useState('all');
-  const [selectedCaseType, setSelectedCaseType] = useState('all');
-  const [selectedMinQuantity, setSelectedMinQuantity] = useState('all');
+  const [viewMode, setViewMode] = useState("compact");
 
-  // Daten-States
-  const [allProfiles, setAllProfiles] = useState([]);
-  const [filteredResults, setFilteredResults] = useState([]);
-
-  // 1. DEINE ORIGINAL-ENTFERNUNGSMATRIX VOM GITHUB (Messbasis Braunau/Mauerkirchen)
-  const getDistanceTo = (city) => {
-    const target = (city || '').toLowerCase().trim();
-    if (target.includes('braunau')) return 0;
-    if (target.includes('altötting')) return 28;
-    if (target.includes('passau')) return 53;
-    if (target.includes('wels')) return 90;
-    if (target.includes('linz')) return 120;
-    if (target.includes('wien')) return 290;
-    return 45; // Fallback
-  };
-
-  // 2. DATEN-PIPELINE (gigsda_users + gigsda_profiles fehlerfrei verschmelzen)
-  useEffect(() => {
-    const storedUsers = localStorage.getItem('gigsda_users');
-    const storedProfiles = localStorage.getItem('gigsda_profiles');
-    
-    if (storedUsers) {
-      const users = JSON.parse(storedUsers) || [];
-      const profiles = storedProfiles ? JSON.parse(storedProfiles) : [];
-      
-      const mergedData = users.map(user => {
-        if (!user) return null;
-        const extendedProfile = profiles.find(p => 
-          p && (p.id === user.id || (p.name || '').trim().toLowerCase() === (user.name || '').trim().toLowerCase())
-        ) || {};
-        
-        return {
-          ...user,
-          ...extendedProfile,
-          name: user.name || extendedProfile.name,
-          role: user.role || extendedProfile.role || 'Künstler',
-          city: user.city || extendedProfile.city || '',
-          id: user.id
-        };
-      }).filter(Boolean);
-      
-      setAllProfiles(mergedData);
-    }
-  }, []);
-
-  useEffect(() => {
-    const storedUsers = localStorage.getItem('gigsda_users');
-    const storedProfiles = localStorage.getItem('gigsda_profiles');
-
-    if (storedUsers) {
-      const users = JSON.parse(storedUsers) || [];
-      const profiles = storedProfiles ? JSON.parse(storedProfiles) : [];
-
-      // 1. Daten verschmelzen & filtern (Korrektur: .filter() jetzt im chain)
-      const mergedData = users.map(user => {
-        if (!user) return null;
-        const extendedProfile = profiles.find(p =>
-          p && (p.id === user.id || (p.name || '').trim().toLowerCase() === (user.name || '').trim().toLowerCase())
-        ) || {};
-        return {
-          ...user,
-          ...extendedProfile,
-          name: user.name || extendedProfile.name,
-          role: user.role || extendedProfile.role || 'Künstler',
-          city: user.city || extendedProfile.city || '',
-          id: user.id
-        };
-      }).filter(Boolean); // Entfernt null-Werte
-
-      setAllProfiles(mergedData);
-
-      // 2. Daten basierend auf Sektor und Filtern eingrenzen
-      const results = mergedData.filter(user => {
-        const userRole = (user.role || '').toLowerCase().trim();
-
-        // Basis-Rollenprüfung
-        if (currentSector === 'artists' && userRole !== 'künstler') return false;
-        if (currentSector === 'locations' && userRole !== 'location') return false;
-        if (currentSector === 'equipment' && (userRole !== 'material' && userRole !== 'verleiher')) return false;
-
-        // Erweiterte Filterung (switch-case)
-        switch (currentSector) {
-          case 'artists': return matchArtistFilters(user, { selectedGenre, selectedType, selectedBudget });
-          case 'locations': return matchLocationFilters(user, { selectedPax, selectedPower, selectedCurfew });
-          case 'equipment': return matchEquipmentFilters(user, selectedMaterialCategory, selectedCaseType, selectedMinQuantity);
-          default: return true;
-        }
-      });
-
-      setFilteredResults(results);
-    }
-  }, [currentSector, selectedGenre, selectedType, selectedBudget, selectedPax, selectedPower, selectedCurfew, selectedMaterialCategory, selectedCaseType, selectedMinQuantity, allProfiles]);
-
-  const handleReset = () => {
-    setSearchQuery('');
-    setSelectedGenre('all');
-    setSelectedType('all');
-    setSelectedBudget('all');
-    setSelectedRadius('all');
-    setOnlyVerified(false);
-    setSelectedPax('all');
-    setSelectedArea('all');
-    setSelectedPower('all');
-    setSelectedCurfew('all');
-    setSelectedMaterialCategory('all');
-    setSelectedCaseType('all');
-    setSelectedMinQuantity('all');
-
-  };
+const {
+  currentSector,
+  setCurrentSector,
+  filters,
+  setFilters,
+  filteredResults,
+  resetFilters,
+  searchQuery,
+  setSearchQuery,
+  sortBy,
+  setSortBy // 🔥 DAS FEHLT
+} = useUniversalSearch();
 
   return (
     <div className="min-h-screen bg-[#070b12] text-slate-200 p-4 font-sans">
       <div className="max-w-5xl mx-auto space-y-3">
-        
-        {/* Header */}
+
+        {/* HEADER */}
         <div className="flex items-center gap-2 border-b border-slate-800/40 pb-2 mb-2">
-          <div className="p-1.5 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-lg"><Search size={14} /></div>
+          <div className="p-1.5 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-lg">
+            <Search size={14} />
+          </div>
           <div>
-            <span className="text-[8px] font-bold tracking-widest text-slate-500 uppercase">// Universal Search Matrix</span>
-            <h1 className="text-xs font-bold text-white uppercase tracking-wider mt-0.5">GIGSDA VERZEICHNIS & ENGINE</h1>
+            <span className="text-[8px] font-bold tracking-widest text-slate-500 uppercase">
+              // Universal Search Matrix
+            </span>
+            <h1 className="text-xs font-bold text-white uppercase tracking-wider mt-0.5">
+              GIGSDA VERZEICHNIS & ENGINE
+            </h1>
           </div>
         </div>
 
-        {/* Sektor-Weiche */}
+        {/* SEKTOR */}
         <div className="grid grid-cols-4 gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800/60 shadow-inner">
           {[
-            { id: 'artists', label: '🎤 Künstler' },
-            { id: 'locations', label: '🏢 Locations' },
-            { id: 'equipment', label: '🎛️ Material' },
-            { id: 'crew', label: '🛠️ Crews & Staff' }
-          ].map(sec => (
+            { id: "artists", label: "🎤 Künstler" },
+            { id: "locations", label: "🏢 Locations" },
+            { id: "equipment", label: "🎛️ Material" },
+            { id: "crew", label: "🛠️ Crews & Staff" }
+          ].map((sec) => (
             <button
               key={sec.id}
-              onClick={() => { setCurrentSector(sec.id); handleReset(); }}
+              onClick={() => {
+                setCurrentSector(sec.id);
+                resetFilters();
+              }}
               className={`py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all border ${
-                currentSector === sec.id ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30 shadow-[0_0_10px_rgba(6,182,212,0.1)]' : 'text-slate-500 border-transparent hover:text-slate-300'
+                currentSector === sec.id
+                  ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
+                  : "text-slate-500 border-transparent hover:text-slate-300"
               }`}
             >
               {sec.label}
@@ -166,123 +63,324 @@ export default function UniversalSearchPage({ onNavigate, setView }) {
           ))}
         </div>
 
-        {/* Filter-Bar */}
+        {/* FILTER */}
         <div className="bg-[#0b111e] rounded-xl border border-slate-800/50 p-3 shadow-xl space-y-2.5">
-          <div className="flex flex-col sm:flex-row items-center gap-2">
-            <div className="relative flex-1 w-full">
-              <Search size={11} className="absolute left-2.5 top-2 text-slate-500" />
-              <input 
-                type="text"
-                placeholder={`Suche in ${currentSector}...`}
+
+          {/* SEARCH + RESET */}
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search size={11} className="absolute left-2 top-2 text-slate-500" />
+              <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#070b12]/60 border border-slate-800/80 rounded-lg pl-7 pr-3 py-1 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500/40"
+                placeholder="Suche..."
+                className="w-full bg-[#070b12] border border-slate-800 rounded-lg pl-6 pr-2 py-1 text-xs"
               />
             </div>
-            <button onClick={handleReset} className="flex items-center gap-1 px-3 py-1 bg-slate-900 border border-slate-800/80 text-[9px] font-bold text-slate-400 uppercase tracking-widest hover:text-white rounded-lg h-7"><RotateCcw size={10} /> Reset</button>
+
+            <button
+              onClick={resetFilters}
+              className="flex items-center gap-1 px-3 py-1 bg-slate-900 border border-slate-800 text-[9px] font-bold text-slate-400 uppercase rounded-lg"
+            >
+              <RotateCcw size={10} /> Reset
+            </button>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pt-2 border-t border-slate-800/20">
-            {currentSector === 'artists' && (
+          {/* FILTER GRID */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+
+
+            {/* ARTISTS **********/}
+            {currentSector === "artists" && (
               <>
-                <select value={selectedGenre} onChange={(e) => setSelectedGenre(e.target.value)} className="bg-[#070b12] border text-[11px] rounded-md px-2 py-0.5 h-6 border-slate-800 text-slate-400 focus:outline-none">
-                  <option value="all">Alle Genres</option>
-                  <option value="rock">Rock / Metal</option>
-                  <option value="pop">Pop / Indie</option>
-                  <option value="electronic">Electronic / Techno</option>
+                {/* GENRE */}
+                <select
+                  value={filters.selectedGenre}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedGenre: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
+                  <option value="rock metal">Rock / Metal</option>
+                  <option value="pop indie">Pop / Indie</option>
+                  <option value="electronic techno">Electronic / Techno</option>
+                  <option value="hiphop rap">Hip-Hop / Rap</option>
+                  <option value="jazz blues">Jazz / Blues</option>
+                  <option value="cover partyband">Cover / Partyband</option>
+                  <option value="schlager volksmusik">Schlager / Volksmusik</option>
+                  <option value="acoustic singer songwriter">Acoustic / Singer-Songwriter</option>
                 </select>
-                <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)} className="bg-[#070b12] border text-[11px] rounded-md px-2 py-0.5 h-6 border-slate-800 text-slate-400 focus:outline-none">
+
+                {/* EVENT TYPE 🔥 */}
+                <select
+                  value={filters.selectedEventType}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedEventType: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
+                  <option value="all">Alle Eventtypen</option>
+                  <option value="club">🎧 Club / Nightlife</option>
+                  <option value="festival">🎪 Festival</option>
+                  <option value="wedding">💍 Hochzeit</option>
+                  <option value="corporate">🏢 Firmenevent</option>
+                  <option value="private">🎉 Privatparty</option>
+                </select>
+
+                {/* FORMATION */}
+                <select
+                  value={filters.selectedType}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedType: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
                   <option value="all">Alle Formationen</option>
                   <option value="solo">Solo-Act</option>
                   <option value="band">Band</option>
                 </select>
-                <select value={selectedBudget} onChange={(e) => setSelectedBudget(e.target.value)} className="bg-[#070b12] border text-[11px] rounded-md px-2 py-0.5 h-6 border-slate-800 text-slate-400 focus:outline-none">
+
+                {/* BUDGET */}
+                <select
+                  value={filters.selectedBudget}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedBudget: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
                   <option value="all">Jede Gage</option>
                   <option value="low">Unter 500 €</option>
                   <option value="mid">500 € – 1.500 €</option>
+                  <option value="high">Ab 1.500 €</option>
                 </select>
+
+                {/* RADIUS */}
+                <select
+                  value={filters.selectedRadius || "all"}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedRadius: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
+                  <option value="all">Aktionsradius (Alle)</option>
+                  <option value="20">20 km</option>
+                  <option value="50">50 km</option>
+                  <option value="100">100 km</option>
+                  <option value="150">150 km</option>
+                  <option value="200">200 km</option>
+                </select>
+
+                <select
+                  value={filters.selectedInstrument}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedInstrument: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-1 text-[11px] text-slate-400"
+                >
+                  <option value="all">Alle Instrumente</option>
+                  <option value="guitar">Gitarre</option>
+                  <option value="piano">Piano</option>
+                  <option value="drums">Drums</option>
+                  <option value="vocals">Vocals</option>
+                </select>
+
+                {/* VERIFIED FULL WIDTH 🔥 */}
+                <button
+                  onClick={() =>
+                    setFilters({
+                      ...filters,
+                      onlyVerified: !filters.onlyVerified
+                    })
+                  }
+                  className="col-span-2 md:col-span-4 h-6 flex items-center justify-center gap-1 rounded-md border text-[9px] font-bold uppercase tracking-wider transition-all bg-[#070b12] border-slate-800 text-slate-400"
+                >
+                  <ShieldCheck size={10} /> Nur Verifizierte
+                </button>
               </>
             )}
 
-            {currentSector === 'locations' && (
+
+            {/* LOCATIONS **********/}
+            {currentSector === "locations" && (
               <>
-                <select value={selectedPax} onChange={(e) => setSelectedPax(e.target.value)} className="bg-[#070b12] border text-[11px] rounded-md px-2 py-0.5 h-6 border-slate-800 text-slate-400 focus:outline-none">
+                {/* PAX */}
+                <select
+                  value={filters.selectedPax}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedPax: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
                   <option value="all">Alle Kapazitäten</option>
                   <option value="small">Club (bis 100 Pax)</option>
-                  <option value="mid">Halle (100-500 Pax)</option>
+                  <option value="mid">Halle (100–500 Pax)</option>
+                  <option value="large">Arena (500+ Pax)</option>
                 </select>
-                <select value={selectedArea} onChange={(e) => setSelectedArea(e.target.value)} className="bg-[#070b12] border text-[11px] rounded-md px-2 py-0.5 h-6 border-slate-800 text-slate-400 focus:outline-none">
+
+                {/* FLÄCHE */}
+                <select
+                  value={filters.selectedArea}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedArea: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
                   <option value="all">Jede m²-Fläche</option>
                   <option value="small">Kompakt (bis 150 m²)</option>
-                  <option value="mid">Mittel (150-500 m²)</option>
+                  <option value="mid">Mittel (150–500 m²)</option>
+                  <option value="large">Groß (500+ m²)</option>
                 </select>
+
+                {/* RADIUS */}
+                <select
+                  value={filters.selectedRadius}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedRadius: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
+                  <option value="all">Aktionsradius (Alle)</option>
+                  <option value="local">Lokal (bis 50 km)</option>
+                  <option value="regional">Regional (bis 200 km)</option>
+                </select>
+
+                {/* STROM */}
+                <select
+                  value={filters.selectedPower}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedPower: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
+                  <option value="all">Jeder Stromanschluss</option>
+                  <option value="cee 63a">🔌 CEE 63A</option>
+                  <option value="cee 32a">🔌 CEE 32A</option>
+                  <option value="cee 16a">🔌 CEE 16A</option>
+                  <option value="schuko">🔌 Schuko</option>
+                </select>
+
+                {/* CURFEW */}
+                <select
+                  value={filters.selectedCurfew}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedCurfew: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
+                  <option value="all">Keine Sperrstunde</option>
+                  <option value="22:00">Bis 22:00 Uhr</option>
+                  <option value="00:00">Bis 00:00 Uhr</option>
+                  <option value="02:00">Bis 02:00 Uhr</option>
+                  <option value="05:00">Bis 05:00 Uhr</option>
+                </select>
+
+                {/* VERIFIED FULL WIDTH 🔥 */}
+                <button
+                  onClick={() =>
+                    setFilters({
+                      ...filters,
+                      onlyVerified: !filters.onlyVerified
+                    })
+                  }
+                  className="col-span-2 md:col-span-4 h-6 flex items-center justify-center gap-1 rounded-md border text-[9px] font-bold uppercase tracking-wider transition-all bg-[#070b12] border-slate-800 text-slate-400"
+                >
+                  <ShieldCheck size={10} /> Nur Verifizierte
+                </button>
               </>
             )}
 
-            <select value={selectedRadius} onChange={(e) => setSelectedRadius(e.target.value)} 
-              className="bg-[#070b12] border text-[11px] rounded-md px-2 py-0.5 h-6 border-slate-800 text-slate-400 focus:outline-none"
-              >
-              <option value="all">Aktionsradius (Alle)</option>
-              <option value="local">Lokal (bis 50 km)</option>
-              <option value="regional">Regional (bis 200 km)</option>
-            </select>
 
-            {/* STARKSTROM-FILTER (B2B TECH SPEC) */}
-            <select
-              value={selectedPower}
-              onChange={(e) => setSelectedPower(e.target.value)}
-              className="bg-[#070b12] border text-[11px] rounded-md px-2 py-0.5 h-6 border-slate-800 text-slate-400 focus:outline-none"
-            >
-              <option value="all">Jeder Stromanschluss</option>
-              <option value="cee 63a">🔌 CEE 63A (Großbühne)</option>
-              <option value="cee 32a">🔌 CEE 32A (Mittelbühne / Club)</option>
-              <option value="cee 16a">🔌 CEE 16A (Kleine Bühne)</option>
-              <option value="schuko">🔌 230V Schuko (Standard)</option>
-            </select>
-
-            {/* LÄRMSPERRSTUNDE-FILTER (CURFEW) */}
-            <select
-              value={selectedCurfew}
-              onChange={(e) => setSelectedCurfew(e.target.value)}
-              className="bg-[#070b12] border text-[11px] rounded-md px-2 py-0.5 h-6 border-slate-800 text-slate-400 focus:outline-none"
-            >
-              <option value="all">Keine Sperrstunde</option>
-              <option value="22:00">⏱️ Bis 22:00 Uhr (Open-Air)</option>
-              <option value="00:00">⏱️ Bis 00:00 Uhr</option>
-              <option value="02:00">⏱️ Bis 02:00 Uhr (Club)</option>
-              <option value="05:00">⏱️ Bis 05:00 Uhr (Open End)</option>
-            </select>
-
-          {/* === DYNAMISCHE MATERIAL-FILTER (Nur sichtbar im Sektor Material) === */}
-          {currentSector === 'equipment' && (
-            <>
+            {/* EQUIPMENT *********/}
+            {currentSector === "equipment" && (
+              <>
+                {/* RADIUS */}
                 <select
-                  value={selectedMaterialCategory}
-                  onChange={(e) => setSelectedMaterialCategory(e.target.value)}
-              className="bg-[#070b12] border text-[11px] rounded-md px-2 py-0.5 h-6 border-slate-800 text-slate-400 focus:outline-none"
+                  value={filters.selectedRadius}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedRadius: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
+                  <option value="all">Aktionsradius (Alle)</option>
+                  <option value="local">Lokal (bis 50 km)</option>
+                  <option value="regional">Regional (bis 200 km)</option>
+                </select>
+
+                {/* STROM */}
+                <select
+                  value={filters.selectedPower}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedPower: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
+                  <option value="all">Jeder Stromanschluss</option>
+                  <option value="cee 63a">🔌 CEE 63A</option>
+                  <option value="cee 32a">🔌 CEE 32A</option>
+                  <option value="cee 16a">🔌 CEE 16A</option>
+                  <option value="schuko">🔌 Schuko</option>
+                </select>
+
+                {/* CURFEW */}
+                <select
+                  value={filters.selectedCurfew}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedCurfew: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
+                  <option value="all">Keine Sperrstunde</option>
+                  <option value="22:00">Bis 22:00 Uhr</option>
+                  <option value="00:00">Bis 00:00 Uhr</option>
+                  <option value="02:00">Bis 02:00 Uhr</option>
+                  <option value="05:00">Bis 05:00 Uhr</option>
+                </select>
+
+                {/* GEWERKE / KATEGORIE */}
+                <select
+                  value={filters.selectedMaterialCategory}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      selectedMaterialCategory: e.target.value
+                    })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
                 >
                   <option value="all">Alle Gewerke</option>
                   <option value="audio">🎛️ Audio / Tontechnik</option>
                   <option value="licht">💡 Licht / Beleuchtung</option>
-                  <option value="video">📺 Video / LED-Wände</option>
+                  <option value="video">📺 Video / LED</option>
                   <option value="buehne">🏗️ Bühne / Rigging</option>
-                  <option value="backline">🥁 Backline (Instrumente)</option>
+                  <option value="backline">🥁 Backline</option>
                 </select>
 
+                {/* CASE */}
                 <select
-                  value={selectedCaseType}
-                  onChange={(e) => setSelectedCaseType(e.target.value)}
-                  className="bg-[#0b111e] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-white"
+                  value={filters.selectedCaseType}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      selectedCaseType: e.target.value
+                    })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
                 >
                   <option value="all">Egal wie verpackt</option>
-                  <option value="flightcase">📦 Im Flightcase (Rollbar)</option>
-                  <option value="lose">🎒 Lose / In Tasche</option>
+                  <option value="flightcase">📦 Flightcase</option>
+                  <option value="lose">🎒 Lose</option>
                 </select>
 
+                {/* MENGE */}
                 <select
-                  value={selectedMinQuantity}
-                  onChange={(e) => setSelectedMinQuantity(e.target.value)}
-                  className="bg-[#0b111e] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-white"
+                  value={filters.selectedMinQuantity}
+                  onChange={(e) =>
+                    setFilters({
+                      ...filters,
+                      selectedMinQuantity: e.target.value
+                    })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
                 >
                   <option value="all">Jede Menge</option>
                   <option value="1">Mind. 1 Stück</option>
@@ -290,48 +388,139 @@ export default function UniversalSearchPage({ onNavigate, setView }) {
                   <option value="8">Mind. 8 Stück</option>
                   <option value="12">Mind. 12 Stück</option>
                 </select>
-            </>
-          )}
-            <button
-              onClick={() => setOnlyVerified(!onlyVerified)}
-              className={`h-6 flex items-center justify-center gap-1 rounded-md border text-[9px] font-bold uppercase tracking-wider transition-all ${
-                onlyVerified ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-400' : 'bg-[#070b12] border-slate-800/80 text-slate-500'
-              }`}
-            >
-              <ShieldCheck size={10} /> {onlyVerified ? 'Verifiziert ✓' : 'Nur Verifizierte'}
+
+                {/* VERIFIED FULL WIDTH 🔥 */}
+                <button
+                  onClick={() =>
+                    setFilters({
+                      ...filters,
+                      onlyVerified: !filters.onlyVerified
+                    })
+                  }
+                  className="col-span-2 md:col-span-4 h-6 flex items-center justify-center gap-1 rounded-md border text-[9px] font-bold uppercase tracking-wider transition-all bg-[#070b12] border-slate-800 text-slate-400"
+                >
+                  <ShieldCheck size={10} /> Nur Verifizierte
+                </button>
+              </>
+            )}
+
+
+            {/* CREW & STUFF */}
+            {currentSector === "crew" && (
+              <>
+                {/* GEWERK */}
+                <select
+                  value={filters.selectedCrewType}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedCrewType: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
+                  <option value="all">Alle Gewerke</option>
+                  <option value="techniker">🎛️ Tontechniker</option>
+                  <option value="licht">💡 Lichttechniker</option>
+                  <option value="stage">🛠️ Stagehand</option>
+                  <option value="event">📋 Eventmanager</option>
+                </select>
+
+                {/* TAGESSATZ */}
+                <select
+                  value={filters.selectedRate}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedRate: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
+                  <option value="all">Jeder Tagessatz</option>
+                  <option value="low">Unter 200€</option>
+                  <option value="mid">200€ – 500€</option>
+                  <option value="high">500€+</option>
+                </select>
+
+                {/* RADIUS */}
+                <select
+                  value={filters.selectedRadius}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedRadius: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
+                  <option value="all">Aktionsradius (Alle)</option>
+                  <option value="local">Lokal (bis 50 km)</option>
+                  <option value="regional">Regional (bis 200 km)</option>
+                </select>
+
+                {/* SUPPORT */}
+                <select
+                  value={filters.selectedSupport}
+                  onChange={(e) =>
+                    setFilters({ ...filters, selectedSupport: e.target.value })
+                  }
+                  className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
+                >
+                  <option value="all">Support egal</option>
+                  <option value="yes">Support bereit ✅</option>
+                  <option value="no">Kein Support ❌</option>
+                </select>
+
+                {/* VERIFIED FULL WIDTH */}
+                <button
+                  onClick={() =>
+                    setFilters({
+                      ...filters,
+                      onlyVerified: !filters.onlyVerified
+                    })
+                  }
+                  className="col-span-2 md:col-span-4 h-6 flex items-center justify-center gap-1 rounded-md border text-[9px] font-bold uppercase tracking-wider transition-all bg-[#070b12] border-slate-800 text-slate-400"
+                >
+                  <ShieldCheck size={10} /> Nur Verifizierte
+                </button>
+              </>
+            )}
+
+          </div>
+        </div>
+
+        {/* RESULTS */}
+        <div className="flex justify-between text-[10px] text-slate-500">
+          <span>{filteredResults.length} Ergebnisse</span>
+
+          <div className="flex gap-1">
+            <button onClick={() => setViewMode("compact")}>
+              <List size={12} />
             </button>
+            <button onClick={() => setViewMode("large")}>
+              <LayoutGrid size={12} />
+            </button>
+
+            {/* 🔥 HIER REIN */}
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-[#070b12] border border-slate-800 rounded-md text-[11px] text-slate-400 ml-2 px-2 py-1"
+            >
+              <option value="default">Sort</option>
+              <option value="priceLow">💶 Preis ↑</option>
+              <option value="priceHigh">💶 Preis ↓</option>
+              <option value="distance">📍 Entfernung</option>
+              <option value="ranking">🔥 Beste Treffer</option>
+            </select>
           </div>
         </div>
 
-        {/* Counter */}
-        <div className="flex items-center justify-between text-[8px] font-bold text-slate-500 uppercase tracking-widest px-1">
-          <span>Suchergebnisse: {filteredResults.length} Accounts gelistet</span>
-          <div className="flex bg-slate-950 p-0.5 rounded-md border border-slate-800/60 items-center">
-            <button onClick={() => setViewMode('compact')} className={`p-1 rounded transition-colors ${viewMode === 'compact' ? 'bg-cyan-500/10 text-cyan-400' : 'text-slate-600'}`}><List size={10} /></button>
-            <button onClick={() => setViewMode('large')} className={`p-1 rounded transition-colors ${viewMode === 'large' ? 'bg-cyan-500/10 text-cyan-400' : 'text-slate-600'}`}><LayoutGrid size={10} /></button>
-          </div>
+        {/* LIST */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {filteredResults.map((profile) => (
+            <UniversalSearchCard
+              key={profile.id}
+              profile={profile}
+              currentSector={currentSector}
+              viewMode={viewMode}
+              setView={setView}
+              onNavigate={onNavigate}
+            />
+          ))}
         </div>
-
-        {/* Ergebnisse Grid */}
-        {filteredResults.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-            {filteredResults.map((profile) => (
-              <UniversalSearchCard 
-                key={profile.id} 
-                profile={profile} 
-                currentSector={currentSector}
-                viewMode={viewMode}
-                setView={setView}
-                onNavigate={onNavigate}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="bg-[#0b111e] rounded-xl border border-slate-800/40 p-6 text-center border-dashed">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Keine Accounts in dieser Kategorie</h4>
-          </div>
-        )}
-
       </div>
     </div>
   );
