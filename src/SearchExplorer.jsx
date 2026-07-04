@@ -43,7 +43,8 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
         requestId: "REQ-" + Math.floor(Math.random() * 9000 + 1000),
         eventName: eventTitle,
         date: targetEvent.date || "Termin auf Anfrage",
-        requestedProfile: activeRequestUser.name,
+        requestedProfileId: activeRequestUser.id,
+        requestedProfileName: activeRequestUser.name,
         requesterName: localStorage.getItem('gigsda_user_name') || "Veranstalter",
         status: "pending",
         note: requestText || "Standard-B2B Konditionen laut Profil."
@@ -82,20 +83,23 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
         const targetProfileName = activeRequestUser?.name || activeRequestUser?.user?.name || activeRequestUser?.username || "Crew-Mitglied";
         const targetProfileRole = activeRequestUser?.role || activeRequestUser?.gewerk || "Crew";
         const targetProfileCity = activeRequestUser?.city || activeRequestUser?.ort || "";
+        const targetProfileId = activeRequestUser?.id;
 
-        const alreadyInCrew = savedEvents[eventIndex].crew.some(m => m && m.name && m.name.toLowerCase() === targetProfileName.toLowerCase());
-        
+        const alreadyInCrew = savedEvents[eventIndex].crew.some(m =>
+          m && m.id === targetProfileId
+        );
+
         if (!alreadyInCrew) {
           savedEvents[eventIndex].crew.push({
+            id: targetProfileId,
             name: targetProfileName,
             role: targetProfileRole,
-            status: 'pending', // Gelbe Ampelkachel!
+            status: 'pending',
             city: targetProfileCity,
             addedAt: new Date().toLocaleDateString('de-DE')
           });
-          
+
           localStorage.setItem('gigsda_events', JSON.stringify(savedEvents));
-          console.log(`✓ B2B-Injektion: ${targetProfileName} erfolgreich in Crew von "${eventTitle}" verbucht!`);
         }
       }
 

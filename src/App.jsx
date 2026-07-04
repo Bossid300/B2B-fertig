@@ -112,11 +112,12 @@ export default function App() {
 
     useEffect(() => {
     const savedName = localStorage.getItem('gigsda_user_name');
-    if (isLoggedIn && savedName) {
-      setTicketName(savedName);
-    } else if (!isLoggedIn) {
-      setTicketName('Gast');
-    }
+      if (savedName) {
+        setTicketName(savedName);
+      } else {
+        setTicketName('Gast');
+      }
+
   }, [isLoggedIn]);
  
   // 🔒 INTELLIGENTER ROUTER-SPEICHER: Merkt sich den Bildschirm auch bei F5!
@@ -153,7 +154,8 @@ export default function App() {
         doneProgress: 35, 
         venue: "Backstage Halle",
         text: "Crew-Shortlist befüllt. Warte auf technischen Rider-Abgleich.",
-        crewIds: ["Jud-Winston", "spark", "luna"]
+        ownerId: "GIGS-7677",    // 🔥 wer hat es erstellt
+        crewIds: ["GIGS-3344"]
       },
       { 
         id: "EVT-2026-02", 
@@ -163,7 +165,8 @@ export default function App() {
         doneProgress: 0, 
         venue: "Stadtpark Wiese, Braunau",
         text: "Event frisch initialisiert. Starte die Crew-Suche im Radar.",
-        crewIds: [] 
+        ownerId: "GIGS-7677",    // 🔥 wer hat es erstellt
+        crewIds: ["GIGS-3344"] 
       },
       { 
         id: "EVT-2026-03", 
@@ -173,7 +176,8 @@ export default function App() {
         doneProgress: 100, 
         venue: "The Jazz Cave",
         text: "Alle Meilensteine verriegelt. Live-Countdown läuft im Netz.",
-        crewIds: ["Jud-Winston", "cyber"] 
+        ownerId: "GIGS-7677",    // 🔥 wer hat es erstellt
+        crewIds: ["GIGS-3344"] 
       }
     ];
   });

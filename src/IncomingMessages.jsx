@@ -1,92 +1,159 @@
-import React from 'react';
-import { Mail, CheckCircle2, ArrowUpRight, DollarSign } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 
 export default function IncomingMessages() {
-  // Statische Beispiel-Deals (Bereit für den LocalStorage-Einzug im zweiten Schritt)
-  const incomingDeals = [
-    {
-      id: "INC-901",
-      event: "Stadtpark OpenAir",
-      sender: "Bundy (Drums)",
-      type: "CREW-ZUSAGE",
-      text: "✓ Hat die Einladung für die Show am 15. Aug angenommen.",
-      badgeColor: "text-emerald-400 bg-emerald-950/40 border-emerald-900/30",
-      actionText: "Crew einsehen"
-    },
-    {
-      id: "INC-902",
-      event: "Winston Jud - Live & Unplugged",
-      sender: "Club Matrix, Linz",
-      type: "GAGEN-OFFER",
-      text: "💰 Neues Gagen-Angebot eingegangen: 2.400,00 € Festgage.",
-      badgeColor: "text-purple-400 bg-purple-950/40 border-purple-900/30",
-      actionText: "Deal Verhandeln"
-    },
-    {
-      id: "INC-903",
-      event: "Rock Night Salzburg",
-      sender: "System Dispatcher",
-      type: "RIDER-ALARM",
-      text: "⚠️ Der technische Rider wurde vom Local-Tech abgelehnt (Strombedarf!).",
-      badgeColor: "text-amber-400 bg-amber-950/40 border-amber-900/30",
-      actionText: "Rider öffnen"
+  
+  const handleUpdateStatus = (requestId, newStatus) => {
+    try {
+      const requests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
+      const events = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+
+      const request = requests.find(r => r.requestId === requestId);
+      if (!request) return;
+
+      // ✅ Request Status ändern
+      const updatedRequests = requests.map(r =>
+        r.requestId === requestId ? { ...r, status: newStatus } : r
+      );
+
+      localStorage.setItem('gigsda_crew_requests', JSON.stringify(updatedRequests));
+
+      // ✅ Crew im Event updaten
+      const event = events.find(ev => ev.title === request.eventName);
+      if (event && event.crew) {
+        event.crew = event.crew.map(member =>
+          member.id === request.requestedProfileId
+            ? { ...member, status: newStatus }
+            : member
+        );
+
+        localStorage.setItem('gigsda_events', JSON.stringify(events));
+      }
+
+      // 🔥 UI refresh triggern
+      window.dispatchEvent(new CustomEvent('request-sent'));
+
+    } catch (e) {
+      console.error('Fehler beim Status Update:', e);
     }
-  ];
+  };
+
+  const [incomingRequests, setIncomingRequests] = useState([]);
+
+  useEffect(() => {
+    const loadRequests = () => {
+      try {
+        const requests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
+
+        // aktueller User
+        const currentUserName = localStorage.getItem('gigsda_user_name');
+
+        const currentUser = {
+          name: currentUserName
+        };
+
+        const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
+        const currentProfile = profiles.find(p =>
+          (p.name || '').toLowerCase() === (currentUserName || '').toLowerCase()
+        );
+        const currentUserId = currentProfile?.id;
+        const filtered = requests.filter(r =>
+          r.requestedProfileId === currentUserId
+        );
+        setIncomingRequests(filtered);
+
+
+      } catch (e) {
+        console.error('Fehler beim Laden der Incoming Requests:', e);
+      }
+    };
+
+    loadRequests();
+
+    // live refresh wenn was passiert
+    window.addEventListener('request-sent', loadRequests);
+    window.addEventListener('route-change', loadRequests);
+
+    return () => {
+      window.removeEventListener('request-sent', loadRequests);
+      window.removeEventListener('route-change', loadRequests);
+    };
+
+  }, []);
 
   return (
-    <div className="mt-6 space-y-4 animate-fade-in font-mono text-xs text-slate-300">
-      
-      {/* HEADER-TRENNLINIE */}
-      <div className="flex justify-between items-center border-b border-slate-900 pb-1.5 mb-3">
-        <div className="flex items-center gap-2 text-[9px] text-slate-500 uppercase tracking-widest font-black">
-          <Mail className="w-3 h-3 text-purple-400" /> // Incoming Request-Pipeline
-        </div>
-        <span className="text-[9px] text-purple-500 font-bold bg-purple-950/20 border border-purple-900/30 px-1.5 py-0.5 rounded">
-          {incomingDeals.length} Dringend
+    <div id="incoming-requests" className="bg-slate-950 border border-slate-900 p-4 rounded-2xl text-white font-mono text-xs space-y-3 transition-all duration-500">
+
+      {/* HEADER */}
+      <div className="border-b border-slate-900 pb-2 flex justify-between items-center">
+        <span className="text-[10px] text-purple-400 font-black uppercase tracking-widest">
+          // Incoming Crew Requests
+        </span>
+        <span className="text-[10px] text-slate-500">
+          {incomingRequests.length} Offen
         </span>
       </div>
 
-      {/* REIHUNG DER ANFRAGEN */}
-      <div className="space-y-3">
-        {incomingDeals.map((deal) => (
-          <div 
-            key={deal.id}
-            className="bg-slate-950/80 backdrop-blur-md border border-slate-900 p-3 rounded-2xl shadow-xl flex flex-col sm:flex-row justify-between sm:items-center gap-3 hover:border-slate-800 transition-colors group overflow-hidden"
+      {/* LISTE */}
+      {incomingRequests.length > 0 ? (
+        incomingRequests.map((req) => (
+          <div
+            key={req.requestId}
+            className="bg-slate-900/20 border border-slate-800 rounded-xl p-3 space-y-2"
           >
-            <div className="space-y-1 text-left">
-              <div className="flex items-center gap-2">
-                <span className={`text-[8px] font-bold tracking-widest uppercase px-1.5 py-0.5 rounded border ${deal.badgeColor}`}>
-                  {deal.type}
-                </span>
-                <span className="text-[9px] text-slate-600 font-bold">
-                  {deal.id}
-                </span>
-                <span className="text-[10px] text-slate-400 font-bold truncate max-w-[150px]">
-                  • {deal.event}
-                </span>
-              </div>
-              <div className="text-white font-black uppercase text-[11px] tracking-tight">
-                {deal.sender}
-              </div>
-              <p className="text-[10px] text-slate-400 leading-relaxed">
-                {deal.text}
-              </p>
+
+            <div className="text-[9px] text-slate-500">
+              📅 {req.eventName} • {req.date}
             </div>
 
-            {/* AKTION-BUTTON */}
-            <div className="shrink-0 flex justify-end">
-              <button
-                type="button"
-                onClick={() => alert(`Aktion '${deal.actionText}' wird mit LocalStorage verknüpft.`)}
-                className="bg-slate-900 border border-slate-800 hover:border-purple-500/40 text-slate-400 hover:text-white px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 cursor-pointer shadow-md transition-colors"
-              >
-                {deal.actionText} <ArrowUpRight className="w-3 h-3 text-purple-400" />
-              </button>
+            <div className="font-bold text-white uppercase text-[11px]">
+              Anfrage von: {req.requesterName}
             </div>
+
+            <div className="text-[10px] text-slate-400 italic">
+              "{req.note}"
+            </div>
+
+            <div className="text-[8px] font-bold uppercase text-amber-400">
+              STATUS: {req.status}
+            </div>
+
+            {/* 🔥 ACTION BUTTONS */}
+            {(req.status === "pending" || req.status === "counter_offer") && (
+              <div className="flex gap-2 pt-2">
+
+                {/* ✅ ZUSAGEN */}
+                <button
+                  onClick={() => handleUpdateStatus(req.requestId, 'accepted')}
+                  className="flex-1 text-[9px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-lg py-1 hover:bg-emerald-500/20"
+                >
+                  ✅ ZUSAGEN
+                </button>
+
+                {/* ❌ ABSAGEN */}
+                <button
+                  onClick={() => handleUpdateStatus(req.requestId, 'declined')}
+                  className="flex-1 text-[9px] font-bold bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg py-1 hover:bg-red-500/20"
+                >
+                  ❌ ABSAGEN
+                </button>
+
+                {/* ⚡ COUNTER */}
+                <button
+                  onClick={() => handleUpdateStatus(req.requestId, 'counter_offer')}
+                  className="flex-1 text-[9px] font-bold bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-lg py-1 hover:bg-cyan-500/20"
+                >
+                  ⚡ COUNTER
+                </button>
+
+              </div>
+            )}
           </div>
-        ))}
-      </div>
-
+        ))
+      ) : (
+        <div className="text-center text-slate-600 text-[10px] uppercase py-6">
+          // KEINE ANFRAGEN GEFUNDEN
+        </div>
+      )}
     </div>
   );
 }

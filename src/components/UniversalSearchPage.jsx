@@ -6,18 +6,32 @@ import { useUniversalSearch } from "../hooks/useUniversalSearch";
 export default function UniversalSearchPage({ onNavigate, setView }) {
   const [viewMode, setViewMode] = useState("compact");
 
-const {
-  currentSector,
-  setCurrentSector,
-  filters,
-  setFilters,
-  filteredResults,
-  resetFilters,
-  searchQuery,
-  setSearchQuery,
-  sortBy,
-  setSortBy // 🔥 DAS FEHLT
-} = useUniversalSearch();
+  const {
+    currentSector,
+    setCurrentSector,
+    filters,
+    setFilters,
+    filteredResults,
+    resetFilters,
+    searchQuery,
+    setSearchQuery,
+    sortBy,
+    setSortBy
+  } = useUniversalSearch();
+  
+  {/* FAVORITEN */}
+  const getFavorites = () => {
+  return JSON.parse(localStorage.getItem("gigsda_favorites")) || [];
+  };
+  const toggleFavorite = (id) => {
+    let favs = getFavorites();
+    if (favs.includes(id)) {
+      favs = favs.filter(f => f !== id);
+    } else {
+      favs.push(id);
+    }
+    localStorage.setItem("gigsda_favorites", JSON.stringify(favs));
+  };
 
   return (
     <div className="min-h-screen bg-[#070b12] text-slate-200 p-4 font-sans">

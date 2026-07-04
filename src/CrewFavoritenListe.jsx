@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 export default function CrewFavoritenListe({ onNavigate }) {
   const [favorites, setFavorites] = useState([]);
   const [filterRole, setFilterRole] = useState('all');
+  const [allProfiles, setAllProfiles] = useState([]);
+
 
   // SYSTEM-ROLES FÜR DIE GEWERKE-FILTER MATRIX
   const ROLES_LIST = ['all', 'Künstler', 'Catering', 'Rental', 'Location', 'Techniker', 'Logistik', 'Security', 'Design'];
@@ -17,13 +19,45 @@ export default function CrewFavoritenListe({ onNavigate }) {
     }
   }, []);
 
-  const removeFavorite = (name) => {
-    const updated = favorites.filter(f => f.name !== name);
+  useEffect(() => {
+    try {
+      const storedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
+      const storedUsers = JSON.parse(localStorage.getItem('gigsda_users') || '[]');
+
+      const merged = storedUsers.map((user) => {
+        const p = storedProfiles.find(pr => pr.id === user.id) || {};
+
+        return {
+          ...user,
+          ...p,
+          name: user.name || p.name,
+          role: user.role || p.role,
+          city: user.city || p.city || '',
+          id: user.id
+        };
+      });
+
+      setAllProfiles(merged);
+
+    } catch (e) {
+      console.error("Fehler beim Laden der Profile:", e);
+    }
+  }, []);
+
+  const removeFavorite = (id) => {
+    const updated = favorites.filter(f => f !== id);
     localStorage.setItem('gigsda_favorites', JSON.stringify(updated));
     setFavorites(updated);
   };
 
-  const filteredFavs = favorites.filter(f => filterRole === 'all' || f.role === filterRole);
+  const favoriteProfiles = favorites
+    .map(favId => allProfiles.find(p => p.id === favId))
+    .filter(Boolean);
+
+  const filteredFavs = favoriteProfiles.filter(
+    f => filterRole === 'all' || f.role === filterRole
+  );
+
   // 🏟️ STATE FÜR DIE PROJEKT-AUSWAHL
   const [events, setEvents] = useState([]);
   const [activeSelectFav, setActiveSelectFav] = useState(null); // Welcher Favorit wird gerade hinzugefügt?
@@ -71,7 +105,10 @@ export default function CrewFavoritenListe({ onNavigate }) {
           }
 
         // Doppelbuchungen im selben Event verhindern
-        const alreadyInCrew = savedEvents[eventIndex].crew.some(member => member && member.name.toLowerCase() === fav.name.toLowerCase());
+        const alreadyInCrew = savedEvents[eventIndex].crew.some(member =>
+          member && member.id === fav.id
+        );
+
         if (alreadyInCrew) {
           alert(`${fav.name} ist bereits in der Crewliste dieses Projekts eingetragen!`);
           setActiveSelectFav(null);
@@ -80,6 +117,7 @@ export default function CrewFavoritenListe({ onNavigate }) {
 
         // Neues B2B-Crewmitglied mit Standardstatus 'pending' anlegen
         const newCrewMember = {
+          id: fav.id, // 🔥 DAS HINZUFÜGEN
           name: fav.name,
           role: fav.role,
           status: 'pending', // Startet offen für die Anfrage
@@ -102,7 +140,8 @@ export default function CrewFavoritenListe({ onNavigate }) {
           requestId: "REQ-" + Math.floor(Math.random() * 9000 + 1000),
           eventName: savedEvents[eventIndex].title || savedEvents[eventIndex].name || "B2B Event",
           date: savedEvents[eventIndex].date || "Termin folgt",
-          requestedProfile: fav.name,
+          requestedProfileId: fav.id,
+          requestedProfileName: fav.name,
           requesterName: localStorage.getItem('gigsda_user_name') || "Veranstalter",
           status: "pending",
           note: `Automatisch über Crew-Favoritenliste hinzugefügt.`
@@ -190,7 +229,7 @@ export default function CrewFavoritenListe({ onNavigate }) {
 
 
 
-            <button onClick={() => removeFavorite(fav.name)} className="w-full py-1 bg-red-500/5 border border-red-500/20 hover:border-red-500 hover:text-white text-red-400 text-[8px] font-bold uppercase rounded-lg transition-all cursor-pointer">
+            <button onClick={() => removeFavorite(fav.id)} className="w-full py-1 bg-red-500/5 border border-red-500/20 hover:border-red-500 hover:text-white text-red-400 text-[8px] font-bold uppercase rounded-lg transition-all cursor-pointer">
               ✕ ENTFERNEN
             </button>
           </div>

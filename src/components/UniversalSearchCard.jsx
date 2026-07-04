@@ -4,7 +4,7 @@ import { Play, Pause, ShieldCheck, MapPin, DollarSign, Layers, Volume2 } from 'l
 export default function UniversalSearchCard({ profile, currentSector, viewMode, setView, onNavigate }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
-
+  const [favState, setFavState] = useState(false);
   const handlePlayPause = (e, url) => {
     e.stopPropagation();
     if (!url) return;
@@ -29,6 +29,11 @@ export default function UniversalSearchCard({ profile, currentSector, viewMode, 
   };
 
   useEffect(() => {
+    const favs = JSON.parse(localStorage.getItem("gigsda_favorites")) || [];
+    setFavState(favs.includes(profile.id));
+  }, [profile.id]);
+
+  useEffect(() => {
     return () => {
       if (audioRef.current) audioRef.current.pause();
     };
@@ -45,6 +50,22 @@ export default function UniversalSearchCard({ profile, currentSector, viewMode, 
   const hasEvents = profile.gigsda_events && profile.gigsda_events.length >= 2;
   const isVerified = profile.gigsda_verified === true || hasEvents;
   const isCompact = viewMode === 'compact';
+
+  // FAVORITEN
+  const getFavorites = () => {
+    return JSON.parse(localStorage.getItem("gigsda_favorites")) || [];
+  };
+  const toggleFavorite = (id) => {
+    let favs = getFavorites();
+    if (favs.includes(id)) {
+      favs = favs.filter(f => f !== id);
+    } else {
+      favs.push(id);
+    }
+    localStorage.setItem("gigsda_favorites", JSON.stringify(favs));
+  };
+
+  const isFav = favState;
 
   return (
     <div 
@@ -63,6 +84,21 @@ export default function UniversalSearchCard({ profile, currentSector, viewMode, 
             <span className="text-slate-600 text-xs">{currentSector === 'artists' ? '🎤' : '🏢'}</span>
           )}
         </div>
+
+        {/* FAVORITEN */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleFavorite(profile.id);
+
+            const favs = JSON.parse(localStorage.getItem("gigsda_favorites")) || [];
+            setFavState(favs.includes(profile.id));
+          }}
+          className="text-yellow-400 hover:scale-120 transition"
+        >
+          {isFav ? "⭐" : "☆"}
+        </button>
+
 
         <div className="min-w-0 leading-tight">
           <div className="flex items-center gap-1.5 min-w-0">

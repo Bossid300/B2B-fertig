@@ -5,54 +5,48 @@ export default function CrewRequestCenter({ currentProfileName }) {
   const [counterText, setCounterText] = useState('');
   const [activeCounterId, setActiveCounterId] = useState(null);
 
-  // 📡 HOOT ALLE INCOMING REQUESTS AUS DEM SPEICHER
-  useEffect(() => {
+useEffect(() => {
+
+  const loadRequests = () => {
     try {
       const savedRequests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
-      
-      // Falls die DB komplett leer ist, generieren wir zum Testen zwei fette Demo-Anfragen!
-      if (savedRequests.length === 0) {
-        const demoRequests = [
-          {
-            requestId: "REQ-4402",
-            eventName: "Rock Night Braunau 2026",
-            date: "14.11.2026",
-            requestedProfile: currentProfileName || "Cater John",
-            requesterName: "Arena Braunau",
-            status: "pending",
-            note: "Brauchen dringend deine Full-Service Unterstützung vor Ort!"
-          },
-          {
-            requestId: "REQ-8911",
-            eventName: "Cyberpunk Gala Open-Air",
-            date: "22.08.2026",
-            requestedProfile: currentProfileName || "Cater John",
-            requesterName: "Innviertel Events GmbH",
-            status: "pending",
-            note: "Standard-B2B Konditionen laut Marktplatz-Tarif."
-          }
-        ];
-        localStorage.setItem('gigsda_crew_requests', JSON.stringify(demoRequests));
-        setRequests(demoRequests);
-        // ⚡ Sendet den globalen B2B-Funkspruch an die App.jsx!
-        window.dispatchEvent(new CustomEvent('request-sent'));
 
-      } else {
-        // Filtert nur die Anfragen, die exakt an DIESES geöffnete Profil gerichtet sind
-        const myRequests = savedRequests.filter(req => {
-          if (!req) return false;
-          const reqName = (req.requestedProfile || '').trim().toLowerCase();
-          const senderName = (req.requesterName || '').trim().toLowerCase();
-          const me = (currentProfileName || '').trim().toLowerCase();
+      const myRequests = savedRequests.filter(req => {
+        if (!req) return false;
 
-          return reqName === me || senderName === me;
-        });
-        setRequests(myRequests);
-      }
+        // ✅ ALT (Name)
+        const reqName = (req.requestedProfile || '').trim().toLowerCase();
+        const me = (currentProfileName || '').trim().toLowerCase();
+
+        // ✅ NEU (ID)
+        const reqId = (req.requestedProfileId || '').toLowerCase();
+
+        const myId = (JSON.parse(localStorage.getItem('gigsda_profiles') || '[]')
+          .find(p => p.name === currentProfileName)?.id || ''
+        ).toLowerCase();
+
+        return reqId === myId || reqName === me;
+      });
+
+      setRequests(myRequests);
+
     } catch (e) {
       console.error("Fehler beim Laden der Crew-Anfragen:", e);
     }
-  }, [currentProfileName]);
+  };
+
+  // ✅ INITIAL LOAD
+  loadRequests();
+
+  // ✅ LIVE UPDATE (kein F5 mehr!)
+  window.addEventListener('request-sent', loadRequests);
+
+  return () => {
+    window.removeEventListener('request-sent', loadRequests);
+  };
+
+}, [currentProfileName]);
+
 
   const handleResponse = (requestId, newStatus) => {
     try {
@@ -126,7 +120,7 @@ export default function CrewRequestCenter({ currentProfileName }) {
   };
 
   // Wenn keine offenen Anfragen oder Gegenangebote da sind, schläft das Modul unsichtbar im Hintergrund
-  if (requests.filter(r => r.status === 'pending' || r.status === 'counter_offer').length === 0) return null;
+  return null;
 
   return (
     <div className="mb-6 space-y-3 font-mono animate-fade-in">

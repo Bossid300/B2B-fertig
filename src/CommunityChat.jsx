@@ -2,28 +2,59 @@ import React, { useState } from 'react';
 import { Send, Users, ShieldCheck, MapPin } from 'lucide-react';
 
 export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
-  // 1. Die Teilnehmerliste (Sidebar) direkt aus eurer Projekt-Crew
-  const crewChannels = [
-    { id: 'all', name: "📢 Haupt-Kanal", role: "Alle Crewmitglieder", isGroup: true },
-    { id: 'jud', name: "Winston Jud", role: "Künstler // Main-Act", active: true },
-    { id: 'pichler', name: "Oliver Pichler (Socn MC)", role: "Künstler // Support" },
-    { id: 'klingelsberger', name: "Daniel Klingelsberger", role: "Licht- & Tonsystemtechnik" },
-    { id: 'stadtpark', name: "Stadtpark OpenAir", role: "Location // Braunau" },
-    { id: 'audiorent', name: "AudioRent Group", role: "PA & Tonsystem-Verleih" },
-  ];
 
-  const [activeChannel, setActiveChannel] = useState('all');
+  const currentUserName = localStorage.getItem('gigsda_user_name');
+  const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
+  const currentProfile = profiles.find(p =>
+    (p.name || '').toLowerCase() === (currentUserName || '').toLowerCase()
+  );
+  const currentUserId = currentProfile?.id || "";
+
+  const activeStub = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
+  const events = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+
+  const activeEvent = events.find(e => e.id === activeStub?.id);
+  const hasAccess =
+  activeEvent &&
+  (
+    activeEvent.ownerId === currentUserId ||
+    activeEvent.crewIds?.includes(currentUserId)
+  );
+
+  // 1. Die Teilnehmerliste (Sidebar) direkt aus eurer Projekt-Crew
+
+const crewChannels = (() => {
+  const activeStub = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
+  const events = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+  const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
+
+  const currentEvent = events.find(e => e.id === activeStub?.id);
+
+  const members = (currentEvent?.crewIds || [])
+    .map(id => profiles.find(p => p.id === id))
+    .filter(Boolean);
+
+  return [
+    { id: 'all', name: "📢 Haupt-Kanal", role: "Alle Crewmitglieder", isGroup: true },
+    ...members.map(m => ({
+      id: m.id,
+      name: m.name,
+      role: m.role
+    }))
+  ];
+})();
+
+
+const [activeChannel, setActiveChannel] = useState('USR-8717');
   const [message, setMessage] = useState('');
-  
-  // Beispiel-Nachrichten für das System
-  const [chatHistory, setChatHistory] = useState([
-    { id: 1, channel: 'all', user: 'Daniel Klingelsberger', text: 'Moin! Tonsystem steht bereit. Habt ihr den Rider final freigegeben?', time: '14:22' },
-    { id: 2, channel: 'all', user: 'Stadtpark OpenAir', text: 'Ja, Rider ist auf 100%. Stromanschlüsse auf der Hauptbühne sind verriegelt.', time: '14:35' },
-    { id: 3, channel: 'all', user: 'Winston Jud', text: 'Hammer! Soundcheck machen wir dann pünktlich um 16:30 Uhr.', time: '15:01' },
     
-    // Private Nachrichten vorbelegt
-    { id: 4, channel: 'klingelsberger', user: 'Daniel Klingelsberger', text: '[Direktnachricht] Hey Winston, bringst du dein eigenes Gesangsmikrofon mit?', time: 'Gestern' },
-  ]);
+  // Beispiel-Nachrichten für das System
+    const [chatHistory, setChatHistory] = useState(() => {
+    const saved = JSON.parse(localStorage.getItem('gigsda_chats') || '[]');
+    if (!activeEvent) return [];
+    const eventChat = saved.find(c => c.eventId === activeEvent.id);
+    return eventChat?.messages || [];
+  });
 
   const currentChannelInfo = crewChannels.find(c => c.id === activeChannel);
 
@@ -34,10 +65,40 @@ export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
     const newMsg = {
       id: Date.now(),
       channel: activeChannel,
-      user: "Winston Jud (Du)",
+      user: `${currentUserName} (Du)`,
       text: message,
       time: "Jetzt"
     };
+    
+    const chats = JSON.parse(localStorage.getItem('gigsda_chats') || '[]');
+    const activeEvent = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
+
+    if (!activeEvent) return;
+
+    // finde chat für dieses event
+    let eventChat = chats.find(c => c.eventId === activeEvent.id);
+
+    if (!eventChat) {
+      eventChat = {
+        eventId: activeEvent.id,
+        messages: []
+      };
+      chats.push(eventChat);
+    }
+
+    // neue message rein
+    eventChat.messages.push({
+      id: Date.now(),
+      senderId: currentUserId,
+      channel: activeChannel,
+      text: message,
+      time: new Date().toLocaleTimeString().slice(0,5)
+    });
+
+    // speichern
+    localStorage.setItem('gigsda_chats', JSON.stringify(chats));
+
+
 
     setChatHistory([...chatHistory, newMsg]);
     setMessage('');
@@ -73,7 +134,19 @@ export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
   // Filtert nur die Nachrichten für den aktuell ausgewählten Kanal
   const filteredMessages = chatHistory.filter(m => m.channel === activeChannel);
 
+  if (!hasAccess) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 text-center text-slate-400">
+        <p className="text-lg">🔒 Zugriff verweigert</p>
+        <p className="text-sm mt-2">
+          Du bist kein Teil dieses Projekts.
+        </p>
+      </div>
+    );
+  }
+
   return (
+    
     <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs">
       
       {/* HEADER */}
@@ -114,6 +187,9 @@ export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
                 <span className="text-[9px] font-mono text-slate-500 mt-0.5 block truncate">
                   {channel.role}
                 </span>
+                  {(channel.id === "all" || channel.id === "GIGS-1122") && (
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                  )}
               </button>
             );
           })}
@@ -136,12 +212,17 @@ export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
           {/* Nachrichten-Verlauf */}
           <div className="flex-1 p-4 overflow-y-auto space-y-3 font-mono text-[11px] bg-slate-950/20">
             {filteredMessages.length > 0 ? (
-              filteredMessages.map((msg) => {
-                const isMe = msg.user.includes("(Du)");
+             filteredMessages.map((msg) => {
+                const isMe = msg.user?.includes("(Du)");
+                const senderName =
+                  profiles.find(p => p.id === msg.senderId)?.name ||
+                  msg.user ||
+                  "Unbekannt";
+
                 return (
                   <div key={msg.id} className={`flex flex-col max-w-[85%] ${isMe ? 'ml-auto items-end' : 'mr-auto items-start'}`}>
                     <div className="flex items-center gap-1.5 text-[9px] text-slate-500 mb-0.5 px-1">
-                      <span className={isMe ? 'text-cyan-400 font-bold' : 'text-purple-400'}>{msg.user}</span>
+                      <span className={isMe ? 'text-cyan-400 font-bold' : 'text-purple-400'}>{senderName}</span>
                       <span>•</span>
                       <span>{msg.time}</span>
                     </div>

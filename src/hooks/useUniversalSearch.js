@@ -13,6 +13,7 @@ export const useUniversalSearch = () => {
   const [currentSector, setCurrentSector] = useState("artists");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("default");
+  const [showFavorites, setShowFavorites] = useState(false);
   const [filters, setFilters] = useState({
     selectedGenre: "all",
     selectedType: "all",
@@ -32,9 +33,10 @@ export const useUniversalSearch = () => {
     selectedSupport: "all", // "all" | "yes" | "no"
     selectedEventType: "all",
     selectedInstrument: "all",
-
     sortBy,
     setSortBy,
+    showFavorites,
+    setShowFavorites,
 
     onlyVerified: false
 
@@ -74,7 +76,20 @@ export const useUniversalSearch = () => {
   // 🔹 Filterlogik (🔥 useMemo statt useEffect)
   const filteredResults = useMemo(() => {
     return allProfiles.filter((user) => {
+
       const role = (user.role || "").toLowerCase();
+
+      // ⭐ FAVORITEN FILTER
+      const favorites = JSON.parse(localStorage.getItem("gigsda_favorites")) || [];
+
+      if (showFavorites && !favorites.some(f => {
+        if (typeof f === "string") return f === user.id;       // ✅ ID-Vergleich
+        if (typeof f === "object") return f.name === user.name; // ✅ Objekt-Vergleich
+        return false;
+      })) {
+        return false;
+      }
+
 
         // 🎤 ARTISTS
         if (currentSector === "artists" && role !== "künstler") return false;
@@ -199,7 +214,7 @@ return {
   setSearchQuery,
 
   sortBy,
-  setSortBy // 🔥 DAS HAT GEFEHLT
+  setSortBy
 };
 
 

@@ -21,8 +21,8 @@ export default function GuestNavigation({ setView, activeView }) {
   const mobileBase = "w-full text-left px-3 py-2 rounded-xl text-[10px] font-mono tracking-widest border border-slate-900 uppercase";
 
   return (
-    <div className="w-full bg-slate-950/80 backdrop-blur-md border-b border-slate-900 shadow-xl select-none sticky top-0 z-50 font-mono">
-      <div className="w-full max-w-7xl mx-auto px-4 py-3 flex items-center justify-between sm:justify-end gap-6">
+    <div className="w-full backdrop-blur-md border-slate-900 shadow-xl select-none sticky top-0 z-50 font-mono">
+      <div className="w-full max-w-7xl mx-auto px-4 py-1.0 flex items-center justify-between sm:justify-end gap-6">
         
         {/* ── DESKTOP NAVIGATIONS-LINKS (EXAKT DEINE ORIGINALEN PUNKTE VON GITHUB) ── */}
         <div className="hidden sm:flex items-center gap-6 select-none ml-auto shrink-0">
@@ -46,7 +46,7 @@ export default function GuestNavigation({ setView, activeView }) {
 
         </div>
 
-        {/* ── LILA LOGIN BUTTON (MIT DEINEM ORIGINALEN CYBERPUNK-FARBVERLAUF) & BURGER ── */}
+        {/* LOGIN */}
         <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end shrink-0 pl-2">
           <button 
             onClick={() => handleNavClick('login')} 

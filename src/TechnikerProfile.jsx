@@ -19,6 +19,7 @@ import ProfileVertretungBox from './components/ProfileVertretungBox';
 import ProfileLokalBox from './components/ProfileLokalBox';
 import ProfileStatusMatrix from './components/ProfileStatusMatrix';
 import ProfileHilfeBox from './components/ProfileHilfeBox';
+import ArtistAudioBox from './components/ArtistAudioBox';
 
 
 export default function TechnikerProfile({ onBack, ticketName, isOwner }) {
@@ -97,9 +98,11 @@ export default function TechnikerProfile({ onBack, ticketName, isOwner }) {
       />
 
       <ProfileStammBox currentProfileName={targetUser} isOwner={isOwner} />
+      
       <ProfileStatusMatrix currentProfileName={targetUser} />
       <ProfileBioTabsBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileSkillBox currentProfileName={targetUser} isOwner={isOwner} />
+            <ArtistAudioBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileGalleryBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileNetworkBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileProjekteBox currentProfileName={targetUser} isOwner={isOwner} />

@@ -139,11 +139,10 @@ export const matchArtistFilters = (profile, filters) => {
           ${profile.subInstruments || ""}
         `.toLowerCase();
 
-        const selected = filters.selectedInstrument.toLowerCase();
+        const selected = (filters.selectedInstrument || "").toLowerCase();
 
-        // 🔥 einfache Synonym-Map
         const synonyms = {
-          guitar: ["guitar", "gitarre", "e-gitarre", "acoustic guitar"],
+          guitar: ["guitar", "gitarre", "e-gitarre"],
           piano: ["piano", "klavier"],
           drums: ["drums", "schlagzeug"],
           vocals: ["vocals", "gesang"]
