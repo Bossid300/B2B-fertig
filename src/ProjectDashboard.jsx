@@ -195,27 +195,6 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
                       </span>
                     )}
 
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-
-                        const currentEvt = evt;
-                        const eventId = currentEvt.id || currentEvt.eventId || currentEvt._id;
-                        const eventTitle = currentEvt.title || currentEvt.name || "B2B Event";
-
-                        localStorage.setItem('gigsda_active_event', JSON.stringify({ id: eventId, title: eventTitle }));
-
-                        if (typeof onSelectEvent === 'function') onSelectEvent(currentEvt);
-
-                        if (typeof onNavigateToStep === 'function') {
-                          onNavigateToStep('riderzentrale');
-                        }
-                      }}
-                      className="px-3 py-1.5 bg-gradient-to-r from-purple-600/20 to-cyan-600/20 border border-cyan-500/40 hover:border-cyan-400 text-cyan-400 hover:text-white text-[9px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer font-mono mr-2 shadow-[0_0_10px_rgba(6,182,212,0.05)]"
-                    >
-                      🎛️ Rider & Gewerke
-                    </button>
-
                     {/* 🎛️ TARGETED B2B ACCESS: WEIST JEDEM BUTTON REAKTIV SEIN EIGENES PROJEKT ZU */}
                     <button 
                       type="button"

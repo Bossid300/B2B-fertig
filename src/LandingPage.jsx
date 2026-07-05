@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Search, MapPin, Ticket, Shield, Sliders, Calendar, ArrowRight, CheckCircle2, ChevronDown, Users, Layers, Award } from 'lucide-react';
 import GuestPass from './GuestPass';
-
+import Roadmap from "./components/Roadmap";
 // 📡 Daniels originale Testdaten (Bands, Termine und geile Locations)
 const initialGigs = [
   { id: 1, title: "Band", date: "27.08.2026", location: "Bambug", img: "/2026/profiles/Jud-Herbert/banner.jpg" },
@@ -21,6 +21,8 @@ export default function LandingPage({ onEnterCenter, onCreateAccount }) {
     }
   };
   const [searchQuery, setSearchQuery] = useState('');
+
+const [videoMuted, setVideoMuted] = useState(true);
 
   return (
     <div className="w-full min-h-screen bg-[#070913] text-white font-sans relative overflow-x-hidden antialiased pb-16">
@@ -142,7 +144,33 @@ export default function LandingPage({ onEnterCenter, onCreateAccount }) {
 
         {/* RECHTE DEKO-AURA (HÄLT DAS DESIGN REAKTIV RECHTS BALANCIERT) */}
         <div className="hidden md:block w-5/12 h-64 bg-gradient-to-tr from-purple-600/10 to-pink-500/5 rounded-3xl border border-slate-900/40 backdrop-blur-xs relative overflow-hidden shadow-2xl">
-          <div className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-screen" style={{ backgroundImage: `url('https://unsplash.com')` }}></div>
+          <div className="absolute inset-0 rounded-[32px] overflow-hidden border border-cyan-500/20 bg-black/20 backdrop-blur-xl">
+
+              <video
+                autoPlay
+                muted={videoMuted}
+                loop
+                playsInline
+                className="w-full h-full object-cover"
+              >
+                <source
+                  src="/2026/videos/gigsda_video_stahlhammer.mp4"
+                  type="video/mp4"
+                />
+              </video>
+
+              <button
+                onClick={() => setVideoMuted(!videoMuted)}
+                className="absolute top-3 right-3 px-2 py-1 rounded-lg bg-black/40 border border-cyan-500/30 text-cyan-400 text-[10px] font-mono uppercase hover:bg-cyan-500/10"
+              >
+                {videoMuted ? "🔇 Ton" : "🔊 Ton"}
+              </button>
+
+              <div className="absolute bottom-3 left-4 text-[12px] font-mono text-cyan-400 tracking-widest uppercase">
+                // Live Concert Feed Active
+              </div>
+
+            </div>
           <div className="absolute bottom-4 left-4 text-left font-mono text-[9px] text-cyan-400 font-bold uppercase tracking-widest animate-pulse">// LIVE CONCERT FEED CHANNEL active</div>
         </div>
 
@@ -230,6 +258,11 @@ export default function LandingPage({ onEnterCenter, onCreateAccount }) {
                 </div>
               </section>
 
+              {/* Building Gigsda In Public */}
+              <div className="max-w-4xl mx-auto">
+                <Roadmap />
+              </div>
+              
               <section>
               {/* ANKER-VORSCHAU-PFEIL */}
               <div className="flex justify-center text-slate-600 animate-bounce">

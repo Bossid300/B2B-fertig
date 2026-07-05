@@ -34,14 +34,22 @@ const crewChannels = (() => {
     .map(id => profiles.find(p => p.id === id))
     .filter(Boolean);
 
-  return [
-    { id: 'all', name: "📢 Haupt-Kanal", role: "Alle Crewmitglieder", isGroup: true },
-    ...members.map(m => ({
-      id: m.id,
-      name: m.name,
-      role: m.role
-    }))
-  ];
+    return [
+      {
+        id: 'all',
+        name: "📢 Haupt-Kanal",
+        role: "Alle Crewmitglieder",
+        isGroup: true,
+        unread: false
+      },
+
+      ...members.map(m => ({
+        id: m.id,
+        name: m.name,
+        role: m.role,
+        unread: false
+      }))
+    ];
 })();
 
 
@@ -64,8 +72,9 @@ const [activeChannel, setActiveChannel] = useState('USR-8717');
 
     const newMsg = {
       id: Date.now(),
+      senderId: currentUserId,
+      receiverId: activeChannel,
       channel: activeChannel,
-      user: `${currentUserName} (Du)`,
       text: message,
       time: "Jetzt"
     };
@@ -181,15 +190,19 @@ const [activeChannel, setActiveChannel] = useState('USR-8717');
                     : 'bg-slate-900/40 border-slate-900/60 text-slate-400 hover:border-slate-800 hover:text-slate-200'
                 }`}
               >
-                <span className="text-[11px] font-black uppercase tracking-tight block truncate">
-                  {channel.name}
-                </span>
-                <span className="text-[9px] font-mono text-slate-500 mt-0.5 block truncate">
-                  {channel.role}
-                </span>
-                  {(channel.id === "all" || channel.id === "GIGS-1122") && (
-                <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                  )}
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-black uppercase tracking-tight block truncate">
+                    {channel.name}
+                  </span>
+
+                    {channel.unread && (
+                      <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0"></span>
+                    )}
+                </div>
+
+                  <span className="text-[9px] font-mono text-slate-500 mt-0.5 block truncate">
+                    {channel.role}
+                  </span>
               </button>
             );
           })}

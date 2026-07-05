@@ -38,7 +38,7 @@ import RiderZentrale from './RiderZentrale'; // 🎛️ Schaltet das geteilte B2
 
 
 import { initialUsers, initialProfiles } from './data/mockData';
-
+import ArtistPortfolio from "./components/ArtistPortfolio";
  
 export default function App() {
     // 📡 REAKTIVER CREW-ALARM EMPFÄNGER
@@ -572,6 +572,10 @@ export default function App() {
             />
           )}
 
+
+          {view === "artistPortfolio" && (
+            <ArtistPortfolio />
+          )}
 
  
         </main>

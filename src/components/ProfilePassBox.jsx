@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, FileText, ArrowLeft } from 'lucide-react';
+import ArtistPortfolio from "./ArtistPortfolio";
 
 export default function ProfilePassBox({ currentProfileName, profileId, onBackToDashboard, sliderImages = [] }) {
   // Generiert den passenden reaktiven Reflink aus dem Künstlernamen
@@ -131,8 +132,28 @@ export default function ProfilePassBox({ currentProfileName, profileId, onBackTo
           className="w-full sm:flex-1 h-12 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:opacity-90 text-slate-900 font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.99]"
         >
           <FileText size={14} className="text-slate-900" />
-          Portfolio-Bewerbung drucken (PDF)
+          ✅Profil drucken (PDF)
         </button>
+
+        <button
+          onClick={handlePrintPdf}
+          className="w-full sm:flex-1 h-12 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:opacity-90 text-slate-900 font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.99]"
+        >
+          <FileText size={14} className="text-slate-900" />
+          ✅ Portfolio drucken (PDF)
+        </button>
+
+        <button
+          onClick={() => {
+            localStorage.setItem('gigsda_current_view', 'artistPortfolio');
+            window.location.reload();
+          }}
+          className="no-print w-full sm:flex-1 h-12 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:opacity-90 text-slate-900 font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.99]"
+        >
+          <FileText size={14} className="text-slate-900" />
+          🎤 Portfolio öffnen
+        </button>
+
 
         <button
           onClick={onBackToDashboard}
@@ -142,8 +163,8 @@ export default function ProfilePassBox({ currentProfileName, profileId, onBackTo
           Zurück zum Dashboard
         </button>
 
-      </div>
 
+      </div>
     </div>
   );
 }
