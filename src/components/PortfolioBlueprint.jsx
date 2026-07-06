@@ -93,7 +93,7 @@ Ziel
 Warum macht dieser Mensch Musik?
 
 ==================================================
-06 // REFERENCES 
+06 // REFERENCES  ✅
 ==================================================
 
 Vertrauen schaffen.
@@ -108,7 +108,7 @@ Ziel
 Wo wurde der Künstler bereits wahrgenommen?
 
 ==================================================
-07 // BOOKING CENTER✅
+07 // BOOKING CENTER ✅
 ==================================================
 
 Jetzt wird aus Interesse eine Anfrage.
@@ -138,7 +138,7 @@ Ziel
 Ist der Künstler umsetzbar?
 
 ==================================================
-09 // TECHNICAL RIDER
+09 // TECHNICAL RIDER ✅
 ==================================================
 
 Der Produktionsbereich.

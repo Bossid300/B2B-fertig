@@ -34,7 +34,11 @@ export default function Roadmap() {
   <li>Persistenter Chat</li>
   <li>Hero Video Feed</li>
   <li>Navigation Refresh</li>
+  <li>Portfolio V2</li>
+  <li>↓</li>
+  <li>GIGSDA Pass</li>
 </ul>
+
 
         </div>
 
@@ -95,6 +99,14 @@ export default function Roadmap() {
     <li>✅ Navigation Refresh</li>
     <li>✅ Chat V1 Complete</li>
     <li>✅ Notification UI</li>
+   
+    <li>✅ Portfolio V2 Foundation</li>
+    <li>✅ Artist Portfolio Dynamic Data</li>
+    <li>✅ Media Showcase Integration</li>
+    <li>✅ Technical Rider Integration</li>
+    <li>✅ GIGSDA Pass Component</li>
+    <li>✅ QR Access Prototype</li>
+
   </ul>
 </div>
 

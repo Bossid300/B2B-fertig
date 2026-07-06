@@ -84,7 +84,7 @@ export default function GlobalNavigation({ view, setView, onLogout }) {
   const mobileBase = "w-full text-left px-3 py-2 rounded-xl text-[10px] font-mono tracking-widest border border-slate-900 uppercase";
   
   return (
-    <div className="w-full backdrop-blur-md border-slate-900 shadow-xl select-none sticky top-0 z-50 font-mono">
+    <div className="no-print w-full backdrop-blur-md border-slate-900 shadow-xl select-none sticky top-0 z-50 font-mono">
       <div className="w-full max-w-7xl mx-auto px-4 py-1.0 flex items-center justify-between sm:justify-end gap-6">
 
       {/* NAV */}

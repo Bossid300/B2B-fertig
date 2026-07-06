@@ -1,4 +1,5 @@
 import React from "react";
+import GigsdaPass from "../components/GigsdaPass";
 
 const profiles =
   JSON.parse(localStorage.getItem("gigsda_profiles")) || [];
@@ -42,12 +43,12 @@ export default function ArtistPortfolio() {
                 Rock • Akustik • Eigene Songs
                 </p>
 
-                <div className="flex gap-3 mt-6">
+                <div className="no-print flex gap-3 mt-6">
                 <button className="px-5 py-3 rounded-xl bg-cyan-500 text-black font-semibold">
                     Hörprobe
                 </button>
 
-                <button className="px-5 py-3 rounded-xl border border-slate-700">
+                <button className="no-print px-5 py-3 rounded-xl border border-slate-700">
                     Booking
                 </button>
                 </div>
@@ -245,6 +246,44 @@ export default function ArtistPortfolio() {
 
         </section>
 
+
+        {/* REFERENCES */}
+        <section className="rounded-3xl bg-slate-950 border border-slate-800 p-8">
+
+        <h2 className="text-2xl font-bold mb-8">
+            References
+        </h2>
+
+        <div className="rounded-2xl bg-slate-900 border border-slate-800 p-8">
+
+            <h3 className="text-xl font-semibold mb-4">
+            Aktuelle Projekte & Engagements
+            </h3>
+
+            <p className="text-slate-400 leading-relaxed">
+            Referenzen werden automatisch aus GIGSDA Projekten und Events
+            generiert. Alle Veranstaltungen, Produktionen und Engagements,
+            bei denen ein Künstler, Crew-Mitglied oder Veranstalter beteiligt
+            ist, erscheinen hier automatisch.
+            </p>
+
+            <div className="mt-6 border-t border-slate-800 pt-6">
+
+            <p className="text-cyan-400 font-mono text-sm">
+                REFERENZSYSTEM AKTIV
+            </p>
+
+            <p className="text-slate-500 text-sm mt-2">
+                Noch keine automatisch erkannten Referenzen vorhanden.
+            </p>
+
+            </div>
+
+        </div>
+
+        </section>
+
+
         {/* TECH OVERVIEW */}
         <section className="rounded-3xl bg-slate-950 border border-slate-800 p-8">
 
@@ -288,30 +327,72 @@ export default function ArtistPortfolio() {
         </section>
 
 
+        {/* TECHNICAL RIDER */}
+        <section className="rounded-3xl bg-slate-950 border border-slate-800 p-8">
 
-
-
-
-      {/* PASS */}
-      <section className="rounded-3xl bg-slate-950 border border-cyan-500/20 p-8">
-
-        <h2 className="text-2xl font-bold mb-6">
-          Gigsda Pass
+        <h2 className="text-2xl font-bold mb-8">
+            Technical Rider
         </h2>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid md:grid-cols-2 gap-6">
 
-          <div className="rounded-2xl bg-slate-900 p-6">
-            Vorderseite
-          </div>
+            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+            <h3 className="font-semibold mb-4">
+                Technical Rider PDF
+            </h3>
 
-          <div className="rounded-2xl bg-slate-900 p-6">
-            QR-Code
-          </div>
+                <a
+                href={profile?.rider_pdf_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 hover:text-cyan-300 underline break-all"
+                >
+                📄 Rider öffnen
+                </a>
+            </div>
+
+            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+            <h3 className="font-semibold mb-4">
+                Stageplot
+            </h3>
+
+            <a
+                href={profile?.stageplot_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 hover:text-cyan-300 underline break-all"
+            >
+                🗺️ Stageplot öffnen
+            </a>
+            </div>
+
+            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+            <h3 className="font-semibold mb-4">
+                Monitoring
+            </h3>
+
+            <p className="text-slate-300">
+                {profile?.rider_monitors}
+            </p>
+            </div>
+
+            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+            <h3 className="font-semibold mb-4">
+                Backline
+            </h3>
+
+            <p className="text-slate-300">
+                {profile?.rider_backline}
+            </p>
+            </div>
 
         </div>
 
-      </section>
+        </section>
+
+
+        {/* PASS */}
+        <GigsdaPass profile={profile} />
 
     </div>
   );
