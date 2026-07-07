@@ -122,6 +122,12 @@ export default function Roadmap() {
     <li>🔄 Tech Overview</li>
     <li>🔄 Technical Rider</li>
 
+    <li>🔄 ...</li>
+
+    <li>🔄 Cleaning gigsda_users entkoppeln</li>
+    <li>✅ CrewFavoritenListe.jsx</li>
+    <li>🔄 LoginRegisterMask.jsx</li>
+    <li>🔄 App.jsx</li>
 
   </ul>
 </div>

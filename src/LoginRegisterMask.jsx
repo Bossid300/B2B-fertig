@@ -44,19 +44,28 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
     }
 
     // Normaler Datenbank-Abgleich für alle anderen User
-    let registeredUsers = [];
+    let registeredProfiles = [];
+
     try {
-      const localData = localStorage.getItem('gigsda_users');
+      const localData = localStorage.getItem('gigsda_profiles');
       if (localData) {
-        registeredUsers = JSON.parse(localData);
+        registeredProfiles = JSON.parse(localData);
       }
     } catch (err) {
-      registeredUsers = [];
+      registeredProfiles = [];
     }
 
-    const userArray = Array.isArray(registeredUsers) ? registeredUsers : [];
-    const matchedUser = userArray.find(
-      user => user && user.name && user.name.trim().toLowerCase() === inputName.toLowerCase()
+    const profileArray =
+      Array.isArray(registeredProfiles)
+        ? registeredProfiles
+        : [];
+
+    const matchedUser = profileArray.find(
+      user =>
+        user &&
+        user.name &&
+        user.name.trim().toLowerCase() ===
+          inputName.toLowerCase()
     );
 
     if (matchedUser) {
