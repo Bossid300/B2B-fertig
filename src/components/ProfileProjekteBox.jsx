@@ -50,12 +50,23 @@ export default function ProfileProjekteBox({ currentProfileName, isOwner }) {
                 (member.status === 'accepted' || member.status === 'confirmed')
               );
 
+              const isProjectOwner =
+                evt.ownerId &&
+                found.id &&
+                evt.ownerId === found.id;
+
               // Falls der User Teil der Crew ist, pushen wir das Event als verifizierte Referenz!
-              if (hasJoined) {
+              if (hasJoined || isProjectOwner) {
                 joinedProjects.push(evt);
-                
-                // Zählt wie viele Leute INSGESAMT in diesem Event verifiziert aufrecht stehen
-                const totalAcceptedCrew = evt.crew.filter(m => m && (m.status === 'accepted' || m.status === 'confirmed')).length;
+
+                const totalAcceptedCrew =
+                  Array.isArray(evt.crew)
+                    ? evt.crew.filter(m =>
+                        m &&
+                        (m.status === 'accepted' || m.status === 'confirmed')
+                      ).length
+                    : 0;
+
                 counts[evt.id || evt.title] = totalAcceptedCrew;
               }
             });

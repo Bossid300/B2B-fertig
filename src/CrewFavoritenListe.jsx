@@ -21,23 +21,12 @@ export default function CrewFavoritenListe({ onNavigate }) {
 
   useEffect(() => {
     try {
-      const storedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
-      const storedUsers = JSON.parse(localStorage.getItem('gigsda_users') || '[]');
+      const storedProfiles = JSON.parse(
+        localStorage.getItem('gigsda_profiles') || '[]'
+      );
 
-      const merged = storedUsers.map((user) => {
-        const p = storedProfiles.find(pr => pr.id === user.id) || {};
+      setAllProfiles(storedProfiles);
 
-        return {
-          ...user,
-          ...p,
-          name: user.name || p.name,
-          role: user.role || p.role,
-          city: user.city || p.city || '',
-          id: user.id
-        };
-      });
-
-      setAllProfiles(merged);
 
     } catch (e) {
       console.error("Fehler beim Laden der Profile:", e);
