@@ -8,6 +8,25 @@ const profile =
   profiles.find(p => p.id === "GIGS-7677");
 
 
+const events =
+  JSON.parse(localStorage.getItem("gigsda_events")) || [];
+
+const references = events.filter(evt => {
+  const hasJoined =
+    Array.isArray(evt.crew) &&
+    evt.crew.some(member =>
+      member &&
+      member.name === profile?.name &&
+      (member.status === "accepted" ||
+       member.status === "confirmed")
+    );
+
+  const isOwner =
+    evt.ownerId === profile?.id;
+
+  return hasJoined || isOwner;
+});
+
 
 export default function ArtistPortfolio() {
   return (
@@ -273,9 +292,28 @@ export default function ArtistPortfolio() {
                 REFERENZSYSTEM AKTIV
             </p>
 
+            {references.length > 0 ? (
+            <div className="space-y-2 mt-4">
+                {references.map(ref => (
+                <div
+                    key={ref.id}
+                    className="rounded-xl bg-slate-950 border border-slate-800 p-3"
+                >
+                    <div className="font-semibold text-white">
+                    {ref.title}
+                    </div>
+
+                    <div className="text-slate-400 text-sm">
+                    {ref.date}
+                    </div>
+                </div>
+                ))}
+            </div>
+            ) : (
             <p className="text-slate-500 text-sm mt-2">
                 Noch keine automatisch erkannten Referenzen vorhanden.
             </p>
+            )}
 
             </div>
 

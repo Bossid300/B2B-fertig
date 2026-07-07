@@ -104,12 +104,27 @@ export default function Roadmap() {
     <li>✅ Artist Portfolio Dynamic Data</li>
     <li>✅ Media Showcase Integration</li>
     <li>✅ Technical Rider Integration</li>
+    <li>✅ GIGSDA Auto Referenzen</li>
     <li>✅ GIGSDA Pass Component</li>
     <li>✅ QR Access Prototype</li>
 
   </ul>
 </div>
 
+<div>
+  <h3 className="text-cyan-400 font-black uppercase text-xs tracking-widest mb-2">
+    ☕ In Progress
+  </h3>
+
+  <ul className="text-slate-300 text-sm space-y-1">
+    <li>🔄 Media Showcase</li>
+    <li>🔄 Gallery</li>
+    <li>🔄 Tech Overview</li>
+    <li>🔄 Technical Rider</li>
+
+
+  </ul>
+</div>
 
       </div>
     </div>
