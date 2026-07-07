@@ -7,7 +7,6 @@ const profiles =
 const profile =
   profiles.find(p => p.id === "GIGS-7677");
 
-
 const events =
   JSON.parse(localStorage.getItem("gigsda_events")) || [];
 
