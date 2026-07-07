@@ -99,7 +99,7 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
     if (!regName.trim() || !regPass.trim()) return;
 
     // 1️⃣ Die eindeutige ID generieren (für beide Tabellen identisch)
-    const generatedId = "USR-" + Math.floor(Math.random() * 9000 + 1000);
+    const generatedId = "GIGS-" + Math.floor(Math.random() * 9000 + 1000);
 
     // 2️⃣ ERSTER BLOCK: Das neutrale Basis-Profil für 'gigsda_profiles'
     const newProfile = {
@@ -108,23 +108,10 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
       role: regRole
     };
 
-    // 3️⃣ ZWEITER BLOCK: Der User für die Login-Tabelle 'gigsda_users'
-    const newUser = {
-      id: generatedId,
-      name: regName,
-      role: regRole,
-      registeredAt: new Date().toLocaleDateString()
-    };
-
     // 📁 Speichern in Tabelle 1 (gigsda_profiles)
     const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
     savedProfiles.push(newProfile);
     localStorage.setItem('gigsda_profiles', JSON.stringify(savedProfiles));
-
-    // 📁 Speichern in Tabelle 2 (gigsda_users)
-    const savedUsers = JSON.parse(localStorage.getItem('gigsda_users') || '[]');
-    savedUsers.push(newUser);
-    localStorage.setItem('gigsda_users', JSON.stringify(savedUsers));
 
     // 🚀 Erfolg an Daniels Hauptrouter funken
     onLoginSuccess(regName, regRole);
@@ -162,11 +149,11 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {[
                     { id: 'Fan', icon: '🎫', label: 'Fan', code: '[FAN_ZONE]' },
-                    { id: 'Veranstalter', icon: '💼', label: 'Promoter', code: '[ORG_CENTER]' },
+                    { id: 'Veranstalter', icon: '💼', label: 'Veranstalter', code: '[ORG_CENTER]' },
                     { id: 'Künstler', icon: '🎤', label: 'Künstler', code: '[ACT_READY]' },
-                    { id: 'Techniker', icon: '🎛️', label: 'Crew', code: '[CREW_PATCH]' },
+                    { id: 'Techniker', icon: '🎛️', label: 'Techniker', code: '[CREW_PATCH]' },
                     { id: 'Catering', icon: '🍽️', label: 'Catering', code: '[FOOD_SUPP]' },
-                    { id: 'Material', icon: '🔌', label: 'Rental', code: '[PA_BACKLINE]' },
+                    { id: 'Verleiher', icon: '🔌', label: 'Verleiher', code: '[PA_BACKLINE]' },
                     { id: 'Logistik', icon: '🚛', label: 'Logistik', code: '[CARGO_HUB]' },
                     { id: 'Security', icon: '🛡️', label: 'Security', code: '[GUARD_SYS]' },
                     { id: 'Design', icon: '🎭', label: 'Deko/Stage', code: '[STAGE_FX]' }

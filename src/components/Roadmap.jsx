@@ -108,6 +108,15 @@ export default function Roadmap() {
     <li>✅ GIGSDA Pass Component</li>
     <li>✅ QR Access Prototype</li>
 
+    <li>✅ Winston Referenzen repariert</li>
+    <li>✅ Portfolio Referenzen eingebaut</li>
+    <li>✅ ID-Mismatch gefunden</li>
+    <li>✅ Requests repariert</li>
+    <li>✅ Favorites repariert</li>
+    <li>✅ Login auf gigsda_profiles umgestellt</li>
+    <li>✅ Registrierung von gigsda_users entkoppelt</li>
+    <li>✅ Profil-Löschen getestet</li>
+    <li>✅ Testprofil erfolgreich erstellt und gelöscht</li>
   </ul>
 </div>
 
@@ -126,7 +135,7 @@ export default function Roadmap() {
 
     <li>🔄 Cleaning gigsda_users entkoppeln</li>
     <li>✅ CrewFavoritenListe.jsx</li>
-    <li>🔄 LoginRegisterMask.jsx</li>
+    <li>✅ LoginRegisterMask.jsx</li>
     <li>🔄 App.jsx</li>
 
   </ul>

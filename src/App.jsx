@@ -82,10 +82,6 @@ export default function App() {
     checkPendingRequests(); // Einmal direkt beim Start prüfen
 
       // === GIGSDA CORE AUTO-INITIALISIERUNG AUS VS CODE ===
-    const storedUsers = localStorage.getItem('gigsda_users');
-    if (!storedUsers || JSON.parse(storedUsers).length === 0) {
-      localStorage.setItem('gigsda_users', JSON.stringify(initialUsers));
-    }
     const storedProfiles = localStorage.getItem('gigsda_profiles');
     if (!storedProfiles || JSON.parse(storedProfiles).length === 0) {
       localStorage.setItem('gigsda_profiles', JSON.stringify(initialProfiles));
@@ -203,7 +199,6 @@ export default function App() {
  
   // 📡 DER FEHLENDE LOGIN-EMPFÄNGER
   const handleLoginUser = (name, role) => {
-    const existingUsers = JSON.parse(localStorage.getItem('gigsda_users')) || [];
     const newUser = {
       id: "USR-" + Date.now().toString().slice(-4),
       name: name,
@@ -212,9 +207,7 @@ export default function App() {
     };
  
     // Nur speichern, wenn der User nicht schon existiert
-    if (!existingUsers.some(u => u.name.toLowerCase() === name.toLowerCase())) {
-      localStorage.setItem('gigsda_users', JSON.stringify([...existingUsers, newUser]));
-    }
+    if (!existingUsers.some(u => u.name.toLowerCase() === name.toLowerCase()))
  
     // 💾 SPEICHERT DIE AKTIVE SESSION FÜR DEN BROWSER
     localStorage.setItem('gigsda_logged_in', 'true');
@@ -242,30 +235,6 @@ export default function App() {
     setEvents(updatedEvents);
     localStorage.setItem('gigsda_events', JSON.stringify(updatedEvents));
   };
- 
-  // 💥 FUNKTION 1: DAS INTELLIGENTE LOGIN (NUR DIESE EINE VERSION STEHEN LASSEN!)
-  const handleLoginSubmit = (e) => {
-    e.preventDefault();
-    const inputName = loginName.trim();
-    if (!inputName) {
-      setErrorMsg('Bitte gib deine Künstler-ID oder deinen Namen ein!');
-      return;
-    }
-    if (inputName.toLowerCase() === 'winston jud') {
-      setErrorMsg('');
-      onLoginSuccess('Winston Jud', 'Veranstalter');
-      return;
-    }
-    const registeredUsers = JSON.parse(localStorage.getItem('gigsda_users')) || [];
-    const matchedUser = registeredUsers.find(user => user.name.toLowerCase() === inputName.toLowerCase());
-    if (matchedUser) {
-      setErrorMsg('');
-      onLoginSuccess(matchedUser.name, matchedUser.role);
-    } else {
-      setErrorMsg(`Der Name "${inputName}" ist im Gigsda-Protokoll nicht registriert. Bitte erstelle zuerst ein Konto!`);
-    }
-  };
- 
  
   const triggerGate = (message) => {
     if (isLoggedIn) {
