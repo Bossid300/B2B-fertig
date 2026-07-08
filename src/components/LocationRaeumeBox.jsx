@@ -4,7 +4,7 @@ import {
   FileText, Image as ImageIcon, Users, MapPin, DollarSign, Activity 
 } from 'lucide-react';
 
-export default function LocationRaeumeBox({ currentProfileName, isOwner }) {
+export default function LocationRaeumeBox({ currentProfileName, isOwner, selectedRoom }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profileId, setProfileId] = useState(null);
   const [rooms, setRooms] = useState([]);
@@ -166,7 +166,14 @@ export default function LocationRaeumeBox({ currentProfileName, isOwner }) {
 
       {/* Raum-Liste */}
       <div className="space-y-8 divide-y divide-slate-800/40">
-        {rooms.map((room) => (
+        {rooms
+          .filter(
+            room =>
+              !selectedRoom ||
+              room.index === selectedRoom
+          )
+          .map((room) => (
+
           <div key={room.index} className={`pt-6 first:pt-0 ${!room.isPublic && !isEditing ? 'opacity-50' : ''}`}>
             
             {/* Raum Sub-Header */}
