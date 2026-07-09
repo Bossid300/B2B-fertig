@@ -4,8 +4,14 @@ import GigsdaPass from "../components/GigsdaPass";
 const profiles =
   JSON.parse(localStorage.getItem("gigsda_profiles")) || [];
 
-const profile =
-  profiles.find(p => p.id === "GIGS-7677");
+
+const activeProfileId =
+  localStorage.getItem('gigsda_portfolio_profile');
+
+const profile = profiles.find(
+  p => p.id === activeProfileId
+);
+
 
 const events =
   JSON.parse(localStorage.getItem("gigsda_events")) || [];

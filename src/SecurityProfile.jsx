@@ -19,6 +19,7 @@ import ProfileVertretungBox from './components/ProfileVertretungBox';
 import ProfileLokalBox from './components/ProfileLokalBox';
 import ProfileStatusMatrix from './components/ProfileStatusMatrix';
 import ProfileHilfeBox from './components/ProfileHilfeBox';
+import ProfilePassBox from './components/ProfilePassBox';
 
 
 export default function SecurityProfile({ onBack, ticketName, isOwner }) {
@@ -105,7 +106,11 @@ export default function SecurityProfile({ onBack, ticketName, isOwner }) {
       <ProfileLogistikBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileFinanzBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileLokalBox currentProfileName={targetUser} isOwner={isOwner} />
-
+      <ProfilePassBox 
+        currentProfileName={targetUser}
+        profileId={profileData?.id || 'GIGS-XXXX'}
+        onBackToDashboard={onBack}
+      />
     </div>
   );
 }

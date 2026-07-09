@@ -16,7 +16,6 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
 
     const refresh = () => {
       // Event neu laden
-      console.log("RIDER UPDATE EMPFANGEN");
     };
 
     window.addEventListener(

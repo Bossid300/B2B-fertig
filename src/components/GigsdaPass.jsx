@@ -14,22 +14,51 @@ export default function GigsdaPass({ profile }) {
       <div className="space-y-8">
 
         {/* VORDERSEITE */}
+        <div
+        className="w-full max-w-[700px] aspect-[1.586/1]
+                    mx-auto rounded-3xl
+                    bg-slate-900
+                    border border-cyan-500/20
+                    p-8
+                    relative overflow-hidden"
+        >
 
-        <div className="w-full max-w-[700px] aspect-[1.586/1] mx-auto rounded-3xl bg-slate-900 border border-cyan-500/20 p-8">
+        <div
+        className="absolute
+                    -bottom-20
+                    -right-20
+                    w-64
+                    h-64
+                    bg-fuchsia-500/15
+                    rounded-full
+                    blur-3xl
+                    pointer-events-none"
+        />
 
-        <div className="h-full grid grid-cols-[240px_1px_1fr] items-center">
+        <div className="h-full grid grid-cols-[260px_1px_1fr] items-center">
 
             {/* LINKE SEITE */}
             <div className="flex flex-col items-center justify-center">
-            <img
-                src={profile.avatarUrl}
-                alt={profile.name}
-                className="w-40 h-40 rounded-full mx-auto"
-            />
-            <p className="text-cyan-400 mt-4 tracking-[0.25em] uppercase text-lg font-bold mb-4">
-                GIGSDA PASS
-            </p>
+
+                <div
+                    className="w-42 h-42 rounded-full p-[4px]
+                            bg-gradient-to-r
+                            from-cyan-400
+                            to-fuchsia-500
+                            shadow-[0_0_20px_rgba(34,211,238,0.35)]"
+                >
+                    <img
+                    src={profile.avatarUrl}
+                    alt={profile.name}
+                    className="w-40 h-40 rounded-full mx-auto object-cover"
+                    />
+                    <p className="text-cyan-400 mt-4 tracking-[0.25em] uppercase text-lg font-bold">
+                    GIGSDA PASS
+                    </p>
+                </div>
+
             </div>
+
 
             {/* TRENNLINIE */}
 

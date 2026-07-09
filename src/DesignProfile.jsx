@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CrewRequestCenter from './CrewRequestCenter'; // Pfade an deine Ordnerstruktur anpassen!
 import ProfileHeaderBox from './components/ProfileHeaderBox';
 import ProfileStammBox from './components/ProfileStammBox';
+import ProfilePassBox from './components/ProfilePassBox';
 
 export default function DesignProfile({ onBack, ticketName, isOwner }) {
   const [profileData, setProfileData] = useState(null);
@@ -83,6 +84,11 @@ export default function DesignProfile({ onBack, ticketName, isOwner }) {
       <ProfileStammBox 
         currentProfileName={targetUser} 
         isOwner={isOwner} 
+      />
+      <ProfilePassBox 
+        currentProfileName={targetUser}
+        profileId={profileData?.id || 'GIGS-XXXX'}
+        onBackToDashboard={onBack}
       />
 
     </div>

@@ -19,6 +19,7 @@ import ProfileVertretungBox from './components/ProfileVertretungBox';
 import ProfileLokalBox from './components/ProfileLokalBox';
 import ProfileStatusMatrix from './components/ProfileStatusMatrix';
 import ProfileHilfeBox from './components/ProfileHilfeBox';
+import ProfilePassBox from './components/ProfilePassBox';
 
 
 export default function VeranstalterProfile({ onBack, ticketName, isOwner }) {
@@ -106,7 +107,11 @@ export default function VeranstalterProfile({ onBack, ticketName, isOwner }) {
       <ProfileProjekteBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileBewertungsBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileLokalBox currentProfileName={targetUser} isOwner={isOwner} />
-
+      <ProfilePassBox 
+        currentProfileName={targetUser}
+        profileId={profileData?.id || 'GIGS-XXXX'}
+        onBackToDashboard={onBack}
+      />
     </div>
   );
 }

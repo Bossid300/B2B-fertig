@@ -6,6 +6,7 @@ import ProfileBewertungsBox from './components/ProfileBewertungsBox';
 import ProfileHilfeBox from './components/ProfileHilfeBox';
 import ProfileFinanzBox from './components/ProfileFinanzBox';
 import ProfileBioTabsBox from './components/ProfileBioTabsBox';
+import ProfilePassBox from './components/ProfilePassBox';
 
 export default function FanProfile({ onBack, ticketName, isOwner }) {
   const [profileData, setProfileData] = useState(null);
@@ -85,7 +86,11 @@ export default function FanProfile({ onBack, ticketName, isOwner }) {
       <ProfileHilfeBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileBewertungsBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileFinanzBox currentProfileName={targetUser} isOwner={isOwner} />
-
+      <ProfilePassBox 
+        currentProfileName={targetUser}
+        profileId={profileData?.id || 'GIGS-XXXX'}
+        onBackToDashboard={onBack}
+      />
     </div>
   );
 }

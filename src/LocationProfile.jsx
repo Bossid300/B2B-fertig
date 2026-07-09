@@ -21,6 +21,7 @@ import ProfileStatusMatrix from './components/ProfileStatusMatrix';
 import ProfileHilfeBox from './components/ProfileHilfeBox';
 import ProfileHallenBox from './components/ProfileHallenBox';
 import LocationRaeumeBox from './components/LocationRaeumeBox';
+import ProfilePassBox from './components/ProfilePassBox';
 
 
 export default function LocationProfile({ onBack, ticketName, isOwner }) {
@@ -111,7 +112,11 @@ export default function LocationProfile({ onBack, ticketName, isOwner }) {
       <LocationRaeumeBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileFinanzBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileLokalBox currentProfileName={targetUser} isOwner={isOwner} />
-
+      <ProfilePassBox 
+        currentProfileName={targetUser}
+        profileId={profileData?.id || 'GIGS-XXXX'}
+        onBackToDashboard={onBack}
+      />
 
 
     </div>

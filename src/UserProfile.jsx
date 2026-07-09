@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import CrewRequestCenter from './CrewRequestCenter'; // Pfade an deine Ordnerstruktur anpassen!
+import CrewRequestCenter from './CrewRequestCenter';
 import ProfileHeaderBox from './components/ProfileHeaderBox';
 import ProfileStammBox from './components/ProfileStammBox';
 import ProfileBioTabsBox from './components/ProfileBioTabsBox';
@@ -117,11 +117,11 @@ export default function VorlageProfile({ onBack, ticketName, isOwner }) {
       <ProfileHilfeBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileLokalBox currentProfileName={targetUser} isOwner={isOwner} />
       
-<ProfilePassBox 
-  currentProfileName={targetUser}
-  profileId={profileData?.id || 'GIGS-XXXX'}
-  onBackToDashboard={onBack}
-/>
+      <ProfilePassBox 
+        currentProfileName={targetUser}
+        profileId={profileData?.id || 'GIGS-XXXX'}
+        onBackToDashboard={onBack}
+      />
 
 
 

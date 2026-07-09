@@ -111,11 +111,12 @@ export default function TechnikerProfile({ onBack, ticketName, isOwner }) {
       <ProfileBewertungsBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileFinanzBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileLokalBox currentProfileName={targetUser} isOwner={isOwner} />
-<ProfilePassBox 
-  currentProfileName={targetUser}
-  profileId={profileData?.id || 'GIGS-XXXX'}
-  onBackToDashboard={onBack}
-/>
+      
+      <ProfilePassBox 
+        currentProfileName={targetUser}
+        profileId={profileData?.id || 'GIGS-XXXX'}
+        onBackToDashboard={onBack}
+      />
     </div>
   );
 }

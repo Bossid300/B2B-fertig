@@ -19,6 +19,7 @@ import ProfileVertretungBox from './components/ProfileVertretungBox';
 import ProfileLokalBox from './components/ProfileLokalBox';
 import ProfileStatusMatrix from './components/ProfileStatusMatrix';
 import ProfileHilfeBox from './components/ProfileHilfeBox';
+import ProfilePassBox from './components/ProfilePassBox';
 
 
 export default function LogistikProfile({ onBack, ticketName, isOwner }) {
@@ -107,7 +108,11 @@ export default function LogistikProfile({ onBack, ticketName, isOwner }) {
       <ProfileBewertungsBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileLogistikBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileLokalBox currentProfileName={targetUser} isOwner={isOwner} />
-
+      <ProfilePassBox 
+        currentProfileName={targetUser}
+        profileId={profileData?.id || 'GIGS-XXXX'}
+        onBackToDashboard={onBack}
+      />
     </div>
   );
 }

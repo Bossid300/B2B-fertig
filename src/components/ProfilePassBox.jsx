@@ -145,7 +145,16 @@ export default function ProfilePassBox({ currentProfileName, profileId, onBackTo
 
         <button
           onClick={() => {
-            localStorage.setItem('gigsda_current_view', 'artistPortfolio');
+            localStorage.setItem(
+              'gigsda_portfolio_profile',
+              profileId
+            );
+            
+            localStorage.setItem(
+              'gigsda_current_view',
+              'artistPortfolio'
+            );
+
             window.location.reload();
           }}
           className="no-print w-full sm:flex-1 h-12 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:opacity-90 text-slate-900 font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.99]"
