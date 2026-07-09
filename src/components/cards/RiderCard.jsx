@@ -6,12 +6,19 @@ export default function RiderCard({
   member,
   status = "offen",
   progress = 0,
+  confirmedAt,
   selected = false,
   variant = "compact",
   onClick,
   onProfileClick
 })
+
  {
+
+    const confirmedDate = confirmedAt
+    ? new Date(confirmedAt)
+        .toLocaleDateString("de-DE")
+    : null;
 
     const isCompact =
     variant === "compact";
@@ -19,12 +26,14 @@ export default function RiderCard({
   const statusColor = {
     offen: "text-red-400",
     pruefung: "text-amber-400",
+    geaendert: "text-amber-400",
     bestaetigt: "text-emerald-400"
   };
 
   const statusLabel = {
     offen: "🔴 OFFEN",
     pruefung: "🟡 PRÜFUNG",
+    geaendert: "🟡 GEÄNDERT",
     bestaetigt: "🟢 BESTÄTIGT"
   };
 
@@ -157,6 +166,30 @@ export default function RiderCard({
         >
             {member?.name}
         </span>
+        
+        {confirmedDate && (
+        <>
+            <div
+            className="
+                mt-1
+                text-[12px]
+                text-emerald-400
+            "
+            >
+            ✅ Bestätigt
+            </div>
+
+            <div
+            className="
+                text-[12px]
+                text-slate-500
+            "
+            >
+            am {confirmedDate}
+            </div>
+        </>
+        )}
+
         </div>
 
         {!isCompact && (

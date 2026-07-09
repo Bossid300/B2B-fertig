@@ -98,6 +98,8 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
             ...(evt.riderCenter || {}),
             [selectedMember.id]: {
               confirmed: true,
+              changed: false,
+              changedAt: null,
               confirmedAt: Date.now(),
             },
           },
@@ -334,22 +336,34 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
           const confirmed =
             riderCenter?.[member.id]?.confirmed;
 
+          const changed =
+            riderCenter?.[member.id]?.changed;
+
+          const confirmedAt =
+            riderCenter?.[member.id]?.confirmedAt;
+
           return (
-            <RiderCard
-              key={member.id}
-              member={member}
-              status={
-                confirmed ? "bestaetigt" : "offen"
-              }
-              progress={
-                confirmed ? 100 : 0
-              }
-              selected={
-                selectedMember?.id === member.id
-              }
-              onClick={() =>
-                setSelectedMember(member)
-              }
+          <RiderCard
+            key={member.id}
+            member={member}
+            status={
+              changed
+                ? "geaendert"
+                : confirmed
+                  ? "bestaetigt"
+                  : "offen"
+            }
+
+            progress={
+              confirmed ? 100 : 0
+            }
+            confirmedAt={confirmedAt}
+            selected={
+              selectedMember?.id === member.id
+            }
+            onClick={() =>
+              setSelectedMember(member)
+            }
               onProfileClick={() => {
                 if (typeof setFavorites === "function") {
                   setFavorites(member.name);
