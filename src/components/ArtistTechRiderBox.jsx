@@ -124,6 +124,47 @@ export default function ArtistTechRiderBox({ currentProfileName, isOwner }) {
       });
 
       localStorage.setItem('gigsda_profiles', JSON.stringify(profiles));
+
+      try {
+        const events = JSON.parse(
+          localStorage.getItem("gigsda_events") || "[]"
+        );
+
+        const updatedEvents = events.map((event) => {
+
+          if (!event.riderCenter?.[profileId]) {
+            return event;
+          }
+            return {
+              ...event,
+
+              riderCenter: {
+                ...event.riderCenter,
+
+                [profileId]: {
+                  ...event.riderCenter[profileId],
+
+                  confirmed: false,
+                  changed: true,
+                  changedAt: Date.now()
+                }
+              }
+            };
+        });
+
+        localStorage.setItem(
+          "gigsda_events",
+          JSON.stringify(updatedEvents)
+        );
+
+        window.dispatchEvent(
+          new CustomEvent("rider-updated")
+        );
+
+      } catch (err) {
+        console.error(err);
+      }
+
       setIsEditing(false);
     }
   };

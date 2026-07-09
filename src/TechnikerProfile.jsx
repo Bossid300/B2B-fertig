@@ -20,7 +20,7 @@ import ProfileLokalBox from './components/ProfileLokalBox';
 import ProfileStatusMatrix from './components/ProfileStatusMatrix';
 import ProfileHilfeBox from './components/ProfileHilfeBox';
 import ArtistAudioBox from './components/ArtistAudioBox';
-
+import ProfilePassBox from './components/ProfilePassBox';
 
 export default function TechnikerProfile({ onBack, ticketName, isOwner }) {
   const [profileData, setProfileData] = useState(null);
@@ -111,7 +111,11 @@ export default function TechnikerProfile({ onBack, ticketName, isOwner }) {
       <ProfileBewertungsBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileFinanzBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileLokalBox currentProfileName={targetUser} isOwner={isOwner} />
-
+<ProfilePassBox 
+  currentProfileName={targetUser}
+  profileId={profileData?.id || 'GIGS-XXXX'}
+  onBackToDashboard={onBack}
+/>
     </div>
   );
 }

@@ -13,6 +13,26 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
   const [selectedRoom, setSelectedRoom] = useState(1);
 
   useEffect(() => {
+
+    const refresh = () => {
+      // Event neu laden
+      console.log("RIDER UPDATE EMPFANGEN");
+    };
+
+    window.addEventListener(
+      "rider-updated",
+      refresh
+    );
+
+    return () =>
+      window.removeEventListener(
+        "rider-updated",
+        refresh
+      );
+
+  }, []);
+
+  useEffect(() => {
     if (currentEvent?.locationRoom) {
       setSelectedRoom(
         currentEvent.locationRoom

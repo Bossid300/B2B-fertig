@@ -167,12 +167,12 @@ export default function RiderCard({
             {member?.name}
         </span>
         
-        {confirmedDate && (
+        {confirmedDate && status !== "geaendert" && (
         <>
             <div
             className="
                 mt-1
-                text-[12px]
+                text-[11px]
                 text-emerald-400
             "
             >
@@ -181,11 +181,34 @@ export default function RiderCard({
 
             <div
             className="
-                text-[12px]
+                text-[9px]
                 text-slate-500
             "
             >
             am {confirmedDate}
+            </div>
+        </>
+        )}
+
+        {status === "geaendert" && (
+        <>
+            <div
+            className="
+                mt-1
+                text-[11px]
+                text-amber-400
+            "
+            >
+            ⚠ Änderung erkannt
+            </div>
+
+            <div
+            className="
+                text-[9px]
+                text-slate-500
+            "
+            >
+            Freigabe erforderlich
             </div>
         </>
         )}
