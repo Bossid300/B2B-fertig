@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import ArtistTechRiderBox from "./components/ArtistTechRiderBox";
 import LocationRaeumeBox from "./components/LocationRaeumeBox";
+import ProfileSkillBox from "./components/ProfileSkillBox";
+import ProfileEquipmentBox from "./components/ProfileEquipmentBox";
+import RiderCard from "./components/cards/RiderCard";
 
 export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
   
@@ -214,8 +217,16 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
 
       case "Techniker":
         return (
-          <div>
-            Technik-Rider kommt hier rein
+          <div className="space-y-6">
+            <ProfileSkillBox
+              currentProfileName={selectedMember.name}
+              isOwner={true}
+            />
+
+            <ProfileEquipmentBox
+              currentProfileName={selectedMember.name}
+              isOwner={true}
+            />
           </div>
         );
 
@@ -324,56 +335,27 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
             riderCenter?.[member.id]?.confirmed;
 
           return (
-            <div
+            <RiderCard
               key={member.id}
-              onClick={() => setSelectedMember(member)}
-              className={`
-                cursor-pointer
-                rounded-2xl
-                border
-                p-4
-                transition-all
-                hover:border-cyan-500/40
-                bg-slate-950
-                ${
-                  selectedMember?.id === member.id
-                    ? "border-cyan-500 shadow-[0_0_20px_rgba(6,182,212,0.15)]"
-                    : "border-slate-900"
+              member={member}
+              status={
+                confirmed ? "bestaetigt" : "offen"
+              }
+              progress={
+                confirmed ? 100 : 0
+              }
+              selected={
+                selectedMember?.id === member.id
+              }
+              onClick={() =>
+                setSelectedMember(member)
+              }
+              onProfileClick={() => {
+                if (typeof setFavorites === "function") {
+                  setFavorites(member.name);
                 }
-              `}
-            >
-
-              <div className="flex justify-between items-center">
-
-                <span className="text-[8px] px-2 py-1 rounded bg-slate-900 border border-slate-800 uppercase tracking-widest text-slate-500">
-                  {member.role}
-                </span>
-
-                <span
-                  className={`text-[8px] px-2 py-1 rounded border uppercase font-bold tracking-wider ${getStatusColor(
-                    member.id
-                  )}`}
-                >
-                  {getStatusLabel(member.id)}
-                </span>
-
-              </div>
-
-
-<h3 className="mt-4 text-lg font-black uppercase">
-  {member.name}
-</h3>
-
-
-              <div className="mt-3 text-xs text-slate-500">
-                Rider-Profil verknüpft
-              </div>
-
-              <div className="mt-2 text-cyan-400 text-xs font-bold">
-                {confirmed ? "100%" : "0%"}
-              </div>
-
-            </div>
+              }}
+            />
           );
         })}
       </div>

@@ -478,14 +478,26 @@ export default function App() {
                 }
               } catch (e) { console.error("Fehler in App.jsx Express-Weiche:", e); }
 
-              return <RiderZentrale onBack={() => setView('projects')} activeEvent={targetedEvent} onNavigateToStep={setView} />;
+
+            return <RiderZentrale
+              onBack={() => setView('projects')}
+              activeEvent={targetedEvent}
+              onNavigateToStep={setView}
+              setFavorites={(artistView) => {
+
+                setActiveGuestArtist(artistView);
+                setView('profile');
+              }}
+            />;
+
             })()
           )}
 
           {/* ⭐ UNZERSTÖRBARE GIGSDA FAVORITEN POOL EXPRESS-PIPELINE */}
           {view === 'crewfavoriten' && (
             (() => {
-              return <CrewFavoritenListe onNavigate={setView} />;
+              return <CrewFavoritenListe onNavigate={setView} 
+              />;
             })()
           )}
 
