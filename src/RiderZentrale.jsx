@@ -53,7 +53,7 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
 
       setProfiles(allProfiles);
 
-      const targetId =
+      let targetId =
         activeEvent?.id ||
         activeEvent?.eventId ||
         activeEvent?._id;

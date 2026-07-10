@@ -22,26 +22,43 @@ export default function Roadmap() {
       ✅ Stabil & Erledigt
     </h3>
 
-    <div className="space-y-2 text-sm text-slate-300">
-      <p>✅ Crew-System</p>
-      <p>✅ Event-Radar</p>
-      <p>✅ Search-Explorer</p>
-      <p>✅ Matrix-Suche</p>
-      <p>✅ Community Chat</p>
-      <p>✅ Crew Lifecycle</p>
-      <p>✅ Portfolio V2</p>
-      <p>✅ GIGSDA Pass</p>
-      <p>✅ Portfolio Referenzen</p>
-      <p>✅ Auto Referenzen</p>
-      <p>✅ QR Access Prototype</p>
-      <p>✅ Winston Referenzen repariert</p>
-      <p>✅ Requests repariert</p>
-      <p>✅ Favorites repariert</p>
-      <p>✅ Login → gigsda_profiles</p>
-      <p>✅ Registrierung → gigsda_profiles</p>
-      <p>✅ Profil löschen getestet</p>
-      <p>✅ gigsda_users entfernt</p>
-    </div>
+
+<div className="space-y-2 text-sm text-slate-300">
+
+  <p>✅ Crew-System</p>
+  <p>✅ Event-Radar</p>
+  <p>✅ Search-Explorer</p>
+  <p>✅ Matrix-Suche</p>
+  <p>✅ Community Chat</p>
+  <p>✅ Crew Lifecycle</p>
+  <p>✅ Portfolio V2</p>
+  <p>✅ GIGSDA Pass</p>
+  <p>✅ Portfolio Referenzen</p>
+  <p>✅ Auto Referenzen</p>
+  <p>✅ QR Access Prototype</p>
+  <p>✅ Winston Referenzen repariert</p>
+  <p>✅ Requests repariert</p>
+  <p>✅ Favorites repariert</p>
+  <p>✅ Login → gigsda_profiles</p>
+  <p>✅ Registrierung → gigsda_profiles</p>
+  <p>✅ Profil löschen getestet</p>
+  <p>✅ gigsda_users entfernt</p>
+
+  <p>✅ RiderZentrale</p>
+  <p>✅ Rider-Freigabelogik</p>
+  <p>✅ Rider-Statussystem</p>
+  <p>✅ Rider-Profilnavigation</p>
+  <p>✅ Künstler-Rider</p>
+  <p>✅ Location-Rider</p>
+  <p>✅ Techniker-Rider</p>
+  <p>✅ Material / Verleiher Rider</p>
+  <p>✅ Fan Support Rider</p>
+  <p>✅ Rider-Check Veranstalterübersicht</p>
+  <p>✅ Rollenfarben & Statuslogik</p>
+  <p>✅ Owner-Konzept statt Veranstalter-Rolle</p>
+
+</div>
+
   </div>
 
   {/* IN ARBEIT */}
@@ -50,23 +67,28 @@ export default function Roadmap() {
       🔄 In Entwicklung
     </h3>
 
-    <div className="space-y-2 text-sm text-slate-300">
-      <p>🔄 Notification Engine</p>
-      <p>🔄 Ungelesen-Logik</p>
-      <p>🔄 Direktnachrichten V2</p>
-      <p>🔄 WhatsApp Style Chat</p>
-      <p>🔄 Rider & Gewerke Erweiterung</p>
-      <p>🔄 Projektchronik</p>
-      <p>🔄 Veranstalter Export</p>
-      <p>🔄 Datei Austausch</p>
-      <p>🔄 Media Showcase</p>
-      <p>🔄 Gallery</p>
-      <p>🔄 Tech Overview</p>
-      <p>🔄 Technical Rider</p>
-      <p>🔄 Responsive Portfolio</p>
-      <p>🔄 Responsive GIGSDA Pass</p>
-      <p>🔄 Datenbank statt LocalStorage</p>
-    </div>
+
+<div className="space-y-2 text-sm text-slate-300">
+
+  <p>🔄 Event Planner</p>
+  <p>🔄 Event bearbeiten</p>
+  <p>🔄 Notification Engine</p>
+  <p>🔄 Ungelesen-Logik</p>
+  <p>🔄 Direktnachrichten V2</p>
+  <p>🔄 WhatsApp Style Chat</p>
+  <p>🔄 Projektchronik</p>
+  <p>🔄 Veranstalter Export</p>
+  <p>🔄 Datei Austausch</p>
+  <p>🔄 Media Showcase</p>
+  <p>🔄 Gallery</p>
+  <p>🔄 Tech Overview</p>
+  <p>🔄 Technical Rider</p>
+  <p>🔄 Responsive Portfolio</p>
+  <p>🔄 Responsive GIGSDA Pass</p>
+  <p>🔄 Datenbank statt LocalStorage</p>
+
+</div>
+
   </div>
 
 
@@ -76,20 +98,25 @@ export default function Roadmap() {
       🎯 Nächste Milestones
     </h3>
 
-  <div className="space-y-2 text-sm text-slate-300">
-      <p>🎯 Notification Center fertigstellen</p>
-      <p>🎯 Read / Unread Logik</p>
-      <p>🎯 Datei Upload im Chat</p>
-      <p>🎯 Event Timeline</p>
-      <p>🎯 Veranstalter Export</p>
-      <p>🎯 Mobile Optimierung</p>
-      <p>🎯 Datenbank Migration</p>
-      <p>🎯 API & Backend Vorbereitung</p>
-    </div>
+
+<div className="space-y-2 text-sm text-slate-300">
+
+  <p>🎯 Event Planner fertigstellen</p>
+  <p>🎯 Event Bearbeitung integrieren</p>
+  <p>🎯 Notification Center fertigstellen</p>
+  <p>🎯 Read / Unread Logik</p>
+  <p>🎯 Datei Upload im Chat</p>
+  <p>🎯 Event Timeline</p>
+  <p>🎯 Veranstalter Export</p>
+  <p>🎯 Mobile Optimierung</p>
+  <p>🎯 Datenbank Migration</p>
+  <p>🎯 API & Backend Vorbereitung</p>
+
+</div>
+
+
+
   </div>
-
-
-
 </div>
     </div>
   );
