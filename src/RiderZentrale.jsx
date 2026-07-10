@@ -4,6 +4,8 @@ import LocationRaeumeBox from "./components/LocationRaeumeBox";
 import ProfileSkillBox from "./components/ProfileSkillBox";
 import ProfileEquipmentBox from "./components/ProfileEquipmentBox";
 import RiderCard from "./components/cards/RiderCard";
+import ProfileGalleryBox from "./components/ProfileGalleryBox";
+import ProfileHilfeBox from './components/ProfileHilfeBox';
 
 export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
   
@@ -251,19 +253,38 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
           </div>
         );
 
-      case "Material":
-        return (
-          <div>
-            Material-Rider kommt hier rein
-          </div>
-        );
+    case "Material":
+    case "Verleiher":
+      return (
+        <div className="space-y-6">
 
-      default:
-        return (
-          <div>
-            Rider für {selectedMember.role}
-          </div>
-        );
+          <ProfileEquipmentBox
+            currentProfileName={selectedMember.name}
+            isOwner={true}
+          />
+
+          <ProfileGalleryBox
+            currentProfileName={selectedMember.name}
+            isOwner={true}
+          />
+
+        </div>
+      );
+
+    case "Fan":
+      return (
+        <ProfileHilfeBox
+          currentProfileName={selectedMember.name}
+          isOwner={true}
+        />
+      );
+
+    default:
+      return (
+        <div>
+          Rider für {selectedMember.role}
+        </div>
+      );
     }
   };
 

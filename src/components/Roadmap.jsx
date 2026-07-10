@@ -14,134 +14,83 @@ export default function Roadmap() {
         </p>
       </div>
 
-      <div className="space-y-6">
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <div>
-          <h3 className="text-green-400 font-black uppercase text-xs tracking-widest mb-2">
-            ✅ Foundation
-          </h3>
+  {/* FERTIG */}
+  <div className="bg-slate-900/30 border border-emerald-500/20 rounded-3xl p-6">
+    <h3 className="text-emerald-400 font-black text-lg mb-4">
+      ✅ Stabil & Erledigt
+    </h3>
+
+    <div className="space-y-2 text-sm text-slate-300">
+      <p>✅ Crew-System</p>
+      <p>✅ Event-Radar</p>
+      <p>✅ Search-Explorer</p>
+      <p>✅ Matrix-Suche</p>
+      <p>✅ Community Chat</p>
+      <p>✅ Crew Lifecycle</p>
+      <p>✅ Portfolio V2</p>
+      <p>✅ GIGSDA Pass</p>
+      <p>✅ Portfolio Referenzen</p>
+      <p>✅ Auto Referenzen</p>
+      <p>✅ QR Access Prototype</p>
+      <p>✅ Winston Referenzen repariert</p>
+      <p>✅ Requests repariert</p>
+      <p>✅ Favorites repariert</p>
+      <p>✅ Login → gigsda_profiles</p>
+      <p>✅ Registrierung → gigsda_profiles</p>
+      <p>✅ Profil löschen getestet</p>
+      <p>✅ gigsda_users entfernt</p>
+    </div>
+  </div>
+
+  {/* IN ARBEIT */}
+  <div className="bg-slate-900/30 border border-cyan-500/20 rounded-3xl p-6">
+    <h3 className="text-cyan-400 font-black text-lg mb-4">
+      🔄 In Entwicklung
+    </h3>
+
+    <div className="space-y-2 text-sm text-slate-300">
+      <p>🔄 Notification Engine</p>
+      <p>🔄 Ungelesen-Logik</p>
+      <p>🔄 Direktnachrichten V2</p>
+      <p>🔄 WhatsApp Style Chat</p>
+      <p>🔄 Rider & Gewerke Erweiterung</p>
+      <p>🔄 Projektchronik</p>
+      <p>🔄 Veranstalter Export</p>
+      <p>🔄 Datei Austausch</p>
+      <p>🔄 Media Showcase</p>
+      <p>🔄 Gallery</p>
+      <p>🔄 Tech Overview</p>
+      <p>🔄 Technical Rider</p>
+      <p>🔄 Responsive Portfolio</p>
+      <p>🔄 Responsive GIGSDA Pass</p>
+      <p>🔄 Datenbank statt LocalStorage</p>
+    </div>
+  </div>
 
 
-<ul className="text-slate-300 text-sm space-y-1">
-  <li>Crew-System</li>
-  <li>Event-Radar</li>
-  <li>Search-Explorer</li>
-  <li>Matrix-Suche</li>
-  <li>Community Chat</li>
-  <li>Crew-Historie</li>
-  <li>Crew Lifecycle</li>
-  <li>Rollen & Zugriffe</li>
-  <li>Persistenter Chat</li>
-  <li>Hero Video Feed</li>
-  <li>Navigation Refresh</li>
-  <li>Portfolio V2</li>
-  <li>↓</li>
-  <li>GIGSDA Pass</li>
-</ul>
+  {/* NEXT */}
+  <div className="bg-slate-900/30 border border-violet-500/20 rounded-3xl p-6">
+    <h3 className="text-fuchsia-400 font-black text-lg mb-4">     
+      🎯 Nächste Milestones
+    </h3>
+
+  <div className="space-y-2 text-sm text-slate-300">
+      <p>🎯 Notification Center fertigstellen</p>
+      <p>🎯 Read / Unread Logik</p>
+      <p>🎯 Datei Upload im Chat</p>
+      <p>🎯 Event Timeline</p>
+      <p>🎯 Veranstalter Export</p>
+      <p>🎯 Mobile Optimierung</p>
+      <p>🎯 Datenbank Migration</p>
+      <p>🎯 API & Backend Vorbereitung</p>
+    </div>
+  </div>
 
 
-        </div>
 
-        <div>
-          <h3 className="text-yellow-400 font-black uppercase text-xs tracking-widest mb-2">
-            🔄 In Progress
-          </h3>
-
-
-<ul className="text-slate-300 text-sm space-y-1">
-  <li>🔴 Notification Engine</li>
-  <li>💬 WhatsApp-Style Konversationen</li>
-  <li>🎛️ Rider & Gewerke Erweiterung</li>
-  <li>📡 Projektkommunikation 2.0</li>
-</ul>
-
-        </div>
-
-        <div>
-          <h3 className="text-cyan-400 font-black uppercase text-xs tracking-widest mb-2">
-            🎯 Next Milestones
-          </h3>
-
-
-<ul className="text-slate-300 text-sm space-y-1">
-  <li>🔴 Echte Ungelesen-Logik</li>
-  <li>💬 Direktnachrichten V2</li>
-  <li>📄 Projektchronik</li>
-  <li>📦 Veranstalter-Export</li>
-  <li>🔒 Chat nach Event readonly</li>
-  <li>📎 Datei- & Rider-Austausch im Chat</li>
-</ul>
-
-        </div>
-
-        <div>
-          <h3 className="text-purple-400 font-black uppercase text-xs tracking-widest mb-2">
-            🌌 Vision
-          </h3>
-
-          <p className="text-slate-300 text-sm leading-relaxed">
-            Eine Plattform für Veranstalter, Crews, Künstler und
-            Dienstleister – von der Suche über die Planung bis zum
-            Projektabschluss.
-          </p>
-        </div>
-
-<div>
-  <h3 className="text-cyan-400 font-black uppercase text-xs tracking-widest mb-2">
-    ☕ Last Update
-  </h3>
-
-  <ul className="text-slate-300 text-sm space-y-1">
-    <li>✅ Crew History</li>
-    <li>✅ Removed & Rehire Workflow</li>
-    <li>✅ Persistent Chat</li>
-    <li>✅ Hero Video Feed</li>
-    <li>✅ Navigation Refresh</li>
-    <li>✅ Chat V1 Complete</li>
-    <li>✅ Notification UI</li>
-   
-    <li>✅ Portfolio V2 Foundation</li>
-    <li>✅ Artist Portfolio Dynamic Data</li>
-    <li>✅ Media Showcase Integration</li>
-    <li>✅ Technical Rider Integration</li>
-    <li>✅ GIGSDA Auto Referenzen</li>
-    <li>✅ GIGSDA Pass Component</li>
-    <li>✅ QR Access Prototype</li>
-
-    <li>✅ Winston Referenzen repariert</li>
-    <li>✅ Portfolio Referenzen eingebaut</li>
-    <li>✅ ID-Mismatch gefunden</li>
-    <li>✅ Requests repariert</li>
-    <li>✅ Favorites repariert</li>
-    <li>✅ Login auf gigsda_profiles umgestellt</li>
-    <li>✅ Registrierung von gigsda_users entkoppelt</li>
-    <li>✅ Profil-Löschen getestet</li>
-    <li>✅ Testprofil erfolgreich erstellt und gelöscht</li>
-  </ul>
 </div>
-
-<div>
-  <h3 className="text-cyan-400 font-black uppercase text-xs tracking-widest mb-2">
-    ☕ In Progress
-  </h3>
-
-  <ul className="text-slate-300 text-sm space-y-1">
-    <li>🔄 Media Showcase</li>
-    <li>🔄 Gallery</li>
-    <li>🔄 Tech Overview</li>
-    <li>🔄 Technical Rider</li>
-
-    <li>🔄 ...</li>
-
-    <li>🔄 Cleaning gigsda_users entkoppeln</li>
-    <li>✅ CrewFavoritenListe.jsx</li>
-    <li>✅ LoginRegisterMask.jsx</li>
-    <li>🔄 App.jsx</li>
-
-  </ul>
-</div>
-
-      </div>
     </div>
   );
 }

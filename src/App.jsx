@@ -449,6 +449,7 @@ export default function App() {
               onNavigateToStep={setView}
               progress={progress}
               currentProfileName={ticketName}
+              onSelectEvent={setActiveEvent}
             />
           )}
 

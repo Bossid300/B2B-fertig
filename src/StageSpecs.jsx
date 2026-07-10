@@ -9,7 +9,11 @@ export default function StageSpecs({ onBack, progress, onNavigateToStep, onAppro
   const [selectedElement, setSelectedElement] = useState(null);
 
   // Holt die crewIds aus dem aktiven Event
-  const crewIds = activeEvent && Array.isArray(activeEvent.crewIds) ? activeEvent.crewIds : [];
+  
+  const crewIds =
+    Array.isArray(activeEvent?.crewIds)
+      ? activeEvent.crewIds
+      : [];
 
   // 📡 DYNAMISCHER KANAL- & BÜHNEN-GENERATOR (Basiert auf Schritt 1)
   useEffect(() => {
@@ -45,7 +49,7 @@ export default function StageSpecs({ onBack, progress, onNavigateToStep, onAppro
     // Kanäle nach Kanalnummer sortieren
     setChannels(dynamicChannels.sort((a, b) => a.ch - b.ch));
     setStageElements(dynamicElements);
-  }, [crewIds]);
+  }, [activeEvent]);
 
   const handleApproveAll = () => {
     setIsApproved(true);
@@ -65,6 +69,59 @@ export default function StageSpecs({ onBack, progress, onNavigateToStep, onAppro
     ));
   };
 
+
+
+
+
+  const riderCenter =
+  activeEvent?.riderCenter || {};
+
+  const riderEntries =
+    Object.values(riderCenter);
+
+
+  const sortedCrewIds = [...crewIds].sort((a, b) => {
+
+    const riderA = riderCenter?.[a];
+    const riderB = riderCenter?.[b];
+
+    const priority = (rider) => {
+      if (rider?.changed) return 1;
+      if (rider?.confirmed) return 2;
+      return 0;
+    };
+
+    return priority(riderA) - priority(riderB);
+  });
+
+
+  const confirmedCount =
+    riderEntries.filter(
+      r => r?.confirmed
+    ).length;
+
+  const changedCount =
+    riderEntries.filter(
+      r => r?.changed
+    ).length;
+
+  const openCount =
+    Math.max(
+      crewIds.length -
+        confirmedCount -
+        changedCount,
+      0
+    );
+
+  const riderProgress =
+    crewIds.length > 0
+      ? Math.round(
+          (confirmedCount /
+            crewIds.length) *
+            100
+        )
+      : 0;
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
       
@@ -72,6 +129,140 @@ export default function StageSpecs({ onBack, progress, onNavigateToStep, onAppro
       <FahrplanMetrics progress={progress} activeStep="stage" onNavigate={onNavigateToStep} />
 
       {/* HEADER */}
+{/* TWO COLUMN GRID */}
+{/* RIDER STATUS ÜBERSICHT */}
+<div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-5 shadow-xl">
+
+  <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+
+    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+      Rider Status
+    </h3>
+
+    <span className="text-[10px] text-cyan-400 font-black uppercase">
+      Veranstalter Übersicht
+    </span>
+
+  </div>
+
+  <div className="grid grid-cols-3 gap-3 mb-4">
+
+    <div className="bg-slate-950 rounded-xl p-3 border border-emerald-500/20">
+      <div className="text-[10px] text-slate-500 uppercase">
+        Bestätigt
+      </div>
+
+      <div className="text-xl font-black text-emerald-400">
+        {confirmedCount}
+      </div>
+    </div>
+
+    <div className="bg-slate-950 rounded-xl p-3 border border-amber-500/20">
+      <div className="text-[10px] text-slate-500 uppercase">
+        Geändert
+      </div>
+
+      <div className="text-xl font-black text-amber-400">
+        {changedCount}
+      </div>
+    </div>
+
+    <div className="bg-slate-950 rounded-xl p-3 border border-red-500/20">
+      <div className="text-[10px] text-slate-500 uppercase">
+        Offen
+      </div>
+
+      <div className="text-xl font-black text-red-400">
+        {openCount}
+      </div>
+    </div>
+
+  </div>
+
+  <div className="text-[11px] text-slate-400">
+    Rider-Fortschritt: <span className="text-cyan-400 font-black">
+      {riderProgress}%
+    </span>
+  </div>
+
+
+  <div className="mt-5 border-t border-slate-800 pt-4">
+
+    <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-3">
+      Aktive Gewerke
+    </div>
+
+    <div className="space-y-2">
+
+        {sortedCrewIds.map((crewId) => {
+
+          const profiles = JSON.parse(
+            localStorage.getItem("gigsda_profiles") || "[]"
+          );
+
+          const member = profiles.find(
+            p => p.id === crewId
+          );
+
+          const rider =
+            riderCenter?.[crewId];
+
+          const state =
+            rider?.changed
+              ? "🟡"
+              : rider?.confirmed
+                ? "🟢"
+                : "🔴";
+
+          return (
+            <div
+              key={crewId}
+              className="
+                flex
+                justify-between
+                items-center
+                bg-slate-950/60
+                border
+                border-slate-900
+                rounded-xl
+                px-3
+                py-2
+              "
+            >
+              <div>
+
+                <div className="text-[11px] text-white font-bold">
+                  {member?.name || crewId}
+                </div>
+
+                <div className="text-[9px] text-slate-500">
+                  {member?.role || "Unbekannt"}
+                </div>
+
+              </div>
+
+              <span className="text-lg">
+                {state}
+              </span>
+
+            </div>
+          );
+
+        })}
+
+    </div>
+
+  </div>
+
+
+</div>
+
+
+
+
+
+
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl gap-4">
         <div>
           {activeEvent ? (
