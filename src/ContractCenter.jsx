@@ -1,9 +1,152 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShieldCheck, FileText, CheckCircle2, ArrowRight, Download } from 'lucide-react';
 import FahrplanMetrics from './FahrplanMetrics';
 
-export default function ContractCenter({ onBack, progress, onNavigateToStep, onContractSigned, activeEvent }) {
+export default function ContractCenter({ onBack, progress, setProgress, onNavigateToStep, onContractSigned, activeEvent }) {
+
+
+  const profiles = JSON.parse(
+    localStorage.getItem("gigsda_profiles") || "[]"
+  );
+
+  const crewProfiles = profiles.filter(
+    p => activeEvent?.crewIds?.includes(p.id)
+  );
+
+
+  // 📥 Deal-Simulieren
+const [acceptedDeals, setAcceptedDeals] = useState({});
+
+
+
+const dealPartners = crewProfiles;
+
+
+
+
+  // 📥 BETEILIGTENSTATES
+  const [dealAmounts, setDealAmounts] = useState(
+    activeEvent?.dealAmounts || {}
+  );
+
+
+  // 📥 Deal-Statuswechsel
+  const [dealSent, setDealSent] = useState(
+    activeEvent?.dealSent || false
+  );
+
+
+
+  // 📥 Verbindung zu Status in Bearbeitung
+  const signedCount =
+    Object.values(acceptedDeals)
+      .filter(Boolean)
+      .length;
+
+  const processingCount =
+    dealSent
+      ? (activeEvent?.crewIds?.length || 0) - signedCount
+      : 0;
+
+
+  // STATUSBERECHNUNG FÜR FAHRPLANMETRICS
+  const openCount =
+    dealSent
+      ? 0
+      : (activeEvent?.crewIds?.length || 0);
+
+
+
+  const totalPartners =
+    activeEvent?.crewIds?.length || 0;
+
+  const contractProgress =
+    totalPartners > 0
+      ? Math.round(
+          (signedCount / totalPartners) * 100
+        )
+      : 0;
+
+  useEffect(() => {
+    setProgress(prev => ({
+      ...prev,
+      contract: contractProgress
+    }));
+  }, [contractProgress, setProgress]);
+  // ENDE STATUSBERECHNUNG
+
+
+
+  // 📥 Freigaberegel
+  const allSigned =
+    processingCount === 0 &&
+    signedCount > 0;
+
+
+
+
+  // 📥 Deal senden Funktion
+  const handleSendDeal = () => {
+
+    if (!activeEvent) return;
+
+    const events = JSON.parse(
+      localStorage.getItem("gigsda_events") || "[]"
+    );
+
+    const updatedEvents = events.map(event => {
+
+      if (event.id !== activeEvent.id) {
+        return event;
+      }
+
+      return {
+        ...event,
+        dealSent: true
+      };
+    });
+
+    localStorage.setItem(
+      "gigsda_events",
+      JSON.stringify(updatedEvents)
+    );
+
+    setDealSent(true);
+  };
+
+
+
+  const handleSaveDeal = () => {
+    if (!activeEvent) return;
+    const events = JSON.parse(
+      localStorage.getItem("gigsda_events") || "[]"
+    );
+    const updatedEvents = events.map(event => {
+      if (event.id !== activeEvent.id) {
+        return event;
+      }
+      return {
+        ...event,
+
+        dealAmounts
+      };
+    });
+    localStorage.setItem(
+      "gigsda_events",
+      JSON.stringify(updatedEvents)
+    );
+  };
+
+  const totalDealAmount =
+  Object.values(dealAmounts)
+    .reduce((a, b) => a + b, 0);
+
   const [dealStatus, setDealStatus] = useState('pending'); // pending, processing, signed
+
+
+
+
+
 
   const handleSignContract = () => {
     setDealStatus('processing');
@@ -115,9 +258,9 @@ export default function ContractCenter({ onBack, progress, onNavigateToStep, onC
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
-      
       {/* GLOBALER FAHRPLAN */}
       <FahrplanMetrics progress={progress} activeStep="contract" onNavigate={onNavigateToStep} />
+
 
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl gap-4">
@@ -153,6 +296,256 @@ export default function ContractCenter({ onBack, progress, onNavigateToStep, onC
         </button>
       </div>
 
+
+
+
+
+
+
+
+
+      {/* Deal Status */}
+      <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
+
+        <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+            Deal Status
+          </h3>
+
+          <span className="text-[10px] text-cyan-400 font-black uppercase">
+            Vertragsfortschritt
+          </span>
+
+        </div>
+
+        <div className="grid grid-cols-3 gap-3 mb-5">
+
+          <div className="bg-slate-950 rounded-xl p-3 border border-emerald-500/20">
+            <div className="text-[10px] text-slate-500 uppercase">
+              Signiert
+            </div>
+
+            <div className="text-xl font-black text-emerald-400">
+              {signedCount}
+            </div>
+          </div>
+
+          <div className="bg-slate-950 rounded-xl p-3 border border-amber-500/20">
+            <div className="text-[10px] text-slate-500 uppercase">
+              In Bearbeitung
+            </div>
+
+            <div className="text-xl font-black text-amber-400">
+              {processingCount}
+            </div>
+          </div>
+
+          <div className="bg-slate-950 rounded-xl p-3 border border-red-500/20">
+            <div className="text-[10px] text-slate-500 uppercase">
+              Offen
+            </div>
+
+            <div className="text-xl font-black text-red-400">
+              {openCount}
+            </div>
+          </div>
+
+        </div>
+
+        <div className="space-y-2">
+
+          <div className="flex justify-between text-[11px]">
+            <span className="text-slate-500">
+              Deal-Fortschritt
+            </span>
+
+            <span className="text-cyan-400 font-black">
+              {contractProgress}%
+            </span>
+          </div>
+
+          <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
+
+            <div
+              className="h-full bg-cyan-400 transition-all"
+              style={{
+                width: `${contractProgress}%`
+              }}
+            />
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {/* Beteiligtenliste */}
+      <div className="bg-slate-900/40 border border-cyan-500/20 rounded-3xl p-5 shadow-xl">
+        <h3 className="text-xs font-bold text-white uppercase tracking-wider mb-4">
+          Beteiligte (Neu)
+        </h3>
+
+        <div className="space-y-3">
+          {dealPartners.map(member => (
+            <div
+              key={member.id}
+              className="flex justify-between items-center"
+            >
+              <div>
+                <div className="text-white font-bold">
+                  {member.name}
+                </div>
+
+                <div className="text-slate-500 text-[10px]">
+                  {member.role}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="number"
+                  value={dealAmounts[member.id] || ""}
+                  onChange={(e) =>
+                    setDealAmounts({
+                      ...dealAmounts,
+                      [member.id]: Number(e.target.value) || 0
+                    })
+                  }
+                  className="
+                    w-20
+                    bg-slate-950
+                    border
+                    border-slate-800
+                    rounded-lg
+                    px-2
+                    py-1
+                    text-right
+                    text-xs
+                    text-white
+                  "
+                />
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setAcceptedDeals({
+                      ...acceptedDeals,
+                      [member.id]: true
+                    })
+                  }
+                  className={
+                    acceptedDeals[member.id]
+                      ? "text-emerald-400"
+                      : dealSent
+                      ? "text-amber-400"
+                      : "text-red-400"
+                  }
+                >
+                  ●
+                </button>
+
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+      {/* Aktionsleiste Deal an alle Senden*/}
+      <div className="border-t border-slate-800 mt-4 pt-4 flex gap-3">
+        <button
+          type="button"
+          className="
+            flex-1
+            h-11
+            rounded-xl
+            bg-slate-950
+            border
+            border-slate-800
+            text-slate-300
+            font-black
+            uppercase
+            tracking-wider
+          "
+        >
+          Vorschau anzeigen 👁️
+        </button>
+
+        <button
+          type="button"
+          onClick={handleSendDeal}
+          className="
+            h-11
+            px-6
+            rounded-xl
+            bg-cyan-500
+            text-slate-950
+            font-black
+            uppercase
+            tracking-wider
+          "
+        >
+          Deal an alle Beteiligten senden 📤
+        </button>
+
+        <button
+          type="button"
+          onClick={handleSaveDeal}
+          className="
+            h-11
+            px-6
+            rounded-xl
+            bg-emerald-500
+            text-slate-950
+            font-black
+            uppercase
+            tracking-wider
+          "
+        >
+          Gagen speichern 💾
+        </button>
+
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {/* Digitaler Konzert- & Bookingvertrag & Gagen-Absicherung */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         
         {/* RECHTLICHER TEXT */}
@@ -175,7 +568,7 @@ export default function ContractCenter({ onBack, progress, onNavigateToStep, onC
             </h3>
             <div className="bg-slate-950 p-3 rounded-xl border border-slate-900">
               <span className="text-[10px] text-slate-500 block uppercase">Hinterlegte Summe:</span>
-              <span className="text-lg font-black text-white">1.850,00 EUR</span>
+              <span className="text-lg font-black text-white">{totalDealAmount.toLocaleString("de-DE")} EUR</span>
             </div>
             
             {/* DER DYNAMISCHE PDF BUTTON (Ergänzung für Richtung 1) */}
@@ -192,7 +585,7 @@ export default function ContractCenter({ onBack, progress, onNavigateToStep, onC
 
           <button
             type="button"
-            disabled={dealStatus !== 'pending'}
+            disabled={!allSigned || dealStatus !== 'pending'}
             onClick={handleSignContract}
             className={`w-full font-black text-[10px] uppercase tracking-wider h-10 rounded-xl transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer ${
               dealStatus === 'signed'
@@ -220,7 +613,10 @@ export default function ContractCenter({ onBack, progress, onNavigateToStep, onC
       <div className="flex justify-end pt-2">
         <button
           type="button"
-          onClick={() => onNavigateToStep && onNavigateToStep('voting')}
+          disabled={dealStatus !== 'signed'}
+          onClick={() =>
+            onNavigateToStep && 
+            onNavigateToStep('voting')}
           className="bg-gradient-to-r from-cyan-500 to-purple-500 text-slate-950 font-mono font-black text-[10px] uppercase tracking-wider px-6 h-11 rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.2)] hover:scale-[1.02] active:scale-[0.98] flex items-center gap-1.5 cursor-pointer"
         >
           Nächster Meilenstein: Team-Voting <ArrowRight className="w-4 h-4" />

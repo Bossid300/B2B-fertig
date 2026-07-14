@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import CommunityChat from './CommunityChat'; // Falls euer Chat so heißt, ansonsten bleibt Daniels Import aktiv
+import CommunityChat from './CommunityChat';
 import FahrplanMetrics from './FahrplanMetrics';
 
-export default function CrewShortlist({ onBack, progress, onNavigateToStep, activeEvent }) {
+export default function CrewShortlist({ onBack, progress, setProgress, onNavigateToStep, activeEvent }) {
 
 
 const addFromShortlist = (eventId, profileName) => {
@@ -175,20 +175,49 @@ const addFromShortlist = (eventId, profileName) => {
   };
 
   const activeStub = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
-const events = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
-const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
+  const events = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+  const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
 
-const currentEvent = events.find(e => e.id === activeStub?.id);
+  const currentEvent = events.find(e => e.id === activeStub?.id);
 
-const crewMembers = (currentEvent?.crewIds || [])
-  .map(id => profiles.find(p => p.id === id))
-  .filter(Boolean);
+  const crewMembers = (currentEvent?.crewIds || [])
+    .map(id => profiles.find(p => p.id === id))
+    .filter(Boolean);
+
+  // STATUSBERECHNUNG FÜR FAHRPLANMETRICS
+  const totalRequests =
+    currentEvent?.crew?.length || 0;
+
+  const crewCount =
+    currentEvent?.crewIds?.length || 0;
+
+  const shortlistProgress =
+    totalRequests > 0
+      ? Math.round((crewCount / totalRequests) * 100)
+      : 0;
+
+  useEffect(() => {
+    setProgress(prev => ({
+      ...prev,
+      shortlist: shortlistProgress
+    }));
+  }, [shortlistProgress, setProgress]);
+  // ENDE STATUSBERECHNUNG
+
+
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
       
       {/* 📊 GLOBALER B2B-FORTSCHRITTS-FAHRPLAN (DIREKT IM COCKPIT INTEGRIERT) */}
       <FahrplanMetrics progress={progress} activeStep="shortlist" onNavigate={onNavigateToStep} />
+
+
+
+<div>
+  Crew Fortschritt: {shortlistProgress}%
+</div>
+
 
 
       {/* HEADER BEREICH */}

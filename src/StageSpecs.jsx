@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Sliders, Move, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import FahrplanMetrics from './FahrplanMetrics';
 
-export default function StageSpecs({ onBack, progress, onNavigateToStep, onApproveSuccess, activeEvent }) {
+export default function StageSpecs({ onBack, progress, setProgress, onNavigateToStep, onApproveSuccess, activeEvent }) {
   const [isApproved, setIsApproved] = useState(false);
-  const [channels, setChannels] = useState([]);
-  const [stageElements, setStageElements] = useState([]);
-  const [selectedElement, setSelectedElement] = useState(null);
 
   // Holt die crewIds aus dem aktiven Event
   
@@ -15,42 +12,6 @@ export default function StageSpecs({ onBack, progress, onNavigateToStep, onAppro
       ? activeEvent.crewIds
       : [];
 
-  // 📡 DYNAMISCHER KANAL- & BÜHNEN-GENERATOR (Basiert auf Schritt 1)
-  useEffect(() => {
-    // Grund-Setup: Winston Jud ist als Main-Act IMMER auf der Bühne
-    let dynamicChannels = [
-      { ch: 1, source: 'Vocals Winston', mic: 'Shure Beta 58A', status: 'bestätigt', crew: 'Jud-Winston' },
-      { ch: 2, source: 'E-Guitar Winston', mic: 'Sennheiser e906', status: 'bestätigt', crew: 'Jud-Winston' },
-      { ch: 3, source: 'Amp Winston', mic: 'DI-Box Active', status: 'bestätigt', crew: 'Jud-Winston' },
-    ];
-
-    let dynamicElements = [
-      { id: 'vocals-winston', label: '🎤 Vocals (Winston)', x: 50, y: 70, color: 'bg-emerald-500/20 border-emerald-400 text-emerald-400' },
-      { id: 'amp-winston', label: '🎸 Amp Winston', x: 30, y: 40, color: 'bg-purple-500/20 border-purple-400 text-purple-400' },
-    ];
-
-    // Wenn "The Neon Sparks" im Team sind -> HipHop-Mics und Bläser-Kanäle hinzufügen!
-    if (crewIds.includes('spark')) {
-      dynamicChannels.push(
-        { ch: 4, source: 'Sparks MC Vocals', mic: 'Wireless Shure SM58', status: 'geprüft', crew: 'spark' },
-        { ch: 5, source: 'Brass Sektion (Mix)', mic: 'Clip-Mic AKG', status: 'geprüft', crew: 'spark' }
-      );
-      dynamicElements.push(
-        { id: 'mc-sparks', label: '🎤 MC (Neon Sparks)', x: 65, y: 70, color: 'bg-cyan-500/20 border-cyan-400 text-cyan-400' },
-        { id: 'brass-sparks', label: '🎺 Brass Sektion', x: 75, y: 35, color: 'bg-amber-500/20 border-amber-400 text-amber-400' }
-      );
-    }
-
-    // Wenn Systemtechniker "Daniel Klingelsberger" am Start ist -> Mess-Mikrofon patchen!
-    if (crewIds.includes('luna')) {
-      dynamicChannels.push({ ch: 6, source: 'Mess-Mic Daniel K.', mic: 'Beyerdynamic MM1', status: 'bestätigt', crew: 'luna' });
-    }
-
-    // Kanäle nach Kanalnummer sortieren
-    setChannels(dynamicChannels.sort((a, b) => a.ch - b.ch));
-    setStageElements(dynamicElements);
-  }, [activeEvent]);
-
   const handleApproveAll = () => {
     setIsApproved(true);
     if (typeof onApproveSuccess === 'function') {
@@ -58,27 +19,11 @@ export default function StageSpecs({ onBack, progress, onNavigateToStep, onAppro
     }
   };
 
-  const handleStageClick = (e) => {
-    if (selectedElement === null) return;
-    const bounds = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - bounds.left) / bounds.width) * 100;
-    const y = ((e.clientY - bounds.top) / bounds.height) * 100;
-
-    setStageElements(stageElements.map(el => 
-      el.id === selectedElement ? { ...el, x: Math.round(x), y: Math.round(y) } : el
-    ));
-  };
-
-
-
-
-
   const riderCenter =
   activeEvent?.riderCenter || {};
 
   const riderEntries =
     Object.values(riderCenter);
-
 
   const sortedCrewIds = [...crewIds].sort((a, b) => {
 
@@ -93,7 +38,6 @@ export default function StageSpecs({ onBack, progress, onNavigateToStep, onAppro
 
     return priority(riderA) - priority(riderB);
   });
-
 
   const confirmedCount =
     riderEntries.filter(
@@ -113,6 +57,8 @@ export default function StageSpecs({ onBack, progress, onNavigateToStep, onAppro
       0
     );
 
+
+  // STATUSBERECHNUNG FÜR FAHRPLANMETRICS
   const riderProgress =
     crewIds.length > 0
       ? Math.round(
@@ -122,257 +68,233 @@ export default function StageSpecs({ onBack, progress, onNavigateToStep, onAppro
         )
       : 0;
 
+  useEffect(() => {
+    setProgress(prev => ({
+      ...prev,
+      stage: riderProgress
+    }));
+  }, [riderProgress, setProgress]);
+  // ENDE STATUSBERECHNUNG
+
+
+
+  const roleIcon = {
+    "Künstler": "🔵",
+    "Location": "🟠",
+    "Techniker": "🟣",
+    "Material": "🟡",
+    "Verleiher": "🟡",
+    "Veranstalter": "🩷",
+    "Fan": "⚪"
+  };
+
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
       
-      {/* GLOBALER FAHRPLAN */}
-      <FahrplanMetrics progress={progress} activeStep="stage" onNavigate={onNavigateToStep} />
+    {/* GLOBALER FAHRPLAN */}
+    <FahrplanMetrics progress={progress} activeStep="stage" onNavigate={onNavigateToStep} />
 
-      {/* HEADER */}
-{/* TWO COLUMN GRID */}
-{/* RIDER STATUS ÜBERSICHT */}
-<div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-5 shadow-xl">
-
-  <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
-
-    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-      Rider Status
-    </h3>
-
-    <span className="text-[10px] text-cyan-400 font-black uppercase">
-      Veranstalter Übersicht
-    </span>
-
-  </div>
-
-  <div className="grid grid-cols-3 gap-3 mb-4">
-
-    <div className="bg-slate-950 rounded-xl p-3 border border-emerald-500/20">
-      <div className="text-[10px] text-slate-500 uppercase">
-        Bestätigt
+    {/* StageSpecs & Bühnen-Patching */}
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl gap-4">
+      <div>
+        {activeEvent ? (
+          <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-md inline-block mb-1.5">
+            📍 Aktives Event: {activeEvent.title} ({activeEvent.date})
+          </span>
+        ) : (
+          <span className="text-[10px] text-cyan-400 font-bold block mb-1">// Ebene 02: Rider-Check</span>
+        )}
+        <h2 className="text-xl font-bold text-white mt-0.5">StageSpecs & Bühnen-Patching</h2>
+        <p className="text-slate-400 text-[11px]">Verifiziere die Kanalliste basierend auf deiner zugesagten Crew.</p>
+        {/* 🚨 REKTIVES PROJEKT-BADGE DIREKT UNTER DER ÜBERSCHRIFT */}
+        <div className="bg-slate-950/90 border border-cyan-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2 w-max shadow-[0_0_15px_rgba(6,182,212,0.05)] text-[10px]">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500"></span>
+          </span>
+          <span className="text-slate-500 font-bold uppercase tracking-wider text-[8px]">// ACTIVE TARGET:</span>
+          <span className="font-black text-cyan-400 uppercase tracking-wide">
+            {(() => {
+              try {
+                const activeData = localStorage.getItem('gigsda_active_event');
+                if (activeData) return JSON.parse(activeData).title || "WAYNESTOCK 2";
+              } catch(e) {}
+              return activeEvent?.title || activeEvent?.name || "WAYNESTOCK 2";
+            })()}
+          </span>
+        </div>
       </div>
-
-      <div className="text-xl font-black text-emerald-400">
-        {confirmedCount}
-      </div>
+      <button type="button" onClick={onBack} className="bg-slate-950 border border-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer">
+        ‹ Zurück
+      </button>
     </div>
 
-    <div className="bg-slate-950 rounded-xl p-3 border border-amber-500/20">
-      <div className="text-[10px] text-slate-500 uppercase">
-        Geändert
+
+    {/* RIDER STATUS ÜBERSICHT */}
+    <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-5 shadow-xl">
+
+      <div className="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+
+        <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+          Rider Status
+        </h3>
+
+        <span className="text-[10px] text-cyan-400 font-black uppercase">
+          Veranstalter Übersicht
+        </span>
+
       </div>
 
-      <div className="text-xl font-black text-amber-400">
-        {changedCount}
+      <div className="grid grid-cols-3 gap-3 mb-4">
+
+        <div className="bg-slate-950 rounded-xl p-3 border border-emerald-500/20">
+          <div className="text-[10px] text-slate-500 uppercase">
+            🟢 Fertig
+          </div>
+
+          <div className="text-xl font-black text-emerald-400">
+            {confirmedCount}
+          </div>
+        </div>
+
+        <div className="bg-slate-950 rounded-xl p-3 border border-amber-500/20">
+          <div className="text-[10px] text-slate-500 uppercase">
+            🟡 In Arbeit
+          </div>
+
+          <div className="text-xl font-black text-amber-400">
+            {changedCount}
+          </div>
+        </div>
+
+        <div className="bg-slate-950 rounded-xl p-3 border border-red-500/20">
+          <div className="text-[10px] text-slate-500 uppercase">
+            🔴 Handlungsbedarf
+          </div>
+
+          <div className="text-xl font-black text-red-400">
+            {openCount}
+          </div>
+        </div>
+
       </div>
-    </div>
 
-    <div className="bg-slate-950 rounded-xl p-3 border border-red-500/20">
-      <div className="text-[10px] text-slate-500 uppercase">
-        Offen
+      <div className="text-[11px] text-slate-400">
+        Rider-Fortschritt: <span className="text-cyan-400 font-black">
+          {riderProgress}%
+        </span>
       </div>
 
-      <div className="text-xl font-black text-red-400">
-        {openCount}
-      </div>
-    </div>
+      {/* RIDER STATUS ÜBERSICHT */}
+      <div className="mt-5 border-t border-slate-800 pt-4">
 
-  </div>
+        <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-3">
+          Aktive Gewerke
+        </div>
 
-  <div className="text-[11px] text-slate-400">
-    Rider-Fortschritt: <span className="text-cyan-400 font-black">
-      {riderProgress}%
-    </span>
-  </div>
+        <div className="space-y-2">
+            {sortedCrewIds.map((crewId) => {
+              const profiles = JSON.parse(
+                localStorage.getItem("gigsda_profiles") || "[]"
+              );
+              const member = profiles.find(
+                p => p.id === crewId
+              );
+              const rider =
+                riderCenter?.[crewId];
+              const state =
+                rider?.changed
+                  ? "🟡"
+                  : rider?.confirmed
+                    ? "🟢"
+                    : "🔴";
+              return (
+                <div
+                  key={crewId}
+                  className="
+                    flex
+                    justify-between
+                    items-center
+                    bg-slate-950/60
+                    border
+                    border-slate-900
+                    rounded-xl
+                    px-3
+                    py-2
+                  "
+                >
+                  <div>
 
+                    <div className="text-[11px] text-white font-bold">
+                      {member?.name || crewId}
+                    </div>
 
-  <div className="mt-5 border-t border-slate-800 pt-4">
+                    <div className="text-[9px] text-slate-500">
+                      {(roleIcon[member?.role] || "⚫")}{" "}
+                      {member?.role || "Unbekannt"}
+                    </div>
 
-    <div className="text-[10px] text-slate-500 uppercase tracking-wider mb-3">
-      Aktive Gewerke
-    </div>
+                  </div>
 
-    <div className="space-y-2">
+                  <span className="text-lg">
+                    {state}
+                  </span>
 
-        {sortedCrewIds.map((crewId) => {
-
-          const profiles = JSON.parse(
-            localStorage.getItem("gigsda_profiles") || "[]"
-          );
-
-          const member = profiles.find(
-            p => p.id === crewId
-          );
-
-          const rider =
-            riderCenter?.[crewId];
-
-          const state =
-            rider?.changed
-              ? "🟡"
-              : rider?.confirmed
-                ? "🟢"
-                : "🔴";
-
-          return (
-            <div
-              key={crewId}
-              className="
-                flex
-                justify-between
-                items-center
-                bg-slate-950/60
-                border
-                border-slate-900
-                rounded-xl
-                px-3
-                py-2
-              "
-            >
-              <div>
-
-                <div className="text-[11px] text-white font-bold">
-                  {member?.name || crewId}
                 </div>
+              );
 
-                <div className="text-[9px] text-slate-500">
-                  {member?.role || "Unbekannt"}
-                </div>
-
-              </div>
-
-              <span className="text-lg">
-                {state}
-              </span>
-
-            </div>
-          );
-
-        })}
-
-    </div>
-
-  </div>
-
-
+            })}
+        </div>
+      </div>
 </div>
 
+      {/* Absegnen */}
+      <div className="border-t border-slate-800 mt-4 pt-4">
 
+        {openCount === 0 && changedCount === 0 ? (
 
+          <button
+            type="button"
+            onClick={handleApproveAll}
+            className="
+              w-full
+              h-11
+              rounded-xl
+              bg-emerald-400
+              text-slate-950
+              font-black
+              uppercase
+              tracking-wider
+              hover:bg-emerald-300
+              transition-all
+            "
+          >
+            Rider Final Absegnen 🔒
+          </button>
 
+        ) : (
 
-
-
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl gap-4">
-        <div>
-          {activeEvent ? (
-            <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-md inline-block mb-1.5">
-              📍 Aktives Event: {activeEvent.title} ({activeEvent.date})
-            </span>
-          ) : (
-            <span className="text-[10px] text-cyan-400 font-bold block mb-1">// Ebene 02: Rider-Check</span>
-          )}
-          <h2 className="text-xl font-bold text-white mt-0.5">StageSpecs & Bühnen-Patching</h2>
-          <p className="text-slate-400 text-[11px]">Verifiziere die Kanalliste basierend auf deiner zugesagten Crew.</p>
-          {/* 🚨 REKTIVES PROJEKT-BADGE DIREKT UNTER DER ÜBERSCHRIFT */}
-          <div className="bg-slate-950/90 border border-cyan-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2 w-max shadow-[0_0_15px_rgba(6,182,212,0.05)] text-[10px]">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500"></span>
-            </span>
-            <span className="text-slate-500 font-bold uppercase tracking-wider text-[8px]">// ACTIVE TARGET:</span>
-            <span className="font-black text-cyan-400 uppercase tracking-wide">
-              {(() => {
-                try {
-                  const activeData = localStorage.getItem('gigsda_active_event');
-                  if (activeData) return JSON.parse(activeData).title || "WAYNESTOCK 2";
-                } catch(e) {}
-                return activeEvent?.title || activeEvent?.name || "WAYNESTOCK 2";
-              })()}
-            </span>
+          <div
+            className="
+              w-full
+              h-11
+              rounded-xl
+              flex
+              items-center
+              justify-center
+              bg-slate-950
+              border
+              border-slate-800
+              text-slate-500
+              text-[11px]
+              uppercase
+              tracking-wider
+            "
+          >
+            Noch {openCount + changedCount} Gewerke offen, danach kann der Rider final abgesegnet werden.
           </div>
-        </div>
-        <button type="button" onClick={onBack} className="bg-slate-950 border border-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer">
-          ‹ Zurück
-        </button>
-      </div>
-
-      {/* TWO COLUMN GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        
-        {/* KANALLISTE */}
-        <div className="md:col-span-7 bg-slate-900/40 border border-slate-800 rounded-3xl p-5 space-y-4 shadow-xl">
-          <div className="flex justify-between items-center border-b border-slate-800/60 pb-2">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-              <Sliders className="w-3.5 h-3.5 text-cyan-400" /> Patchplan ({channels.length} Kanäle)
-            </h3>
-            <button 
-              type="button" 
-              onClick={handleApproveAll}
-              className={`text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-lg transition-all cursor-pointer ${
-                isApproved 
-                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' 
-                  : 'bg-emerald-400 text-slate-950 hover:bg-emerald-300'
-              }`}
-            >
-              {isApproved ? '✓ Rider verifiziert' : 'Rider absegnen 🔒'}
-            </button>
-          </div>
-
-          <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-            {channels.map((c) => (
-              <div key={c.ch} className="bg-slate-950/60 border border-slate-900 rounded-xl p-3 flex justify-between items-center text-[11px]">
-                <div className="flex items-center gap-3">
-                  <span className="text-slate-600 text-[10px]">CH {String(c.ch).padStart(2, '0')}</span>
-                  <span className="text-white font-bold">{c.source}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-slate-500 text-[10px]">{c.mic}</span>
-                  <span className={`text-[9px] uppercase px-1.5 py-0.5 rounded font-black ${
-                    c.status === 'bestätigt' ? 'bg-emerald-950 text-emerald-400' : 'bg-cyan-950 text-cyan-400'
-                  }`}>{c.status}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* VISUELLE BÜHNE */}
-        <div className="md:col-span-5 bg-slate-900/40 border border-slate-800 rounded-3xl p-5 space-y-3 flex flex-col justify-between shadow-xl">
-          <div>
-            <h3 className="text-xs font-bold text-white uppercase border-b border-slate-800/60 pb-2 flex items-center gap-1.5 tracking-wider">
-              <Move className="w-3.5 h-3.5 text-purple-400" /> Equipment-Grid
-            </h3>
-            <div className="flex flex-wrap gap-1.5 pt-2">
-              {stageElements.map(el => (
-                <button
-                  key={el.id}
-                  type="button"
-                  onClick={() => setSelectedElement(el.id)}
-                  className={`px-2 py-1 rounded-lg border text-[9px] uppercase transition-all cursor-pointer ${
-                    selectedElement === el.id ? 'border-white bg-slate-800 text-white scale-105' : 'border-slate-800 text-slate-400 bg-slate-950/40'
-                  }`}
-                >
-                  {el.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div onClick={handleStageClick} className="w-full aspect-square bg-slate-950 rounded-2xl border border-slate-900 relative overflow-hidden cursor-crosshair mt-2">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:20px_20px] opacity-40"></div>
-            {stageElements.map(el => (
-              <div
-                key={el.id}
-                style={{ left: `${el.x}%`, top: `${el.y}%` }}
-                className={`absolute -translate-x-1/2 -translate-y-1/2 px-2 py-1 rounded-lg border text-[8px] font-black tracking-tight whitespace-nowrap transition-all duration-300 shadow-md ${el.color}`}
-              >
-                {el.label}
-              </div>
-            ))}
-          </div>
-        </div>
-
+        )}
       </div>
 
       {/* WEITERLEITUNGSMASKIERUNG */}

@@ -14,7 +14,43 @@ export default function FahrplanMetrics({ progress = {}, activeStep = '', onNavi
     { id: 'voting', target: 'voting', label: '4. Team-Voting', sub: 'Setlist-Abstimmung', current: progress.voting || 0 },
     { id: 'planner', target: 'planner', label: '5. Event-Planner', sub: 'Logistik & Zeiten', current: progress.planner || 0 },
     { id: 'countdown', target: 'countdown', label: '6. Live-Countdown', sub: 'Der Tag der Show', current: progress.countdown || 25 },
+  
+    { id: 'promotion', target: 'promotion', label: '7. Event-Promotion', sublabel: 'Eventbeschreibung & Werbung', current: progress.promotion || 0},
+
   ];
+
+  const getStatusIcon = (value) => {
+
+    if (value === 100) {
+      return "🟢";
+    }
+
+    if (value > 0) {
+      return "🟡";
+    }
+
+    return "🔴";
+  };
+
+  const getProgressBadge = (value) => {
+
+    if (value >= 100)
+      return "bg-emerald-950 text-emerald-400";
+
+    if (value >= 75)
+      return "bg-lime-950 text-lime-400";
+
+    if (value >= 50)
+      return "bg-yellow-950 text-yellow-400";
+
+    if (value >= 20)
+      return "bg-yellow-950 text-yellow-400";
+
+    if (value > 0)
+      return "bg-orange-950 text-orange-400";
+
+    return "bg-red-950 text-red-400";
+  };
 
   const renderStepButton = (step) => {
     const isActive = activeStep === step.id;
@@ -36,8 +72,12 @@ export default function FahrplanMetrics({ progress = {}, activeStep = '', onNavi
         className={`px-4 py-2 rounded-2xl text-[11px] font-mono font-black uppercase tracking-wider border flex items-center justify-between gap-2 transition-all duration-200 group active:scale-[0.97] text-left min-h-[54px] ${buttonStyle}`}
       >
         <div className="flex flex-col justify-center truncate">
-          <span className="font-black tracking-tight block truncate">{step.label}</span>
-          <span className={`text-[8px] font-mono tracking-normal block mt-0.5 normal-case ${
+
+          <span className="font-black tracking-tight block truncate">
+            {getStatusIcon(step.current)} {step.label}
+          </span>
+
+          <span className={`text-[10px] font-mono tracking-normal block mt-0.5 normal-case ${
             isActive ? 'text-slate-800' : 'text-slate-600 group-hover:text-slate-400'
           }`}>
             {step.sub}
@@ -45,12 +85,10 @@ export default function FahrplanMetrics({ progress = {}, activeStep = '', onNavi
         </div>
         
         {/* Die Prozentanzeige rechts im Kasten */}
-        <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono font-black shrink-0 transition-colors ${
-          isActive 
-            ? 'bg-slate-950 text-cyan-400' 
-            : isDone 
-            ? 'bg-emerald-950 text-emerald-400 group-hover:bg-emerald-900' 
-            : 'bg-slate-900 text-slate-700 group-hover:text-slate-500'
+        <span className={`text-[12px] px-1.5 py-0.5 rounded font-mono font-black shrink-0 transition-colors ${
+          isActive
+            ? 'bg-slate-950 text-cyan-400'
+            : getProgressBadge(step.current)
         }`}>
           {step.current}%
         </span>

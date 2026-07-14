@@ -19,75 +19,97 @@ export default function Roadmap() {
   {/* FERTIG */}
   <div className="bg-slate-900/30 border border-emerald-500/20 rounded-3xl p-6">
     <h3 className="text-emerald-400 font-black text-lg mb-4">
-      ✅ Stabil & Erledigt
+      ✅ Abgeschlossen Stabil & Erledigt
     </h3>
 
 
-<div className="space-y-2 text-sm text-slate-300">
+      <div className="space-y-2 text-sm text-slate-300">
 
-  <p>✅ Crew-System</p>
-  <p>✅ Event-Radar</p>
-  <p>✅ Search-Explorer</p>
-  <p>✅ Matrix-Suche</p>
-  <p>✅ Community Chat</p>
-  <p>✅ Crew Lifecycle</p>
-  <p>✅ Portfolio V2</p>
-  <p>✅ GIGSDA Pass</p>
-  <p>✅ Portfolio Referenzen</p>
-  <p>✅ Auto Referenzen</p>
-  <p>✅ QR Access Prototype</p>
-  <p>✅ Winston Referenzen repariert</p>
-  <p>✅ Requests repariert</p>
-  <p>✅ Favorites repariert</p>
-  <p>✅ Login → gigsda_profiles</p>
-  <p>✅ Registrierung → gigsda_profiles</p>
-  <p>✅ Profil löschen getestet</p>
-  <p>✅ gigsda_users entfernt</p>
+      <p>✅ Crew-System</p>
+      <p>✅ Event-Radar</p>
+      <p>✅ Search-Explorer</p>
+      <p>✅ Matrix-Suche</p>
+      <p>✅ Community Chat</p>
+      <p>✅ Crew Lifecycle</p>
+      <p>✅ Portfolio V2</p>
+      <p>✅ GIGSDA Pass</p>
+      <p>✅ Portfolio Referenzen</p>
+      <p>✅ Auto Referenzen</p>
+      <p>✅ QR Access Prototype</p>
+      <p>✅ Winston Referenzen repariert</p>
+      <p>✅ Requests repariert</p>
+      <p>✅ Favorites repariert</p>
+      <p>✅ Login → gigsda_profiles</p>
+      <p>✅ Registrierung → gigsda_profiles</p>
+      <p>✅ Profil löschen getestet</p>
+      <p>✅ gigsda_users entfernt</p>
 
-  <p>✅ RiderZentrale</p>
-  <p>✅ Rider-Freigabelogik</p>
-  <p>✅ Rider-Statussystem</p>
-  <p>✅ Rider-Profilnavigation</p>
-  <p>✅ Künstler-Rider</p>
-  <p>✅ Location-Rider</p>
-  <p>✅ Techniker-Rider</p>
-  <p>✅ Material / Verleiher Rider</p>
-  <p>✅ Fan Support Rider</p>
-  <p>✅ Rider-Check Veranstalterübersicht</p>
-  <p>✅ Rollenfarben & Statuslogik</p>
-  <p>✅ Owner-Konzept statt Veranstalter-Rolle</p>
+      </div>
 
-</div>
+  </div>
+
+  {/* FERTIG */}
+  <div className="bg-slate-900/30 border border-emerald-500/20 rounded-3xl p-6">
+    <h3 className="text-emerald-400 font-black text-lg mb-4">
+      ✅ Event-Projekt-System (fertig)
+    </h3>
+
+
+      <div className="space-y-2 text-sm text-slate-300">
+
+      <p>✅ RiderZentrale</p>
+      <p>✅ Rider-Freigabelogik</p>
+      <p>✅ Rider-Statussystem</p>
+      <p>✅ Rider-Profilnavigation</p>
+      <p>✅ Künstler-Rider</p>
+      <p>✅ Location-Rider</p>
+      <p>✅ Techniker-Rider</p>
+      <p>✅ Material / Verleiher Rider</p>
+      <p>✅ Fan Support Rider</p>
+      <p>✅ Rider-Check Veranstalterübersicht</p>
+      <p>✅ Rollenfarben & Statuslogik</p>
+      <p>✅ Owner-Konzept statt Veranstalter-Rolle</p>
+
+      <p>✅ Crew-Shortlist Fahrplan-Integration</p>
+      <p>✅ Rider-Check Fahrplan-Integration</p>
+      <p>✅ Zusage-Deal Fahrplan-Integration</p>
+      <p>✅ Event-Planer inkl. Timeline, Editierung & Speicherung</p>
+      <p>✅ Event-Planer Fahrplan-Integration</p>
+      <p>✅ Event-Promotion inkl. Statussystem & Live-Vorschau</p>
+      <p>✅ Event-Promotion Fahrplan-Integration</p>
+      <p>✅ Live-Countdown inkl. Freigabe-, Push- & Live-Workflow</p>
+      <p>✅ Countdown-Freigabe aus Projektstatus</p>
+
+      <p>✅ Deal-Center Refactoring auf Personenmodell</p>
+      <p>✅ Mehrfachrollen-Unterstützung</p>
+      <p>✅ Dynamische Deal-Partner</p>
+      <p>✅ Personenbasierte Gagenverwaltung</p>
+      <p>✅ Personenbasierte Signatur-Logik</p>
+      <p>✅ Rollenmodell aus Deal-Center entfernt</p>
+
+      </div>
 
   </div>
 
   {/* IN ARBEIT */}
   <div className="bg-slate-900/30 border border-cyan-500/20 rounded-3xl p-6">
     <h3 className="text-cyan-400 font-black text-lg mb-4">
-      🔄 In Entwicklung
+      🎯 Nächste Ausbaustufe
     </h3>
 
+    <div className="space-y-2 text-sm text-slate-300">
 
-<div className="space-y-2 text-sm text-slate-300">
 
-  <p>🔄 Event Planner</p>
-  <p>🔄 Event bearbeiten</p>
-  <p>🔄 Notification Engine</p>
-  <p>🔄 Ungelesen-Logik</p>
-  <p>🔄 Direktnachrichten V2</p>
-  <p>🔄 WhatsApp Style Chat</p>
-  <p>🔄 Projektchronik</p>
-  <p>🔄 Veranstalter Export</p>
-  <p>🔄 Datei Austausch</p>
-  <p>🔄 Media Showcase</p>
-  <p>🔄 Gallery</p>
-  <p>🔄 Tech Overview</p>
-  <p>🔄 Technical Rider</p>
-  <p>🔄 Responsive Portfolio</p>
-  <p>🔄 Responsive GIGSDA Pass</p>
-  <p>🔄 Datenbank statt LocalStorage</p>
+    <p>🎯 Event Bearbeitung integrieren</p>
+    <p>🎯 Notification Center fertigstellen</p>
+    <p>🎯 Read / Unread Logik</p>
+    <p>🎯 Datei Upload im Chat</p>
+    <p>🎯 Veranstalter Export</p>
+    <p>🎯 Mobile Optimierung</p>
+    <p>🎯 Datenbank Migration</p>
+    <p>🎯 API & Backend Vorbereitung</p>
 
-</div>
+    </div>
 
   </div>
 
@@ -95,25 +117,23 @@ export default function Roadmap() {
   {/* NEXT */}
   <div className="bg-slate-900/30 border border-violet-500/20 rounded-3xl p-6">
     <h3 className="text-fuchsia-400 font-black text-lg mb-4">     
-      🎯 Nächste Milestones
+      🔮 Später
     </h3>
 
+    <div className="space-y-2 text-sm text-slate-300">
 
-<div className="space-y-2 text-sm text-slate-300">
+    <p>🔮 Direktnachrichten V2</p>
+    <p>🔮 WhatsApp Style Chat</p>
+    <p>🔮 Projektchronik</p>
+    <p>🔮 Media Showcase</p>
+    <p>🔮 Gallery</p>
+    <p>🔮 Tech Overview</p>
+    <p>🔮 Technical Rider</p>
+    <p>🔮 Responsive Portfolio</p>
+    <p>🔮 Responsive GIGSDA Pass</p>
+    <p>🔮 Local Hero Voting</p>
 
-  <p>🎯 Event Planner fertigstellen</p>
-  <p>🎯 Event Bearbeitung integrieren</p>
-  <p>🎯 Notification Center fertigstellen</p>
-  <p>🎯 Read / Unread Logik</p>
-  <p>🎯 Datei Upload im Chat</p>
-  <p>🎯 Event Timeline</p>
-  <p>🎯 Veranstalter Export</p>
-  <p>🎯 Mobile Optimierung</p>
-  <p>🎯 Datenbank Migration</p>
-  <p>🎯 API & Backend Vorbereitung</p>
-
-</div>
-
+    </div>
 
 
   </div>

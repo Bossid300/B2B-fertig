@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import EventCard from './components/cards/EventCard';
 
 export default function GuestEvents({ onNavigate }) {
   const [events, setEvents] = useState([]);
@@ -137,68 +138,17 @@ export default function GuestEvents({ onNavigate }) {
 
       </div>
 
+
+
+
       {/* 💳 EVENT-KARTEN-GRID (Zwillings-Struktur) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredEvents.length > 0 ? (
           filteredEvents.map((event, index) => (
-            <div 
-              key={`${event.id || 'event'}-${index}`} 
-              className="bg-slate-950 border border-slate-900 rounded-2xl shadow-2xl relative overflow-hidden flex flex-col group hover:border-slate-800 transition-all duration-300 min-h-[300px]"
-            >
-              {/* OBERES EVENT-BANNER */}
-              <div className="h-24 w-full relative overflow-hidden bg-slate-900">
-                <img 
-                  src={event.slide1_url || 'https://unsplash.com'} 
-                  alt="Event Banner" 
-                  className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
-                />
-                <span className="absolute top-3 right-3 text-[8px] bg-slate-950/90 border border-slate-800/80 text-cyan-400 font-bold px-2 py-0.5 rounded-md tracking-wider uppercase backdrop-blur-sm z-10">
-                  {event.category}
-                </span>
-              </div>
 
-              {/* DATUMS-BOX ALS ICON-ERSATZ */}
-              <div className="absolute top-12 left-4 z-20">
-                <div className="w-16 h-16 rounded-xl border-2 border-slate-950 overflow-hidden bg-slate-900 shadow-xl flex flex-col items-center justify-center text-center font-mono">
-                  <span className="text-[9px] font-black text-cyan-400 tracking-tighter">DATE</span>
-                  <span className="text-[10px] font-bold text-white leading-none mt-0.5">{event.date?.substring(0, 5)}</span>
-                </div>
-              </div>
-
-              {/* TEXT-KÖRPER DER EVENT-KARTE */}
-              <div className="p-4 pt-7 flex-grow flex flex-col justify-between pl-4">
-                <div className="mb-4">
-                  <h3 className="text-sm font-black uppercase text-white tracking-wide group-hover:text-cyan-400 transition-colors">
-                    {event.title}
-                  </h3>
-                  <p className="text-[9px] text-slate-600 uppercase mt-0.5">// EVENT-ID: {event.id || 'N/A'} • BY {event.organizer}</p>
-                </div>
-
-                {/* LOGISCHE LIVE-VARIABLEN (STADT & ENTFERNUNG) */}
-                <div className="pt-3 border-t border-slate-900 flex justify-between text-[10px] text-slate-400 font-mono">
-                  <span>STADT: <strong className="text-slate-200">{event.city || 'Nicht hinterlegt'}</strong></span>
-                  <span>DISTANZ: <strong className="text-cyan-400">{getDistanceTo(event.city)} KM</strong></span>
-                </div>
-                {/* EVENT-BUTTONS */}
-                <div className="grid grid-cols-2 gap-2 mt-5 pt-3 border-t border-slate-900/60">
-                  <button
-                    onClick={() => alert(`Details für ${event.title} öffnen...`)}
-                    className="bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-[10px] font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center"
-                  >
-                    INFOS
-                  </button>
-
-                  <button
-                    onClick={() => alert(`Ticket-Anfrage für ${event.title} bereit! ✎`)}
-                    className="bg-cyan-500/5 border border-cyan-500/20 hover:border-cyan-500/50 text-cyan-400 text-[10px] font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center"
-                  >
-                    TICKETS ✎
-                  </button>
-                </div>
-              </div>
-
-            </div>
+            <EventCard event={event} />
           ))
+
         ) : (
           <div className="col-span-full bg-slate-900/10 border border-dashed border-slate-900 rounded-2xl p-12 text-center text-xs text-slate-600 font-mono">
             // KEINE EVENTS IM GEWÄHLTEN UMKREIS GEFUNDEN 🧹

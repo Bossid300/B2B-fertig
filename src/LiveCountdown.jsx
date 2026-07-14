@@ -6,7 +6,10 @@ export default function LiveCountdown({ onBack, progress, onNavigateToStep, setP
   const [ticketCount, setTicketCount] = useState(142);
   const [isLive, setIsLive] = useState(false);
   const [alarmSent, setAlarmSent] = useState(false);
-
+  const [releaseReady, setReleaseReady] = useState(false);
+  const handleReleaseEvent = () => {
+  setReleaseReady(true);
+  };
   // Live-Simulator: Lässt die Ticket-Scans im Sekundentakt hochzählen
   useEffect(() => {
     if (!isLive) return;
@@ -90,8 +93,16 @@ export default function LiveCountdown({ onBack, progress, onNavigateToStep, setP
             </h3>
             <span className={`px-2 py-0.5 rounded font-black text-[9px] uppercase tracking-wider ${
               isLive ? 'bg-emerald-950 text-emerald-400 border border-emerald-500/20 animate-pulse' : 'bg-slate-950 text-slate-600'
-            }`}>
-              {isLive ? '● System Online' : 'Standby'}
+            }`}>             
+              {
+                isLive
+                  ? 'LIVE ● System Online'
+                  : alarmSent
+                    ? 'PUSH ● System Online'
+                    : releaseReady
+                      ? 'FREIGEGEBEN ● System Online'
+                      : 'STANDBY ● Erwarte Freigabe'
+              }
             </span>
           </div>
 
@@ -115,7 +126,15 @@ export default function LiveCountdown({ onBack, progress, onNavigateToStep, setP
               <div>
                 <span className="text-[9px] text-slate-500 block uppercase">Verbleibende Zeit:</span>
                 <span className="text-lg font-black text-cyan-400 tracking-wider font-mono">
-                  {isLive ? '00:14:42' : 'IN STANDBY'}
+                  {
+                    isLive
+                      ? 'KONZERT LÄUFT LIVE'
+                      : alarmSent
+                        ? 'PUSH-ALARM GESENDET'
+                        : releaseReady
+                          ? 'EVENT FREIGEGEBEN'
+                          : 'IN STANDBY'
+                  }
                 </span>
               </div>
             </div>
@@ -131,30 +150,44 @@ export default function LiveCountdown({ onBack, progress, onNavigateToStep, setP
 
         {/* CONTROLS */}
         <div className="md:col-span-4 bg-slate-900/40 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-xl gap-4">
-          <div className="space-y-4">
             <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-800 pb-2">
               <Users className="w-4 h-4 text-purple-400" /> Regiepult
             </h3>
-            
-            {/* ACTION 1: TRIGGER PUSH ALARM */}
-            <button
-              type="button"
-              disabled={alarmSent}
-              onClick={handleSendAlarm}
-              className={`w-full font-black text-[9px] uppercase tracking-wider h-10 rounded-xl flex items-center justify-center gap-2 border transition-all active:scale-95 cursor-pointer ${
-                alarmSent 
-                  ? 'bg-slate-950 border-slate-900 text-slate-600 cursor-not-allowed' 
-                  : 'bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.1)]'
-              }`}
-            >
-              <Bell className="w-3.5 h-3.5" /> {alarmSent ? 'Push-Alarm gefeuert' : 'Push-Alarm an Fans'}
-            </button>
-          </div>
 
-          {/* ACTION 2: START EVENT */}
+          {/* ACTION 1: EVENT FREIGEBEN */}
           <button
             type="button"
-            disabled={isLive}
+            onClick={handleReleaseEvent}
+            className={`w-full font-black text-[9px] uppercase tracking-wider h-10 rounded-xl flex items-center justify-center gap-2 border transition-all active:scale-95 cursor-pointer ${
+              alarmSent 
+                ? 'bg-slate-950 border-slate-900 text-slate-600 cursor-not-allowed' 
+                : 'bg-green-500/10 border-green-500/30 text-white-400 hover:bg-green-500/20 shadow-[0_0_15px_rgba(168,85,247,0.1)]'
+            }`}
+          >
+          {releaseReady
+            ? 'EVENT FREIGEGEBEN'
+            : 'IN STANDBY 🚨'
+          }
+          </button>
+          
+          {/* ACTION 2: TRIGGER PUSH ALARM */}
+          <button
+            type="button"
+            disabled={!releaseReady || alarmSent}
+            onClick={handleSendAlarm}
+            className={`w-full font-black text-[9px] uppercase tracking-wider h-10 rounded-xl flex items-center justify-center gap-2 border transition-all active:scale-95 cursor-pointer ${
+              alarmSent 
+                ? 'bg-slate-950 border-slate-900 text-slate-600 cursor-not-allowed' 
+                : 'bg-purple-500/10 border-purple-500/30 text-purple-400 hover:bg-purple-500/20 shadow-[0_0_15px_rgba(168,85,247,0.1)]'
+            }`}
+          >
+            <Bell className="w-3.5 h-3.5" /> {alarmSent ? 'Push-Alarm gefeuert' : 'Push-Alarm an Fans'}
+          </button>
+
+          {/* ACTION 3: START EVENT */}
+          <button
+            type="button"
+            disabled={!alarmSent || isLive}
             onClick={handleStartShow}
             className={`w-full font-black text-[10px] uppercase tracking-wider h-11 rounded-xl transition-all active:scale-[0.97] flex items-center justify-center gap-1.5 border cursor-pointer ${
               isLive 
@@ -164,6 +197,7 @@ export default function LiveCountdown({ onBack, progress, onNavigateToStep, setP
           >
             {isLive ? '✓ Konzert läuft live' : 'Konzert starten 🚀'}
           </button>
+
         </div>
 
       </div>

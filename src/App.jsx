@@ -7,6 +7,7 @@ import StageSpecs from './StageSpecs';
 import ContractCenter from './ContractCenter';
 import TeamVoting from './TeamVoting';
 import EventPlanner from './EventPlanner';
+import EventPromotion from './EventPromotion';
 import LiveCountdown from './LiveCountdown';
 import ProfileSettings from './ProfileSettings';
 // 👈 Lade Navigation
@@ -71,6 +72,36 @@ export default function App() {
       setHasPendingRequests(false);
     }
   };
+
+
+
+
+
+
+      {/* F5 Session Recovery */}
+      useEffect(() => {
+        const storedActiveEvent =
+          JSON.parse(localStorage.getItem("gigsda_active_event"));
+
+        const events =
+          JSON.parse(localStorage.getItem("gigsda_events")) || [];
+
+        if (storedActiveEvent?.id) {
+          const restoredEvent = events.find(
+            e => e.id === storedActiveEvent.id
+          );
+
+          if (restoredEvent) {
+            setActiveEvent(restoredEvent);
+          }
+        }
+      }, []);
+
+
+
+
+
+
 
 
 
@@ -178,15 +209,39 @@ export default function App() {
     ];
   });
  
+
   const [progress, setProgress] = useState({
     shortlist: 0,
     stage: 0,
     contract: 0,
     voting: 0,
     planner: 0,
-    countdown: 25
+    promotion: 0,
+    countdown: 0
   });
- 
+
+  useEffect(() => {
+    
+    const countdownReady =
+      progress.shortlist === 100 &&
+      progress.stage === 100 &&
+      progress.contract === 100 &&
+      progress.planner === 100 &&
+      progress.promotion === 100;
+
+    setProgress(prev => ({
+      ...prev,
+      countdown: countdownReady ? 100 : 0
+    }));
+  }, [
+    progress.shortlist,
+    progress.stage,
+    progress.contract,
+    progress.planner,
+    progress.promotion
+  ]);
+
+
   // DANIELS DAUMENTASTEN-SCHUTZ
   useEffect(() => {
     window.history.pushState({ view: view }, '', '');
@@ -503,15 +558,15 @@ export default function App() {
           )}
 
           {view === 'shortlist' && isLoggedIn && (
-            <CrewShortlist onBack={() => setView('projects')} progress={progress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} setFavorites={handleUpdateCrewForEvent} />
+            <CrewShortlist onBack={() => setView('projects')} progress={progress} setProgress={setProgress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} setFavorites={handleUpdateCrewForEvent} />
           )}
  
           {view === 'stage' && isLoggedIn && (
-            <StageSpecs onBack={() => setView('shortlist')} progress={progress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} onApproveSuccess={() => setProgress(prev => ({ ...prev, stage: 100 }))} />
+            <StageSpecs onBack={() => setView('shortlist')} progress={progress} setProgress={setProgress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} onApproveSuccess={() => setProgress(prev => ({ ...prev, stage: 100 }))} />
           )}
  
           {view === 'contract' && isLoggedIn && (
-            <ContractCenter onBack={() => setView('projects')} progress={progress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} onContractSigned={() => setProgress(prev => ({ ...prev, contract: 100 }))} />
+            <ContractCenter onBack={() => setView('projects')} progress={progress} setProgress={setProgress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} onContractSigned={() => setProgress(prev => ({ ...prev, contract: 100 }))} />
           )}
  
           {view === 'voting' && isLoggedIn && (
@@ -519,13 +574,24 @@ export default function App() {
           )}
  
           {view === 'planner' && isLoggedIn && (
-            <EventPlanner onBack={() => setView('projects')} progress={progress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} onStepSuccess={() => setProgress(prev => ({ ...prev, planner: 100 }))} />
+            <EventPlanner onBack={() => setView('projects')} progress={progress} setProgress={setProgress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} onStepSuccess={() => setProgress(prev => ({ ...prev, planner: 100 }))} />
           )}
  
           {view === 'countdown' && isLoggedIn && (
             <LiveCountdown onBack={() => setView('projects')} progress={progress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} setProgress={setProgress} onTriggerGate={triggerGate} />
           )}
  
+          {view === 'promotion' && isLoggedIn && (
+            <EventPromotion
+              onBack={() => setView('planner')}
+              progress={progress}
+              setProgress={setProgress}
+              activeEvent={events.find(
+                e => e.id === activeEvent?.id
+              )}
+            />
+          )}
+
           {/* 🔍 KÜNSTLER-SUCHE FÜR EINGELOGGTE USER (PROFIL-WEICHE REPARIERT) */}
           {view === 'search' && (
             <SearchExplorer 
