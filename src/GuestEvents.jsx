@@ -145,8 +145,31 @@ export default function GuestEvents({ onNavigate }) {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredEvents.length > 0 ? (
           filteredEvents.map((event, index) => (
-
-            <EventCard event={event} />
+            
+            <EventCard
+              key={`${event.id || 'event'}-${index}`}
+              event={{
+                ...event,
+                title:
+                  event.promotionData?.title ||
+                  event.title,
+                category:
+                  event.promotionData?.category ||
+                  event.category,
+                shortDescription:
+                  event.promotionData?.shortDescription,
+                slide1_url:
+                  event.promotionData?.promoImage ||
+                  event.slide1_url,
+                entryTime:
+                  event.promotionData?.entryTime,
+                startTime:
+                  event.promotionData?.startTime,
+                city:
+                  event.venue ||
+                  event.city
+              }}
+            />
           ))
 
         ) : (

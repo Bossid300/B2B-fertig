@@ -75,7 +75,8 @@ export default function Roadmap() {
       <p>✅ Zusage-Deal Fahrplan-Integration</p>
       <p>✅ Event-Planer inkl. Timeline, Editierung & Speicherung</p>
       <p>✅ Event-Planer Fahrplan-Integration</p>
-      <p>✅ Event-Promotion inkl. Statussystem & Live-Vorschau</p>
+      <p>✅ Event-Promotion inkl. Statussystem</p>
+      <p>✅ Event-Promotion Live-Vorschau für Radar-Search-Card</p>
       <p>✅ Event-Promotion Fahrplan-Integration</p>
       <p>✅ Live-Countdown inkl. Freigabe-, Push- & Live-Workflow</p>
       <p>✅ Countdown-Freigabe aus Projektstatus</p>
@@ -101,6 +102,7 @@ export default function Roadmap() {
 
 
     <p>🎯 Event Bearbeitung integrieren</p>
+    <p>🎯 Event Promotion integrieren / Werbematerial</p>
     <p>🎯 Notification Center fertigstellen</p>
     <p>🎯 Read / Unread Logik</p>
     <p>🎯 Datei Upload im Chat</p>

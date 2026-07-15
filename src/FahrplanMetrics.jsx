@@ -11,12 +11,13 @@ export default function FahrplanMetrics({ progress = {}, activeStep = '', onNavi
 
   // UNTERE REIHE (Schritte 4 - 6) – Fan-Voting, Logistik & Finale
   const bottomRow = [
-    { id: 'voting', target: 'voting', label: '4. Team-Voting', sub: 'Setlist-Abstimmung', current: progress.voting || 0 },
-    { id: 'planner', target: 'planner', label: '5. Event-Planner', sub: 'Logistik & Zeiten', current: progress.planner || 0 },
-    { id: 'countdown', target: 'countdown', label: '6. Live-Countdown', sub: 'Der Tag der Show', current: progress.countdown || 25 },
+    { id: 'planner', target: 'planner', label: '4. Event-Planner', sub: 'Logistik & Zeiten', current: progress.planner || 0 },
+    { id: 'promotion', target: 'promotion', label: '5. Event-Promotion', sublabel: 'Eventbeschreibung & Werbung', current: progress.promotion || 0},
+    { id: 'countdown', target: 'countdown', label: '6. Live-Countdown', sub: 'Der Tag der Show', current: progress.countdown || 0 },
+  ];
   
-    { id: 'promotion', target: 'promotion', label: '7. Event-Promotion', sublabel: 'Eventbeschreibung & Werbung', current: progress.promotion || 0},
-
+  const extraModules = [
+    { id: 'voting', target: 'voting', label: 'FAN-Voting (comming soon)', sub: 'Setlist-Abstimmung', current: progress.voting || 0 },
   ];
 
   const getStatusIcon = (value) => {
@@ -107,6 +108,11 @@ export default function FahrplanMetrics({ progress = {}, activeStep = '', onNavi
       {/* UNTERE REIHE (Schritte 4, 5, 6 bündig genau darunter) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {bottomRow.map(renderStepButton)}
+      </div>
+
+      {/* FAN-VOTING */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {extraModules.map(renderStepButton)}
       </div>
 
     </div>

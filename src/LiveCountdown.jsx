@@ -46,10 +46,10 @@ export default function LiveCountdown({ onBack, progress, onNavigateToStep, setP
       <FahrplanMetrics progress={progress} activeStep="countdown" onNavigate={onNavigateToStep} />
 
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl gap-4">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl gap-4">
         <div>
           {activeEvent ? (
-            <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-md inline-block mb-1.5">
+          <span className="text-[12px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-md inline-block mb-1.5">
               📍 Aktives Event: {activeEvent.title} ({activeEvent.date})
             </span>
           ) : (
@@ -57,15 +57,21 @@ export default function LiveCountdown({ onBack, progress, onNavigateToStep, setP
               // Ebene 06: Live-Countdown
             </span>
           )}
-          <h2 className="text-xl font-bold text-white mt-0.5">Live-Countdown & Fan-Signal</h2>
-          <p className="text-slate-400 text-[11px]">Überwache den Einlass an den Gates und alarmiere die Fangemeinde kurz vor der Show.</p>
+          <h2 className="text-3xl font-bold text-white mt-0.5">
+            Live-Countdown & Fan-Signal
+          </h2>
+          <p className="text-slate-400 text-[12px]">
+            Überwache den Einlass an den Gates und alarmiere die Fangemeinde kurz vor der Show.
+          </p>
           {/* 🚨 REKTIVES PROJEKT-BADGE DIREKT UNTER DER ÜBERSCHRIFT */}
           <div className="bg-slate-950/90 border border-cyan-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2 w-max shadow-[0_0_15px_rgba(6,182,212,0.05)] text-[10px]">
             <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500"></span>
             </span>
-            <span className="text-slate-500 font-bold uppercase tracking-wider text-[8px]">// ACTIVE TARGET:</span>
+            <span className="text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+              // ACTIVE TARGET:
+            </span>
             <span className="font-black text-cyan-400 uppercase tracking-wide">
               {(() => {
                 try {
@@ -77,7 +83,11 @@ export default function LiveCountdown({ onBack, progress, onNavigateToStep, setP
             </span>
           </div>
         </div>
-        <button type="button" onClick={onBack} className="bg-slate-950 border border-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer">
+        <button 
+          type="button" 
+          onClick={onBack} 
+          className="bg-slate-950 border border-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer"
+        >
           ‹ Zurück
         </button>
       </div>

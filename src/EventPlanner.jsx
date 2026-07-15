@@ -253,26 +253,31 @@ useEffect(() => {
 
 
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl gap-4">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl gap-4">
         <div>
           {activeEvent ? (
-            <span className="text-[10px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-md inline-block mb-1.5">
+          <span className="text-[12px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-md inline-block mb-1.5">
               📍 Aktives Event: {activeEvent.title} ({activeEvent.date})
             </span>
           ) : (
-            <span className="text-[10px] text-cyan-400 font-bold block mb-1">
-              // Ebene 05: Logistik & Timings
+          <span className="text-[10px] text-cyan-400 font-bold block mb-1">
+              // Ebene 04: Logistik & Timings
             </span>
           )}
-          <h2 className="text-xl font-bold text-white mt-0.5">Event-Planner & Ablaufplan</h2>
-          <p className="text-slate-400 text-[11px]">Regle die zeitliche Taktung für den Einlass, Soundcheck und den Live-Auftritt vor Ort.</p>
+          <h2 className="text-3xl font-bold text-white mt-0.5">
+            Event-Planner & Ablaufplan
+          </h2>
+          <p className="text-slate-400 text-[12px]">
+            Regle die zeitliche Taktung für den Einlass, Soundcheck und den Live-Auftritt vor Ort.
+          </p>
           {/* 🚨 REKTIVES PROJEKT-BADGE DIREKT UNTER DER ÜBERSCHRIFT */}
           <div className="bg-slate-950/90 border border-cyan-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2 w-max shadow-[0_0_15px_rgba(6,182,212,0.05)] text-[10px]">
             <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500"></span>
             </span>
-            <span className="text-slate-500 font-bold uppercase tracking-wider text-[8px]">// ACTIVE TARGET:</span>
+            <span className="text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+              // ACTIVE TARGET:</span>
             <span className="font-black text-cyan-400 uppercase tracking-wide">
               {(() => {
                 try {

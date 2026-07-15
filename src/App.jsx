@@ -589,6 +589,7 @@ export default function App() {
               activeEvent={events.find(
                 e => e.id === activeEvent?.id
               )}
+              onNavigateToStep={setView}
             />
           )}
 
