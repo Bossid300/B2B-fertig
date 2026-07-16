@@ -19,6 +19,7 @@ export default function UniversalSearchPage({ onNavigate, setView }) {
     setSortBy
   } = useUniversalSearch();
   
+
   {/* FAVORITEN */}
   const getFavorites = () => {
   return JSON.parse(localStorage.getItem("gigsda_favorites")) || [];
@@ -115,6 +116,7 @@ export default function UniversalSearchPage({ onNavigate, setView }) {
                   }
                   className="bg-[#070b12] border border-slate-800 rounded-md px-2 py-0.5 h-6 text-[11px] text-slate-400"
                 >
+                  <option value="all">Alle Genres</option>
                   <option value="rock metal">Rock / Metal</option>
                   <option value="pop indie">Pop / Indie</option>
                   <option value="electronic techno">Electronic / Techno</option>

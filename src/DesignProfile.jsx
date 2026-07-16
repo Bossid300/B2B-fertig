@@ -3,6 +3,7 @@ import CrewRequestCenter from './CrewRequestCenter'; // Pfade an deine Ordnerstr
 import ProfileHeaderBox from './components/ProfileHeaderBox';
 import ProfileStammBox from './components/ProfileStammBox';
 import ProfilePassBox from './components/ProfilePassBox';
+import ProfileCard from './components/cards/ProfileCard';
 
 export default function DesignProfile({ onBack, ticketName, isOwner }) {
   const [profileData, setProfileData] = useState(null);
@@ -85,6 +86,22 @@ export default function DesignProfile({ onBack, ticketName, isOwner }) {
         currentProfileName={targetUser} 
         isOwner={isOwner} 
       />
+
+      <div className="bg-slate-900/40 border border-cyan-500/20 rounded-2xl p-4 mb-4">
+        <h3 className="text-xs font-black uppercase text-cyan-400 tracking-wider">
+          🔍 // Live-Vorschau SearchExplorer
+        </h3>
+
+        <p className="text-xs text-slate-500 mt-1">
+          So erscheint dein Profil aktuell in der Partnersuche.
+        </p>        
+        <p className="text-xs text-slate-500 mt-1">
+          Button "PROFIL" & "ANFRAGEN" haben hier keine Funktion!
+        </p>
+      </div>
+
+      <ProfileCard user={profileData} />
+
       <ProfilePassBox 
         currentProfileName={targetUser}
         profileId={profileData?.id || 'GIGS-XXXX'}

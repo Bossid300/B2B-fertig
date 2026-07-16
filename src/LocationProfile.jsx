@@ -22,7 +22,7 @@ import ProfileHilfeBox from './components/ProfileHilfeBox';
 import ProfileHallenBox from './components/ProfileHallenBox';
 import LocationRaeumeBox from './components/LocationRaeumeBox';
 import ProfilePassBox from './components/ProfilePassBox';
-
+import ProfileCard from './components/cards/ProfileCard';
 
 export default function LocationProfile({ onBack, ticketName, isOwner }) {
   const [profileData, setProfileData] = useState(null);
@@ -101,6 +101,22 @@ export default function LocationProfile({ onBack, ticketName, isOwner }) {
 
       <ProfileStammBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileStatusMatrix currentProfileName={targetUser} />
+
+      <div className="bg-slate-900/40 border border-cyan-500/20 rounded-2xl p-4 mb-4">
+        <h3 className="text-xs font-black uppercase text-cyan-400 tracking-wider">
+          🔍 // Live-Vorschau SearchExplorer
+        </h3>
+
+        <p className="text-xs text-slate-500 mt-1">
+          So erscheint dein Profil aktuell in der Partnersuche.
+        </p>        
+        <p className="text-xs text-slate-500 mt-1">
+          Button "PROFIL" & "ANFRAGEN" haben hier keine Funktion!
+        </p>
+      </div>
+
+      <ProfileCard user={profileData} />
+
       <ProfileBioTabsBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileGalleryBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileNetworkBox currentProfileName={targetUser} isOwner={isOwner} />

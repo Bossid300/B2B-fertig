@@ -46,32 +46,11 @@ export const useUniversalSearch = () => {
 
   // 🔹 Daten laden
   useEffect(() => {
-    const users = JSON.parse(localStorage.getItem("gigsda_users")) || [];
     const profiles = JSON.parse(localStorage.getItem("gigsda_profiles")) || [];
 
-    const merged = users
-      .map((user) => {
-        const p =
-          profiles.find(
-            (p) =>
-              p &&
-              (p.id === user.id ||
-                p.name?.toLowerCase() === user.name?.toLowerCase())
-          ) || {};
-
-        return {
-          ...user,
-          ...p,
-          name: user.name || p.name,
-          role: user.role || p.role || "Künstler",
-          city: user.city || p.city || "",
-          id: user.id
-        };
-      })
-      .filter(Boolean);
-
-    setAllProfiles(merged);
+  setAllProfiles(profiles);
   }, []);
+
 
   // 🔹 Filterlogik (🔥 useMemo statt useEffect)
   const filteredResults = useMemo(() => {
