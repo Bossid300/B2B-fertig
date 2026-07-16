@@ -13,7 +13,7 @@ export default function GuestNavigation({ setView, activeView }) {
   };
 
   // Dein originaler, flacher Desktop-Look ohne klobige Rahmen
-  const desktopBase = "uppercase text-[10px] font-black tracking-wider transition-all cursor-pointer font-mono";
+  const desktopBase = "uppercase text-xs font-black tracking-wider transition-all cursor-pointer font-mono";
   const activeClass = "text-purple-400 font-bold";
   const inactiveClass = "text-slate-400 hover:text-white";
 
@@ -25,22 +25,21 @@ export default function GuestNavigation({ setView, activeView }) {
       <div className="w-full max-w-7xl mx-auto px-4 py-1.0 flex items-center justify-between sm:justify-end gap-6">
         
         {/* ── DESKTOP NAVIGATIONS-LINKS (EXAKT DEINE ORIGINALEN PUNKTE VON GITHUB) ── */}
-        <div className="hidden sm:flex items-center gap-6 select-none ml-auto shrink-0">
-          <button onClick={() => handleNavClick('whatIsGigsda')} className={`${desktopBase} ${activeView === 'whatIsGigsda' ? activeClass : inactiveClass}`}>
+        <div className="hidden sm:flex items-center gap-4 select-none ml-auto shrink-0">
+          <button onClick={() => handleNavClick('whatIsGigsda')} 
+          className={`${desktopBase} ${activeView === 'whatIsGigsda' ? activeClass : inactiveClass}`}>
             🎵 Was ist gigsda?
           </button>
-          <button onClick={() => handleNavClick('guestEvents')} className={`${desktopBase} ${activeView === 'guestEvents' ? activeClass : inactiveClass}`}>
+          <button onClick={() => handleNavClick('guestEvents')} 
+          className={`${desktopBase} ${activeView === 'guestEvents' ? activeClass : inactiveClass}`}>
             🏃 Events-Radar
           </button>
-          <button onClick={() => handleNavClick('radar')} className={`${desktopBase} ${activeView === 'radar' ? activeClass : inactiveClass}`}>
+          <button onClick={() => handleNavClick('radar')} 
+          className={`${desktopBase} ${activeView === 'radar' ? activeClass : inactiveClass}`}>
             🗣 Search-Explorer
           </button>
-          <button
-            onClick={() => handleNavClick('artists')}
-            className={`px-3 py-1 text-[11px] font-bold uppercase tracking-wider transition-colors ${
-              activeView === 'artists' ? 'text-cyan-400' : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
+          <button onClick={() => handleNavClick('artists')}
+            className={`${desktopBase} ${activeView === 'artists' ? activeClass : inactiveClass}`}>
             🔍 Matrix-Suche
           </button>
 

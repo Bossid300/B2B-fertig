@@ -76,7 +76,7 @@ export default function GlobalNavigation({ view, setView, onLogout }) {
   };
 
   // Dein originaler, flacher Desktop-Look ohne klobige Rahmen
-  const desktopBase = "uppercase text-[10px] font-black tracking-wider transition-all cursor-pointer font-mono";
+  const desktopBase = "uppercase text-xs font-black tracking-wider transition-all cursor-pointer font-mono";
   const activeClass = "text-purple-400 font-bold";
   const inactiveClass = "text-slate-400 hover:text-white";
 
@@ -91,33 +91,25 @@ export default function GlobalNavigation({ view, setView, onLogout }) {
         <div className="hidden sm:flex items-center gap-6 select-none ml-auto shrink-0">
         <span
           onClick={() => triggerNav('artists')}
-          className={`${desktopBase} ${
-            view === 'artists' ? activeClass : inactiveClass
-          }`}
+          className={`${desktopBase} ${view === 'artists' ? activeClass : inactiveClass}`}
         >
           🔍 MATRIX
         </span>
                 <span
           onClick={() => triggerNav('radar')}
-          className={`${desktopBase} ${
-            view === 'radar' ? activeClass : inactiveClass
-          }`}
+          className={`${desktopBase} ${view === 'radar' ? activeClass : inactiveClass}`}
         >
           💬 SEARCH
         </span>
                 <span
           onClick={() => triggerNav('guestEvents')}
-          className={`${desktopBase} ${
-            view === 'guestEvents' ? activeClass : inactiveClass
-          }`}
+          className={`${desktopBase} ${view === 'guestEvents' ? activeClass : inactiveClass}`}
         >
           📅 EVENTS
         </span>
                 <span
           onClick={() => triggerNav('projects')}
-          className={`${desktopBase} ${
-            view === 'projects' ? activeClass : inactiveClass
-          }`}
+          className={`${desktopBase} ${view === 'projects' ? activeClass : inactiveClass}`}
         >
           📁 PROJEKTE
         </span>

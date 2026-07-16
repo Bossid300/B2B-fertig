@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Search, MapPin, Ticket, Shield, Sliders, Calendar, ArrowRight, CheckCircle2, ChevronDown, Users, Layers, Award } from 'lucide-react';
 import GuestPass from './GuestPass';
 import Roadmap from "./components/Roadmap";
+import ASoFunktioniertEs from "./components/a_SoFunktioniertEs";
+
+
 // 📡 Daniels originale Testdaten (Bands, Termine und geile Locations)
 const initialGigs = [
   { id: 1, title: "Band", date: "27.08.2026", location: "Bambug", img: "/2026/profiles/Jud-Herbert/banner.jpg" },
@@ -25,7 +28,7 @@ export default function LandingPage({ onEnterCenter, onCreateAccount }) {
 const [videoMuted, setVideoMuted] = useState(true);
 
   return (
-    <div className="w-full min-h-screen bg-[#070913] text-white font-sans relative overflow-x-hidden antialiased pb-16">
+    <div className="w-full min-h-screen bg-[#070913] text-white font-sans relative overflow-x-hidden antialiased">
       
       {/* 🌌 DAS REAKTIVE LIVE-KONZERT HINTERGRUNDBILD (UNZERSTÖRBAR VERANKERT!) */}
       <div 
@@ -201,29 +204,10 @@ const [videoMuted, setVideoMuted] = useState(true);
 
       {/* 🛠️ SPERREN-SEKTION: "SO FUNKTIONIERT ES" */}
       <div className="max-w-6xl mx-auto px-4 md:px-8 pt-6 border-t border-slate-900/60 text-left font-mono z-10 relative">
-        <h2 className="text-sm font-black text-white uppercase tracking-widest mb-6">// SO FUNKTIONIERT ES</h2>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm font-bold">
-          
-          {/* STEP 1 */}
-          <div className="flex items-center gap-3 group cursor-pointer" onClick={() => typeof onNavigate === 'function' && onNavigate('search')}>
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 group-hover:bg-cyan-500/20 group-hover:border-cyan-400 transition-all text-base shadow-sm">📍</div>
-            <span className="text-slate-300 group-hover:text-white transition-colors uppercase tracking-wide">Standort wählen</span>
-          </div>
 
-          {/* STEP 2 */}
-          <div className="flex items-center gap-3 group cursor-pointer" onClick={() => typeof onNavigate === 'function' && onNavigate('search')}>
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 group-hover:bg-purple-500/20 group-hover:border-purple-400 transition-all text-base shadow-sm">🔍</div>
-            <span className="text-slate-300 group-hover:text-white transition-colors uppercase tracking-wide">Gig finden</span>
-          </div>
 
-          {/* STEP 3 */}
-          <div className="flex items-center gap-3 group cursor-pointer" onClick={() => typeof onNavigate === 'function' && onNavigate('register')}>
-            <div className="w-10 h-10 rounded-xl bg-pink-500/10 border border-pink-500/30 flex items-center justify-center text-pink-400 group-hover:bg-pink-500/20 group-hover:border-pink-400 transition-all text-base shadow-sm">👥</div>
-            <span className="text-slate-300 group-hover:text-white transition-colors uppercase tracking-wide">Dabei sein</span>
-          </div>
+        <ASoFunktioniertEs onEnterCenter={onEnterCenter} />
 
-        </div>
 
               <section>
                 {/* 🌌 ZENTRIERTES CYBERPUNK-LOGO-ZENTRUM */}
@@ -259,36 +243,37 @@ const [videoMuted, setVideoMuted] = useState(true);
               </section>
 
               {/* Building Gigsda In Public */}
-              <div className="max-w-4xl mx-auto">
+              <div className="max-w-6xl mx-auto">
                 <Roadmap />
               </div>
               
               <section>
               {/* ANKER-VORSCHAU-PFEIL */}
-              <div className="flex justify-center text-slate-600 animate-bounce">
-                <div className="text-center font-mono text-[9px] uppercase tracking-widest">
-                  für alle Besucher<br/>
+              <div className="mt-10 flex justify-center text-slate-600 animate-bounce">
+                <div className="text-center font-mono text-xm uppercase tracking-widest">
+                  für alle Besucher
                   <ChevronDown className="w-4 h-4 mx-auto mt-1 text-cyan-500/60" />
                 </div>
               </div>
               </section>
 
               {/* ========================================================================= */}
-              {/* SEKTION 4: DAS KÜNSTLER- & PLANER-VERSPRECHEN                              */}
+              {/* SEKTION 4: DAS KÜNSTLER- & PLANER-VERSPRECHEN                             */}
               {/* ========================================================================= */}
-              <section className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+              <section className="mt-6 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
                 
                 {/* Block 1: Die Bühne für Künstler */}
                 <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 space-y-4 flex flex-col justify-between hover:border-slate-800 transition-all shadow-xl">
                   <div className="space-y-3">
-                    <div className="text-xs font-black text-cyan-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-950 pb-2">
-                      <Award className="w-4 h-4" /> Die Bühne für Künstler!
+                    <div className="text-xl font-black text-cyan-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-950 pb-2">
+                      <Award className="w-4 h-4" /> 
+                      Die Bühne für Künstler!
                     </div>
-                    <p className="text-slate-400 text-[11px] font-sans leading-relaxed">
+                    <p className="text-slate-400 text-xm font-sans leading-relaxed">
                       In erster Linie wollen wir Brücken erstellen, um Bands oder Künstler zu unterstützen, damit Ihr Mehrwert wieder ansteigt. Einmal das Profil informativ ausgefüllt, und jeder Veranstalter sieht auf einen Blick, welche Anforderungen ihr habt (Technical Rider).
                     </p>
                   </div>
-                  <p className="text-[10px] text-slate-500 italic font-sans leading-relaxed pt-2">
+                  <p className="text-xs text-slate-500 italic font-sans leading-relaxed pt-2">
                     „Durch gigsda bekommen semiprofessionelle Künstler schneller die Chance auf bessere Gigs, mehr Gage und mehr Fans.“
                   </p>
                 </div>
@@ -296,16 +281,19 @@ const [videoMuted, setVideoMuted] = useState(true);
                 {/* Block 2: Eventplanung */}
                 <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 space-y-4 flex flex-col justify-between hover:border-slate-800 transition-all shadow-xl">
                   <div className="space-y-3">
-                    <div className="text-xs font-black text-purple-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-950 pb-2">
-                      <Layers className="w-4 h-4" /> Eventplanung!
+                    <div className="text-xl font-black text-purple-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-950 pb-2">
+                      <Layers className="w-4 h-4" /> 
+                      Eventplanung!
                     </div>
-                    <p className="text-slate-400 text-[11px] font-sans leading-relaxed">
+                    <p className="text-slate-400 text-xm font-sans leading-relaxed">
                       Durch einige Tools schaffen wir neue Wege, um einem Künstler dabei zu helfen, sein Ziel schneller durch vereinfachte Planung zu erreichen. All dies mit geringstem Zeitaufwand, damit er sich wieder auf seine eigentliche Kunst konzentrieren kann.
                     </p>
                   </div>
-                  <div className="bg-slate-950/80 border border-slate-900 rounded-xl p-3 text-[10px] text-emerald-400 flex items-center gap-2">
+                  <div className="bg-slate-950/80 border border-slate-900 rounded-xl p-3 text-xs text-emerald-400 flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
-                    <span>Organisiere deine Projekte mit dem Schritt-für-Schritt-System.</span>
+                    <span>
+                      Organisiere deine Projekte mit dem Schritt-für-Schritt-System.
+                    </span>
                   </div>
                 </div>
               </section>
@@ -313,12 +301,17 @@ const [videoMuted, setVideoMuted] = useState(true);
               {/* ========================================================================= */}
               {/* SEKTION 3: DAS MANIFEST FÜR MITGLIEDER (DAS CORE-ÖKOSYSTEM)               */}
               {/* ========================================================================= */}
-              <section className="max-w-4xl mx-auto space-y-10">
-                <div className="text-center max-w-xl mx-auto space-y-3">
-                  <span className="text-[10px] text-cyan-400 font-bold uppercase tracking-widest bg-cyan-950/40 border border-cyan-500/20 px-3 py-1 rounded-full inline-block">// Das Gigsda Netzwerk</span>
-                  <h2 className="text-2xl font-black text-white uppercase tracking-tight leading-none">Fans, Künstler, Veranstalter, Verleiher, Techniker, Locations, Catering und viele mehr</h2>
-                  <p className="text-slate-500 text-xs font-sans leading-relaxed">
-                    „gigsda“ schafft einfache Wege, um die Planung für eine Veranstaltung zu vollziehen. Du musst nicht zwingend ein Veranstalter sein, um ein Projekt zu starten.
+              <section className="max-w-6xl mx-auto space-y-10">
+                <div className="text-center max-w-4xl mx-auto space-y-3 mt-12">
+                  <span className="text-4x1 text-cyan-400 font-bold uppercase tracking-widest bg-cyan-950/40 border border-cyan-500/20 px-3 py-1 rounded-full inline-block">// Das Gigsda Netzwerk</span>
+                  <h2 className="text-4xl font-black text-white uppercase tracking-tight leading-none">
+                    Fans, Künstler, Veranstalter, Verleiher, Techniker, Locations, Catering und viele mehr ...
+                  </h2>
+                  <p className="text-slate-500 text-xl font-sans leading-relaxed">
+                    „Gigsda“ schafft einfache Wege, um die Planung für eine Veranstaltung zu vollziehen. 
+                  </p>  
+                  <p className="text-slate-500 text-xl font-sans leading-relaxed">
+                    Du musst nicht zwingend ein Veranstalter sein, um ein Projekt zu starten.
                   </p>
                 </div>
 
@@ -328,37 +321,49 @@ const [videoMuted, setVideoMuted] = useState(true);
                   {/* Card A */}
                   <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:border-slate-800 transition-all">
                     <div className="space-y-2">
-                      <div className="text-cyan-400 font-bold text-[10px] uppercase border-b border-slate-950/40 pb-1.5">// EIGENSTÄNDIGKEIT</div>
-                      <h4 className="text-sm font-black text-white uppercase tracking-tight">Wähle Deine Bühne</h4>
-                      <p className="text-slate-400 text-[11px] font-sans leading-relaxed">
+                      <div className="text-cyan-400 font-bold text-xl uppercase border-b border-slate-950/40 pb-1.5">
+                      // EIGENSTÄNDIGKEIT
+                      </div>
+                      <h4 className="text-sm font-black text-white uppercase tracking-tight">
+                        Wähle Deine Bühne
+                      </h4>
+                      <p className="text-slate-400 text-xm font-sans leading-relaxed">
                         Hier bist du in der Lage, dein Event selbst zu organisieren. Suche einen Künstler, finde Veranstalter, Techniker oder Locations. Alle, die du auf, hinter und vor der Bühne brauchst, um durchzustarten.
                       </p>
                     </div>
-                    <span className="text-[9px] text-slate-600 font-mono tracking-widest mt-4 block">#NETZWERK</span>
+                    <span className="text-[12px] text-slate-600 font-mono tracking-widest mt-4 block">#NETZWERK</span>
                   </div>
 
                   {/* Card B */}
                   <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:border-slate-800 transition-all">
                     <div className="space-y-2">
-                      <div className="text-purple-400 font-bold text-[10px] uppercase border-b border-slate-950/40 pb-1.5">// OPTIMIERUNG</div>
-                      <h4 className="text-sm font-black text-white uppercase tracking-tight">Mit wenigen Klicks zum Gig</h4>
-                      <p className="text-slate-400 text-[11px] font-sans leading-relaxed">
+                      <div className="text-purple-400 font-bold text-xl uppercase border-b border-slate-950/40 pb-1.5">
+                      // OPTIMIERUNG
+                      </div>
+                      <h4 className="text-sm font-black text-white uppercase tracking-tight">
+                        Mit wenigen Klicks zum Gig
+                      </h4>
+                      <p className="text-slate-400 text-xm font-sans leading-relaxed">
                         Minimiere lange Wartezeiten mit unseren Tools, zugeschnitten auf beste Erfolgschancen und Effizienz. Hier wirst du gefunden und machst dich sichtbar für Veranstalter und Fans.
                       </p>
                     </div>
-                    <span className="text-[9px] text-slate-600 font-mono tracking-widest mt-4 block">#EFFIZIENZ</span>
+                    <span className="text-[12px] text-slate-600 font-mono tracking-widest mt-4 block">#EFFIZIENZ</span>
                   </div>
 
                   {/* Card C */}
                   <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:border-slate-800 transition-all">
                     <div className="space-y-2">
-                      <div className="text-emerald-400 font-bold text-[10px] uppercase border-b border-slate-950/40 pb-1.5">// ZUSAGE-DEAL</div>
-                      <h4 className="text-sm font-black text-white uppercase tracking-tight">Bring deinen Gig zum Abschluss</h4>
-                      <p className="text-slate-400 text-[11px] font-sans leading-relaxed">
+                      <div className="text-emerald-400 font-bold text-xl uppercase border-b border-slate-950/40 pb-1.5">
+                      // ZUSAGE-DEAL
+                      </div>
+                      <h4 className="text-sm font-black text-white uppercase tracking-tight">
+                        Bring deinen Gig zum Abschluss
+                      </h4>
+                      <p className="text-slate-400 text-xm font-sans leading-relaxed">
                         Durch interaktive Vernetzung und Kommunikation von Künstlern, Veranstaltern, Locations, Technikern und Fans ist gigsda die Lösung, um eigenständige Gigs schnellstmöglich zum Abschluss zu bringen.
                       </p>
                     </div>
-                    <span className="text-[9px] text-slate-600 font-mono tracking-widest mt-4 block">#ZUSAGE_DEAL</span>
+                    <span className="text-[12px] text-slate-600 font-mono tracking-widest mt-4 block">#ZUSAGE_DEAL</span>
                   </div>
 
                 </div>
@@ -366,8 +371,10 @@ const [videoMuted, setVideoMuted] = useState(true);
               
         </div>        
         
-                {/* 🎫 DEIN NEUER GAST-PASS (PERFEKT WEITER UNTEN PLATZIERT) */}
-                <GuestPass onEnterCenter={onEnterCenter} />
+
+
+        {/* 🎫 DEIN NEUER GAST-PASS (PERFEKT WEITER UNTEN PLATZIERT) */}
+        <GuestPass onEnterCenter={onEnterCenter} />
 
 
 
@@ -375,11 +382,13 @@ const [videoMuted, setVideoMuted] = useState(true);
         {/* SEKTION 5: DAS VIERTEILIGE PROFI-FOOTER LAYOUT                            */}
         {/* ========================================================================= */}
         <footer className="w-full border-t border-slate-900 bg-slate-950 pt-12 pb-6 px-4">
-          <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 text-[11px] font-sans text-slate-500">
+          <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 text-sm font-sans text-slate-500">
             
             {/* Spalte 1 */}
             <div className="space-y-2.5">
-              <h5 className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest">// RECHTLICHES</h5>
+              <h5 className="font-mono text-sm font-bold text-slate-400 uppercase tracking-widest">
+                // RECHTLICHES
+              </h5>
               <ul className="space-y-1.5">
                 <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Nutzungsbedingungen</a></li>
                 <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Datenschutzerklärung</a></li>
@@ -390,7 +399,9 @@ const [videoMuted, setVideoMuted] = useState(true);
 
             {/* Spalte 2 */}
             <div className="space-y-2.5">
-              <h5 className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest">// NETZWERK & INFOS</h5>
+              <h5 className="font-mono text-sm font-bold text-slate-400 uppercase tracking-widest">
+                // NETZWERK & INFOS
+              </h5>
               <ul className="space-y-1.5">
                 <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Was ist gigsda?</a></li>
                 <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Events & Locations</a></li>
@@ -401,7 +412,9 @@ const [videoMuted, setVideoMuted] = useState(true);
 
             {/* Spalte 3 */}
             <div className="space-y-2.5">
-              <h5 className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest">// SICHERHEIT</h5>
+              <h5 className="font-mono text-sm font-bold text-slate-400 uppercase tracking-widest">
+                // SICHERHEIT
+              </h5>
               <ul className="space-y-1.5">
                 <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Richtlinien & Sicherheit</a></li>
                 <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Zahlungsarten</a></li>
@@ -412,12 +425,14 @@ const [videoMuted, setVideoMuted] = useState(true);
 
             {/* Spalte 4 */}
             <div className="space-y-2.5">
-              <h5 className="font-mono text-[9px] font-bold text-slate-400 uppercase tracking-widest">// GIGDATA GMBH</h5>
+              <h5 className="font-mono text-sm font-bold text-slate-400 uppercase tracking-widest">
+                // GIGDATA GMBH
+              </h5>
               <ul className="space-y-1.5">
                 <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Über uns</a></li>
                 <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Kontakt</a></li>
                 <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Karriere</a></li>
-                <li className="text-[9px] font-mono text-slate-700 pt-2">© 2026 GIGDATA GmbH</li>
+                <li className="text-[11px] font-mono text-slate-700 pt-2">© 2026 GIGDATA GmbH</li>
               </ul>
             </div>
           </div>

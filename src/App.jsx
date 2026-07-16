@@ -626,14 +626,17 @@ export default function App() {
             <ArtistPortfolio />
           )}
 
+
  
         </main>
  
         {/* ========================================================================= */}
         {/* FOOTER                                                                    */}
         {/* ========================================================================= */}
-        <footer className="w-full border-t border-slate-900/60 bg-slate-950 py-3 text-center text-[9px] text-slate-600 mt-12">
-          GIGSDA PROTOCOL V2.6 // OPERATOR: <span className="text-cyan-400 font-bold">{ticketName}</span> // RECHTSGÜLTIG GESICHERT
+        <footer className="w-full border-t border-slate-900/60 bg-slate-950 py-3 text-center text-xm text-slate-600 mt-12">
+          GIGSDA PROTOCOL V2.6 // OPERATOR: 
+          <span className="text-cyan-400 font-bold">{ticketName} </span> 
+          // RECHTSGÜLTIG GESICHERT
         </footer>
       </div>
  
