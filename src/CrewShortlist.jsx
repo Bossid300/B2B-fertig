@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CommunityChat from './CommunityChat';
 import FahrplanMetrics from './FahrplanMetrics';
+import CrewCard from './components/cards/CrewCard';
 
 export default function CrewShortlist({ 
   onBack, 
@@ -325,87 +326,71 @@ const addFromShortlist = (eventId, profileName) => {
               }
 
               return (
-                <div key={idx} className="bg-slate-950/60 border border-slate-900 rounded-2xl p-4 flex flex-col justify-between space-y-3 shadow-2xl relative overflow-hidden group">
-                  <div className="space-y-1">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[7px] bg-slate-900 border border-slate-800 px-1.5 py-0.5 rounded text-slate-400 font-bold uppercase tracking-wider">
-                        {member.role || 'Gewerk'}
-                      </span>
-                      <span className={`text-[7px] border px-1.5 py-0.5 rounded font-black tracking-widest uppercase ${statusColor}`}>
-                        {statusLabel}
-                      </span>
 
-                      {/* 🟠 WARTEN AUF ZUSAGE ➕ IN CREW ÜBERNEHMEN */}
-                        {(() => {
-                          const activeStub = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
-                          const events = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+                <CrewCard
+                  key={idx}
+                  member={member}
+                  statusColor={statusColor}
+                  statusLabel={statusLabel}
+                  actionContent={(() => {
+                  const activeStub = JSON.parse(
+                    localStorage.getItem('gigsda_active_event') || 'null'
+                  );
 
-                          const currentEvent = events.find(e => e.id === activeStub?.id);
-                          const isInCrew = currentEvent?.crewIds?.includes(member.id);
+                  const events = JSON.parse(
+                    localStorage.getItem('gigsda_events') || '[]'
+                  );
 
-                            if (isInCrew) {
-                              return (
-                                <div className="text-[10px] bg-green-500/20 border border-green-400 px-2 py-1 rounded text-green-300">
-                                  ✅ In Crew
-                                </div>
-                              );
-                            }
-                            if (member.status === "removed") {
-                              return (
-                                <button
-                                  onClick={() => {
-                                    const activeStub = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
-                                    addFromShortlist(activeStub?.id, member.name);
-                                  }}
-                                  className="text-[10px] bg-slate-500/10 border border-slate-400 px-2 py-1 rounded text-slate-300"
-                                >
-                                  ↩️ Erneut übernehmen
-                                </button>
-                              );
-                            }
-                            if (member.status !== "accepted") {
-                              return (
-                                <div className="text-[10px] bg-orange-500/20 border border-orange-400 px-2 py-1 rounded text-orange-300">
-                                  ⏳ Warten auf Zusage
-                                </div>
-                              );
-                            }
+                  const currentEvent = events.find(
+                    e => e.id === activeStub?.id
+                  );
 
-                            return (
-                              <button
-                                onClick={() => {
-                                  const activeStub = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
-                                  addFromShortlist(activeStub?.id, member.name);
-                                }}
-                                className="text-[10px] bg-emerald-500/10 border border-emerald-400 px-2 py-1 rounded"
-                              >
-                                ➕ In Crew übernehmen
-                              </button>
-                            );
+                  const isInCrew =
+                    currentEvent?.crewIds?.includes(member.id);
 
-                        })()}
+                  if (isInCrew) {
+                    return (
+                      <div className="text-[10px] bg-green-500/20 border border-green-400 px-2 py-1 rounded text-green-300">
+                        ✅ In Crew
+                      </div>
+                    );
+                  }
 
-                    </div>
-                  <div className="flex justify-between items-start pt-1 gap-2">
-                    <h3 className="text-xs font-black text-white uppercase tracking-wide">
-                      {member.name}
-                    </h3>
-                    
-                    {/* ✕ REAKTIVER B2B-STORNO-HEBEL */}
+                  if (member.status === "removed") {
+                    return (
+                      <button
+                        onClick={() => {
+                          addFromShortlist(activeStub?.id, member.name);
+                        }}
+                        className="text-[10px] bg-slate-500/10 border border-slate-400 px-2 py-1 rounded text-slate-300"
+                      >
+                        ↩️ Erneut übernehmen
+                      </button>
+                    );
+                  }
+
+                  if (member.status !== "accepted") {
+                    return (
+                      <div className="text-[10px] bg-orange-500/20 border border-orange-400 px-2 py-1 rounded text-orange-300">
+                        ⏳ Warten auf Zusage
+                      </div>
+                    );
+                  }
+
+                  return (
                     <button
-                      type="button"
-                      onClick={() => handleRemoveMember(member.name)}
-                      className="text-[10px] text-slate-600 hover:text-red-400 font-bold px-1.5 py-0.5 rounded-md hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer font-mono shrink-0"
-                      title="Aus Projekt stornieren"
+                      onClick={() => {
+                        addFromShortlist(activeStub?.id, member.name);
+                      }}
+                      className="text-[10px] bg-emerald-500/10 border border-emerald-400 px-2 py-1 rounded"
                     >
-                      ✕
+                      ➕ In Crew übernehmen
                     </button>
-                  </div>
-                  </div>
-                  <div className="text-[8px] text-slate-500 italic bg-slate-950 border border-slate-900/60 p-2 rounded-xl">
-                    ✓ Aus Favoritenliste zugewiesen. Realtime B2B-Uhrwerk aktiv.
-                  </div>
-                </div>
+                  );
+                })()}
+                  onRemove={() => handleRemoveMember(member.name)}
+                />
+
               );
             })}
           </div>
@@ -421,6 +406,7 @@ const addFromShortlist = (eventId, profileName) => {
         <div className="text-[9px] text-slate-500 uppercase tracking-widest font-black mb-3 border-b border-slate-900 pb-1.5">
           // COMMUNITY CHAT AREA
         </div>
+        
         <CommunityChat />
       </div>
 

@@ -1,10 +1,13 @@
 import React from 'react';
 
+
 export default function ProfileCard({
   user,
   onProfile,
-  onRequest
+  onRequest,
+  isGuest = false
 }) {
+
 
 const roleStyles = {
   Veranstalter:
@@ -107,6 +110,7 @@ const idClass =
         </div>
 
         {/* BUTTONS */}
+        {!isGuest && (
         <div className="grid grid-cols-2 gap-2 mt-5 pt-3 border-t border-slate-900/60">
             <button
             onClick={onProfile}
@@ -124,6 +128,7 @@ const idClass =
             </button>
 
         </div>
+        )}
         </div>
     </div>
   );

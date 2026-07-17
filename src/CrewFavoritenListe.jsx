@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import FavoritenCard from './components/cards/FavoritenCard';
 
 export default function CrewFavoritenListe({ onNavigate }) {
   const [favorites, setFavorites] = useState([]);
@@ -175,53 +176,18 @@ export default function CrewFavoritenListe({ onNavigate }) {
       {/* FAVORITEN GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {filteredFavs.map(fav => (
-          <div key={fav.name} className="bg-slate-900/20 border border-slate-900 rounded-2xl p-4 flex flex-col justify-between space-y-3">
-            <div>
-              <span className="text-[7px] bg-slate-950 border border-slate-800 px-1.5 py-0.5 rounded text-slate-400 font-bold uppercase">{fav.role}</span>
-              <h3 className="text-xs font-black text-white uppercase mt-1">{fav.name}</h3>
-              <p className="text-[8px] text-slate-500">📍 {fav.city}</p>
-              <p className="text-[9px] text-slate-400 italic mt-2">"{fav.note || 'Keine Notiz hinterlegt.'}"</p>
-            </div>
-
-
-              {/* ➕ REAKTIVE PROJEKT-ANREIHUNG */}
-              <div className="pt-1 font-mono text-[9px]">
-                {activeSelectFav === fav.name ? (
-                  <div className="bg-slate-950 border border-amber-500/20 rounded-xl p-2 space-y-1.5 animate-fade-in">
-                    <span className="text-[6px] text-amber-400 block font-black uppercase">// WÄHLE DAS ZIEL-PROJEKT:</span>
-                    {events.length === 0 ? (
-                      <p className="text-slate-600 text-[8px] italic">// Keine aktiven Events im Speicher gefunden.</p>
-                    ) : (
-                      <div className="max-h-24 overflow-y-auto space-y-1 pr-1 scrollbar-thin">
-                        {events.map(ev => (
-                          <button 
-                            key={ev.id} 
-                            onClick={() => handleAddFavToProject(ev.id, fav)}
-                            className="w-full text-left px-2 py-1 bg-slate-900 hover:bg-amber-500/10 border border-slate-800 text-slate-300 hover:text-white rounded text-[8px] transition-all truncate cursor-pointer block"
-                          >
-                            📅 {ev.title || ev.name || "Unbenanntes Event"}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    <button onClick={() => setActiveSelectFav(null)} className="w-full text-center text-[7px] text-slate-500 font-bold uppercase mt-1">Abbrechen</button>
-                  </div>
-                ) : (
-                  <button 
-                    onClick={() => setActiveSelectFav(fav.name)}
-                    className="w-full py-1.5 bg-cyan-500/5 border border-cyan-500/20 hover:border-cyan-500 hover:text-white text-cyan-400 rounded-xl transition-all cursor-pointer font-bold uppercase tracking-wider text-center"
-                  >
-                    ➕ Zum Projekt hinzufügen
-                  </button>
-                )}
-              </div>
-
-
-
-            <button onClick={() => removeFavorite(fav.id)} className="w-full py-1 bg-red-500/5 border border-red-500/20 hover:border-red-500 hover:text-white text-red-400 text-[8px] font-bold uppercase rounded-lg transition-all cursor-pointer">
-              ✕ ENTFERNEN
-            </button>
-          </div>
+          <FavoritenCard
+            key={fav.id}
+            fav={fav}
+            activeSelectFav={activeSelectFav}
+            events={events}
+            onSelect={() => setActiveSelectFav(fav.name)}
+            onAddToProject={(eventId) =>
+              handleAddFavToProject(eventId, fav)
+            }
+            onRemove={() => removeFavorite(fav.id)}
+            onCancel={() => setActiveSelectFav(null)}
+          />
         ))}
       </div>
 

@@ -13,6 +13,9 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
   const [events, setEvents] = useState([]);
   const [showProjectSelect, setShowProjectSelect] = useState(false);
 
+  const isLoggedIn =
+  localStorage.getItem('gigsda_logged_in') === 'true';
+
   useEffect(() => {
     try {
       const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
@@ -141,8 +144,13 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veran
 
   // ⚡ DIE ERWEITERTE FILTER-SCHLEIFE (Filtert nach Name, Rolle UND Radius!)
   const filteredUsers = allUsers.filter(user => {
-    const matchesName = user.name?.toLowerCase().includes(searchTerm.toLowerCase());
-    
+  const searchValue = searchTerm.toLowerCase();
+  const matchesName =
+    user.name?.toLowerCase().includes(searchValue);
+  const matchesId =
+    user.id?.toLowerCase().includes(searchValue);   
+  
+  
     // 1. Rollen-Filter (original von Daniel)
     const userRole = (user.role || user.type || 'Künstler').toLowerCase();
     let matchesRole = false;
@@ -166,8 +174,10 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veran
     const userDistance = getDistanceTo(user.location || user.city);
     const matchesRadius = userDistance <= searchRadius;
 
-    return matchesName && matchesRole && matchesRadius;
-  });
+    return (matchesName || matchesId) &&
+       matchesRole &&
+       matchesRadius;
+    });
 
   return (
     <div className="p-6 bg-slate-950 text-white min-h-screen font-mono relative">
@@ -263,6 +273,7 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veran
             <ProfileCard
               key={`${user.id || 'user'}-${index}`}
               user={user}
+              isGuest={!isLoggedIn}
               onProfile={() => {
                 if (typeof setFavorites === 'function') {
                   setFavorites(user.name);
