@@ -3,7 +3,12 @@ import { ArrowRight, Clock, MapPin, Truck, Radio, Calendar } from 'lucide-react'
 import FahrplanMetrics from './FahrplanMetrics';
 
 export default function EventPlanner({ onBack, progress, setProgress, onNavigateToStep, onStepSuccess, activeEvent }) {
-const [isPlannerLocked, setIsPlannerLocked] = useState(false);
+
+const [isPlannerLocked, setIsPlannerLocked] =
+  useState(
+    activeEvent?.plannerLocked || false
+  );
+
 
 // Der standardmäßige Ablaufplan vor Ort für die Crew
 const [schedule, setSchedule] = useState(
@@ -48,7 +53,9 @@ const handleSaveTimeline = () => {
     }
     return {
       ...event,
-      timeline: cleanSchedule
+      timeline: cleanSchedule,
+      productionNotes,
+      plannerLocked: isPlannerLocked
     };
   });
   localStorage.setItem(
@@ -57,7 +64,33 @@ const handleSaveTimeline = () => {
   );
 };
 
+const handleSaveProductionNotes = () => {
+  if (!activeEvent) return;
 
+  const events = JSON.parse(
+    localStorage.getItem("gigsda_events") || "[]"
+  );
+
+  const updatedEvents = events.map(event => {
+    if (event.id !== activeEvent.id) {
+      return event;
+    }
+
+    return {
+      ...event,
+      productionNotes
+    };
+  });
+
+  localStorage.setItem(
+    "gigsda_events",
+    JSON.stringify(updatedEvents)
+  );
+};
+
+const [productionNotes, setProductionNotes] = useState(
+  activeEvent?.productionNotes || ""
+);
 
 
 
@@ -152,24 +185,46 @@ useEffect(() => {
 }, [plannerProgress, setProgress]);
 
 
+const currentUserName =
+  localStorage.getItem('gigsda_user_name');
+
+const currentProfile =
+  profiles.find(
+    p =>
+      (p.name || '').toLowerCase() ===
+      (currentUserName || '').toLowerCase()
+  );
+
+const currentUserId =
+  currentProfile?.id;
+
+const isOwner =
+  activeEvent?.ownerId === currentUserId;
 
 
-
-
-
-
-
-
-
-
-
-
-  const handleLockPlanner = () => {
-    setIsPlannerLocked(true);
-    if (typeof onStepSuccess === 'function') {
-      onStepSuccess(); // Setzt den Meilenstein "Event-Planner" im globalen Fahrplan live auf 100%!
+const handleLockPlanner = () => {
+  setIsPlannerLocked(true);
+  const events = JSON.parse(
+    localStorage.getItem("gigsda_events") || "[]"
+  );
+  const updatedEvents = events.map(event => {
+    if (event.id !== activeEvent?.id) {
+      return event;
     }
-  };
+    return {
+      ...event,
+      plannerLocked: true
+    };
+  });
+  localStorage.setItem(
+    "gigsda_events",
+    JSON.stringify(updatedEvents)
+  );
+  if (typeof onStepSuccess === 'function') {
+    onStepSuccess();
+  }
+};
+
 
   // 📅 INTEGRATED iCALENDAR EXPORT ENGINE FÜR DIE HANDYS
   const handleExportICal = () => {
@@ -258,6 +313,11 @@ useEffect(() => {
           {activeEvent ? (
           <span className="text-[12px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-md inline-block mb-1.5">
               📍 Aktives Event: {activeEvent.title} ({activeEvent.date})
+              
+              <p className="text-[10px] text-cyan-400 mt-2">
+                {isOwner ? '👑 Owner' : '👥 Crew'}
+              </p>
+
             </span>
           ) : (
           <span className="text-[10px] text-cyan-400 font-bold block mb-1">
@@ -704,100 +764,148 @@ useEffect(() => {
 
 
 
-
-
       {/* Produktionsnotizen */}
-<div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
+      {isOwner ? (
 
-  <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+        <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
 
-    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-      Produktionsnotizen
-    </h3>
+          <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+              Produktionsnotizen
+            </h3>
 
-    <span className="text-[10px] text-cyan-400 font-black uppercase">
-      Veranstalter
-    </span>
+            <span className="text-[10px] text-cyan-400 font-black uppercase">
+              Veranstalter
+            </span>
+          </div>
 
-  </div>
+          <textarea
+            value={productionNotes}
+            onChange={(e) =>
+              setProductionNotes(e.target.value)
+            }
+            placeholder="Besonderheiten, Absprachen, Hinweise..."
+            className="
+              w-full
+              min-h-[300px]
+              bg-slate-950
+              border
+              border-slate-800
+              rounded-2xl
+              p-4
+              text-slate-300
+              text-sm
+              resize-none
+              outline-none
+            "
+          />
 
-  <textarea
-    placeholder="Besonderheiten, Absprachen, Hinweise..."
-    className="
-      w-full
-      min-h-[140px]
-      bg-slate-950
-      border
-      border-slate-800
-      rounded-2xl
-      p-4
-      text-slate-300
-      text-sm
-      resize-none
-      outline-none
-    "
-  />
+          <button
+            type="button"
+            onClick={handleSaveProductionNotes}
+            className="
+              mt-3
+              bg-emerald-500
+              text-slate-950
+              font-black
+              px-4
+              py-2
+              rounded-xl
+              text-[10px]
+              uppercase
+              tracking-wider
+              transition-all
+              hover:border-cyan-500/50
+              hover:text-white
+              hover:scale-[1.02]
+              active:scale-[0.98]
+              cursor-pointer
+            "
+          >
+            💾 Produktionsnotizen speichern
+          </button>
 
-</div>
+        </div>
 
+      ) : (
+
+        <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
+
+          <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+            <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+              Produktionsnotizen
+            </h3>
+
+            <span className="text-[10px] text-cyan-400 font-black uppercase">
+              Team Information
+            </span>
+          </div>
+
+          <div className="mt-4 text-slate-300 whitespace-pre-wrap leading-relaxed">
+            {productionNotes || "Keine Produktionsnotizen vorhanden."}
+          </div>
+
+        </div>
+
+      )}
 
 
       {/* Produktions- & Logistikübersicht */}
-<div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
+      <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
 
-  <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+        <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
 
-    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-      Logistik & Produktion
-    </h3>
+          <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+            Logistik & Produktion
+          </h3>
 
-    <span className="text-[10px] text-cyan-400 font-black uppercase">
-      Eventbetrieb
-    </span>
+          <span className="text-[10px] text-cyan-400 font-black uppercase">
+            Eventbetrieb
+          </span>
 
-  </div>
+        </div>
 
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
 
-    <div className="bg-slate-950 rounded-xl p-3 border border-slate-800">
-      <div className="text-[10px] text-slate-500 uppercase">
-        Aufbau
+          <div className="bg-slate-950 rounded-xl p-3 border border-slate-800">
+            <div className="text-[10px] text-slate-500 uppercase">
+              Aufbau
+            </div>
+            <div className="text-white font-bold">
+              Offen
+            </div>
+          </div>
+
+          <div className="bg-slate-950 rounded-xl p-3 border border-slate-800">
+            <div className="text-[10px] text-slate-500 uppercase">
+              Strom
+            </div>
+            <div className="text-white font-bold">
+              Offen
+            </div>
+          </div>
+
+          <div className="bg-slate-950 rounded-xl p-3 border border-slate-800">
+            <div className="text-[10px] text-slate-500 uppercase">
+              Catering
+            </div>
+            <div className="text-white font-bold">
+              Offen
+            </div>
+          </div>
+
+          <div className="bg-slate-950 rounded-xl p-3 border border-slate-800">
+            <div className="text-[10px] text-slate-500 uppercase">
+              Security
+            </div>
+            <div className="text-white font-bold">
+              Offen
+            </div>
+          </div>
+
+        </div>
+
       </div>
-      <div className="text-white font-bold">
-        Offen
-      </div>
-    </div>
-
-    <div className="bg-slate-950 rounded-xl p-3 border border-slate-800">
-      <div className="text-[10px] text-slate-500 uppercase">
-        Strom
-      </div>
-      <div className="text-white font-bold">
-        Offen
-      </div>
-    </div>
-
-    <div className="bg-slate-950 rounded-xl p-3 border border-slate-800">
-      <div className="text-[10px] text-slate-500 uppercase">
-        Catering
-      </div>
-      <div className="text-white font-bold">
-        Offen
-      </div>
-    </div>
-
-    <div className="bg-slate-950 rounded-xl p-3 border border-slate-800">
-      <div className="text-[10px] text-slate-500 uppercase">
-        Security
-      </div>
-      <div className="text-white font-bold">
-        Offen
-      </div>
-    </div>
-
-  </div>
-
-</div>
 
 
 
@@ -815,7 +923,8 @@ useEffect(() => {
       <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 shadow-xl space-y-5">
         <div className="flex justify-between items-center border-b border-slate-800/60 pb-3 gap-2">
           <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-            <Clock className="w-4 h-4 text-cyan-400" /> // Tagesablauf (Echtzeit-Synchronisiert)
+            <Clock className="w-4 h-4 text-cyan-400" /> 
+            // Tagesablauf (Echtzeit-Synchronisiert)
           </h3>
           
           <div className="flex gap-2 shrink-0">
@@ -825,9 +934,10 @@ useEffect(() => {
               onClick={handleExportICal}
               className="bg-purple-500/10 border border-purple-500/30 text-purple-400 font-black text-[9px] uppercase tracking-wider px-3 h-8 rounded-lg hover:bg-purple-500/20 transition-all flex items-center gap-1 cursor-pointer shadow-md"
             >
-              <Calendar className="w-3.5 h-3.5" /> Kalender-Export (.ics) 📅
+              <Calendar className="w-3.5 h-3.5" /> 
+              Kalender-Export (.ics) 📅
             </button>
-
+            {isOwner && (
             <button
               type="button"
               onClick={() => {
@@ -842,7 +952,8 @@ useEffect(() => {
             >
               {isPlannerLocked ? '✓ Zeitplan eingefroren' : 'Zeitplan freigeben 🔒'}
             </button>
-
+            )}
+            {isOwner && (
             <button
               type="button"
               onClick={handleAddTimelineItem}
@@ -857,11 +968,17 @@ useEffect(() => {
                 border
                 border-cyan-500/30
                 text-cyan-400
+                transition-all
+                hover:border-cyan-500/50
+                hover:text-white
+                hover:scale-[1.02]
+                active:scale-[0.98]
+                cursor-pointer
               "
             >
               + Programmpunkt
             </button>
-
+            )}
           </div>
         </div>
 
@@ -992,6 +1109,7 @@ useEffect(() => {
                         </p>
                       )}
                     </div>
+                    {isOwner && (
                       <button
                       type="button"
                       onClick={() => {
@@ -1016,6 +1134,7 @@ useEffect(() => {
                     >
                       Löschen
                     </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1024,14 +1143,14 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* FINALER HEBEL ZUM LIVE-COUNTDOWN */}
+      {/* FINALER HEBEL ZUM EVENT-PROMOTION */}
       <div className="flex justify-end pt-2">
         <button
           type="button"
-          onClick={() => onNavigateToStep && onNavigateToStep('countdown')}
+          onClick={() => onNavigateToStep && onNavigateToStep('promotion')}
           className="bg-gradient-to-r from-cyan-500 to-purple-500 text-slate-950 font-mono font-black text-[10px] uppercase tracking-wider px-6 h-11 rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.2)] hover:scale-[1.02] active:scale-[0.98] flex items-center gap-1.5 cursor-pointer"
         >
-          Nächster Meilenstein: Live-Countdown <ArrowRight className="w-4 h-4" />
+          Nächster Meilenstein: Event-Promotion <ArrowRight className="w-4 h-4" />
         </button>
       </div>
 

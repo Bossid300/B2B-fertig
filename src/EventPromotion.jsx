@@ -50,43 +50,50 @@ useEffect(() => {
 
 
 const handleSavePromotion = () => {
-
   if (!activeEvent) return;
-
   const events = JSON.parse(
     localStorage.getItem("gigsda_events") || "[]"
   );
-
   const updatedEvents = events.map(event => {
-
     if (event.id !== activeEvent.id) {
       return event;
     }
-
     return {
       ...event,
 
       promotionData: promoData
     };
-
   });
-
   localStorage.setItem(
     "gigsda_events",
     JSON.stringify(updatedEvents)
   );
-
-  console.log("Promotion gespeichert ✅");
-
-
-
-
-
-
-
-
-
 };
+
+const currentUserName =
+  localStorage.getItem('gigsda_user_name');
+
+const profiles = JSON.parse(
+  localStorage.getItem('gigsda_profiles') || '[]'
+);
+
+const currentProfile = profiles.find(
+  p =>
+    (p.name || '').toLowerCase() ===
+    (currentUserName || '').toLowerCase()
+);
+
+const currentUserId = currentProfile?.id;
+
+const isOwner =
+  activeEvent?.ownerId === currentUserId;
+
+
+const ownerLead =
+  profiles.find(
+    p => p.id === activeEvent?.ownerId
+  );
+
   return (
 
     
@@ -108,6 +115,11 @@ const handleSavePromotion = () => {
         {activeEvent ? (
           <span className="text-[12px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-md inline-block mb-1.5">
             📍 Aktives Event: {activeEvent.title} ({activeEvent.date})
+            
+            <p className="text-[10px] text-cyan-400 mt-2">
+              {isOwner ? '👑 Owner' : '👥 Crew'}
+            </p>
+
           </span>
         ) : (
           <span className="text-[10px] text-cyan-400 font-bold block mb-1">
@@ -221,6 +233,7 @@ const handleSavePromotion = () => {
           <input
             type="text"
             value={promoData.title}
+            disabled={!isOwner}
             onChange={(e) =>
               setPromoData({
                 ...promoData,
@@ -245,6 +258,7 @@ const handleSavePromotion = () => {
         <input
         type="text"
         value={promoData.category}
+        disabled={!isOwner}
         onChange={(e) =>
             setPromoData({
             ...promoData,
@@ -274,6 +288,7 @@ const handleSavePromotion = () => {
     <input
       type="text"
       value={activeEvent?.venue || ''}
+      disabled={!isOwner}
       readOnly
       className="
         w-full
@@ -301,6 +316,7 @@ const handleSavePromotion = () => {
     <input
       type="text"
       value={activeEvent?.date || ''}
+      disabled={!isOwner}
       readOnly
       className="
         w-full
@@ -341,6 +357,7 @@ const handleSavePromotion = () => {
     <input
       type="time"
       value={promoData.entryTime}
+      disabled={!isOwner}
       onChange={(e) =>
         setPromoData({
           ...promoData,
@@ -367,9 +384,8 @@ const handleSavePromotion = () => {
     </label>
     <input
       type="time"
-
       value={promoData.startTime}
-
+      disabled={!isOwner}
       onChange={(e) =>
         setPromoData({
           ...promoData,
@@ -407,7 +423,8 @@ const handleSavePromotion = () => {
 
   <input
     type="text"
-    value="Winston Jud"
+    value={ownerLead?.name || ""}
+    disabled={!isOwner}
     readOnly
     className="
       w-full
@@ -446,6 +463,7 @@ const handleSavePromotion = () => {
         type="text"
         placeholder="https://..."
         value={promoData.ticketLink}
+        readOnly={!isOwner}
         onChange={(e) =>
             setPromoData({
             ...promoData,
@@ -488,6 +506,7 @@ const handleSavePromotion = () => {
     type="text"
     placeholder="https://..."
     value={promoData.promoImage}
+    readOnly={!isOwner}
     onChange={(e) =>
         setPromoData({
         ...promoData,
@@ -659,6 +678,7 @@ const handleSavePromotion = () => {
           <textarea
             rows={3}
             value={promoData.shortDescription}
+            disabled={!isOwner}
             onChange={(e) =>
               setPromoData({
                 ...promoData,
@@ -679,6 +699,7 @@ const handleSavePromotion = () => {
           <textarea
             rows={8}
             value={promoData.description}
+            disabled={!isOwner}
             onChange={(e) =>
               setPromoData({
                 ...promoData,
@@ -690,6 +711,7 @@ const handleSavePromotion = () => {
 
         </div>
 
+        {isOwner && (
         <button
         onClick={handleSavePromotion}
           type="button"
@@ -706,9 +728,20 @@ const handleSavePromotion = () => {
         >
           Speichern 💾
         </button>
-
+        )}
       </div>
 
+      {/* FINALER HEBEL ZUM LIVE-COUNTDOWN */}
+       <div className="flex justify-end pt-2">
+        <button
+          type="button"
+          onClick={() => onNavigateToStep && onNavigateToStep('countdown')}
+          className="bg-gradient-to-r from-cyan-500 to-purple-500 text-slate-950 font-mono font-black text-[10px] uppercase tracking-wider px-6 h-11 rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.2)] hover:scale-[1.02] active:scale-[0.98] flex items-center gap-1.5 cursor-pointer"
+        >
+          Nächster Meilenstein: Live-Countdown
+        </button>
+      </div>
+      
     </div>
 
   );

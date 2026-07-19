@@ -11,7 +11,6 @@ export default function CrewShortlist({
   activeEvent 
 }) {
 
-
 const addFromShortlist = (eventId, profileName) => {
   const events = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
   const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
@@ -185,7 +184,23 @@ const addFromShortlist = (eventId, profileName) => {
   const events = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
   const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
 
+  const currentUserName =
+  localStorage.getItem('gigsda_user_name');
+
+  const currentProfile =
+    profiles.find(
+      p =>
+        (p.name || '').toLowerCase() ===
+        (currentUserName || '').toLowerCase()
+    );
+
+  const currentUserId =
+    currentProfile?.id;
+
   const currentEvent = events.find(e => e.id === activeStub?.id);
+
+  const isOwner =
+  currentEvent?.ownerId === currentUserId;
 
   const crewMembers = (currentEvent?.crewIds || [])
     .map(id => profiles.find(p => p.id === id))
@@ -227,7 +242,13 @@ const addFromShortlist = (eventId, profileName) => {
         {activeEvent ? (
           <span className="text-[12px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-md inline-block mb-1.5">
             📍 Aktives Event: {activeEvent.title} ({activeEvent.date})
+          
+            <p className="text-[10px] text-cyan-400">
+              {isOwner ? '👑 Owner' : '👥 Crew'}
+            </p>
+
           </span>
+          
         ) : (
           <span className="text-[10px] text-cyan-400 font-bold block mb-1">
             // Ebene 01: Crew-Zentrale
@@ -259,43 +280,47 @@ const addFromShortlist = (eventId, profileName) => {
             </span>
           </div>
         </div>
-
         <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto shrink-0 font-bold text-[9px] uppercase">
-          {/* 📡 DIE REPARIERTEN B2B EXPRESS-NAVIGATOREN */}
-          <button 
-            type="button" 
-            onClick={() => {
-              if (typeof onNavigateToStep === 'function') onNavigateToStep('search');
-              else if (typeof setView === 'function') setView('search');
-            }} 
-          className="bg-slate-950 border border-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer"
-          >
-            # RADAR SEARCH Explorer
-          </button>
 
-          {/* ⭐ SAUBERER UND ABGESICHERTER FAVORITEN-POOL NAVIGATOR */}
-          <button 
-            type="button" 
-            onClick={() => {
-              if (typeof onNavigateToStep === 'function') {
-                onNavigateToStep('crewfavoriten'); // 🚨 DYNAMISCH: Trifft exakt Daniels Key aus Zeile 563!
-              } else if (typeof setView === 'function') {
-                setView('crewfavoriten'); 
-              }
-            }} 
-            className="px-3 py-2 bg-gradient-to-r from-purple-600/20 to-cyan-600/20 border border-cyan-500/40 hover:border-cyan-400 text-cyan-400 hover:text-white rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 shadow-[0_0_10px_rgba(6,182,212,0.05)] font-bold font-mono"
-          >
-            ⭐ ZUM FAVORITEN-POOL
-          </button>
+          {isOwner && (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof onNavigateToStep === 'function')
+                    onNavigateToStep('search');
+                  else if (typeof setView === 'function')
+                    setView('search');
+                }}
+                className="bg-slate-950 border border-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer"
+              >
+                # RADAR SEARCH Explorer
+              </button>
 
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof onNavigateToStep === 'function') {
+                    onNavigateToStep('crewfavoriten');
+                  } else if (typeof setView === 'function') {
+                    setView('crewfavoriten');
+                  }
+                }}
+                className="px-3 py-2 bg-gradient-to-r from-purple-600/20 to-cyan-600/20 border border-cyan-500/40 hover:border-cyan-400 text-cyan-400 hover:text-white rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 shadow-[0_0_10px_rgba(6,182,212,0.05)] font-bold font-mono"
+              >
+                ⭐ ZUM FAVORITEN-POOL
+              </button>
+            </>
+          )}
 
-          <button 
-            type="button" 
-            onClick={onBack} 
-          className="bg-slate-950 border border-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer"
+          <button
+            type="button"
+            onClick={onBack}
+            className="bg-slate-950 border border-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer"
           >
             ‹ Dashboard
           </button>
+
         </div>
       </div>
 
@@ -369,9 +394,25 @@ const addFromShortlist = (eventId, profileName) => {
                     );
                   }
 
+                  if (member.status === "declined") {
+                    return (
+                      <div className="text-[10px] bg-red-500/20 border border-red-400 px-2 py-1 rounded">
+                        ❌ Anfrage abgelehnt
+                      </div>
+                    );
+                  }
+
+                  if (member.status === "counter_offer") {
+                    return (
+                      <div className="text-[10px] bg-cyan-500/20 border border-cyan-400 px-2 py-1 rounded">
+                        ⚡ Gegenvorschlag erhalten
+                      </div>
+                    );
+                  }
+
                   if (member.status !== "accepted") {
                     return (
-                      <div className="text-[10px] bg-orange-500/20 border border-orange-400 px-2 py-1 rounded text-orange-300">
+                      <div className="text-[10px] bg-orange-500/20 border border-orange-400 px-2 py-1 rounded">
                         ⏳ Warten auf Zusage
                       </div>
                     );
@@ -388,7 +429,11 @@ const addFromShortlist = (eventId, profileName) => {
                     </button>
                   );
                 })()}
-                  onRemove={() => handleRemoveMember(member.name)}
+                  onRemove={
+                    isOwner
+                      ? () => handleRemoveMember(member.name)
+                      : null
+                  }
                 />
 
               );

@@ -36,7 +36,7 @@ import FanProfile from './FanProfile'; // 👈 Schaltet die Fan-Zentrale im Syst
 import CrewRequestCenter from './CrewRequestCenter'; // 👈 Das B2B-Uhrwerk laden
 import CrewFavoritenListe from './CrewFavoritenListe'; // ⭐ Schaltet die Favoriten-Matrix frei!
 import RiderZentrale from './RiderZentrale'; // 🎛️ Schaltet das geteilte B2B-Rider-Uhrwerk plattformweit frei!
-
+import CommunityChat from './CommunityChat';
 
 import { initialUsers, initialProfiles } from './data/mockData';
 import ArtistPortfolio from "./components/ArtistPortfolio";
@@ -91,9 +91,52 @@ export default function App() {
             e => e.id === storedActiveEvent.id
           );
 
-          if (restoredEvent) {
-            setActiveEvent(restoredEvent);
-          }
+        if (restoredEvent) {
+
+          setActiveEvent(restoredEvent);
+
+          setProgress({
+            shortlist:
+              restoredEvent.crewIds?.length > 0
+                ? 100
+                : 0,
+
+            stage:
+              restoredEvent.riderCenter
+                ? 100
+                : 0,
+
+            contract:
+              restoredEvent.dealSent
+                ? Math.round(
+                    (
+                      Object.keys(
+                        restoredEvent.acceptedDeals || {}
+                      ).length /
+                      (
+                        restoredEvent.crewIds?.length || 1
+                      )
+                    ) * 100
+                  )
+                : 0,
+
+            planner:
+              restoredEvent.plannerLocked
+                ? 100
+                : 50,
+
+            promotion:
+              restoredEvent.promotionData?.title
+                ? 100
+                : 0,
+
+            countdown:
+              restoredEvent.countdownStatus?.isLive
+                ? 100
+                : 0
+          });
+
+        }
         }
       }, []);
 
@@ -555,6 +598,12 @@ export default function App() {
               return <CrewFavoritenListe onNavigate={setView} 
               />;
             })()
+          )}
+
+          {view === 'communitychat' && isLoggedIn && (
+            <CommunityChat
+              onBack={() => setView('projects')}
+            />
           )}
 
           {view === 'shortlist' && isLoggedIn && (

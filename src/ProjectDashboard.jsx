@@ -133,6 +133,10 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
               )?.name || "Unbekannt";
 
               const teamSize = evt.crewIds?.length || 0;
+              
+              const isOwner =
+                evt.ownerId === currentUserId;
+
               // Dynamische Prozentberechnung basierend auf der echten Team-Auswahl für dieses Event
               const totalTeamSize = Array.isArray(evt.crewIds) ? evt.crewIds.length : 0;
               const dynamicProgress = totalTeamSize > 0 ? Math.min(100, Math.round((totalTeamSize / 4) * 100)) : 0;
@@ -155,6 +159,10 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
                       <h4 className="text-sm font-black text-white mt-0.5">{evt.title}</h4>
                       <p className="text-[10px] text-slate-400">
                         👥 {teamSize} Crew • von {ownerName}
+                      </p>
+
+                      <p className="text-[10px]">
+                        {isOwner ? '👑 Owner' : '👥 Crew'}
                       </p>
 
                       <p className="text-[10px] text-slate-400">
@@ -245,6 +253,33 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
                       ✕
                     </button>
 
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const eventId = evt.id;
+                        const eventTitle = evt.title;
+
+                        localStorage.setItem(
+                          'gigsda_active_event',
+                          JSON.stringify({
+                            id: eventId,
+                            title: eventTitle
+                          })
+                        );
+
+                        if (typeof onSelectEvent === 'function') {
+                          onSelectEvent(evt);
+                        }
+
+                        if (typeof onNavigateToStep === 'function') {
+                          onNavigateToStep('communitychat');
+                        }
+                      }}
+                      className="px-3 py-1.5 bg-gradient-to-r from-cyan-600/20 to-emerald-600/20 border border-cyan-500/40 hover:border-cyan-400 text-cyan-400 hover:text-white text-[9px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer font-mono"
+                    >
+                      💬 Crew Chat
+                    </button>
+
                     {/* ⚙️ DANIELS REPARIERTE TÜR ZUM EVENT: ÜBERGEBT ID UND ÖFFNET DIE CREWLISTE */}
                     <button 
                       type="button"
@@ -274,7 +309,13 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
                       }}
                       className="px-4 py-2.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer font-mono shadow-md flex items-center gap-1.5"
                     >
-                      <span>KONFIGURIEREN ⚙️</span>
+                      
+                      <span>
+                        {isOwner
+                          ? '⚙️ VERWALTEN'
+                          : '👁️ PROJEKTSTATUS'}
+                      </span>
+
                     </button>
 
 

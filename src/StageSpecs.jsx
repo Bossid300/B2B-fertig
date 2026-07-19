@@ -273,24 +273,14 @@ export default function StageSpecs({
 
         {openCount === 0 && changedCount === 0 ? (
 
-          <button
-            type="button"
-            onClick={handleApproveAll}
-            className="
-              w-full
-              h-11
-              rounded-xl
-              bg-emerald-400
-              text-slate-950
-              font-black
-              uppercase
-              tracking-wider
-              hover:bg-emerald-300
-              transition-all
-            "
-          >
-            Rider Final Absegnen 🔒
-          </button>
+        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-4 text-center">
+          <p className="text-emerald-400 font-black">
+            ✅ Alle Gewerke freigegeben
+          </p>
+          <p className="text-emerald-300 text-xs mt-1">
+            Rider vollständig bestätigt
+          </p>
+        </div>
 
         ) : (
 

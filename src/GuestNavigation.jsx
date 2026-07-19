@@ -38,11 +38,6 @@ export default function GuestNavigation({ setView, activeView }) {
           className={`${desktopBase} ${activeView === 'radar' ? activeClass : inactiveClass}`}>
             🗣 Search-Explorer
           </button>
-          <button onClick={() => handleNavClick('artists')}
-            className={`${desktopBase} ${activeView === 'artists' ? activeClass : inactiveClass}`}>
-            🔍 Matrix-Suche
-          </button>
-
         </div>
 
         {/* LOGIN */}

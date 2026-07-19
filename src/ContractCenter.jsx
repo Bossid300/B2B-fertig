@@ -13,29 +13,40 @@ export default function ContractCenter({ onBack, progress, setProgress, onNaviga
     p => activeEvent?.crewIds?.includes(p.id)
   );
 
+  const currentUserName =
+    localStorage.getItem('gigsda_user_name');
 
-  // 📥 Deal-Simulieren
-const [acceptedDeals, setAcceptedDeals] = useState({});
+  const currentProfile =
+    profiles.find(
+      p =>
+        (p.name || '').toLowerCase() ===
+        (currentUserName || '').toLowerCase()
+    );
+
+  const currentUserId =
+    currentProfile?.id;
+
+  const isOwner =
+    activeEvent?.ownerId === currentUserId;
 
 
 
-const dealPartners = crewProfiles;
+  // 📥 Deal
+  const [acceptedDeals, setAcceptedDeals] = useState(
+    activeEvent?.acceptedDeals || {}
+  );
 
-
-
+  const dealPartners = crewProfiles;
 
   // 📥 BETEILIGTENSTATES
   const [dealAmounts, setDealAmounts] = useState(
     activeEvent?.dealAmounts || {}
   );
 
-
   // 📥 Deal-Statuswechsel
   const [dealSent, setDealSent] = useState(
     activeEvent?.dealSent || false
   );
-
-
 
   // 📥 Verbindung zu Status in Bearbeitung
   const signedCount =
@@ -43,22 +54,36 @@ const dealPartners = crewProfiles;
       .filter(Boolean)
       .length;
 
+  const totalPartners =
+    activeEvent?.crewIds?.length || 0;
+
+  const pendingCount =
+    totalPartners - signedCount;
+
   const processingCount =
     dealSent
-      ? (activeEvent?.crewIds?.length || 0) - signedCount
+      ? pendingCount
       : 0;
 
-
-  // STATUSBERECHNUNG FÜR FAHRPLANMETRICS
   const openCount =
     dealSent
       ? 0
-      : (activeEvent?.crewIds?.length || 0);
+      : pendingCount;
 
 
 
-  const totalPartners =
-    activeEvent?.crewIds?.length || 0;
+
+
+
+
+
+
+
+
+
+
+
+
 
   const contractProgress =
     totalPartners > 0
@@ -85,34 +110,118 @@ const dealPartners = crewProfiles;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
   // 📥 Deal senden Funktion
-  const handleSendDeal = () => {
+const handleSendDeal = () => {
 
-    if (!activeEvent) return;
+  if (!activeEvent) return;
 
-    const events = JSON.parse(
-      localStorage.getItem("gigsda_events") || "[]"
+  const events = JSON.parse(
+    localStorage.getItem("gigsda_events") || "[]"
+  );
+
+  const requests = JSON.parse(
+    localStorage.getItem("gigsda_crew_requests") || "[]"
+  );
+
+  const profiles = JSON.parse(
+    localStorage.getItem("gigsda_profiles") || "[]"
+  );
+
+  const currentUserName =
+    localStorage.getItem("gigsda_user_name");
+
+  const updatedEvents = events.map(event => {
+
+    if (event.id !== activeEvent.id) {
+      return event;
+    }
+
+    return {
+      ...event,
+      dealSent: true
+    };
+
+  });
+
+  const newDealRequests = dealPartners.map(member => {
+
+    const alreadyExists = requests.some(
+      r =>
+        r.requestType === "deal" &&
+        r.eventName === activeEvent.title &&
+        r.requestedProfileId === member.id
     );
 
-    const updatedEvents = events.map(event => {
+    if (alreadyExists) return null;
 
-      if (event.id !== activeEvent.id) {
-        return event;
-      }
+    return {
+      requestId: `DEAL-${Date.now()}-${member.id}`,
+      requestType: "deal",
 
-      return {
-        ...event,
-        dealSent: true
-      };
-    });
+      eventName: activeEvent.title,
+      date: activeEvent.date,
 
-    localStorage.setItem(
-      "gigsda_events",
-      JSON.stringify(updatedEvents)
-    );
+      requesterName: currentUserName,
 
-    setDealSent(true);
-  };
+      requestedProfileId: member.id,
+      requestedProfileName: member.name,
+
+      status: "pending",
+
+      note: "Deal zur Bestätigung erhalten."
+    };
+  }).filter(Boolean);
+
+  localStorage.setItem(
+    "gigsda_events",
+    JSON.stringify(updatedEvents)
+  );
+
+  localStorage.setItem(
+    "gigsda_crew_requests",
+    JSON.stringify([
+      ...requests,
+      ...newDealRequests
+    ])
+  );
+
+  setDealSent(true);
+
+  window.dispatchEvent(
+    new CustomEvent("request-sent")
+  );
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -268,6 +377,11 @@ const dealPartners = crewProfiles;
           {activeEvent ? (
             <span className="text-[12px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-md inline-block mb-1.5">
               📍 Aktives Event: {activeEvent.title} ({activeEvent.date})
+              
+              <p className="text-[10px] text-cyan-400 mt-2">
+                {isOwner ? '👑 Owner' : '👥 Crew'}
+              </p>
+
             </span>
           ) : (
             <span className="text-[10px] text-cyan-400 font-bold block mb-1">
@@ -427,38 +541,73 @@ const dealPartners = crewProfiles;
                 </div>
               </div>
 
+
               <div className="flex items-center gap-2">
-                <input
-                  type="number"
-                  value={dealAmounts[member.id] || ""}
-                  onChange={(e) =>
-                    setDealAmounts({
-                      ...dealAmounts,
-                      [member.id]: Number(e.target.value) || 0
-                    })
-                  }
-                  className="
-                    w-20
+                {isOwner ? (
+                  <input
+                    type="number"
+                    value={dealAmounts[member.id] || ""}
+                    onChange={(e) =>
+                      setDealAmounts({
+                        ...dealAmounts,
+                        [member.id]:
+                          Number(e.target.value) || 0
+                      })
+                    }
+                    className="
+                      w-20
+                      bg-slate-950
+                      border
+                      border-slate-800
+                      rounded-lg
+                      px-2
+                      py-1
+                      text-right
+                      text-xs
+                      text-white
+                    "
+                  />
+                ) : (
+                  <div className="
+                    px-3
+                    py-1
+                    rounded-lg
                     bg-slate-950
                     border
                     border-slate-800
-                    rounded-lg
-                    px-2
-                    py-1
-                    text-right
+                    text-slate-400
                     text-xs
-                    text-white
-                  "
-                />
+                  ">
+                    🔒 Vertraulich
+                  </div>
 
+                )}
                 <button
                   type="button"
-                  onClick={() =>
-                    setAcceptedDeals({
+                  onClick={() => {
+                    const updatedAcceptedDeals = {
                       ...acceptedDeals,
                       [member.id]: true
-                    })
-                  }
+                    };
+                    setAcceptedDeals(updatedAcceptedDeals);
+                    const events = JSON.parse(
+                      localStorage.getItem("gigsda_events") || "[]"
+                    );
+                    const updatedEvents = events.map(event => {
+                      if (event.id !== activeEvent.id) {
+                        return event;
+                      }
+                      return {
+                        ...event,
+                        acceptedDeals: updatedAcceptedDeals
+                      };
+                    });
+                    localStorage.setItem(
+                      "gigsda_events",
+                      JSON.stringify(updatedEvents)
+                    );
+                  }}
+
                   className={
                     acceptedDeals[member.id]
                       ? "text-emerald-400"
@@ -483,8 +632,8 @@ const dealPartners = crewProfiles;
 
 
 
-
       {/* Aktionsleiste Deal an alle Senden*/}
+      {isOwner && (
       <div className="border-t border-slate-800 mt-4 pt-4 flex gap-3">
         <button
           type="button"
@@ -499,6 +648,12 @@ const dealPartners = crewProfiles;
             font-black
             uppercase
             tracking-wider
+            transition-all
+            hover:border-cyan-500/50
+            hover:text-white
+            hover:scale-[1.02]
+            active:scale-[0.98]
+            cursor-pointer
           "
         >
           Vorschau anzeigen 👁️
@@ -516,6 +671,10 @@ const dealPartners = crewProfiles;
             font-black
             uppercase
             tracking-wider
+            transition-all
+            hover:scale-[1.02]
+            active:scale-[0.98]
+            cursor-pointer
           "
         >
           Deal an alle Beteiligten senden 📤
@@ -533,13 +692,16 @@ const dealPartners = crewProfiles;
             font-black
             uppercase
             tracking-wider
+            transition-all
+            hover:scale-[1.02]
+            active:scale-[0.98]
+            cursor-pointer
           "
         >
           Gagen speichern 💾
         </button>
-
       </div>
-
+      )}
 
 
 
@@ -555,6 +717,9 @@ const dealPartners = crewProfiles;
 
 
       {/* Digitaler Konzert- & Bookingvertrag & Gagen-Absicherung */}
+      
+      {isOwner && (
+
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
         
         {/* RECHTLICHER TEXT */}
@@ -617,18 +782,22 @@ const dealPartners = crewProfiles;
         </div>
 
       </div>
+      )}
 
-      {/* WEITER ZUM TEAM-VOTING */}
+
+
+
+      {/* WEITER ZUM EVENT-PLANNER */}
       <div className="flex justify-end pt-2">
         <button
           type="button"
           disabled={dealStatus !== 'signed'}
           onClick={() =>
             onNavigateToStep && 
-            onNavigateToStep('voting')}
+            onNavigateToStep('planner')}
           className="bg-gradient-to-r from-cyan-500 to-purple-500 text-slate-950 font-mono font-black text-[10px] uppercase tracking-wider px-6 h-11 rounded-xl transition-all shadow-[0_0_20px_rgba(6,182,212,0.2)] hover:scale-[1.02] active:scale-[0.98] flex items-center gap-1.5 cursor-pointer"
         >
-          Nächster Meilenstein: Team-Voting <ArrowRight className="w-4 h-4" />
+          Nächster Meilenstein: Event Planner <ArrowRight className="w-4 h-4" />
         </button>
       </div>
 

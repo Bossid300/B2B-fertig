@@ -25,24 +25,35 @@ export default function Roadmap() {
 
       <div className="space-y-2 text-sm text-slate-300">
 
-      <p>✅ Crew-System</p>
-      <p>✅ Event-Radar</p>
-      <p>✅ Search-Explorer</p>
-      <p>✅ Matrix-Suche</p>
-      <p>✅ Community Chat</p>
-      <p>✅ Crew Lifecycle</p>
-      <p>✅ Portfolio V2</p>
-      <p>✅ GIGSDA Pass</p>
-      <p>✅ Portfolio Referenzen</p>
-      <p>✅ Auto Referenzen</p>
-      <p>✅ QR Access Prototype</p>
-      <p>✅ Winston Referenzen repariert</p>
-      <p>✅ Requests repariert</p>
-      <p>✅ Favorites repariert</p>
-      <p>✅ Login → gigsda_profiles</p>
-      <p>✅ Registrierung → gigsda_profiles</p>
-      <p>✅ Profil löschen getestet</p>
-      <p>✅ gigsda_users entfernt</p>
+<p>✅ Crew-System</p>
+<p>✅ Event-Radar</p>
+<p>✅ Search-Explorer</p>
+<p>✅ Matrix-Suche</p>
+<p>✅ Community Chat</p>
+<p>✅ Crew Lifecycle</p>
+<p>✅ Portfolio V2</p>
+<p>✅ GIGSDA Pass</p>
+<p>✅ Portfolio Referenzen</p>
+<p>✅ Auto Referenzen</p>
+<p>✅ QR Access Prototype</p>
+<p>✅ Winston Referenzen repariert</p>
+<p>✅ Requests repariert</p>
+<p>✅ Favorites repariert</p>
+<p>✅ Login → gigsda_profiles</p>
+<p>✅ Registrierung → gigsda_profiles</p>
+<p>✅ Profil löschen getestet</p>
+<p>✅ gigsda_users entfernt</p>
+<p></p>
+<p>✅ Owner / Crew Rollenmodell</p>
+<p>✅ Projektstatus Rollenmodell</p>
+<p>✅ SearchExplorer nur für Owner</p>
+<p>✅ Favoriten-Pool nur für Owner</p>
+<p></p>
+<p>✅ F5 Session Recovery</p>
+<p>✅ Event Recovery</p>
+<p>✅ Fahrplan Recovery</p>
+<p>✅ Countdown Recovery</p>
+<p>✅ Planner Recovery</p>
 
       </div>
 
@@ -57,36 +68,42 @@ export default function Roadmap() {
 
       <div className="space-y-2 text-sm text-slate-300">
 
-      <p>✅ RiderZentrale</p>
-      <p>✅ Rider-Freigabelogik</p>
-      <p>✅ Rider-Statussystem</p>
-      <p>✅ Rider-Profilnavigation</p>
-      <p>✅ Künstler-Rider</p>
-      <p>✅ Location-Rider</p>
-      <p>✅ Techniker-Rider</p>
-      <p>✅ Material / Verleiher Rider</p>
-      <p>✅ Fan Support Rider</p>
-      <p>✅ Rider-Check Veranstalterübersicht</p>
-      <p>✅ Rollenfarben & Statuslogik</p>
-      <p>✅ Owner-Konzept statt Veranstalter-Rolle</p>
-
-      <p>✅ Crew-Shortlist Fahrplan-Integration</p>
-      <p>✅ Rider-Check Fahrplan-Integration</p>
-      <p>✅ Zusage-Deal Fahrplan-Integration</p>
-      <p>✅ Event-Planer inkl. Timeline, Editierung & Speicherung</p>
-      <p>✅ Event-Planer Fahrplan-Integration</p>
-      <p>✅ Event-Promotion inkl. Statussystem</p>
-      <p>✅ Event-Promotion Live-Vorschau für Radar-Search-Card</p>
-      <p>✅ Event-Promotion Fahrplan-Integration</p>
-      <p>✅ Live-Countdown inkl. Freigabe-, Push- & Live-Workflow</p>
-      <p>✅ Countdown-Freigabe aus Projektstatus</p>
-
-      <p>✅ Deal-Center Refactoring auf Personenmodell</p>
-      <p>✅ Mehrfachrollen-Unterstützung</p>
-      <p>✅ Dynamische Deal-Partner</p>
-      <p>✅ Personenbasierte Gagenverwaltung</p>
-      <p>✅ Personenbasierte Signatur-Logik</p>
-      <p>✅ Rollenmodell aus Deal-Center entfernt</p>
+<p>✅ Crew-Shortlist</p>
+<p>✅ RiderZentrale</p>
+<p>✅ Rider-Freigabelogik</p>
+<p>✅ Rider-Statussystem</p>
+<p></p>
+<p>✅ Deal-Center Refactoring</p>
+<p>✅ Personenmodell</p>
+<p>✅ Dynamische Deal-Partner</p>
+<p>✅ Mehrfachrollen-Unterstützung</p>
+<p>✅ Personenbasierte Gagenverwaltung</p>
+<p>✅ Deal-Statussystem</p>
+<p></p>
+<p>✅ Deal-Versand an Beteiligte</p>
+<p>✅ Deal-Requests über Inbox-System</p>
+<p>✅ Deal-Bestätigung über Inbox-System</p>
+<p>✅ acceptedDeals Persistenz</p>
+<p>✅ Vertragsfortschritt verkabelt</p>
+<p></p>
+<p>✅ Event-Planer</p>
+<p>✅ Timeline Speicherung</p>
+<p>✅ Produktionsnotizen Speicherung</p>
+<p>✅ Produktionsnotizen Crew-Lesemodus</p>
+<p>✅ Planner Locking</p>
+<p></p>
+<p>✅ Event-Promotion</p>
+<p>✅ Radar Preview</p>
+<p>✅ Promotion Persistenz</p>
+<p></p>
+<p>✅ Live-Countdown</p>
+<p>✅ Countdown Persistenz</p>
+<p>✅ Push-Workflow</p>
+<p>✅ Release-Workflow</p>
+<p>✅ Live-Workflow</p>
+<p></p>
+<p>✅ Komplettes Fahrplan-System</p>
+<p>Crew → Rider → Deal → Planner → Promotion → Countdown</p>
 
       </div>
 
@@ -100,46 +117,61 @@ export default function Roadmap() {
 
     <div className="space-y-2 text-sm text-slate-300">
 
-
-    <p>🎯 Event Bearbeitung integrieren</p>
-    <p>🎯 Event Promotion integrieren / Werbematerial</p>
-    <p>🎯 Notification Center fertigstellen</p>
-    <p>🎯 Read / Unread Logik</p>
-    <p>🎯 Datei Upload im Chat</p>
-    <p>🎯 Veranstalter Export</p>
-    <p>🎯 Mobile Optimierung</p>
-    <p>🎯 Datenbank Migration</p>
-    <p>🎯 API & Backend Vorbereitung</p>
+<p>🎯 Event Bearbeitung integrieren</p>
+<p>🎯 IncomingMessages UX finalisieren</p>
+<p>🎯 Notification Center fertigstellen</p>
+<p></p>
+<p>🎯 Read / Unread Logik</p>
+<p>🎯 Datei Upload im Chat</p>
+<p></p>
+<p>🎯 Dashboard Activity Feed</p>
+<p>🎯 Projektchronik</p>
+<p></p>
+<p>🎯 Werbematerial & Promotion Assets</p>
+<p></p>
+<p>🎯 Mobile Optimierung</p>
+<p></p>
+<p>🎯 Datenbank Migration</p>
+<p>🎯 API Vorbereitung</p>
+<p>🎯 Backend Vorbereitung</p>
 
     </div>
-
-  </div>
-
-
-  {/* NEXT */}
-  <div className="bg-slate-900/30 border border-violet-500/20 rounded-3xl p-6">
-    <h3 className="text-fuchsia-400 font-black text-lg mb-4">     
-      🔮 Später
-    </h3>
-
-    <div className="space-y-2 text-sm text-slate-300">
-
-    <p>🔮 Direktnachrichten V2</p>
-    <p>🔮 WhatsApp Style Chat</p>
-    <p>🔮 Projektchronik</p>
-    <p>🔮 Media Showcase</p>
-    <p>🔮 Gallery</p>
-    <p>🔮 Tech Overview</p>
-    <p>🔮 Technical Rider</p>
-    <p>🔮 Responsive Portfolio</p>
-    <p>🔮 Responsive GIGSDA Pass</p>
-    <p>🔮 Local Hero Voting</p>
 
     </div>
 
 
+    {/* NEXT */}
+    <div className="bg-slate-900/30 border border-violet-500/20 rounded-3xl p-6">
+      <h3 className="text-fuchsia-400 font-black text-lg mb-4">     
+        🔮 Später
+      </h3>
+
+      <div className="space-y-2 text-sm text-slate-300">
+
+<p>🔮 Direktnachrichten V2</p>
+<p>🔮 WhatsApp Style Chat</p>
+<p></p>
+<p>🔮 Medienbibliothek</p>
+<p>🔮 Gallery</p>
+<p>🔮 Media Showcase</p>
+<p></p>
+<p>🔮 Technical Rider V2</p>
+<p>🔮 Tech Overview</p>
+<p></p>
+<p>🔮 Responsive Portfolio</p>
+<p>🔮 Responsive GIGSDA Pass</p>
+<p></p>
+<p>🔮 Local Hero Voting</p>
+<p></p>
+<p>🔮 Ticketing Erweiterungen</p>
+<p>🔮 Payment Layer</p>
+<p>🔮 Booking Management</p>
+
+      </div>
+
+
+    </div>
   </div>
-</div>
     </div>
   );
 }

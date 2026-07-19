@@ -54,13 +54,13 @@ const roleClass =
             className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
             />
             <span
-            className={`absolute top-3 right-3 text-[11px] font-bold px-2 py-0.5 rounded-md tracking-wider uppercase backdrop-blur-sm z-10 ${roleClass}`}
+            className={`absolute top-3 right-3 text-sm font-bold px-2 py-0.5 rounded-md tracking-wider uppercase backdrop-blur-sm z-10 ${roleClass}`}
             >
             {member.role || member.type || 'Künstler'}
             </span>
             
             <span
-            className={`absolute top-3 left-3 text-[10px] font-black px-2 py-0.5 rounded-md tracking-wider uppercase backdrop-blur-sm ${statusColor}`}
+            className={`absolute top-3 left-3 text-sm font-black px-2 py-0.5 rounded-md tracking-wider uppercase backdrop-blur-sm ${statusColor}`}
             >
             {statusLabel}
             </span>
@@ -88,18 +88,22 @@ const roleClass =
 
       <div className="flex justify-between items-center pt-2 gap-2">
 
-        <h3 className="text-xs font-black text-white uppercase tracking-wide">
+        <h3 className="text-sm font-black text-white uppercase tracking-wide">
           {member.name}
         </h3>
 
-        <button
-          type="button"
-          onClick={onRemove}
-          className="text-[10px] text-slate-600 hover:text-red-400 font-bold px-1.5 py-0.5 rounded-md hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer font-mono shrink-0"
-          title="Aus Projekt stornieren"
-        >
-          ✕
-        </button>
+
+        {onRemove && (
+          <button
+            type="button"
+            onClick={onRemove}
+            className="text-sm text-slate-600 hover:text-red-400 font-bold px-1.5 py-0.5 rounded-md hover:bg-red-500/10"
+            title="Aus Projekt stornieren"
+          >
+            ✕
+          </button>
+        )}
+
 
       </div>
 

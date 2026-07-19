@@ -3,13 +3,83 @@ import { Clock, Radio, Users, Ticket, Bell, AlertTriangle } from 'lucide-react';
 import FahrplanMetrics from './FahrplanMetrics';
 
 export default function LiveCountdown({ onBack, progress, onNavigateToStep, setProgress, onTriggerGate, activeEvent }) {
-  const [ticketCount, setTicketCount] = useState(142);
-  const [isLive, setIsLive] = useState(false);
-  const [alarmSent, setAlarmSent] = useState(false);
-  const [releaseReady, setReleaseReady] = useState(false);
-  const handleReleaseEvent = () => {
+
+  const countdownStatus =
+    activeEvent?.countdownStatus || {};
+  const [ticketCount, setTicketCount] = useState(
+    countdownStatus.ticketCount || 142
+  );
+  const [isLive, setIsLive] = useState(
+    countdownStatus.isLive || false
+  );
+  const [alarmSent, setAlarmSent] = useState(
+    countdownStatus.alarmSent || false
+  );
+  const [releaseReady, setReleaseReady] = useState(
+    countdownStatus.releaseReady || false
+  );
+
+  useEffect(() => {
+
+    setTicketCount(
+      countdownStatus.ticketCount || 142
+    );
+
+    setIsLive(
+      countdownStatus.isLive || false
+    );
+
+    setAlarmSent(
+      countdownStatus.alarmSent || false
+    );
+
+    setReleaseReady(
+      countdownStatus.releaseReady || false
+    );
+
+  }, [activeEvent]);
+
+
+
+  const saveCountdownStatus = (updates) => {
+  if (!activeEvent) return;
+  const events = JSON.parse(
+    localStorage.getItem("gigsda_events") || "[]"
+  );
+  const updatedEvents = events.map(event => {
+    if (event.id !== activeEvent.id) {
+      return event;
+    }
+    return {
+      ...event,
+      countdownStatus: {
+        ticketCount,
+        releaseReady,
+        alarmSent,
+        isLive,
+        ...updates
+      }
+    };
+  });
+
+  localStorage.setItem(
+    "gigsda_events",
+    JSON.stringify(updatedEvents)
+  );
+};
+
+
+
+const handleReleaseEvent = () => {
   setReleaseReady(true);
-  };
+
+  saveCountdownStatus({
+    releaseReady: true
+  });
+};
+
+
+
   // Live-Simulator: Lässt die Ticket-Scans im Sekundentakt hochzählen
   useEffect(() => {
     if (!isLive) return;
@@ -25,19 +95,26 @@ export default function LiveCountdown({ onBack, progress, onNavigateToStep, setP
     return () => clearInterval(interval);
   }, [isLive]);
 
-  const handleStartShow = () => {
-    setIsLive(true);
-    if (typeof setProgress === 'function') {
-      setProgress(prev => ({ ...prev, countdown: 100 })); // Setzt das Finale auf 100%
-    }
-  };
+
 
   const handleSendAlarm = () => {
     setAlarmSent(true);
-    if (typeof onTriggerGate === 'function') {
-      onTriggerGate("🚨 PUSH-ALARM ABGEFEUERT: 'Winston Jud betritt in 15 Minuten die Bühne! Macht euch bereit im Pit!' - Signal an alle Ticketbesitzer übertragen! 💥");
-    }
-  };
+
+    saveCountdownStatus({
+      releaseReady: true,
+      alarmSent: true
+    });
+};
+    
+  const handleStartShow = () => {
+    setIsLive(true);
+
+    saveCountdownStatus({
+      releaseReady: true,
+      alarmSent: true,
+      isLive: true
+    });
+};
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
