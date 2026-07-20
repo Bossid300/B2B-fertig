@@ -48,6 +48,19 @@ export default function ContractCenter({ onBack, progress, setProgress, onNaviga
     activeEvent?.dealSent || false
   );
 
+  useEffect(() => {
+    setDealAmounts(
+      activeEvent?.dealAmounts || {}
+    );
+    setAcceptedDeals(
+      activeEvent?.acceptedDeals || {}
+    );
+    setDealSent(
+      activeEvent?.dealSent || false
+    );
+  }, [activeEvent]);
+
+
   // 📥 Verbindung zu Status in Bearbeitung
   const signedCount =
     Object.values(acceptedDeals)
@@ -791,7 +804,7 @@ const handleSendDeal = () => {
       <div className="flex justify-end pt-2">
         <button
           type="button"
-          disabled={dealStatus !== 'signed'}
+          /* disabled={dealStatus !== 'signed'} */
           onClick={() =>
             onNavigateToStep && 
             onNavigateToStep('planner')}

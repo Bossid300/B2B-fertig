@@ -21,6 +21,18 @@ const [schedule, setSchedule] = useState(
 
 ]);
 
+useEffect(() => {
+
+  setSchedule(
+    activeEvent?.timeline || []
+  );
+
+  setIsPlannerLocked(
+    activeEvent?.plannerLocked || false
+  );
+
+}, [activeEvent]);
+
 const handleAddTimelineItem = () => {
   setSchedule([
     ...schedule,
@@ -202,28 +214,37 @@ const isOwner =
   activeEvent?.ownerId === currentUserId;
 
 
-const handleLockPlanner = () => {
-  setIsPlannerLocked(true);
-  const events = JSON.parse(
-    localStorage.getItem("gigsda_events") || "[]"
-  );
-  const updatedEvents = events.map(event => {
-    if (event.id !== activeEvent?.id) {
-      return event;
-    }
-    return {
-      ...event,
-      plannerLocked: true
-    };
-  });
-  localStorage.setItem(
-    "gigsda_events",
-    JSON.stringify(updatedEvents)
-  );
-  if (typeof onStepSuccess === 'function') {
-    onStepSuccess();
-  }
-};
+
+  const handleLockPlanner = () => {
+
+    const newLockedState = !isPlannerLocked;
+
+    setIsPlannerLocked(newLockedState);
+
+    const events = JSON.parse(
+      localStorage.getItem("gigsda_events") || "[]"
+    );
+
+    const updatedEvents = events.map(event => {
+
+      if (event.id !== activeEvent?.id) {
+        return event;
+      }
+
+      return {
+        ...event,
+        plannerLocked: newLockedState
+      };
+
+    });
+
+    localStorage.setItem(
+      "gigsda_events",
+      JSON.stringify(updatedEvents)
+    );
+
+  };
+
 
 
   // 📅 INTEGRATED iCALENDAR EXPORT ENGINE FÜR DIE HANDYS
@@ -950,7 +971,7 @@ const handleLockPlanner = () => {
                   : 'bg-emerald-400 text-slate-950 hover:bg-emerald-300 border-emerald-300'
               }`}
             >
-              {isPlannerLocked ? '✓ Zeitplan eingefroren' : 'Zeitplan freigeben 🔒'}
+              {isPlannerLocked ? '🔓 Zeitplan entsperren' : '🔒 Zeitplan freigeben'}
             </button>
             )}
             {isOwner && (

@@ -48,6 +48,23 @@ useEffect(() => {
   }));
 }, [promoProgress, setProgress]);
 
+useEffect(() => {
+
+  setPromoData(
+    activeEvent?.promotionData || {
+      title: '',
+      category: '',
+      shortDescription: '',
+      description: '',
+      promoImage: '',
+      ticketLink: '',
+      entryTime: '',
+      startTime: ''
+    }
+  );
+
+}, [activeEvent]);
+
 
 const handleSavePromotion = () => {
   if (!activeEvent) return;

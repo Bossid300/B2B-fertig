@@ -116,6 +116,13 @@ const handleReleaseEvent = () => {
     });
 };
 
+const countdownReady =
+  progress.shortlist === 100 &&
+  progress.stage === 100 &&
+  progress.contract === 100 &&
+  progress.planner === 100 &&
+  progress.promotion === 100;
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
       
@@ -245,6 +252,7 @@ const handleReleaseEvent = () => {
           <button
             type="button"
             onClick={handleReleaseEvent}
+            disabled={!countdownReady}
             className={`w-full font-black text-[9px] uppercase tracking-wider h-10 rounded-xl flex items-center justify-center gap-2 border transition-all active:scale-95 cursor-pointer ${
               alarmSent 
                 ? 'bg-slate-950 border-slate-900 text-slate-600 cursor-not-allowed' 

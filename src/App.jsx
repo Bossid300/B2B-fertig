@@ -95,6 +95,58 @@ export default function App() {
 
           setActiveEvent(restoredEvent);
 
+          const countdownProgress = Math.round(
+            (
+              (
+                restoredEvent.crewIds?.length > 0
+                  ? 100
+                  : 0
+              )
+              +
+              (
+                restoredEvent.crewIds?.length > 0
+                  ? Math.round(
+                      (
+                        Object.values(
+                          restoredEvent.riderCenter || {}
+                        ).filter(
+                          rider => rider?.confirmed
+                        ).length /
+                        restoredEvent.crewIds.length
+                      ) * 100
+                    )
+                  : 0
+              )
+              +
+              (
+                restoredEvent.dealSent
+                  ? Math.round(
+                      (
+                        Object.keys(
+                          restoredEvent.acceptedDeals || {}
+                        ).length /
+                        (
+                          restoredEvent.crewIds?.length || 1
+                        )
+                      ) * 100
+                    )
+                  : 0
+              )
+              +
+              (
+                restoredEvent.plannerLocked
+                  ? 100
+                  : 50
+              )
+              +
+              (
+                restoredEvent.promotionData?.title
+                  ? 100
+                  : 0
+              )
+            ) / 5
+          );
+
           setProgress({
             shortlist:
               restoredEvent.crewIds?.length > 0
@@ -102,8 +154,17 @@ export default function App() {
                 : 0,
 
             stage:
-              restoredEvent.riderCenter
-                ? 100
+              restoredEvent.crewIds?.length > 0
+                ? Math.round(
+                    (
+                      Object.values(
+                        restoredEvent.riderCenter || {}
+                      ).filter(
+                        rider => rider?.confirmed
+                      ).length /
+                      restoredEvent.crewIds.length
+                    ) * 100
+                  )
                 : 0,
 
             contract:
@@ -130,10 +191,8 @@ export default function App() {
                 ? 100
                 : 0,
 
-            countdown:
-              restoredEvent.countdownStatus?.isLive
-                ? 100
-                : 0
+            countdown: countdownProgress
+            
           });
 
         }
@@ -272,10 +331,21 @@ export default function App() {
       progress.planner === 100 &&
       progress.promotion === 100;
 
+
     setProgress(prev => ({
       ...prev,
-      countdown: countdownReady ? 100 : 0
+      countdown:
+        Math.round(
+          (
+            prev.shortlist +
+            prev.stage +
+            prev.contract +
+            prev.planner +
+            prev.promotion
+          ) / 5
+        )
     }));
+
   }, [
     progress.shortlist,
     progress.stage,

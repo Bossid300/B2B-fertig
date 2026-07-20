@@ -213,10 +213,26 @@ const addFromShortlist = (eventId, profileName) => {
   const crewCount =
     currentEvent?.crewIds?.length || 0;
 
+  // STATUSBERECHNUNG FÜR BESTÄTIGTE RIDER
+  const acceptedMembers = crewMembers;
+
+  const hasOwner =
+    !!currentEvent?.ownerId;
+
+  const hasConfirmedMember =
+    acceptedMembers.some(
+      member =>
+        member.id !== currentEvent?.ownerId
+    );
+
+  const fulfilledRoles =
+    (hasOwner ? 1 : 0) +
+    (hasConfirmedMember ? 1 : 0);
+
   const shortlistProgress =
-    totalRequests > 0
-      ? Math.round((crewCount / totalRequests) * 100)
-      : 0;
+    Math.round(
+      (fulfilledRoles / 2) * 100
+    );
 
   useEffect(() => {
     setProgress(prev => ({
@@ -225,6 +241,7 @@ const addFromShortlist = (eventId, profileName) => {
     }));
   }, [shortlistProgress, setProgress]);
   // ENDE STATUSBERECHNUNG
+
 
 
 

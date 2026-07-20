@@ -54,6 +54,28 @@ export default function Roadmap() {
 <p>✅ Fahrplan Recovery</p>
 <p>✅ Countdown Recovery</p>
 <p>✅ Planner Recovery</p>
+<p>✅ Incoming Requests Refactoring</p>
+<p>✅ Projektanfragen & Bestätigungen</p>
+<p>✅ Deal-Requests über Inbox-System</p>
+<p>✅ Deal-Bestätigung über Inbox-System</p>
+<p>✅ Counter-Offer Workflow</p>
+<p>✅ Gegenvorschlag senden</p>
+<p>✅ Gegenvorschlag empfangen</p>
+<p>✅ Crew Lifecycle Statussystem</p>
+<p>✅ Accepted / Declined / Counter Statuslogik</p>
+<p>✅ Crew-Karten Statusanzeige</p>
+<p>✅ Deal-Fortschritt Echtzeit-Verkabelung</p>
+<p>✅ acceptedDeals Persistenz</p>
+<p>✅ Planner Persistenz</p>
+<p>✅ Countdown Persistenz</p>
+<p>✅ F5 Fahrplan Recovery</p>
+<p>✅ F5 Countdown Recovery</p>
+<p>✅ Event Recovery aus gigsda_active_event</p>
+<p>✅ Crew Lifecycle fertiggestellt</p>
+<p>✅ Projektanfragen & Bestätigungen fertiggestellt</p>
+<p>✅ Counter-Offer Workflow fertiggestellt</p>
+<p>✅ Inbox-System vollständig verkabelt</p>
+<p>✅ Fahrplan Persistenz & Recovery</p>
 
       </div>
 
@@ -105,6 +127,37 @@ export default function Roadmap() {
 <p>✅ Komplettes Fahrplan-System</p>
 <p>Crew → Rider → Deal → Planner → Promotion → Countdown</p>
 
+<h3>🏆 Event-Projekt-System V1 abgeschlossen</h3>
+
+<p>✅ Crew Lifecycle vollständig fertiggestellt</p>
+<p>✅ Projektanfragen & Bestätigungen</p>
+<p>✅ Counter-Offer Workflow</p>
+<p>✅ Gegenvorschlag senden & empfangen</p>
+<p>✅ Deal-Requests über Inbox-System</p>
+<p>✅ Deal-Bestätigung über Inbox-System</p>
+<p>✅ Deal-Fortschritt mit ContractCenter verkabelt</p>
+<p>✅ Crew-Statuslogik (Accepted / Declined / Counter)</p>
+<p>✅ Crew-Karten Statusanzeige</p>
+<p>✅ Deal-Persistenz</p>
+<p>✅ Planner-Persistenz</p>
+<p>✅ Countdown-Persistenz</p>
+<p>✅ Promotion-Persistenz</p>
+<p>✅ Deal Recovery</p>
+<p>✅ Planner Recovery</p>
+<p>✅ Countdown Recovery</p>
+<p>✅ Promotion Recovery</p>
+<p>✅ Fahrplan Recovery</p>
+<p>✅ Event Recovery aus gigsda_active_event</p>
+<p>✅ Countdown als Projektfortschritt reaktiviert</p>
+<p>✅ Live-Countdown Freigabelogik</p>
+<p>✅ Event-Planer Sperr- / Entsperr-Workflow</p>
+<p>✅ Crew-Shortlist Owner + Ressource Logik</p>
+<p>✅ Rider-Check Recovery repariert</p>
+<p>✅ Deal-Center Recovery repariert</p>
+<p>✅ Promotion Recovery repariert</p>
+<p>✅ Countdown Recovery repariert</p>
+<p>✅ F5-Stabilität im kompletten Event-Projekt-System</p>
+
       </div>
 
   </div>
@@ -117,23 +170,18 @@ export default function Roadmap() {
 
     <div className="space-y-2 text-sm text-slate-300">
 
-<p>🎯 Event Bearbeitung integrieren</p>
-<p>🎯 IncomingMessages UX finalisieren</p>
+<h3>🎯 Nächste Ausbaustufe</h3>
+
 <p>🎯 Notification Center fertigstellen</p>
-<p></p>
 <p>🎯 Read / Unread Logik</p>
+<p>🎯 Event Bearbeitung integrieren</p>
 <p>🎯 Datei Upload im Chat</p>
-<p></p>
 <p>🎯 Dashboard Activity Feed</p>
 <p>🎯 Projektchronik</p>
-<p></p>
 <p>🎯 Werbematerial & Promotion Assets</p>
-<p></p>
 <p>🎯 Mobile Optimierung</p>
-<p></p>
 <p>🎯 Datenbank Migration</p>
-<p>🎯 API Vorbereitung</p>
-<p>🎯 Backend Vorbereitung</p>
+<p>🎯 API & Backend Vorbereitung</p>
 
     </div>
 
