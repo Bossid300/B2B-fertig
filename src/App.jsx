@@ -245,7 +245,38 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return localStorage.getItem('gigsda_logged_in') === 'true';
   });
- 
+
+  useEffect(() => {
+    const session = JSON.parse(
+      localStorage.getItem("gigsda_session") || "null"
+    );
+
+    if (!session?.profileId) return;
+
+    const profiles = JSON.parse(
+      localStorage.getItem("gigsda_profiles") || "[]"
+    );
+
+    const currentProfile = profiles.find(
+      p => p.id === session.profileId
+    );
+
+    if (!currentProfile) return;
+
+    setTicketName(currentProfile.name);
+    setIsLoggedIn(true);
+
+    localStorage.setItem(
+      "gigsda_user_name",
+      currentProfile.name
+    );
+
+    localStorage.setItem(
+      "gigsda_logged_in",
+      "true"
+    );
+  }, []);
+  
   // 🛰️ EIGENE LEITUNG FÜR DEN GAST-SUCHER (VERGISS JEDE ANDERE VARIABLE!)
   const [activeGuestArtist, setActiveGuestArtist] = useState('');
  

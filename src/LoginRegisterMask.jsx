@@ -66,6 +66,11 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
     );
 
     localStorage.setItem(
+      "gigsda_profile_id",
+      matchedProfile.id
+    );
+
+    localStorage.setItem(
       "gigsda_logged_in",
       "true"
     );

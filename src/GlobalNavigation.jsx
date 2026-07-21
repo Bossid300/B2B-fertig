@@ -55,6 +55,9 @@ export default function GlobalNavigation({ view, setView, onLogout }) {
     localStorage.removeItem('gigsda_user_name');
     localStorage.removeItem('gigsda_reg_role');
 
+    localStorage.removeItem('gigsda_session');
+    localStorage.removeItem('gigsda_profile_id');
+
     // 🔥 DAS IST DER FIX:
     localStorage.setItem('gigsda_current_view', 'landing');
 
