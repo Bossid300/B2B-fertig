@@ -97,7 +97,14 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
               venue: newEvent.venue || "Stadtpark Wiese, Braunau",
               doneProgress: 0,
               ownerId: currentUserId,
-              crewIds: [currentUserId]
+              crewIds: [currentUserId],
+
+              logistics: {
+                setup: false,
+                power: false,
+                catering: false,
+                security: false,
+              }
 
             };
             
@@ -138,8 +145,45 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
                 evt.ownerId === currentUserId;
 
               // Dynamische Prozentberechnung basierend auf der echten Team-Auswahl für dieses Event
-              const totalTeamSize = Array.isArray(evt.crewIds) ? evt.crewIds.length : 0;
-              const dynamicProgress = totalTeamSize > 0 ? Math.min(100, Math.round((totalTeamSize / 4) * 100)) : 0;
+              const crewProgress =
+                evt.crewIds?.length > 1 ? 100 : 50;
+
+              const riderProgress =
+                evt.crewIds?.length > 0
+                  ? Math.round(
+                      (
+                        Object.values(evt.riderCenter || {})
+                          .filter(r => r?.confirmed).length /
+                        evt.crewIds.length
+                      ) * 100
+                    )
+                  : 0;
+
+              const dealProgress =
+                evt.dealSent
+                  ? Math.round(
+                      (
+                        Object.keys(evt.acceptedDeals || {}).length /
+                        (evt.crewIds?.length || 1)
+                      ) * 100
+                    )
+                  : 0;
+
+              const plannerProgress =
+                evt.plannerLocked ? 100 : 50;
+
+              const promotionProgress =
+                evt.promotionData?.title ? 100 : 0;
+
+              const dynamicProgress = Math.round(
+                (
+                  crewProgress +
+                  riderProgress +
+                  dealProgress +
+                  plannerProgress +
+                  promotionProgress
+                ) / 5
+              );
 
               const openRequests = requests.filter(r =>
                 (r.status === "pending" || r.status === "counter_offer") &&
@@ -147,16 +191,49 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
               );
 
               return (
-                <div key={evt.id} className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 hover:border-slate-800 transition-all shadow-xl">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-11 h-11 rounded-2xl flex flex-col items-center justify-center font-black border text-xs ${
+                  <div
+                    key={evt.id}
+                    className="
+                      relative
+                      overflow-hidden
+                      bg-slate-900/40
+                      border border-slate-900
+                      rounded-3xl
+                      p-5
+                      flex flex-col sm:flex-row
+                      justify-between
+                      items-start sm:items-center
+                      gap-4
+                    "
+                  style={{
+                    backgroundImage: evt?.promotionData?.promoImage
+                      ? `url(${evt.promotionData.promoImage})`
+                      : "none",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }}
+                  >
+
+                  <div className="
+                    absolute inset-0
+                    bg-gradient-to-r
+                    from-slate-950
+                    via-slate-950/95
+                    to-slate-950/25
+                  "/>
+
+                  <div className="relative z-10 flex items-center gap-4">
+                      <div className={`w-11 h-11 rounded-2xl flex flex-col items-center justify-center font-black border text-xs ${
                       dynamicProgress === 100 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-cyan-500/10 border-cyan-500/30 text-cyan-400'
                     }`}>
                       {dynamicProgress}%
                     </div>
                     <div>
                       <span className="text-[9px] text-slate-500 block uppercase font-bold">#{evt.id} // {evt.type}</span>
-                      <h4 className="text-sm font-black text-white mt-0.5">{evt.title}</h4>
+                      <h4 className="text-sm font-black text-white mt-0.5">
+                        {evt.title}
+                      </h4>
+ 
                       <p className="text-[10px] text-slate-400">
                         👥 {teamSize} Crew • von {ownerName}
                       </p>
@@ -171,7 +248,7 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-2">
+                  <div className="relative z-10 flex items-center gap-2">
 
                     {/* 🔴 INCOMMING REQUEST KUGEL */}
                     {openRequests.length > 0 && (
@@ -244,6 +321,7 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
                     </button>
 
                     {/* DEIN ECHTER LÖSCH-HEBEL PRO EVENT */}
+                    {isOwner  && (                    
                     <button
                       type="button"
                       title="Dieses Event unwiderruflich löschen"
@@ -252,6 +330,7 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
                     >
                       ✕
                     </button>
+                    )}
 
                     <button
                       type="button"

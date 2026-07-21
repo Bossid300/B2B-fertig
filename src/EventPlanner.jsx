@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight, Clock, MapPin, Truck, Radio, Calendar } from 'lucide-react';
 import FahrplanMetrics from './FahrplanMetrics';
+import EventHeaderBox from "./components/EventHeaderBox";
 
 export default function EventPlanner({ onBack, progress, setProgress, onNavigateToStep, onStepSuccess, activeEvent }) {
 
@@ -33,6 +34,13 @@ useEffect(() => {
 
 }, [activeEvent]);
 
+const logistics = {
+  setup: activeEvent?.logistics?.setup || false,
+  power: activeEvent?.logistics?.power || false,
+  catering: activeEvent?.logistics?.catering || false,
+  security: activeEvent?.logistics?.security || false,
+};
+
 const handleAddTimelineItem = () => {
   setSchedule([
     ...schedule,
@@ -46,6 +54,8 @@ const handleAddTimelineItem = () => {
     }
   ]);
 };
+
+
 
 const handleSaveTimeline = () => {
   if (!activeEvent) return;
@@ -76,6 +86,11 @@ const handleSaveTimeline = () => {
   );
 };
 
+
+const [isEditingNotes, setIsEditingNotes] = useState(false);
+const [notesSaved, setNotesSaved] = useState(false);
+
+
 const handleSaveProductionNotes = () => {
   if (!activeEvent) return;
 
@@ -98,6 +113,14 @@ const handleSaveProductionNotes = () => {
     "gigsda_events",
     JSON.stringify(updatedEvents)
   );
+  
+  setNotesSaved(true);
+  setIsEditingNotes(false);
+
+  setTimeout(() => {
+    setNotesSaved(false);
+  }, 2000);
+
 };
 
 const [productionNotes, setProductionNotes] = useState(
@@ -314,217 +337,149 @@ const isOwner =
       {/* 6 ECHTE MEILENSTEINE NAVIGATOR */}
       <FahrplanMetrics progress={progress} activeStep="planner" onNavigate={onNavigateToStep} />
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      {/* HEADER */}
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl gap-4">
-        <div>
-          {activeEvent ? (
-          <span className="text-[12px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-md inline-block mb-1.5">
-              📍 Aktives Event: {activeEvent.title} ({activeEvent.date})
-              
-              <p className="text-[10px] text-cyan-400 mt-2">
-                {isOwner ? '👑 Owner' : '👥 Crew'}
-              </p>
-
-            </span>
-          ) : (
-          <span className="text-[10px] text-cyan-400 font-bold block mb-1">
-              // Ebene 04: Logistik & Timings
-            </span>
-          )}
-          <h2 className="text-3xl font-bold text-white mt-0.5">
-            Event-Planner & Ablaufplan
-          </h2>
-          <p className="text-slate-400 text-[12px]">
-            Regle die zeitliche Taktung für den Einlass, Soundcheck und den Live-Auftritt vor Ort.
-          </p>
-          {/* 🚨 REKTIVES PROJEKT-BADGE DIREKT UNTER DER ÜBERSCHRIFT */}
-          <div className="bg-slate-950/90 border border-cyan-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2 w-max shadow-[0_0_15px_rgba(6,182,212,0.05)] text-[10px]">
-            <span className="relative flex h-1.5 w-1.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500"></span>
-            </span>
-            <span className="text-slate-500 font-bold uppercase tracking-wider text-[10px]">
-              // ACTIVE TARGET:</span>
-            <span className="font-black text-cyan-400 uppercase tracking-wide">
-              {(() => {
-                try {
-                  const activeData = localStorage.getItem('gigsda_active_event');
-                  if (activeData) return JSON.parse(activeData).title || "WAYNESTOCK 2";
-                } catch(e) {}
-                return activeEvent?.title || activeEvent?.name || "WAYNESTOCK 2";
-              })()}
-            </span>
-          </div>
-        </div>
-        <button type="button" onClick={onBack} className="bg-slate-950 border border-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer">
-          ‹ Zurück
-        </button>
-      </div>
-
-
-
+      {/* HEADER Event-Planner */}
+      <EventHeaderBox
+        activeEvent={activeEvent}
+        promoImage={activeEvent?.promotionData?.promoImage}
+        title="Event-Planner & Ablaufplan"
+        subtitle="Regle die zeitliche Taktung für den Einlass, Soundcheck und den Live-Auftritt vor Ort."
+        /* isOwner={isOwner} */
+        onBack={onBack}
+      />
 
 
 
 
       {/* Eventdaten */}
-<div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
+      <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
+        <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+            Eventdaten
+          </h3>
 
-  <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+          <span className="text-sm text-cyan-400 font-black uppercase">
+            Owner Cockpit
+          </span>
+        </div>
 
-    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-      Eventdaten
-    </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div className="text-[10px] text-slate-500 uppercase">
+              Titel
+            </div>
 
-    <span className="text-[10px] text-cyan-400 font-black uppercase">
-      Owner Cockpit
-    </span>
+            <div className="text-sm text-white font-bold">
+              {activeEvent?.title || "-"}
+            </div>
+          </div>
 
-  </div>
+          <div>
+            <div className="text-[10px] text-slate-500 uppercase">
+              Datum
+            </div>
 
-  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="text-sm text-white font-bold">
+              {activeEvent?.date || "-"}
+            </div>
+          </div>
 
-    <div>
-      <div className="text-[10px] text-slate-500 uppercase">
-        Titel
+          <div>
+            <div className="text-[10px] text-slate-500 uppercase">
+              Venue
+            </div>
+
+            <div className="text-sm text-white font-bold">
+              {activeEvent?.venue || "-"}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-[10px] text-slate-500 uppercase">
+              Kategorie
+            </div>
+
+            <div className="text-sm text-white font-bold">
+              {activeEvent?.type || "-"}
+            </div>
+          </div>
+        </div>
       </div>
-
-      <div className="text-white font-bold">
-        {activeEvent?.title || "-"}
-      </div>
-    </div>
-
-    <div>
-      <div className="text-[10px] text-slate-500 uppercase">
-        Datum
-      </div>
-
-      <div className="text-white font-bold">
-        {activeEvent?.date || "-"}
-      </div>
-    </div>
-
-    <div>
-      <div className="text-[10px] text-slate-500 uppercase">
-        Venue
-      </div>
-
-      <div className="text-white font-bold">
-        {activeEvent?.venue || "-"}
-      </div>
-    </div>
-
-    <div>
-      <div className="text-[10px] text-slate-500 uppercase">
-        Kategorie
-      </div>
-
-      <div className="text-white font-bold">
-        {activeEvent?.type || "-"}
-      </div>
-    </div>
-
-  </div>
-
-</div>
 
 
 
 
 
       {/* Projektstatus */}
-<div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
+      <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
+        <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+            Projektstatus
+          </h3>
 
-  <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+          <span className="text-sm text-cyan-400 font-black uppercase">
+            Live Monitoring
+          </span>
+        </div>
 
-    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-      Projektstatus
-    </h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+          <div className="bg-slate-950 rounded-xl p-3 border border-slate-800">
+            <div className="text-[10px] text-slate-500 uppercase">
+              Crew
+            </div>
+            <div className="text-xl font-black text-white">
+              {crewIds.length}
+            </div>
+          </div>
 
-    <span className="text-[10px] text-cyan-400 font-black uppercase">
-      Live Monitoring
-    </span>
+          <div className="bg-slate-950 rounded-xl p-3 border border-emerald-500/20">
+            <div className="text-[10px] text-slate-500 uppercase">
+              Bestätigt
+            </div>
+            <div className="text-xl font-black text-emerald-400">
+              {confirmedCount}
+            </div>
+          </div>
 
-  </div>
+          <div className="bg-slate-950 rounded-xl p-3 border border-amber-500/20">
+            <div className="text-[10px] text-slate-500 uppercase">
+              Geändert
+            </div>
+            <div className="text-xl font-black text-amber-400">
+              {changedCount}
+            </div>
+          </div>
 
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+          <div className="bg-slate-950 rounded-xl p-3 border border-red-500/20">
+            <div className="text-[10px] text-slate-500 uppercase">
+              Offen
+            </div>
+            <div className="text-xl font-black text-red-400">
+              {openCount}
+            </div>
+          </div>
+        </div>
 
-    <div className="bg-slate-950 rounded-xl p-3 border border-slate-800">
-      <div className="text-[10px] text-slate-500 uppercase">
-        Crew
+        <div className="space-y-2">
+          <div className="flex justify-between text-[11px]">
+            <span className="text-slate-500">
+              Rider-Fortschritt
+            </span>
+
+            <span className="text-cyan-400 font-black">
+              {riderProgress}%
+            </span>
+          </div>
+
+          <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-cyan-400 transition-all"
+              style={{
+                width: `${riderProgress}%`
+              }}
+            />
+          </div>
+        </div>
       </div>
-      <div className="text-xl font-black text-white">
-        {crewIds.length}
-      </div>
-    </div>
-
-    <div className="bg-slate-950 rounded-xl p-3 border border-emerald-500/20">
-      <div className="text-[10px] text-slate-500 uppercase">
-        Bestätigt
-      </div>
-      <div className="text-xl font-black text-emerald-400">
-        {confirmedCount}
-      </div>
-    </div>
-
-    <div className="bg-slate-950 rounded-xl p-3 border border-amber-500/20">
-      <div className="text-[10px] text-slate-500 uppercase">
-        Geändert
-      </div>
-      <div className="text-xl font-black text-amber-400">
-        {changedCount}
-      </div>
-    </div>
-
-    <div className="bg-slate-950 rounded-xl p-3 border border-red-500/20">
-      <div className="text-[10px] text-slate-500 uppercase">
-        Offen
-      </div>
-      <div className="text-xl font-black text-red-400">
-        {openCount}
-      </div>
-    </div>
-
-  </div>
-
-  <div className="space-y-2">
-
-    <div className="flex justify-between text-[11px]">
-      <span className="text-slate-500">
-        Rider-Fortschritt
-      </span>
-
-      <span className="text-cyan-400 font-black">
-        {riderProgress}%
-      </span>
-    </div>
-
-    <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
-      <div
-        className="h-full bg-cyan-400 transition-all"
-        style={{
-          width: `${riderProgress}%`
-        }}
-      />
-    </div>
-
-  </div>
-
-</div>
 
 
 
@@ -533,91 +488,103 @@ const isOwner =
 
 
       {/* Betriebsstatus */}
-<div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
+      <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
 
-  <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+        <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
 
-    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-      Betriebsstatus
-    </h3>
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+            Betriebsstatus
+          </h3>
 
-    <span className="text-[10px] text-cyan-400 font-black uppercase">
-      Owner Check
-    </span>
+          <span className="text-sm text-cyan-400 font-black uppercase">
+            Owner Check
+          </span>
 
-  </div>
+        </div>
 
-  <div className="space-y-3">
+        <div className="space-y-3">
 
-    <div className="flex justify-between items-center">
-      <span className="text-slate-300">
-        Crew vorhanden
-      </span>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-300">
+              Crew vorhanden
+            </span>
 
-      <span className="text-emerald-400 font-black">
-        ✅
-      </span>
-    </div>
+            <span className="text-emerald-400 font-black">
+              ✅
+            </span>
+          </div>
 
-    <div className="flex justify-between items-center">
-      <span className="text-slate-300">
-        Rider vollständig
-      </span>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-300">
+              Rider vollständig
+            </span>
 
-      <span
-        className={
-          openCount === 0
-            ? "text-emerald-400 font-black"
-            : "text-amber-400 font-black"
-        }
-      >
-        {openCount === 0 ? "✅" : "⚠"}
-      </span>
-    </div>
+            <span
+              className={
+                openCount === 0
+                  ? "text-emerald-400 font-black"
+                  : "text-amber-400 font-black"
+              }
+            >
+              {openCount === 0 ? "✅" : "⚠"}
+            </span>
+          </div>
 
-    <div className="flex justify-between items-center">
-      <span className="text-slate-300">
-        Verträge abgeschlossen
-      </span>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-300">
+              Verträge abgeschlossen
+            </span>
 
-      <span className="text-amber-400 font-black">
-        ⚠
-      </span>
-    </div>
+          <span
+            className={
+              progress?.contract === 100
+                ? "text-emerald-400 font-black"
+                : "text-amber-400 font-black"
+            }
+          >
+            {progress?.contract === 100 ? "✅" : "⚠"}
+          </span>
+          </div>
 
-    <div className="flex justify-between items-center">
-      <span className="text-slate-300">
-        Team-Voting abgeschlossen
-      </span>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-300">
+              Event-Promotion abgeschlossen
+            </span>
 
-      <span className="text-amber-400 font-black">
-        ⚠
-      </span>
-    </div>
+            <span
+              className={
+                progress?.promotion === 100
+                  ? "text-emerald-400 font-black"
+                  : "text-amber-400 font-black"
+              }
+            >
+              {progress?.promotion === 100 ? "✅" : "⚠"}
+            </span>
+          </div>
 
-    <div className="border-t border-slate-800 pt-3 mt-3 flex justify-between items-center">
+          <div className="border-t border-slate-800 pt-3 mt-3 flex justify-between items-center">
 
-      <span className="text-slate-400 uppercase text-[10px] tracking-wider">
-        Countdown Status
-      </span>
+            <span className="text-slate-400 uppercase text-[10px] tracking-wider">
+              Countdown Status
+            </span>
 
-      <span
-        className={
-          openCount === 0
-            ? "text-emerald-400 font-black"
-            : "text-red-400 font-black"
-        }
-      >
-        {openCount === 0
-          ? "✅ READY"
-          : "🔴 BLOCKIERT"}
-      </span>
+            <span
+              className={
+                openCount === 0
+                  ? "text-emerald-400 font-black"
+                  : "text-red-400 font-black"
+              }
+            >
+              {openCount === 0
+                ? "✅ READY"
+                : "🔴 BLOCKIERT"}
+            </span>
 
-    </div>
+          </div>
 
-  </div>
+        </div>
 
-</div>
+      </div>
 
 
 
@@ -626,69 +593,51 @@ const isOwner =
 
 
       {/* Nächster Meilenstein */}
-<div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
+      <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
+        <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+            Nächster Meilenstein
+          </h3>
 
-  <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
-
-    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-      Nächster Meilenstein
-    </h3>
-
-    <span className="text-[10px] text-cyan-400 font-black uppercase">
-      System Empfehlung
-    </span>
-
-  </div>
-
-  <div className="space-y-3">
-
-    {openCount > 0 ? (
-
-      <>
-        <div className="text-lg font-black text-amber-400">
-          🎯 Rider-Check abschließen
+          <span className="text-sm text-cyan-400 font-black uppercase">
+            System Empfehlung
+          </span>
         </div>
 
-        <div className="text-slate-400 text-sm">
-          Noch {openCount} Gewerke benötigen Aufmerksamkeit.
+        <div className="space-y-3">
+          {openCount > 0 ? (
+            <>
+              <div className="text-lg font-black text-amber-400">
+                🎯 Rider-Check abschließen
+              </div>
+
+              <div className="text-slate-400 text-sm">
+                Noch {openCount} Gewerke benötigen Aufmerksamkeit.
+              </div>
+
+              <div className="text-[11px] text-slate-500 uppercase tracking-wider">
+                Nächster Bereich: Rider-Check
+              </div>
+            </>
+
+          ) : (
+
+            <>
+              <div className="text-lg font-black text-emerald-400">
+                ✅ Bereit für Zusage-Deal
+              </div>
+
+              <div className="text-slate-400 text-sm">
+                Alle Rider wurden geprüft und freigegeben.
+              </div>
+
+              <div className="text-[11px] text-slate-500 uppercase tracking-wider">
+                Nächster Bereich: Zusage-Deal
+              </div>
+            </>
+          )}
         </div>
-
-        <div className="text-[11px] text-slate-500 uppercase tracking-wider">
-          Nächster Bereich: Rider-Check
-        </div>
-      </>
-
-    ) : (
-
-      <>
-        <div className="text-lg font-black text-emerald-400">
-          ✅ Bereit für Zusage-Deal
-        </div>
-
-        <div className="text-slate-400 text-sm">
-          Alle Rider wurden geprüft und freigegeben.
-        </div>
-
-        <div className="text-[11px] text-slate-500 uppercase tracking-wider">
-          Nächster Bereich: Zusage-Deal
-        </div>
-      </>
-
-    )}
-
-  </div>
-
-</div>
-
-
-
-
-
-
-
-
-
-
+      </div>
 
 
 
@@ -696,107 +645,159 @@ const isOwner =
 
 
       {/* Verantwortlichkeiten */}
-<div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
+      <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
 
-  <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+        <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
 
-    <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-      Verantwortlichkeiten
-    </h3>
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+            Verantwortlichkeiten
+          </h3>
 
-    <span className="text-[10px] text-cyan-400 font-black uppercase">
-      Projektleitung
-    </span>
+          <span className="text-sm text-cyan-400 font-black uppercase">
+            Projektleitung
+          </span>
 
-  </div>
+        </div>
 
-  <div className="space-y-3">
+        <div className="space-y-3">
 
-    <div className="flex justify-between items-center">
-      <span className="text-slate-400">👑 Owner</span>
-      <span className="text-white font-bold">
-        {ownerLead?.name || "Owner"}
-      </span>
-    </div>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">👑 Owner</span>
+            <span className="text-white font-bold">
+              {ownerLead?.name || "Owner"}
+            </span>
+          </div>
 
-    <div className="flex justify-between items-center">
-      <span className="text-slate-400">🎤 Künstler</span>
-      <span className="text-white font-bold">
-        {artistLead?.name || "Offen"}
-      </span>
-    </div>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">🎤 Künstler</span>
+            <span className="text-white font-bold">
+              {artistLead?.name || "Offen"}
+            </span>
+          </div>
 
-    <div className="flex justify-between items-center">
-      <span className="text-slate-400">🏟️ Location</span>
-      <span className="text-white font-bold">
-        {locationLead?.name || "Offen"}
-      </span>
-    </div>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">🏟️ Location</span>
+            <span className="text-white font-bold">
+              {locationLead?.name || "Offen"}
+            </span>
+          </div>
 
-    <div className="flex justify-between items-center">
-      <span className="text-slate-400">🎚️ Technik</span>
-      <span className="text-white font-bold">
-        {techLead?.name || "Offen"}
-      </span>
-    </div>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">🎚️ Technik</span>
+            <span className="text-white font-bold">
+              {techLead?.name || "Offen"}
+            </span>
+          </div>
 
-    <div className="flex justify-between items-center">
-      <span className="text-slate-400">📦 Material</span>
-      <span className="text-white font-bold">
-        {materialLead?.name || "Offen"}
-      </span>
-    </div>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">📦 Material</span>
+            <span className="text-white font-bold">
+              {materialLead?.name || "Offen"}
+            </span>
+          </div>
 
-    <div className="flex justify-between items-center">
-      <span className="text-slate-400">📣 Promotion</span>
-      <span className="text-amber-400 font-bold">
-        Offen
-      </span>
-    </div>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">📣 Promotion</span>
+            <span className="text-amber-400 font-bold">
+              Offen
+            </span>
+          </div>
 
-    <div className="flex justify-between items-center">
-      <span className="text-slate-400">🛡️ Security</span>
-      <span className="text-amber-400 font-bold">
-        Offen
-      </span>
-    </div>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">🛡️ Security</span>
+            <span className="text-amber-400 font-bold">
+              Offen
+            </span>
+          </div>
 
-    <div className="flex justify-between items-center">
-      <span className="text-slate-400">👥 Fan Community Support</span>
-      <span className="text-amber-400 font-bold">
-        {fanLead?.name || "Offen"}
-      </span>
-    </div>
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">👥 Fan Community Support</span>
+            <span className="text-amber-400 font-bold">
+              {fanLead?.name || "Offen"}
+            </span>
+          </div>
 
-  </div>
-
-</div>
-
-
-
-
-
-
-
-
-
+        </div>
+      </div>
 
 
 
 
 
       {/* Produktionsnotizen */}
-      {isOwner ? (
-
+      {isEditingNotes ? (
+        <>
         <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
 
           <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">
               Produktionsnotizen
             </h3>
 
-            <span className="text-[10px] text-cyan-400 font-black uppercase">
+            <span className="text-sm text-cyan-400 font-black uppercase">
               Veranstalter
+            </span>
+          </div>
+          
+          <textarea
+            value={productionNotes}
+            onChange={(e) =>
+              setProductionNotes(e.target.value)
+            }
+            placeholder="Besonderheiten, Absprachen, Hinweise..."
+            className="
+              w-full
+              min-h-[300px]
+              bg-slate-950
+              border
+              border-slate-800
+              rounded-2xl
+              p-4
+              text-slate-300
+              text-sm
+              resize-none
+              outline-none
+            "
+          />
+          <button
+            type="button"
+            onClick={handleSaveProductionNotes}
+                className="
+                  mt-3
+                  bg-emerald-500
+                  text-slate-950
+                  font-black
+                  px-4
+                  py-2
+                  rounded-xl
+                  text-xm
+                  uppercase
+                  tracking-wider
+                  transition-all
+                  hover:border-cyan-500/50
+                  hover:text-white
+                  hover:scale-[1.02]
+                  active:scale-[0.98]
+                  cursor-pointer
+                "
+              >
+            {notesSaved
+              ? "✅ Produktionsnotizen Gespeichert"
+              : "💾 Produktionsnotizen Speichern"}
+          </button>
+        </div>  
+        </>
+      ) : (
+        <>
+        <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
+
+          <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+              Produktionsnotizen
+            </h3>
+
+            <span className="text-sm text-cyan-400 font-black uppercase">
+              Team Information
             </span>
           </div>
 
@@ -821,54 +822,36 @@ const isOwner =
             "
           />
 
-          <button
-            type="button"
-            onClick={handleSaveProductionNotes}
-            className="
-              mt-3
-              bg-emerald-500
-              text-slate-950
-              font-black
-              px-4
-              py-2
-              rounded-xl
-              text-[10px]
-              uppercase
-              tracking-wider
-              transition-all
-              hover:border-cyan-500/50
-              hover:text-white
-              hover:scale-[1.02]
-              active:scale-[0.98]
-              cursor-pointer
-            "
-          >
-            💾 Produktionsnotizen speichern
-          </button>
-
+          {isOwner && (
+            <button
+              type="button"
+              onClick={() =>
+                setIsEditingNotes(true)
+              }
+              className="
+                mt-3
+                bg-cyan-500
+                text-slate-950
+                font-black
+                px-4
+                py-2
+                rounded-xl
+                text-xm
+                uppercase
+              "
+            >
+              ✏️ Produktionsnotizen Bearbeiten
+            </button>
+          )}
         </div>
 
-      ) : (
-
-        <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
-
-          <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider">
-              Produktionsnotizen
-            </h3>
-
-            <span className="text-[10px] text-cyan-400 font-black uppercase">
-              Team Information
-            </span>
-          </div>
-
-          <div className="mt-4 text-slate-300 whitespace-pre-wrap leading-relaxed">
-            {productionNotes || "Keine Produktionsnotizen vorhanden."}
-          </div>
-
-        </div>
-
+        </>
       )}
+
+
+
+
+
 
 
       {/* Produktions- & Logistikübersicht */}
@@ -876,11 +859,11 @@ const isOwner =
 
         <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
 
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">
             Logistik & Produktion
           </h3>
 
-          <span className="text-[10px] text-cyan-400 font-black uppercase">
+          <span className="text-sm text-cyan-400 font-black uppercase">
             Eventbetrieb
           </span>
 
@@ -892,8 +875,43 @@ const isOwner =
             <div className="text-[10px] text-slate-500 uppercase">
               Aufbau
             </div>
-            <div className="text-white font-bold">
-              Offen
+              <div
+                onClick={() => {
+                  if (!activeEvent) return;
+
+                  const events = JSON.parse(
+                    localStorage.getItem("gigsda_events") || "[]"
+                  );
+
+                  const updated = events.map(evt =>
+                    evt.id === activeEvent.id
+                      ? {
+                          ...evt,
+                          logistics: {
+                            ...evt.logistics,
+                            setup: !evt.logistics?.setup,
+                          },
+                        }
+                      : evt
+                  );
+
+                  localStorage.setItem(
+                    "gigsda_events",
+                    JSON.stringify(updated)
+                  );
+                  window.location.reload();
+                  window.dispatchEvent(
+                    new CustomEvent("active-event-updated")
+                  );
+                }}
+                className={
+                  `${logistics.setup
+                    ? "text-emerald-400 font-bold"
+                    : "text-amber-400 font-bold"
+                  } cursor-pointer`
+                }
+              >
+              {logistics.setup ? "✅ Fertig" : "⚠ Offen"}
             </div>
           </div>
 
@@ -901,8 +919,43 @@ const isOwner =
             <div className="text-[10px] text-slate-500 uppercase">
               Strom
             </div>
-            <div className="text-white font-bold">
-              Offen
+              <div
+                onClick={() => {
+                  if (!activeEvent) return;
+
+                  const events = JSON.parse(
+                    localStorage.getItem("gigsda_events") || "[]"
+                  );
+
+                  const updated = events.map(evt =>
+                    evt.id === activeEvent.id
+                      ? {
+                          ...evt,
+                          logistics: {
+                            ...evt.logistics,
+                            power: !evt.logistics?.power,
+                          },
+                        }
+                      : evt
+                  );
+
+                  localStorage.setItem(
+                    "gigsda_events",
+                    JSON.stringify(updated)
+                  );
+                  window.location.reload();
+                  window.dispatchEvent(
+                    new CustomEvent("active-event-updated")
+                  );
+                }}
+                className={
+                  `${logistics.power
+                    ? "text-emerald-400 font-bold"
+                    : "text-amber-400 font-bold"
+                  } cursor-pointer`
+                }
+              >
+              {logistics.power ? "✅ Fertig" : "⚠ Offen"}
             </div>
           </div>
 
@@ -910,8 +963,43 @@ const isOwner =
             <div className="text-[10px] text-slate-500 uppercase">
               Catering
             </div>
-            <div className="text-white font-bold">
-              Offen
+              <div
+                onClick={() => {
+                  if (!activeEvent) return;
+
+                  const events = JSON.parse(
+                    localStorage.getItem("gigsda_events") || "[]"
+                  );
+
+                  const updated = events.map(evt =>
+                    evt.id === activeEvent.id
+                      ? {
+                          ...evt,
+                          logistics: {
+                            ...evt.logistics,
+                            catering: !evt.logistics?.catering,
+                          },
+                        }
+                      : evt
+                  );
+
+                  localStorage.setItem(
+                    "gigsda_events",
+                    JSON.stringify(updated)
+                  );
+                  window.location.reload();
+                  window.dispatchEvent(
+                    new CustomEvent("active-event-updated")
+                  );
+                }}
+                className={
+                  `${logistics.catering
+                    ? "text-emerald-400 font-bold"
+                    : "text-amber-400 font-bold"
+                  } cursor-pointer`
+                }
+              >
+              {logistics.catering ? "✅ Fertig" : "⚠ Offen"}
             </div>
           </div>
 
@@ -919,8 +1007,43 @@ const isOwner =
             <div className="text-[10px] text-slate-500 uppercase">
               Security
             </div>
-            <div className="text-white font-bold">
-              Offen
+              <div
+                onClick={() => {
+                  if (!activeEvent) return;
+
+                  const events = JSON.parse(
+                    localStorage.getItem("gigsda_events") || "[]"
+                  );
+
+                  const updated = events.map(evt =>
+                    evt.id === activeEvent.id
+                      ? {
+                          ...evt,
+                          logistics: {
+                            ...evt.logistics,
+                            security: !evt.logistics?.security,
+                          },
+                        }
+                      : evt
+                  );
+
+                  localStorage.setItem(
+                    "gigsda_events",
+                    JSON.stringify(updated)
+                  );
+                  window.location.reload();
+                  window.dispatchEvent(
+                    new CustomEvent("active-event-updated")
+                  );
+                }}
+                className={
+                  `${logistics.security
+                    ? "text-emerald-400 font-bold"
+                    : "text-amber-400 font-bold"
+                  } cursor-pointer`
+                }
+              >
+              {logistics.security ? "✅ Fertig" : "⚠ Offen"}
             </div>
           </div>
 
@@ -943,9 +1066,9 @@ const isOwner =
       {/* TIMELINE CONTAINER */}
       <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 shadow-xl space-y-5">
         <div className="flex justify-between items-center border-b border-slate-800/60 pb-3 gap-2">
-          <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
             <Clock className="w-4 h-4 text-cyan-400" /> 
-            // Tagesablauf (Echtzeit-Synchronisiert)
+            // Tagesablauf
           </h3>
           
           <div className="flex gap-2 shrink-0">
@@ -953,7 +1076,7 @@ const isOwner =
             <button
               type="button"
               onClick={handleExportICal}
-              className="bg-purple-500/10 border border-purple-500/30 text-purple-400 font-black text-[9px] uppercase tracking-wider px-3 h-8 rounded-lg hover:bg-purple-500/20 transition-all flex items-center gap-1 cursor-pointer shadow-md"
+              className="bg-purple-500/10 border border-purple-500/30 text-purple-400 font-black text-sx uppercase tracking-wider px-3 h-8 rounded-lg hover:bg-purple-500/20 transition-all flex items-center gap-1 cursor-pointer shadow-md"
             >
               <Calendar className="w-3.5 h-3.5" /> 
               Kalender-Export (.ics) 📅
@@ -965,7 +1088,7 @@ const isOwner =
                 handleSaveTimeline();
                 handleLockPlanner();
               }}
-              className={`text-[9px] font-black uppercase tracking-wider px-3 h-8 rounded-lg transition-all border cursor-pointer ${
+              className={`text-sx font-black uppercase tracking-wider px-3 h-8 rounded-lg transition-all border cursor-pointer ${
                 isPlannerLocked 
                   ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/25' 
                   : 'bg-emerald-400 text-slate-950 hover:bg-emerald-300 border-emerald-300'
@@ -979,7 +1102,7 @@ const isOwner =
               type="button"
               onClick={handleAddTimelineItem}
               className="
-                text-[10px]
+                text-sx
                 font-black
                 uppercase
                 tracking-wider
@@ -1046,7 +1169,7 @@ const isOwner =
                             px-2
                             py-1
                             text-cyan-400
-                            text-[11px]
+                            text-sm
                             font-mono
                             font-black
                           "
@@ -1121,7 +1244,7 @@ const isOwner =
                             px-2
                             py-1
                             text-slate-400
-                            text-[10px]
+                            text-sm
                           "
                         />
                       ) : (
@@ -1145,7 +1268,7 @@ const isOwner =
                       }}
                       className="
                         mt-2
-                        text-[9px]
+                        text-sm
                         uppercase
                         font-black
                         tracking-wider

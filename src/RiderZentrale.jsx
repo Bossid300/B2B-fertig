@@ -14,11 +14,32 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(1);
 
+  const currentUserName =
+    localStorage.getItem("gigsda_user_name");
+
   useEffect(() => {
 
+
     const refresh = () => {
-      // Event neu laden
+
+      const events = JSON.parse(
+        localStorage.getItem("gigsda_events") || "[]"
+      );
+
+      const activeStored = JSON.parse(
+        localStorage.getItem("gigsda_active_event") || "null"
+      );
+
+      const event = events.find(
+        ev => ev.id === activeStored?.id
+      );
+
+      if (event) {
+        setCurrentEvent(event);
+      }
+
     };
+
 
     window.addEventListener(
       "rider-updated",
@@ -77,7 +98,31 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
 
       if (event) {
         setCurrentEvent(event);
+        
+        const preselectedRider =
+          localStorage.getItem(
+            "gigsda_selected_rider"
+          );
+
+        if (preselectedRider) {
+
+          const riderProfile =
+            allProfiles.find(
+              p => p.id === preselectedRider
+            );
+
+          if (riderProfile) {
+            setSelectedMember(riderProfile);
+
+          localStorage.removeItem(
+            "gigsda_selected_rider"
+            );
+          }
+
+        }
+
       }
+
     } catch (err) {
       console.error("RiderZentrale Load Error:", err);
     }
@@ -137,6 +182,15 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
       );
 
       setCurrentEvent(updatedEvent);
+
+      localStorage.setItem(
+        "gigsda_active_event",
+        JSON.stringify(updatedEvent)
+      );
+
+      window.dispatchEvent(
+        new CustomEvent("active-event-updated")
+      );
 
       window.dispatchEvent(
         new CustomEvent("route-change")
@@ -233,7 +287,7 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
         return (
           <LocationRaeumeBox
             currentProfileName={selectedMember.name}
-            isOwner={true}
+            isOwner={selectedMember?.name === currentUserName}
             selectedRoom={selectedRoom}
           />
         );
@@ -243,12 +297,12 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
           <div className="space-y-6">
             <ProfileSkillBox
               currentProfileName={selectedMember.name}
-              isOwner={true}
+              isOwner={selectedMember?.name === currentUserName}
             />
 
             <ProfileEquipmentBox
               currentProfileName={selectedMember.name}
-              isOwner={true}
+              isOwner={selectedMember?.name === currentUserName}
             />
           </div>
         );
@@ -260,12 +314,12 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
 
           <ProfileEquipmentBox
             currentProfileName={selectedMember.name}
-            isOwner={true}
+            isOwner={selectedMember?.name === currentUserName}
           />
 
           <ProfileGalleryBox
             currentProfileName={selectedMember.name}
-            isOwner={true}
+            isOwner={selectedMember?.name === currentUserName}
           />
 
         </div>
@@ -275,7 +329,7 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
       return (
         <ProfileHilfeBox
           currentProfileName={selectedMember.name}
-          isOwner={true}
+          isOwner={selectedMember?.name === currentUserName}
         />
       );
 
@@ -460,7 +514,11 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
 
             </div>
 
-            {!riderCenter?.[selectedMember.id]?.confirmed && (
+
+            {!riderCenter?.[selectedMember.id]?.confirmed &&
+            selectedMember?.name === currentUserName && (
+
+
               <button
                 onClick={handleConfirm}
                 className="px-4 py-2 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-400 hover:text-white transition-all"

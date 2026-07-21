@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CommunityChat from './CommunityChat';
 import FahrplanMetrics from './FahrplanMetrics';
 import CrewCard from './components/cards/CrewCard';
+import EventHeaderBox from "./components/EventHeaderBox";
 
 export default function CrewShortlist({ 
   onBack, 
@@ -242,9 +243,6 @@ const addFromShortlist = (eventId, profileName) => {
   }, [shortlistProgress, setProgress]);
   // ENDE STATUSBERECHNUNG
 
-
-
-
   return (
     <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
       
@@ -252,41 +250,30 @@ const addFromShortlist = (eventId, profileName) => {
       <FahrplanMetrics progress={progress} activeStep="shortlist" onNavigate={onNavigateToStep} />
 
 
-
       {/* HEADER Crew-Short-List */}
+      <EventHeaderBox
+        activeEvent={activeEvent}
+        promoImage={activeEvent?.promotionData?.promoImage}
+        title="Crew-Shortlist"
+        subtitle="Verifiziere Crew & Favoriten."
+        /* isOwner={isOwner} */
+        onBack={onBack}
+      />
+
+
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl gap-4">
       <div>
-        {activeEvent ? (
-          <span className="text-[12px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-md inline-block mb-1.5">
-            📍 Aktives Event: {activeEvent.title} ({activeEvent.date})
-          
-            <p className="text-[10px] text-cyan-400">
-              {isOwner ? '👑 Owner' : '👥 Crew'}
-            </p>
 
-          </span>
-          
-        ) : (
-          <span className="text-[10px] text-cyan-400 font-bold block mb-1">
-            // Ebene 01: Crew-Zentrale
-          </span>
-        )}
-        <h2 className="text-3xl font-bold text-white mt-0.5">
-          Crew-Shortlist & Ampelstatus
-        </h2>
-        <p className="text-slate-400 text-[12px]">
-          Verifiziere Crew & Favoriten.
-        </p>
           {/* 🚨 REKTIVES PROJEKT-BADGE DIREKT UNTER DER ÜBERSCHRIFT */}
           <div className="bg-slate-950/90 border border-cyan-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2 w-max shadow-[0_0_15px_rgba(6,182,212,0.05)] text-[10px]">
             <span className="relative flex h-1.5 w-1.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500"></span>
             </span>
-            <span className="text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+            <span className="text-slate-500 font-bold uppercase tracking-wider text-sm">
               // ACTIVE TARGET:
               </span>
-            <span className="font-black text-cyan-400 uppercase tracking-wide">
+            <span className="font-black text-sm text-cyan-400 uppercase tracking-wide">
               {(() => {
                 try {
                   const activeData = localStorage.getItem('gigsda_active_event');
@@ -298,7 +285,6 @@ const addFromShortlist = (eventId, profileName) => {
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto shrink-0 font-bold text-[9px] uppercase">
-
           {isOwner && (
             <>
               <button
@@ -329,15 +315,6 @@ const addFromShortlist = (eventId, profileName) => {
               </button>
             </>
           )}
-
-          <button
-            type="button"
-            onClick={onBack}
-            className="bg-slate-950 border border-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer"
-          >
-            ‹ Dashboard
-          </button>
-
         </div>
       </div>
 

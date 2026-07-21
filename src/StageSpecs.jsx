@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import FahrplanMetrics from './FahrplanMetrics';
+import EventHeaderBox from "./components/EventHeaderBox";
 
 export default function StageSpecs({ 
   onBack, 
@@ -106,48 +107,15 @@ export default function StageSpecs({
 
 
 
-    {/* StageSpecs & Bühnen-Patching */}
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl gap-4">
-      <div>
-        {activeEvent ? (
-          <span className="text-[12px] text-emerald-400 font-black uppercase tracking-wider bg-emerald-950/40 border border-emerald-500/20 px-2.5 py-1 rounded-md inline-block mb-1.5">
-            📍 Aktives Event: {activeEvent.title} ({activeEvent.date})
-          </span>
-        ) : (
-          <span className="text-[10px] text-cyan-400 font-bold block mb-1">
-            // Ebene 02: Rider-Check
-          </span>
-        )}
-        <h2 className="text-3xl font-bold text-white mt-0.5">
-          StageSpecs & Bühnen-Patching
-        </h2>
-        <p className="text-slate-400 text-[12px]">
-          Verifiziere die Kanalliste basierend auf deiner zugesagten Crew.
-        </p>
-        {/* 🚨 REKTIVES PROJEKT-BADGE DIREKT UNTER DER ÜBERSCHRIFT */}
-        <div className="bg-slate-950/90 border border-cyan-500/30 px-3 py-1.5 rounded-xl flex items-center gap-2 w-max shadow-[0_0_15px_rgba(6,182,212,0.05)] text-[10px]">
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500"></span>
-          </span>
-          <span className="text-slate-500 font-bold uppercase tracking-wider text-[10px]">
-            // ACTIVE TARGET:
-          </span>
-          <span className="font-black text-cyan-400 uppercase tracking-wide">
-            {(() => {
-              try {
-                const activeData = localStorage.getItem('gigsda_active_event');
-                if (activeData) return JSON.parse(activeData).title || "WAYNESTOCK 2";
-              } catch(e) {}
-              return activeEvent?.title || activeEvent?.name || "WAYNESTOCK 2";
-            })()}
-          </span>
-        </div>
-      </div>
-      <button type="button" onClick={onBack} className="bg-slate-950 border border-slate-800 text-slate-300 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer">
-        ‹ Zurück
-      </button>
-    </div>
+    {/* HEADER StageSpecs & Bühnen-Patching */}
+    <EventHeaderBox
+      activeEvent={activeEvent}
+      promoImage={activeEvent?.promotionData?.promoImage}
+      title="StageSpecs & Bühnen-Patching"
+      subtitle="Verifiziere Crew & Favoriten."
+      /* isOwner={isOwner} */
+      onBack={onBack}
+    />
 
 
     {/* RIDER STATUS ÜBERSICHT */}
@@ -166,7 +134,6 @@ export default function StageSpecs({
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-4">
-
         <div className="bg-slate-950 rounded-xl p-3 border border-emerald-500/20">
           <div className="text-[10px] text-slate-500 uppercase">
             🟢 Fertig
@@ -196,14 +163,28 @@ export default function StageSpecs({
             {openCount}
           </div>
         </div>
-
       </div>
 
-      <div className="text-[11px] text-slate-400">
-        Rider-Fortschritt: <span className="text-cyan-400 font-black">
-          {riderProgress}%
-        </span>
+      <div className="space-y-2">
+        <div className="flex justify-between text-[11px]">
+          <span className="text-slate-500">
+            Rider-Fortschritt
+          </span>
+
+          <span className="text-cyan-400 font-black">
+            {riderProgress}%
+          </span>
+        </div>
+        <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-cyan-400 transition-all"
+            style={{
+              width: `${riderProgress}%`
+            }}
+          />
+        </div>
       </div>
+
 
       {/* RIDER STATUS ÜBERSICHT */}
       <div className="mt-5 border-t border-slate-800 pt-4">
@@ -231,6 +212,19 @@ export default function StageSpecs({
               return (
                 <div
                   key={crewId}
+
+                  onClick={() => {
+
+                    localStorage.setItem(
+                      "gigsda_selected_rider",
+                      crewId
+                    );
+
+                    onNavigateToStep &&
+                    onNavigateToStep("riderzentrale");
+
+                  }}
+
                   className="
                     flex
                     justify-between
@@ -241,6 +235,9 @@ export default function StageSpecs({
                     rounded-xl
                     px-3
                     py-2
+                    cursor-pointer
+                    hover:border-cyan-500/40
+                    hover:bg-cyan-500/5
                   "
                 >
                   <div>

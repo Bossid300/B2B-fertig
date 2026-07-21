@@ -149,9 +149,23 @@ export default function App() {
 
           setProgress({
             shortlist:
-              restoredEvent.crewIds?.length > 0
-                ? 100
-                : 0,
+              Math.round(
+                (
+                  (
+                    restoredEvent.ownerId
+                      ? 1
+                      : 0
+                  )
+                  +
+                  (
+                    (restoredEvent.crewIds || []).some(
+                      id => id !== restoredEvent.ownerId
+                    )
+                      ? 1
+                      : 0
+                  )
+                ) / 2 * 100
+              ),
 
             stage:
               restoredEvent.crewIds?.length > 0
@@ -423,6 +437,37 @@ export default function App() {
     return () => window.removeEventListener('route-change', handleProfileRoute);
   }, []);
  
+
+  useEffect(() => {
+
+    const handleActiveEventUpdated = () => {
+
+      const storedEvent = JSON.parse(
+        localStorage.getItem("gigsda_active_event")
+      );
+
+      if (storedEvent) {
+        setActiveEvent(storedEvent);
+      }
+
+    };
+
+    window.addEventListener(
+      "active-event-updated",
+      handleActiveEventUpdated
+    );
+
+    return () => {
+      window.removeEventListener(
+        "active-event-updated",
+        handleActiveEventUpdated
+      );
+    };
+
+  }, []);
+
+
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-slate-950 antialiased overflow-x-hidden flex flex-col justify-between font-mono">
  

@@ -289,7 +289,7 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
               <ul className="space-y-2 mb-5 text-[11px] font-mono text-slate-300">
                 <li className="flex items-start gap-2">
                   <span className="text-cyan-500 font-bold">✓</span>
-                  <span><strong className="text-white">6 dedizierte B2B-Rollen:</strong> Volle Sichtbarkeit für Catering, Rental, Locations, Bands & Crew.</span>
+                  <span><strong className="text-white">9 dedizierte B2B-Rollen:</strong> Volle Sichtbarkeit für Catering, Rental, Locations, Bands & Crew.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-cyan-500 font-bold">✓</span>
@@ -319,7 +319,7 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
         </div>
 
         {/* RECHTSEITE: SOCIAL MEDIA NETZWERK */}
-        <div className="w-full md:w-64 bg-slate-900/60 border border-slate-900 rounded-3xl p-6 flex flex-col justify-between gap-4 shrink-0">
+{/*         <div className="w-full md:w-64 bg-slate-900/60 border border-slate-900 rounded-3xl p-6 flex flex-col justify-between gap-4 shrink-0">
           <div className="space-y-3">
             <div>
               <span className="text-[9px] text-slate-600 uppercase block tracking-wider font-mono">// External Ports</span>
@@ -343,7 +343,7 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
           >
             Mit Facebook anmelden
           </button>
-        </div>
+        </div> */}
 
       </div>
 
