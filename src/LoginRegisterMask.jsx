@@ -5,9 +5,9 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
   const [isRegistering, setIsRegistering] = useState(isRegisteringInitial);
   
   // ⚡ FEHLERFREIE SPEICHER-ZUSTÄNDE (Exakt an die Inputs gekoppelt)
-  const [loginField, setLoginField] = useState('Winston Jud');
-  const [loginPass, setLoginPass] = useState('******');
-  
+  const [loginField, setLoginField] = useState('');
+  const [loginPass, setLoginPass] = useState('');
+
   const [regName, setRegName] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPass, setRegPass] = useState('');
@@ -27,64 +27,73 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
       return;
     }
 
-    // 🚨 ABSOLUTER SYSTEM-FALLBACK: Loggt Winston IMMER ein, egal was in gigsda_users steht!
-    if (inputName.toLowerCase() === 'winston jud') {
-      if (typeof setErrorMsg === 'function') setErrorMsg('');
-      localStorage.setItem('gigsda_reg_role', 'Künstler');
-      localStorage.setItem('gigsda_user_name', 'Winston Jud');
-      localStorage.setItem('gigsda_logged_in', 'true');
-      
-      window.dispatchEvent(new CustomEvent('request-sent'));
-      window.dispatchEvent(new CustomEvent('route-change'));
-      
-      if (typeof onLoginSuccess === 'function') {
-        onLoginSuccess('Winston Jud', 'Künstler');
-      }
+    const authUsers = JSON.parse(
+      localStorage.getItem("gigsda_auth_users") || "[]"
+    );
+
+    const matchedAuthUser = authUsers.find(
+      user =>
+        user.email?.toLowerCase() === inputName.toLowerCase() &&
+        user.password === loginPass
+    );
+
+    if (!matchedAuthUser) {
+      setErrorMsg("E-Mail oder Passwort falsch.");
       return;
     }
 
-    // Normaler Datenbank-Abgleich für alle anderen User
-    let registeredProfiles = [];
-
-    try {
-      const localData = localStorage.getItem('gigsda_profiles');
-      if (localData) {
-        registeredProfiles = JSON.parse(localData);
-      }
-    } catch (err) {
-      registeredProfiles = [];
-    }
-
-    const profileArray =
-      Array.isArray(registeredProfiles)
-        ? registeredProfiles
-        : [];
-
-    const matchedUser = profileArray.find(
-      user =>
-        user &&
-        user.name &&
-        user.name.trim().toLowerCase() ===
-          inputName.toLowerCase()
+    const profiles = JSON.parse(
+      localStorage.getItem("gigsda_profiles") || "[]"
     );
 
-    if (matchedUser) {
-      if (typeof setErrorMsg === 'function') setErrorMsg('');
-      const userLiveRole = matchedUser.role || matchedUser.gewerk || 'Veranstalter';
-      localStorage.setItem('gigsda_reg_role', userLiveRole);
-      localStorage.setItem('gigsda_user_name', matchedUser.name);
-      localStorage.setItem('gigsda_logged_in', 'true');
+    const matchedProfile = profiles.find(
+      p => p.id === matchedAuthUser.profileId
+    );
 
-      window.dispatchEvent(new CustomEvent('request-sent'));
-      window.dispatchEvent(new CustomEvent('route-change'));
+    if (!matchedProfile) {
+      setErrorMsg("Profil konnte nicht geladen werden.");
+      return;
+    }
 
-      if (typeof onLoginSuccess === 'function') {
-        onLoginSuccess(matchedUser.name, userLiveRole);
-      }
-    } else {
-      if (typeof setErrorMsg === 'function') {
-        setErrorMsg(`Der Name "${inputName}" ist im Gigsda-Protokoll des Browsers nicht registriert. Bitte erstelle zuerst ein Konto! ✕`);
-      }
+    localStorage.setItem(
+      "gigsda_reg_role",
+      matchedProfile.role || "Fan"
+    );
+
+    localStorage.setItem(
+      "gigsda_user_name",
+      matchedProfile.name
+    );
+
+    localStorage.setItem(
+      "gigsda_logged_in",
+      "true"
+    );
+
+    localStorage.setItem(
+      "gigsda_session",
+      JSON.stringify({
+        authUserId: matchedAuthUser.id,
+        profileId: matchedProfile.id,
+        loginAt: Date.now()
+      })
+    );
+
+    setErrorMsg("");
+
+    window.dispatchEvent(
+      new CustomEvent("request-sent")
+    );
+
+    window.dispatchEvent(
+      new CustomEvent("route-change")
+    );
+
+    if (typeof onLoginSuccess === "function") {
+      onLoginSuccess(
+        matchedProfile.name,
+        matchedProfile.role
+      );
     }
   };
 
@@ -111,7 +120,27 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
     // 📁 Speichern in Tabelle 1 (gigsda_profiles)
     const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
     savedProfiles.push(newProfile);
-    localStorage.setItem('gigsda_profiles', JSON.stringify(savedProfiles));
+
+
+const authUsers = JSON.parse(
+  localStorage.getItem("gigsda_auth_users") || "[]"
+);
+
+authUsers.push({
+  id: "AUTH-" + Date.now(),
+  email: regEmail,
+  password: regPass,
+  profileId: generatedId,
+  createdAt: Date.now()
+});
+
+localStorage.setItem(
+  "gigsda_auth_users",
+  JSON.stringify(authUsers)
+);
+
+localStorage.setItem('gigsda_profiles', JSON.stringify(savedProfiles));
+
 
     // 🚀 Erfolg an Daniels Hauptrouter funken
     onLoginSuccess(regName, regRole);
@@ -224,7 +253,7 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
                   <User className="absolute left-3 top-2.5 w-4 h-4 text-slate-600" />
                   <input 
                     type="text" 
-                    placeholder="Künstler-ID oder registrierter Name" 
+                    placeholder="E-Mail-Adresse" 
                     value={loginField} 
                     onChange={(e) => setLoginField(e.target.value)} 
                     className="w-full bg-slate-950 border border-slate-900 rounded-xl pl-9 pr-4 py-2.5 text-white text-xs focus:outline-none focus:border-cyan-400 font-mono" 

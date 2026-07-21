@@ -15,8 +15,9 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
   const [selectedRoom, setSelectedRoom] = useState(1);
 
   const currentUserName =
-    localStorage.getItem("gigsda_user_name");
-
+    localStorage.getItem("gigsda_user_name"); /// #
+  const currentProfileId =
+    localStorage.getItem("gigsda_profile_id");
   useEffect(() => {
 
 
@@ -287,7 +288,7 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
         return (
           <LocationRaeumeBox
             currentProfileName={selectedMember.name}
-            isOwner={selectedMember?.name === currentUserName}
+            isOwner={selectedMember?.id === currentProfileId}
             selectedRoom={selectedRoom}
           />
         );
@@ -297,12 +298,12 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
           <div className="space-y-6">
             <ProfileSkillBox
               currentProfileName={selectedMember.name}
-              isOwner={selectedMember?.name === currentUserName}
+              isOwner={selectedMember?.id === currentProfileId}
             />
 
             <ProfileEquipmentBox
               currentProfileName={selectedMember.name}
-              isOwner={selectedMember?.name === currentUserName}
+              isOwner={selectedMember?.id === currentProfileId}
             />
           </div>
         );
@@ -314,12 +315,12 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
 
           <ProfileEquipmentBox
             currentProfileName={selectedMember.name}
-            isOwner={selectedMember?.name === currentUserName}
+            isOwner={selectedMember?.id === currentProfileId}
           />
 
           <ProfileGalleryBox
             currentProfileName={selectedMember.name}
-            isOwner={selectedMember?.name === currentUserName}
+            isOwner={selectedMember?.id === currentProfileId}
           />
 
         </div>
@@ -329,7 +330,7 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
       return (
         <ProfileHilfeBox
           currentProfileName={selectedMember.name}
-          isOwner={selectedMember?.name === currentUserName}
+          isOwner={selectedMember?.id === currentProfileId}
         />
       );
 
@@ -516,7 +517,7 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
 
 
             {!riderCenter?.[selectedMember.id]?.confirmed &&
-            selectedMember?.name === currentUserName && (
+            selectedMember?.id === currentProfileId && (
 
 
               <button
