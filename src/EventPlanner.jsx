@@ -343,7 +343,7 @@ const isOwner =
         promoImage={activeEvent?.promotionData?.promoImage}
         title="Event-Planner & Ablaufplan"
         subtitle="Regle die zeitliche Taktung für den Einlass, Soundcheck und den Live-Auftritt vor Ort."
-        /* isOwner={isOwner} */
+        isOwner={isOwner}
         onBack={onBack}
       />
 

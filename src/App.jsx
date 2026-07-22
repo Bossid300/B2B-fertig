@@ -216,14 +216,6 @@ export default function App() {
 
 
 
-
-
-
-
-
-
-
-
   // Horcht auf das globale Sendesignal der Plattform
   useEffect(() => {
     checkPendingRequests(); // Einmal direkt beim Start prüfen

@@ -390,7 +390,7 @@ const handleSendDeal = () => {
         promoImage={activeEvent?.promotionData?.promoImage}
         title="Miet- & Bookingvertrag verriegeln"
         subtitle="Verifiziere Vertragscenter basierend auf deiner zugesagten Crew."
-        /* isOwner={isOwner} */
+        isOwner={isOwner}
         onBack={onBack}
       />
 

@@ -142,7 +142,7 @@ const ownerLead =
         promoImage={promoData?.promoImage}
         title="Event-Promotion & Sichtbarkeit"
         subtitle="Verifiziere Promotion mit Vorschau auf die Radar-Search-Card."
-        /* isOwner={isOwner} */
+        isOwner={isOwner}
         onBack={onBack}
       />
 

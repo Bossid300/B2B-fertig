@@ -256,7 +256,7 @@ const addFromShortlist = (eventId, profileName) => {
         promoImage={activeEvent?.promotionData?.promoImage}
         title="Crew-Shortlist"
         subtitle="Verifiziere Crew & Favoriten."
-        /* isOwner={isOwner} */
+        isOwner={isOwner}
         onBack={onBack}
       />
 

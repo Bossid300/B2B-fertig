@@ -56,6 +56,9 @@ useEffect(() => {
       
       if (reqIndex > -1) {
         const targetReq = savedRequests[reqIndex];
+
+        console.log("TARGET REQUEST", targetReq);
+
         targetReq.status = newStatus;
         savedRequests[reqIndex] = targetReq;
         localStorage.setItem('gigsda_crew_requests', JSON.stringify(savedRequests));
@@ -75,9 +78,15 @@ useEffect(() => {
         }
 
         if (eventIndex > -1 && savedEvents[eventIndex].crew) {
-          // Sucht das Crewmitglied (z.B. Winston Jud) im Event heraus
-          const memberIndex = savedEvents[eventIndex].crew.findIndex(m => m && m.name.toLowerCase() === targetReq.requestedProfile.toLowerCase());
-          
+          // Sucht das Crewmitglied im Event heraus
+
+          const memberIndex =
+            savedEvents[eventIndex].crew.findIndex(
+              m =>
+                m &&
+                m.id === targetReq.requestedProfileId
+            );
+
           if (memberIndex > -1) {
             savedEvents[eventIndex].crew[memberIndex].status = newStatus;
             
