@@ -10,22 +10,17 @@ export default function ContractCenter({ onBack, progress, setProgress, onNaviga
     localStorage.getItem("gigsda_profiles") || "[]"
   );
 
+  const ownerName =
+    profiles.find(
+      p => p.id === activeEvent?.ownerId
+    )?.name || "Unbekannt";
+
   const crewProfiles = profiles.filter(
     p => activeEvent?.crewIds?.includes(p.id)
   );
 
-  const currentUserName =
-    localStorage.getItem('gigsda_user_name');
-
-  const currentProfile =
-    profiles.find(
-      p =>
-        (p.name || '').toLowerCase() ===
-        (currentUserName || '').toLowerCase()
-    );
-
   const currentUserId =
-    currentProfile?.id;
+    localStorage.getItem('gigsda_profile_id');
 
   const isOwner =
     activeEvent?.ownerId === currentUserId;
@@ -379,6 +374,8 @@ const handleSendDeal = () => {
     printWindow.document.close();
   };
 
+
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
       {/* GLOBALER FAHRPLAN */}
@@ -391,6 +388,7 @@ const handleSendDeal = () => {
         title="Miet- & Bookingvertrag verriegeln"
         subtitle="Verifiziere Vertragscenter basierend auf deiner zugesagten Crew."
         isOwner={isOwner}
+        ownerName={ownerName}
         onBack={onBack}
       />
 

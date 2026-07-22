@@ -12,6 +12,27 @@ export default function StageSpecs({
   activeEvent 
 }) {
 
+  const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
+
+
+  const ownerName = profiles.find(
+    p => p.id === activeEvent?.ownerId
+  )?.name || "Unbekannt";
+
+  const currentUserName =
+    localStorage.getItem("gigsda_user_name");
+
+  const currentProfile = profiles.find(
+    p =>
+      (p.name || "").toLowerCase() ===
+      (currentUserName || "").toLowerCase()
+  );
+
+  const currentUserId = currentProfile?.id;
+
+  const isOwner =
+    activeEvent?.ownerId === currentUserId;
+
   const [isApproved, setIsApproved] = useState(false);
 
   // Holt die crewIds aus dem aktiven Event
@@ -113,7 +134,8 @@ export default function StageSpecs({
       promoImage={activeEvent?.promotionData?.promoImage}
       title="StageSpecs & Bühnen-Patching"
       subtitle="Verifiziere Crew & Favoriten."
-      /* isOwner={isOwner} */
+      isOwner={isOwner}
+      ownerName={ownerName}
       onBack={onBack}
     />
 
@@ -198,6 +220,7 @@ export default function StageSpecs({
               const profiles = JSON.parse(
                 localStorage.getItem("gigsda_profiles") || "[]"
               );
+
               const member = profiles.find(
                 p => p.id === crewId
               );

@@ -133,6 +133,14 @@ const profiles = JSON.parse(
   localStorage.getItem("gigsda_profiles") || "[]"
 );
 
+
+const ownerName =
+  profiles.find(
+    p => p.id === activeEvent?.ownerId
+  )?.name || "Unbekannt";
+
+
+
 const crewProfiles = profiles.filter(
   p => activeEvent?.crewIds?.includes(p.id)
 );
@@ -344,6 +352,7 @@ const isOwner =
         title="Event-Planner & Ablaufplan"
         subtitle="Regle die zeitliche Taktung für den Einlass, Soundcheck und den Live-Auftritt vor Ort."
         isOwner={isOwner}
+        ownerName={ownerName}
         onBack={onBack}
       />
 

@@ -14,8 +14,6 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(1);
 
-  const currentUserName =
-    localStorage.getItem("gigsda_user_name"); /// #
   const currentProfileId =
     localStorage.getItem("gigsda_profile_id");
   useEffect(() => {

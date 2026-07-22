@@ -4,6 +4,7 @@ export default function EventHeaderBox({
   title,
   subtitle,
   isOwner,
+  ownerName,
   onBack
 }) {
   return (
@@ -60,7 +61,10 @@ export default function EventHeaderBox({
             </span>
 
             <p className="text-sm text-cyan-400 mt-2">
-              {isOwner ? "👑 Owner" : "🎭 Crew"}
+              {isOwner
+                ? `👑 Owner: ${ownerName}`
+                : `🎭 Crew`
+              }
             </p>
           </>
         )}

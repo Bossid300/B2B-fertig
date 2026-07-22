@@ -5,6 +5,14 @@ export default function UniversalSearchCard({ profile, currentSector, viewMode, 
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef(null);
   const [favState, setFavState] = useState(false);
+
+const currentProfileId =
+  localStorage.getItem('gigsda_profile_id');
+
+const favoriteKey =
+  `gigsda_favorites_${currentProfileId}`;
+
+
   const handlePlayPause = (e, url) => {
     e.stopPropagation();
     if (!url) return;
@@ -29,7 +37,11 @@ export default function UniversalSearchCard({ profile, currentSector, viewMode, 
   };
 
   useEffect(() => {
-    const favs = JSON.parse(localStorage.getItem("gigsda_favorites")) || [];
+    const favs = 
+      JSON.parse(
+        localStorage.getItem(favoriteKey)
+      ) || [];
+
     setFavState(favs.includes(profile.id));
   }, [profile.id]);
 
@@ -62,7 +74,11 @@ export default function UniversalSearchCard({ profile, currentSector, viewMode, 
     } else {
       favs.push(id);
     }
-    localStorage.setItem("gigsda_favorites", JSON.stringify(favs));
+      localStorage.setItem(
+      favoriteKey,
+      JSON.stringify(favs)
+    );
+
   };
 
   const isFav = favState;

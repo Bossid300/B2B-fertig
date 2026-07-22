@@ -243,6 +243,12 @@ const addFromShortlist = (eventId, profileName) => {
   }, [shortlistProgress, setProgress]);
   // ENDE STATUSBERECHNUNG
 
+  const ownerName =
+    profiles.find(
+      p => p.id === currentEvent?.ownerId
+    )?.name || "Unbekannt";
+
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
       
@@ -257,6 +263,7 @@ const addFromShortlist = (eventId, profileName) => {
         title="Crew-Shortlist"
         subtitle="Verifiziere Crew & Favoriten."
         isOwner={isOwner}
+        ownerName={ownerName}
         onBack={onBack}
       />
 

@@ -9,13 +9,23 @@ export default function ProfileNetworkBox({ currentProfileName, isOwner }) {
 
   const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
   const loggedInUser = localStorage.getItem('gigsda_user_name') || '';
+
+  const currentProfileId =
+    localStorage.getItem('gigsda_profile_id');
+
+  const favoriteKey =
+    `gigsda_favorites_${currentProfileId}`;
+
   const canEditPrivacy = isOwner || targetUser.toLowerCase() === loggedInUser.toLowerCase();
 
   // 1. DYNAMIC B2B NETWORK & METRIC ENGINE
   useEffect(() => {
     const savedProfiles = localStorage.getItem('gigsda_profiles');
     const savedRequests = localStorage.getItem('gigsda_crew_requests');
-    const savedFavs = localStorage.getItem('gigsda_favorites');
+    
+    const savedFavs =
+      localStorage.getItem(favoriteKey);
+
 
     if (savedProfiles) {
       try {

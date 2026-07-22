@@ -33,6 +33,9 @@ const roleStyles = {
   Fan:
     "bg-slate-500/10 border border-slate-500/30 text-slate-300"
 };
+
+  if (!user) return null;
+  
 const role = user.role || user.type || "Künstler";
 const roleClass =
   roleStyles[role] ||

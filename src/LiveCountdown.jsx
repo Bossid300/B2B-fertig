@@ -5,6 +5,29 @@ import EventHeaderBox from "./components/EventHeaderBox";
 
 export default function LiveCountdown({ onBack, progress, onNavigateToStep, setProgress, onTriggerGate, activeEvent }) {
 
+const profiles = JSON.parse(
+  localStorage.getItem("gigsda_profiles") || "[]"
+);
+
+const currentUserName =
+  localStorage.getItem("gigsda_user_name");
+
+const currentProfile = profiles.find(
+  p =>
+    (p.name || "").toLowerCase() ===
+    (currentUserName || "").toLowerCase()
+);
+
+const currentUserId = currentProfile?.id;
+
+const isOwner =
+  activeEvent?.ownerId === currentUserId;
+
+const ownerName =
+  profiles.find(
+    p => p.id === activeEvent?.ownerId
+  )?.name || "Unbekannt";
+
   const countdownStatus =
     activeEvent?.countdownStatus || {};
   const [ticketCount, setTicketCount] = useState(
@@ -124,6 +147,11 @@ const countdownReady =
   progress.planner === 100 &&
   progress.promotion === 100;
 
+
+
+
+
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
       
@@ -137,7 +165,8 @@ const countdownReady =
         promoImage={activeEvent?.promotionData?.promoImage}
         title="Live-Countdown & Fan-Signal"
         subtitle="Überwache den Einlass an den Gates und alarmiere die Fangemeinde kurz vor der Show."
-        /* isOwner={isOwner} */
+        isOwner={isOwner}
+        ownerName={ownerName}
         onBack={onBack}
       />
 

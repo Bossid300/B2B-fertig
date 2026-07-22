@@ -49,18 +49,9 @@ export default function IncomingMessages() {
       try {
         const requests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
 
-        // aktueller User
-        const currentUserName = localStorage.getItem('gigsda_user_name');
+        const currentUserId =
+        localStorage.getItem('gigsda_profile_id');
 
-        const currentUser = {
-          name: currentUserName
-        };
-
-        const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
-        const currentProfile = profiles.find(p =>
-          (p.name || '').toLowerCase() === (currentUserName || '').toLowerCase()
-        );
-        const currentUserId = currentProfile?.id;
         const filtered = requests.filter(r =>
           r.requestedProfileId === currentUserId
         );
@@ -186,6 +177,12 @@ export default function IncomingMessages() {
 
 
 
+  const openRequests = incomingRequests.filter(
+    req =>
+      req.status === 'pending' ||
+      req.status === 'counter_offer'
+  );
+
 
 
   return (
@@ -197,7 +194,7 @@ export default function IncomingMessages() {
           // Projektanfragen & Bestätigungen
         </span>
         <span className="text-[10px] text-slate-500">
-          {incomingRequests.length} Offen
+          {openRequests.length} Offen
         </span>
       </div>
 

@@ -15,6 +15,12 @@ export default function FanProfile({ onBack, ticketName, isOwner }) {
 
   const targetUser = ticketName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
 
+  const currentProfileId =
+    localStorage.getItem('gigsda_profile_id');
+
+  const favoriteKey =
+    `gigsda_favorites_${currentProfileId}`;
+    
   // 1. DATABASE PIPELINE: Lädt die Profildaten, um Favoriten-Status zu prüfen
   useEffect(() => {
     const savedProfiles = localStorage.getItem('gigsda_profiles');
@@ -35,23 +41,34 @@ export default function FanProfile({ onBack, ticketName, isOwner }) {
     }
 
     // Prüft, ob der User in deiner Favoritenliste steht
-    const savedFavs = JSON.parse(localStorage.getItem('gigsda_favorites') || '[]');
-    setIsFavorite(savedFavs.includes(targetUser));
-  }, [targetUser]);
+    const savedFavs =
+      JSON.parse(
+        localStorage.getItem(favoriteKey) || '[]'
+      );
+        setIsFavorite(savedFavs.includes(profileData?.id));
+    }, [targetUser]);
 
-  // 2. FAVORITEN PIPELINE: Schaltet den Stern live im LocalStorage um
-  const handleToggleFavorite = () => {
-    let savedFavs = JSON.parse(localStorage.getItem('gigsda_favorites') || '[]');
-    if (savedFavs.includes(targetUser)) {
-      savedFavs = savedFavs.filter(f => f !== targetUser);
-      setIsFavorite(false);
-    } else {
-      savedFavs.push(targetUser);
-      setIsFavorite(true);
-    }
-    localStorage.setItem('gigsda_favorites', JSON.stringify(savedFavs));
-    window.dispatchEvent(new Event('storage')); // UI-Schubs für reaktive Listen
-  };
+    // 2. FAVORITEN PIPELINE: Schaltet den Stern live im LocalStorage um
+    const handleToggleFavorite = () => {
+      let savedFavs =
+        JSON.parse(
+          localStorage.getItem(favoriteKey) || '[]'
+        );
+      if (savedFavs.includes(profileData?.id)) {
+          savedFavs = savedFavs.filter(
+          f => f !== profileData?.id
+        );
+        setIsFavorite(false);
+      } else {
+        savedFavs.push(profileData?.id);
+        setIsFavorite(true);
+      }
+      localStorage.setItem(
+        favoriteKey,
+        JSON.stringify(savedFavs)
+      );
+      window.dispatchEvent(new Event('storage')); // UI-Schubs für reaktive Listen
+    };
 
   // Verhindert Flackern während die Daten laden
   if (!profileData) {

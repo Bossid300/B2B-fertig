@@ -7,13 +7,21 @@ export default function CrewFavoritenListe({ onNavigate }) {
   const [allProfiles, setAllProfiles] = useState([]);
 
 
+  const currentProfileId =
+    localStorage.getItem('gigsda_profile_id');
+
+  const favoriteKey =
+    `gigsda_favorites_${currentProfileId}`;
+
   // SYSTEM-ROLES FÜR DIE GEWERKE-FILTER MATRIX
   const ROLES_LIST = ['all', 'Künstler', 'Catering', 'Rental', 'Location', 'Techniker', 'Logistik', 'Security', 'Design'];
 
   // 📡 SAUBERE PROD-LEITUNG: Lädt nur echte, vom User gewählte Favoriten
   useEffect(() => {
     try {
-      const savedFavs = JSON.parse(localStorage.getItem('gigsda_favorites') || '[]');
+      const savedFavs = JSON.parse(
+        localStorage.getItem(favoriteKey) || '[]'
+      );
       setFavorites(savedFavs);
     } catch (e) { 
       console.error("Fehler beim Laden der Favoriten:", e); 
@@ -36,7 +44,10 @@ export default function CrewFavoritenListe({ onNavigate }) {
 
   const removeFavorite = (id) => {
     const updated = favorites.filter(f => f !== id);
-    localStorage.setItem('gigsda_favorites', JSON.stringify(updated));
+    localStorage.setItem(
+    favoriteKey,
+    JSON.stringify(updated)
+  );
     setFavorites(updated);
   };
 

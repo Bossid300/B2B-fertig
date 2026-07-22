@@ -106,6 +106,12 @@ const profiles = JSON.parse(
   localStorage.getItem('gigsda_profiles') || '[]'
 );
 
+const ownerName =
+  profiles.find(
+    p => p.id === activeEvent?.ownerId
+  )?.name || "Unbekannt";
+
+
 const currentProfile = profiles.find(
   p =>
     (p.name || '').toLowerCase() ===
@@ -143,6 +149,7 @@ const ownerLead =
         title="Event-Promotion & Sichtbarkeit"
         subtitle="Verifiziere Promotion mit Vorschau auf die Radar-Search-Card."
         isOwner={isOwner}
+        ownerName={ownerName}
         onBack={onBack}
       />
 
