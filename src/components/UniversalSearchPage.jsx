@@ -6,6 +6,12 @@ import { useUniversalSearch } from "../hooks/useUniversalSearch";
 export default function UniversalSearchPage({ onNavigate, setView }) {
   const [viewMode, setViewMode] = useState("compact");
 
+  const currentProfileId =
+    localStorage.getItem('gigsda_profile_id');
+
+  const favoriteKey =
+    `gigsda_favorites_${currentProfileId}`;
+
   const {
     currentSector,
     setCurrentSector,
@@ -22,7 +28,7 @@ export default function UniversalSearchPage({ onNavigate, setView }) {
 
   {/* FAVORITEN */}
   const getFavorites = () => {
-  return JSON.parse(localStorage.getItem("gigsda_favorites")) || [];
+  return JSON.parse(localStorage.getItem(favoriteKey)) || [];
   };
   const toggleFavorite = (id) => {
     let favs = getFavorites();
@@ -31,7 +37,9 @@ export default function UniversalSearchPage({ onNavigate, setView }) {
     } else {
       favs.push(id);
     }
-    localStorage.setItem("gigsda_favorites", JSON.stringify(favs));
+    localStorage.setItem(favoriteKey,
+      JSON.stringify(favs)
+    );
   };
 
   return (

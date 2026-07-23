@@ -6,12 +6,11 @@ export default function UniversalSearchCard({ profile, currentSector, viewMode, 
   const audioRef = useRef(null);
   const [favState, setFavState] = useState(false);
 
-const currentProfileId =
-  localStorage.getItem('gigsda_profile_id');
+  const currentProfileId =
+    localStorage.getItem('gigsda_profile_id');
 
-const favoriteKey =
-  `gigsda_favorites_${currentProfileId}`;
-
+  const favoriteKey =
+    `gigsda_favorites_${currentProfileId}`;
 
   const handlePlayPause = (e, url) => {
     e.stopPropagation();
@@ -65,7 +64,7 @@ const favoriteKey =
 
   // FAVORITEN
   const getFavorites = () => {
-    return JSON.parse(localStorage.getItem("gigsda_favorites")) || [];
+    return JSON.parse(localStorage.getItem(favoriteKey)) || [];
   };
   const toggleFavorite = (id) => {
     let favs = getFavorites();
@@ -107,7 +106,7 @@ const favoriteKey =
             e.stopPropagation();
             toggleFavorite(profile.id);
 
-            const favs = JSON.parse(localStorage.getItem("gigsda_favorites")) || [];
+            const favs = JSON.parse(localStorage.getItem(favoriteKey)) || [];
             setFavState(favs.includes(profile.id));
           }}
           className="text-yellow-400 hover:scale-120 transition"

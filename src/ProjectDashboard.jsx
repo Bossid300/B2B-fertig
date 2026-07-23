@@ -18,6 +18,9 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
     ];
   });
 
+console.log("Dashboard Events", events.length);
+console.log("Props Events", propsEvents);
+
   // Hält den lokalen Zustand synchron mit der App.jsx Festplatte
   useEffect(() => {
     localStorage.setItem('gigsda_events', JSON.stringify(events));
