@@ -270,8 +270,10 @@ export default function App() {
   }, []);
   
   // 🛰️ EIGENE LEITUNG FÜR DEN GAST-SUCHER (VERGISS JEDE ANDERE VARIABLE!)
-  const [activeGuestArtist, setActiveGuestArtist] = useState('');
- 
+  const [activeGuestArtist, setActiveGuestArtist] = useState(
+    () => localStorage.getItem('gigsda_active_guest_artist') || ''
+  );
+
   const [ticketName, setTicketName] = useState(() => {
     return localStorage.getItem('gigsda_user_name') || 'Gast';
   });
@@ -489,8 +491,6 @@ export default function App() {
 
   }, []);
 
-
-
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-slate-950 antialiased overflow-x-hidden flex flex-col justify-between font-mono">
  
@@ -614,7 +614,8 @@ export default function App() {
               onBack={() => setView('landing')} 
               setFavorites={(artistView) => {
                 // ⚡ DIE RETTUNG: Schreibt den Namen in die Variable, die das Profilboard hören kann!
-                setActiveGuestArtist(artistView); 
+                setActiveGuestArtist(artistView);
+                localStorage.setItem('gigsda_active_guest_artist', artistView);
                 setView('profile');
               }}
             />
@@ -626,7 +627,8 @@ export default function App() {
               onBack={() => setView('projects')} 
               setFavorites={(artistView) => {
                 // ⚡ DIE RETTUNG: Schreibt den Namen in die Variable, die das Profilboard hören kann!
-                setActiveGuestArtist(artistView); 
+                setActiveGuestArtist(artistView);
+                localStorage.setItem('gigsda_active_guest_artist', artistView);
                 setView('profile');
               }}
             />
@@ -698,7 +700,7 @@ export default function App() {
                 const activeData = localStorage.getItem('gigsda_active_event');
                 if (activeData) {
                   const parsedActive = JSON.parse(activeData);
-                  const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || localStorage.getItem('gigsda_projects') || '[]');
+                  const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
                   
                   // Sucht erst nach der ID, und falls das fehlschlägt oder doppelt ist, nach dem exakten Titel!
                   const found = savedEvents.find(ev => ev && (
@@ -722,7 +724,8 @@ export default function App() {
               onNavigateToStep={setView}
               setFavorites={(artistView) => {
 
-                setActiveGuestArtist(artistView);
+                setActiveGuestArtist(name);
+                localStorage.setItem('gigsda_active_guest_artist', name);
                 setView('profile');
               }}
             />;
@@ -792,6 +795,7 @@ export default function App() {
               // beamen wir den User direkt auf das schreibgeschützte Portfolio!
               setFavorites={(artistView) => {
                 setActiveGuestArtist(artistView);
+                localStorage.setItem('gigsda_active_guest_artist', artistView);
                 setView('profile');
               }}
             />
@@ -801,8 +805,9 @@ export default function App() {
           {view === 'artists' && (
             <UniversalSearchPage 
               onNavigate={(name) => {
-                setActiveGuestArtist(name); // Setzt den Namen exakt wie in Zeile 543
-                setView('profile');          // Wechselt in dein funktionierendes Profil aus Zeile 544
+                setActiveGuestArtist(name);
+                localStorage.setItem('gigsda_active_guest_artist', name);
+                setView('profile');
               }}
               setView={setView}
             />

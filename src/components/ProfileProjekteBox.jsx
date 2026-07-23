@@ -13,7 +13,7 @@ export default function ProfileProjekteBox({ currentProfileName, isOwner }) {
   // 1. NESTED CREW PIPELINE: Filtert die Einsätze direkt aus den Event-Objekten!
   useEffect(() => {
     const savedProfiles = localStorage.getItem('gigsda_profiles');
-    const savedEvents = localStorage.getItem('gigsda_events') || localStorage.getItem('gigsda_projects') || '[]';
+    const savedEvents = localStorage.getItem('gigsda_events') || '[]';
 
     if (savedProfiles) {
       try {

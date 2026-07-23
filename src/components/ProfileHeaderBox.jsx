@@ -72,9 +72,23 @@ export default function ProfileHeaderBox({
   // Lädt die B2B-Projekte für die Anfragemaske
   useEffect(() => {
     if (isRequestMaskOpen) {
-      const savedProjects = localStorage.getItem('gigsda_projects');
-      if (savedProjects) {
-        try { setMyProjects(JSON.parse(savedProjects) || []); } catch (e) { console.error(e); }
+      try {
+
+        const savedEvents = JSON.parse(
+          localStorage.getItem('gigsda_events') || '[]'
+        );
+
+        const currentProfileId =
+          localStorage.getItem('gigsda_profile_id');
+
+        const myEvents = savedEvents.filter(
+          ev => ev.ownerId === currentProfileId
+        );
+
+        setMyProjects(myEvents);
+
+      } catch (e) {
+        console.error(e);
       }
     }
   }, [isRequestMaskOpen]);

@@ -18,8 +18,18 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
 
   useEffect(() => {
     try {
-      const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
-      setEvents(savedEvents);
+      const savedEvents = JSON.parse(
+        localStorage.getItem('gigsda_events') || '[]'
+      );
+
+      const currentProfileId =
+        localStorage.getItem('gigsda_profile_id');
+
+      const myEvents = savedEvents.filter(
+        ev => ev.ownerId === currentProfileId
+      );
+
+      setEvents(myEvents);
     } catch (e) {
       console.error("Fehler beim Laden der Events im Explorer:", e);
     }

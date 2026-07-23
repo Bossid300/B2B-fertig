@@ -66,10 +66,24 @@ export default function CrewFavoritenListe({ onNavigate }) {
   // Lade die aktuell erstellten Events des Veranstalters beim Start
   useEffect(() => {
     try {
-      const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
-      setEvents(savedEvents);
-    } catch (e) { console.error("Fehler beim Event-Load:", e); }
+      const savedEvents = JSON.parse(
+        localStorage.getItem('gigsda_events') || '[]'
+      );
+
+      const currentProfileId =
+        localStorage.getItem('gigsda_profile_id');
+
+      const myEvents = savedEvents.filter(
+        ev => ev.ownerId === currentProfileId
+      );
+
+      setEvents(myEvents);
+
+    } catch (e) {
+      console.error("Fehler beim Event-Load:", e);
+    }
   }, [activeSelectFav]);
+
 
   // ⚡ INJIZIERT DEN FAVORITEN IN DIE CREWLISTE DES AUSGEWÄHLTEN EVENTS
   const handleAddFavToProject = (eventId, fav) => {
