@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Send, Users, ShieldCheck, MapPin } from 'lucide-react';
 
+import { eventService } from './services/eventService';
+
 export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
 
   const currentUserName = localStorage.getItem('gigsda_user_name');
@@ -11,7 +13,7 @@ export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
   const currentUserId = currentProfile?.id || "";
 
   const activeStub = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
-  const events = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+  const events = eventService.getEvents();
 
   const activeEvent = events.find(e => e.id === activeStub?.id);
   const hasAccess =
@@ -25,7 +27,7 @@ export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
 
 const crewChannels = (() => {
   const activeStub = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
-  const events = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+  const events = eventService.getEvents();
   const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
 
   const currentEvent = events.find(e => e.id === activeStub?.id);

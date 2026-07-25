@@ -40,8 +40,12 @@ import CommunityChat from './CommunityChat';
 
 import { initialUsers, initialProfiles } from './data/mockData';
 import ArtistPortfolio from "./components/ArtistPortfolio";
- 
+
+import { eventService } from './services/eventService';
+
 export default function App() {
+
+
     // 📡 REAKTIVER CREW-ALARM EMPFÄNGER
   const [hasPendingRequests, setHasPendingRequests] = useState(false);
 
@@ -310,44 +314,8 @@ export default function App() {
   }, []);
 
  
-  // Deine geschützte Multi-Event-Datenbank mit dem crewIds-Array
   const [events, setEvents] = useState(() => {
-    const saved = localStorage.getItem('gigsda_events');
-    return saved ? JSON.parse(saved) : [
-      { 
-        id: "EVT-2026-01", 
-        title: "Winston Jud Live", 
-        type: "Clubshow", 
-        date: "Fr, 18. Sept 2026", 
-        doneProgress: 35, 
-        venue: "Backstage Halle",
-        text: "Crew-Shortlist befüllt. Warte auf technischen Rider-Abgleich.",
-        ownerId: "GIGS-7677",    // 🔥 wer hat es erstellt
-        crewIds: ["GIGS-3344"]
-      },
-      { 
-        id: "EVT-2026-02", 
-        title: "Winston Jud OpenAir", 
-        type: "Festival", 
-        date: "Sa, 15. Aug 2026", 
-        doneProgress: 0, 
-        venue: "Stadtpark Wiese, Braunau",
-        text: "Event frisch initialisiert. Starte die Crew-Suche im Radar.",
-        ownerId: "GIGS-7677",    // 🔥 wer hat es erstellt
-        crewIds: ["GIGS-3344"] 
-      },
-      { 
-        id: "EVT-2026-03", 
-        title: "Winston Jud @ The Jazz Cave", 
-        type: "Clubshow", 
-        date: "Sa, 10. Okt 2026", 
-        doneProgress: 100, 
-        venue: "The Jazz Cave",
-        text: "Alle Meilensteine verriegelt. Live-Countdown läuft im Netz.",
-        ownerId: "GIGS-7677",    // 🔥 wer hat es erstellt
-        crewIds: ["GIGS-3344"] 
-      }
-    ];
+    return eventService.getEvents();
   });
  
 
@@ -475,7 +443,10 @@ export default function App() {
         setActiveEvent(storedEvent);
       }
 
+      setEvents(eventService.getEvents());
     };
+
+
 
     window.addEventListener(
       "active-event-updated",
@@ -490,6 +461,19 @@ export default function App() {
     };
 
   }, []);
+
+
+
+
+  const freshActiveEvent =
+  eventService
+    .getEvents()
+    .find(e => e.id === activeEvent?.id)
+  || activeEvent;
+
+
+
+
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-slate-950 antialiased overflow-x-hidden flex flex-col justify-between font-mono">
@@ -700,7 +684,7 @@ export default function App() {
                 const activeData = localStorage.getItem('gigsda_active_event');
                 if (activeData) {
                   const parsedActive = JSON.parse(activeData);
-                  const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+                  const savedEvents = eventService.getEvents();
                   
                   // Sucht erst nach der ID, und falls das fehlschlägt oder doppelt ist, nach dem exakten Titel!
                   const found = savedEvents.find(ev => ev && (
@@ -748,27 +732,64 @@ export default function App() {
           )}
 
           {view === 'shortlist' && isLoggedIn && (
-            <CrewShortlist onBack={() => setView('projects')} progress={progress} setProgress={setProgress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} setFavorites={handleUpdateCrewForEvent} />
+          <CrewShortlist
+            onBack={() => setView('projects')}
+            progress={progress}
+            setProgress={setProgress}
+            activeEvent={freshActiveEvent}
+            onNavigateToStep={setView}
+            setFavorites={handleUpdateCrewForEvent}
+/>
           )}
  
           {view === 'stage' && isLoggedIn && (
-            <StageSpecs onBack={() => setView('shortlist')} progress={progress} setProgress={setProgress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} onApproveSuccess={() => setProgress(prev => ({ ...prev, stage: 100 }))} />
+            <StageSpecs
+              onBack={() => setView('shortlist')}
+              progress={progress}
+              setProgress={setProgress}
+              activeEvent={freshActiveEvent}
+              onNavigateToStep={setView}
+              onApproveSuccess={() =>
+                setProgress(prev => ({ ...prev, stage: 100 }))
+              }
+            />
           )}
  
           {view === 'contract' && isLoggedIn && (
-            <ContractCenter onBack={() => setView('projects')} progress={progress} setProgress={setProgress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} onContractSigned={() => setProgress(prev => ({ ...prev, contract: 100 }))} />
+            <ContractCenter 
+            onBack={() => setView('projects')} 
+            progress={progress} setProgress={setProgress} 
+            activeEvent={freshActiveEvent} 
+            onNavigateToStep={setView} 
+            onContractSigned={() => setProgress(prev => ({ ...prev, contract: 100 }))} 
+            />
           )}
  
           {view === 'voting' && isLoggedIn && (
-            <TeamVoting onBack={() => setView('projects')} progress={progress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} onVoteSuccess={() => setProgress(prev => ({ ...prev, voting: 100 }))} />
+            <TeamVoting onBack={() => setView('projects')} 
+            activeEvent={freshActiveEvent} 
+            onNavigateToStep={setView} 
+            onVoteSuccess={() => setProgress(prev => ({ ...prev, voting: 100 }))} 
+            />
           )}
  
           {view === 'planner' && isLoggedIn && (
-            <EventPlanner onBack={() => setView('projects')} progress={progress} setProgress={setProgress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} onStepSuccess={() => setProgress(prev => ({ ...prev, planner: 100 }))} />
+            <EventPlanner onBack={() => setView('projects')} 
+            progress={progress} 
+            setProgress={setProgress} 
+            activeEvent={freshActiveEvent}
+            onNavigateToStep={setView} 
+            onStepSuccess={() => setProgress(prev => ({ ...prev, planner: 100 }))} 
+            />
           )}
  
           {view === 'countdown' && isLoggedIn && (
-            <LiveCountdown onBack={() => setView('projects')} progress={progress} activeEvent={events.find(e => e.id === activeEvent?.id) || activeEvent} onNavigateToStep={setView} setProgress={setProgress} onTriggerGate={triggerGate} />
+            <LiveCountdown onBack={() => setView('projects')} 
+            progress={progress} 
+            activeEvent={freshActiveEvent}
+            onNavigateToStep={setView} 
+            setProgress={setProgress} onTriggerGate={triggerGate} 
+            />
           )}
  
           {view === 'promotion' && isLoggedIn && (
@@ -776,9 +797,7 @@ export default function App() {
               onBack={() => setView('planner')}
               progress={progress}
               setProgress={setProgress}
-              activeEvent={events.find(
-                e => e.id === activeEvent?.id
-              )}
+              activeEvent={freshActiveEvent}
               onNavigateToStep={setView}
             />
           )}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HelpCircle, Save, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
+import { eventService } from '../services/eventService';
 
 export default function ProfileHilfeBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -53,19 +54,45 @@ export default function ProfileHilfeBox({ currentProfileName, isOwner }) {
     e.preventDefault();
     const savedProfiles = localStorage.getItem('gigsda_profiles');
     if (!savedProfiles) return;
-
     try {
       let allProfiles = JSON.parse(savedProfiles);
       if (!Array.isArray(allProfiles)) return;
-
       allProfiles = allProfiles.map(p => {
         if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
           return { ...p, hilfe_status: hilfeStatus, hilfe_categories: categories, show_hilfe: showHilfe };
         }
         return p;
       });
-
       localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
+      const currentProfileId =
+        localStorage.getItem('gigsda_profile_id');
+
+      const events = eventService.getEvents();
+      const updatedEvents = events.map(event => {
+        if (!event.riderCenter?.[currentProfileId]) {
+          return event;
+        }
+        return {
+          ...event,
+          riderCenter: {
+            ...event.riderCenter,
+
+            [currentProfileId]: {
+            ...event.riderCenter[currentProfileId],
+              confirmed: false,
+              changed: true,
+              changedAt: Date.now()
+            }
+          }
+        };
+      });
+      eventService.saveEvents(updatedEvents);
+      window.dispatchEvent(
+        new CustomEvent('active-event-updated')
+      );
+      window.dispatchEvent(
+        new CustomEvent('rider-updated')
+      );
       alert("B2B Support- & Hilfsprotokoll erfolgreich eingebrannt! 🏗️📄");
       setIsEditing(false);
       window.dispatchEvent(new Event('storage'));
@@ -84,6 +111,9 @@ export default function ProfileHilfeBox({ currentProfileName, isOwner }) {
 
   const isVisible = showHilfe || canEdit;
   if (!isVisible) return null;
+
+
+
 
   return (
     <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">

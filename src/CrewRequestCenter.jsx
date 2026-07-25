@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
+import { eventService } from './services/eventService';
+
 export default function CrewRequestCenter({ currentProfileName }) {
   const [requests, setRequests] = useState([]);
   const [counterText, setCounterText] = useState('');
@@ -57,14 +59,12 @@ useEffect(() => {
       if (reqIndex > -1) {
         const targetReq = savedRequests[reqIndex];
 
-        console.log("TARGET REQUEST", targetReq);
-
         targetReq.status = newStatus;
         savedRequests[reqIndex] = targetReq;
         localStorage.setItem('gigsda_crew_requests', JSON.stringify(savedRequests));
 
         // 2. 🔗 PANZERGLAS-PROJEKT-SYNCHRONISATION
-        const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+        const savedEvents = eventService.getEvents();
         
         // WEG A: Versucht das Event über den exakten Namen aus der Anfrage zu finden
         let eventIndex = savedEvents.findIndex(ev => ev && (ev.title === targetReq.eventName || ev.name === targetReq.eventName));
@@ -91,7 +91,7 @@ useEffect(() => {
             savedEvents[eventIndex].crew[memberIndex].status = newStatus;
             
             // Speichert den aktualisierten Stand in beiden Keys ab
-            localStorage.setItem('gigsda_events', JSON.stringify(savedEvents));
+            eventService.saveEvents(savedEvents);
           }
         }
 

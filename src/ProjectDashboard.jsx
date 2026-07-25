@@ -4,23 +4,18 @@ import CreateEventForm from './CreateEventForm';
 import CommunityChat from './CommunityChat';
 import IncomingMessages from './IncomingMessages';
 
+import { eventService } from './services/eventService';
+
 
 export default function ProjectDashboard({ onNavigateToStep, progress, onSelectEvent, events: propsEvents, onCreateEvent, ticketName }) {
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
   
-  // Lädt die Events direkt aus dem Speicher oder nutzt die 3 Standard-Shows
   const [events, setEvents] = useState(() => {
-    const saved = localStorage.getItem('gigsda_events');
-    return saved ? JSON.parse(saved) : [
-      { id: "EVT-2026-01", title: "Winston Jud Live", type: "Clubshow", date: "Fr, 18. Sept 2026", doneProgress: 35, text: "Crew-Shortlist befüllt. Warte auf technischen Rider-Abgleich.", venue: "Backstage Halle", crewIds: ["Jud-Winston", "spark", "luna"] },
-      { id: "EVT-2026-02", title: "Winston Jud OpenAir", type: "Festival", date: "Sa, 15. Aug 2026", doneProgress: 0, text: "Event frisch initialisiert. Starte die Crew-Suche im Radar.", venue: "Stadtpark Wiese, Braunau", crewIds: [] },
-      { id: "EVT-2026-03", title: "Winston Jud @ The Jazz Cave", type: "Clubshow", date: "Sa, 10. Okt 2026", doneProgress: 100, text: "Alle Meilensteine verriegelt. Live-Countdown läuft im Netz.", venue: "The Jazz Cave", crewIds: ["Jud-Winston", "cyber"] }
-    ];
+    return eventService.getEvents();
   });
 
-  // Hält den lokalen Zustand synchron mit der App.jsx Festplatte
   useEffect(() => {
-    localStorage.setItem('gigsda_events', JSON.stringify(events));
+    eventService.saveEvents(events);
   }, [events]);
 
   // 🗑️ LÖSCHT DAS EVENT NUN AUCH DIREKT VON DER FESTPLATTE
@@ -29,7 +24,7 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
     if (window.confirm("Möchtest du dieses Event wirklich unwiderruflich aus deinem Dashboard löschen? 🗑️")) {
       const remaining = events.filter(evt => evt.id !== eventId);
       setEvents(remaining);
-      localStorage.setItem('gigsda_events', JSON.stringify(remaining));
+      eventService.saveEvents(remaining);
     }
   };
 
@@ -111,7 +106,7 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
             // 💾 DER FESTPLATTEN-SPEICHER FÜR NEUE EVENTS
             const updatedList = [fresh, ...events];
             setEvents(updatedList);
-            localStorage.setItem('gigsda_events', JSON.stringify(updatedList));
+            eventService.saveEvents(updatedList);
 
             // Synchronisiert das neue Event hoch zur Hauptleitung (App.jsx)
             if (onCreateEvent) onCreateEvent(fresh); 

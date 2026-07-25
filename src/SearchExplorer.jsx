@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import ProfileCard from './components/cards/ProfileCard';
 
+import { eventService } from './services/eventService';
+
 export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat }) {
   const [allUsers, setAllUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,9 +20,7 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
 
   useEffect(() => {
     try {
-      const savedEvents = JSON.parse(
-        localStorage.getItem('gigsda_events') || '[]'
-      );
+      const savedEvents = eventService.getEvents();
 
       const currentProfileId =
         localStorage.getItem('gigsda_profile_id');
@@ -39,7 +39,7 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
   const handleSendRequestToProject = (eventId) => {
     try {
       const allRequests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
-      const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+      const savedEvents = eventService.getEvents();
       
       const targetEvent = savedEvents.find(ev => ev && (ev.id === eventId || ev.eventId === eventId || ev._id === eventId));
       if (!targetEvent) return;
@@ -85,7 +85,6 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
         };
         savedEvents.push(newEventPlaceholder);
         eventIndex = savedEvents.length - 1;
-        console.log(`📡 B2B-AutoCreation: Projekt "${eventTitle}" wurde frisch in gigsda_events verankert!`);
       }
 
       if (eventIndex > -1) {

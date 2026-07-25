@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Plus, X, Save, Eye, EyeOff, FileCheck, ShieldAlert } from 'lucide-react';
 
+import { eventService } from '../services/eventService';
+
 export default function ProfileComplianceBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
@@ -20,7 +22,7 @@ export default function ProfileComplianceBox({ currentProfileName, isOwner }) {
   // 1. DATABASE & VERIFICATION PIPELINE
   useEffect(() => {
     const savedProfiles = localStorage.getItem('gigsda_profiles');
-    const savedEvents = localStorage.getItem('gigsda_events') || '[]';
+    const savedEvents = eventService.getEvents();
 
     if (savedProfiles) {
       try {
@@ -36,7 +38,7 @@ export default function ProfileComplianceBox({ currentProfileName, isOwner }) {
 
           // 📐 ERHÖHTER B2B-SECURITY CHECK: Hat der Betrachter ein bestätigtes Event mit dem Inhaber?
           if (loggedInUser && targetUser.toLowerCase() !== loggedInUser.toLowerCase()) {
-            const allEvts = JSON.parse(savedEvents);
+            const allEvts = savedEvents;
             const isContractPartner = allEvts.some(evt => {
               if (!evt || !Array.isArray(evt.crew)) return false;
               const namesInCrew = evt.crew.map(m => m && m.name ? m.name.trim().toLowerCase() : '');

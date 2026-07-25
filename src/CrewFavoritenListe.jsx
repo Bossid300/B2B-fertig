@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import FavoritenCard from './components/cards/FavoritenCard';
 
+import { eventService } from './services/eventService';
+
 export default function CrewFavoritenListe({ onNavigate }) {
   const [favorites, setFavorites] = useState([]);
   const [filterRole, setFilterRole] = useState('all');
@@ -66,9 +68,7 @@ export default function CrewFavoritenListe({ onNavigate }) {
   // Lade die aktuell erstellten Events des Veranstalters beim Start
   useEffect(() => {
     try {
-      const savedEvents = JSON.parse(
-        localStorage.getItem('gigsda_events') || '[]'
-      );
+      const savedEvents = eventService.getEvents();
 
       const currentProfileId =
         localStorage.getItem('gigsda_profile_id');
@@ -88,7 +88,7 @@ export default function CrewFavoritenListe({ onNavigate }) {
   // ⚡ INJIZIERT DEN FAVORITEN IN DIE CREWLISTE DES AUSGEWÄHLTEN EVENTS
   const handleAddFavToProject = (eventId, fav) => {
     try {
-        const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+        const savedEvents = eventService.getEvents();
         
         // 📡 Sucht das Event über die ID heraus
         let eventIndex = savedEvents.findIndex(ev => ev && (ev.id === eventId || ev.eventId === eventId || ev._id === eventId));
@@ -110,7 +110,6 @@ export default function CrewFavoritenListe({ onNavigate }) {
           };
           savedEvents.push(newEventPlaceholder);
           eventIndex = savedEvents.length - 1;
-          console.log(`📡 Favoriten-AutoCreation: Projekt "${activeTitle}" wurde frisch angelegt!`);
         }
 
         // Sicherstellen, dass das gefundene/erstellte Event ein gültiges Crew-Array hat

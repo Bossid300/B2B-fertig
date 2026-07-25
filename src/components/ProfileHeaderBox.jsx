@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Pencil, X, Shield, Music, Landmark, Briefcase, MessageSquare, Eye, EyeOff } from 'lucide-react';
+import { eventService } from '../services/eventService';
 
 export default function ProfileHeaderBox({ 
   currentProfileName, 
@@ -74,9 +75,7 @@ export default function ProfileHeaderBox({
     if (isRequestMaskOpen) {
       try {
 
-        const savedEvents = JSON.parse(
-          localStorage.getItem('gigsda_events') || '[]'
-        );
+        const savedEvents = eventService.getEvents();
 
         const currentProfileId =
           localStorage.getItem('gigsda_profile_id');

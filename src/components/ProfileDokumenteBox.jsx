@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Plus, X, Save, Eye, EyeOff } from 'lucide-react';
+import { eventService } from '../services/eventService';
 
 export default function ProfileDokumenteBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -20,7 +21,7 @@ export default function ProfileDokumenteBox({ currentProfileName, isOwner }) {
   // 1. DATABASE & SECURITY PIPELINE: Lädt Dokumente & prüft Crew-Status des Besuchers
   useEffect(() => {
     const savedProfiles = localStorage.getItem('gigsda_profiles');
-    const savedEvents = localStorage.getItem('gigsda_events') || '[]';
+    const savedEvents = eventService.getEvents();
 
     if (savedProfiles) {
       try {
@@ -36,7 +37,7 @@ export default function ProfileDokumenteBox({ currentProfileName, isOwner }) {
 
           // Crew-Check: Ist der Betrachter in irgendeinem Event dieses Profils als "accepted" eingetragen?
           if (loggedInUser && targetUser.toLowerCase() !== loggedInUser.toLowerCase()) {
-            const allEvts = JSON.parse(savedEvents);
+            const allEvts = savedEvents;
             const commonEvent = allEvts.find(evt => {
               if (!evt || !Array.isArray(evt.crew)) return false;
               return evt.crew.some(m => 

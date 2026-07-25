@@ -12,6 +12,7 @@ export default function StageSpecs({
   activeEvent 
 }) {
 
+
   const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
 
 
@@ -117,6 +118,7 @@ export default function StageSpecs({
     "Veranstalter": "🩷",
     "Fan": "⚪"
   };
+
 
 
   return (

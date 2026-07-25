@@ -1,30 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import EventCard from './components/cards/EventCard';
 
+import { eventService } from './services/eventService';
+
 export default function GuestEvents({ onNavigate }) {
   const [events, setEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Alle');
   const [searchRadius, setSearchRadius] = useState(500); // 📡 Live-Suchumkreis
 
-  // 📁 EVENT-LOADER: Holt alle Events frisch von der Festplatte
   useEffect(() => {
-    // Falls Daniel ein separates Array nutzt, liest er 'gigsda_events' aus
-    const localEvents = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
-    
-    // Prototypen-Fallbacks, falls die Event-Tabelle beim allerersten Start noch leer ist
-    if (localEvents.length === 0) {
-      const demoEvents = [
-        { id: "EVT-8192", title: "Neon Club Night", category: "Club-Gigs", city: "Braunau", date: "15.07.2026", organizer: "Bossid", slide1_url: "https://unsplash.com" },
-        { id: "EVT-4431", title: "Rock am Inn Festival", category: "Festivals", city: "Altötting", date: "02.08.2026", organizer: "Winston Jud", slide1_url: "https://unsplash.com" },
-        { id: "EVT-2911", title: "Acoustic Songwriter Session", category: "Konzerte", city: "Linz", date: "22.08.2026", organizer: "Musica", slide1_url: "https://unsplash.com" },
-        { id: "EVT-9921", title: "B2B Gastro Expo", category: "B2B-Messen", city: "Wien", date: "10.09.2026", organizer: "Gigsda Network", slide1_url: "https://unsplash.com" }
-      ];
-      localStorage.setItem('gigsda_events', JSON.stringify(demoEvents));
-      setEvents(demoEvents);
-    } else {
-      setEvents(localEvents.filter(evt => evt && evt.title));
-    }
+    const localEvents = eventService.getEvents();
+    setEvents(localEvents.filter(evt => evt && evt.title));
   }, []);
 
   const CATEGORIES_LIST = ['Alle', 'Konzerte', 'Festivals', 'Club-Gigs', 'B2B-Messen'];

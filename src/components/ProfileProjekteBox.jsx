@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Briefcase, Eye, EyeOff, Calendar, Users, CheckCircle } from 'lucide-react';
+import { eventService } from '../services/eventService';
 
 export default function ProfileProjekteBox({ currentProfileName, isOwner }) {
   const [profile, setProfile] = useState(null);
@@ -13,7 +14,7 @@ export default function ProfileProjekteBox({ currentProfileName, isOwner }) {
   // 1. NESTED CREW PIPELINE: Filtert die Einsätze direkt aus den Event-Objekten!
   useEffect(() => {
     const savedProfiles = localStorage.getItem('gigsda_profiles');
-    const savedEvents = localStorage.getItem('gigsda_events') || '[]';
+    const savedEvents = eventService.getEvents();
 
     if (savedProfiles) {
       try {

@@ -4,6 +4,8 @@ import FahrplanMetrics from './FahrplanMetrics';
 import CrewCard from './components/cards/CrewCard';
 import EventHeaderBox from "./components/EventHeaderBox";
 
+import { eventService } from './services/eventService';
+
 export default function CrewShortlist({ 
   onBack, 
   progress, 
@@ -13,7 +15,7 @@ export default function CrewShortlist({
 }) {
 
 const addFromShortlist = (eventId, profileName) => {
-  const events = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+  const savedEvents = eventService.getEvents();
   const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
 
   const targetProfile = profiles.find(p =>
@@ -32,7 +34,7 @@ const addFromShortlist = (eventId, profileName) => {
     return evt;
   });
 
-  localStorage.setItem('gigsda_events', JSON.stringify(updated));
+  eventService.saveEvents(updated);
   location.reload();
 };
 
@@ -66,7 +68,7 @@ const addFromShortlist = (eventId, profileName) => {
   useEffect(() => {
     const loadRealtimeCrew = () => {
       try {
-        const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+        const savedEvents = eventService.getEvents();
         
         let targetId = activeEvent?.id || activeEvent?.eventId || activeEvent?._id;
         let targetTitle = activeEvent?.title || activeEvent?.name || "";
@@ -129,7 +131,7 @@ const addFromShortlist = (eventId, profileName) => {
   const handleRemoveMember = (memberName) => {
     if (!window.confirm(`Möchtest du ${memberName} wirklich aus diesem B2B-Projekt entfernen?`)) return;
     try {
-      const savedEvents = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+      const savedEvents = eventService.getEvents();
       // Holt die aktive Event-ID millimetergenau aus dem Speicher
       let targetId = activeEvent?.id || activeEvent?.eventId || activeEvent?._id;
       if (!targetId) {
@@ -170,11 +172,10 @@ const addFromShortlist = (eventId, profileName) => {
           dbCrew[memberIndex].status = "removed";
         }
         // Schreibt den gesäuberten Stand zurück auf die Festplatte
-        localStorage.setItem('gigsda_events', JSON.stringify(savedEvents));
+        eventService.saveEvents(savedEvents);
         // Feuert die globalen Live-Funksprüche für die sofortige reaktive UI-Aktualisierung ohne F5!
         window.dispatchEvent(new CustomEvent('request-sent'));
         window.dispatchEvent(new CustomEvent('route-change'));
-        console.log(`✓ B2B-Stornierung: ${memberName} wurde restlos aus dem Projekt gelöscht!`);
       }
     } catch (e) {
       console.error("Fehler beim Entfernen des Crew-Mitglieds:", e);
@@ -182,7 +183,7 @@ const addFromShortlist = (eventId, profileName) => {
   };
 
   const activeStub = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
-  const events = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+  const events = eventService.getEvents();
   const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
 
   const currentUserName =
@@ -363,9 +364,7 @@ const addFromShortlist = (eventId, profileName) => {
                     localStorage.getItem('gigsda_active_event') || 'null'
                   );
 
-                  const events = JSON.parse(
-                    localStorage.getItem('gigsda_events') || '[]'
-                  );
+                  const events = eventService.getEvents();
 
                   const currentEvent = events.find(
                     e => e.id === activeStub?.id

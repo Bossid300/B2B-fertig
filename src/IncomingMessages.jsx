@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 
+import { eventService } from './services/eventService';
+
 export default function IncomingMessages() {
   
   const handleUpdateStatus = (requestId, newStatus) => {
     try {
       const requests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
-      const events = JSON.parse(localStorage.getItem('gigsda_events') || '[]');
+      const events = eventService.getEvents();
 
       const request = requests.find(r => r.requestId === requestId);
       if (!request) return;
@@ -19,15 +21,15 @@ export default function IncomingMessages() {
 
       // ✅ Crew im Event updaten
       const event = events.find(ev => ev.title === request.eventName);
-      if (event && event.crew) {
-        event.crew = event.crew.map(member =>
-          member.id === request.requestedProfileId
-            ? { ...member, status: newStatus }
-            : member
-        );
+        if (event && event.crew) {
+          event.crew = event.crew.map(member =>
+            member.id === request.requestedProfileId
+              ? { ...member, status: newStatus }
+              : member
+          );
 
-        localStorage.setItem('gigsda_events', JSON.stringify(events));
-      }
+          eventService.saveEvents(events);
+        }
 
       // 🔥 UI refresh triggern
       window.dispatchEvent(new CustomEvent('request-sent'));
@@ -78,9 +80,7 @@ export default function IncomingMessages() {
 
 
   const handleAcceptDeal = (req) => {
-    const events = JSON.parse(
-      localStorage.getItem('gigsda_events') || '[]'
-    );
+    const events = eventService.getEvents();
     const updatedEvents = events.map(event => {
       if (event.title !== req.eventName) {
         return event;
@@ -94,10 +94,7 @@ export default function IncomingMessages() {
       };
 
     });
-    localStorage.setItem(
-      'gigsda_events',
-      JSON.stringify(updatedEvents)
-    );
+    eventService.saveEvents(updatedEvents);
     handleUpdateStatus(
       req.requestId,
       'accepted'
@@ -106,9 +103,6 @@ export default function IncomingMessages() {
       new CustomEvent('request-sent')
     );
   };
-
-
-
 
   const handleCounterOffer = (
     req,

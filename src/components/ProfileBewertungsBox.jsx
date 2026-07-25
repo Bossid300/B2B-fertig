@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Star, Save, Eye, EyeOff, CheckCircle2, User, AlertTriangle } from 'lucide-react';
 
+import { eventService } from '../services/eventService';
+
 export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
@@ -20,7 +22,7 @@ export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
   // 1. DATABASE & SECURITY PIPELINE: Prüft Zusammenarbeit & verhindert Doppel-Bewertungen
   useEffect(() => {
     const savedProfiles = localStorage.getItem('gigsda_profiles');
-    const savedEvents = localStorage.getItem('gigsda_events') || '[]';
+    const savedEvents = eventService.getEvents();
 
     if (savedProfiles) {
       try {
@@ -38,7 +40,7 @@ export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
 
           // SECURITY CHECK: Haben loggedInUser und targetUser zusammen gearbeitet?
           if (loggedInUser && targetUser.toLowerCase() !== loggedInUser.toLowerCase()) {
-            const allEvts = JSON.parse(savedEvents);
+            const allEvts = savedEvents;
             
             // Findet ein gemeinsames Event
             const commonEvent = allEvts.find(evt => {

@@ -7,6 +7,8 @@ import RiderCard from "./components/cards/RiderCard";
 import ProfileGalleryBox from "./components/ProfileGalleryBox";
 import ProfileHilfeBox from './components/ProfileHilfeBox';
 
+import { eventService } from './services/eventService';
+
 export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
   
   const [currentEvent, setCurrentEvent] = useState(null);
@@ -150,9 +152,7 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
     if (!selectedMember || !currentEvent) return;
 
     try {
-      const events = JSON.parse(
-        localStorage.getItem("gigsda_events") || "[]"
-      );
+      const events = eventService.getEvents();
 
       const updatedEvents = events.map((evt) => {
         if (evt.id !== currentEvent?.id) return evt;
@@ -170,35 +170,25 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
           },
         };
       });
-
-      localStorage.setItem(
-        "gigsda_events",
-        JSON.stringify(updatedEvents)
-      );
+      eventService.saveEvents(updatedEvents);
 
       const updatedEvent = updatedEvents.find(
         (e) => e.id === currentEvent?.id
       );
-
       setCurrentEvent(updatedEvent);
-
-      localStorage.setItem(
-        "gigsda_active_event",
-        JSON.stringify(updatedEvent)
-      );
-
+      eventService.saveEvents(updatedEvents);
       window.dispatchEvent(
         new CustomEvent("active-event-updated")
       );
-
       window.dispatchEvent(
         new CustomEvent("route-change")
       );
-
       window.dispatchEvent(
         new CustomEvent("request-sent")
       );
-
+      window.dispatchEvent(
+        new Event("storage")
+      );
     } catch (err) {
       console.error(
         "Rider Bestätigung Fehler:",
@@ -211,9 +201,7 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
     setSelectedRoom(room);
 
     try {
-      const events = JSON.parse(
-        localStorage.getItem("gigsda_events") || "[]"
-      );
+      const events = eventService.getEvents();
 
       const updatedEvents = events.map((evt) => {
         if (evt.id !== currentEvent?.id) return evt;
@@ -224,10 +212,7 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
         };
       });
 
-      localStorage.setItem(
-        "gigsda_events",
-        JSON.stringify(updatedEvents)
-      );
+      eventService.saveEvents(updatedEvents);
 
       const updatedEvent = updatedEvents.find(
         (e) => e.id === currentEvent?.id
