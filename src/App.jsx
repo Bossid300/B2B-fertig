@@ -42,6 +42,10 @@ import { initialUsers, initialProfiles } from './data/mockData';
 import ArtistPortfolio from "./components/ArtistPortfolio";
 
 import { eventService } from './services/eventService';
+import { progressService } from './services/progressService';
+
+
+
 
 export default function App() {
 
@@ -329,6 +333,7 @@ export default function App() {
     countdown: 0
   });
 
+
   useEffect(() => {
     
     const countdownReady =
@@ -465,12 +470,17 @@ export default function App() {
 
 
 
-  const freshActiveEvent =
-  eventService
-    .getEvents()
-    .find(e => e.id === activeEvent?.id)
-  || activeEvent;
 
+  const freshActiveEvent =
+    eventService
+      .getEvents()
+      .find(e => e.id === activeEvent?.id)
+    || activeEvent;
+
+  const progressFromService =
+    progressService.getProgress(
+      freshActiveEvent
+    );
 
 
 
@@ -732,70 +742,73 @@ export default function App() {
           )}
 
           {view === 'shortlist' && isLoggedIn && (
-          <CrewShortlist
-            onBack={() => setView('projects')}
-            progress={progress}
-            setProgress={setProgress}
-            activeEvent={freshActiveEvent}
-            onNavigateToStep={setView}
-            setFavorites={handleUpdateCrewForEvent}
-/>
+            <CrewShortlist
+              onBack={() => setView('projects')}
+              progress={progressFromService}
+              setProgress={setProgress}
+              activeEvent={freshActiveEvent}
+              onNavigateToStep={setView}
+              setFavorites={handleUpdateCrewForEvent}
+            />
           )}
  
           {view === 'stage' && isLoggedIn && (
             <StageSpecs
               onBack={() => setView('shortlist')}
-              progress={progress}
+              progress={progressFromService}
               setProgress={setProgress}
               activeEvent={freshActiveEvent}
               onNavigateToStep={setView}
-              onApproveSuccess={() =>
-                setProgress(prev => ({ ...prev, stage: 100 }))
+              onApproveSuccess={() => setProgress(prev => ({ ...prev, stage: 100 }))
               }
             />
           )}
  
           {view === 'contract' && isLoggedIn && (
             <ContractCenter 
-            onBack={() => setView('projects')} 
-            progress={progress} setProgress={setProgress} 
-            activeEvent={freshActiveEvent} 
-            onNavigateToStep={setView} 
-            onContractSigned={() => setProgress(prev => ({ ...prev, contract: 100 }))} 
+              onBack={() => setView('projects')} 
+              progress={progressFromService} 
+              setProgress={setProgress} 
+              activeEvent={freshActiveEvent} 
+              onNavigateToStep={setView} 
+              onContractSigned={() => setProgress(prev => ({ ...prev, contract: 100 }))} 
             />
           )}
  
           {view === 'voting' && isLoggedIn && (
-            <TeamVoting onBack={() => setView('projects')} 
-            activeEvent={freshActiveEvent} 
-            onNavigateToStep={setView} 
-            onVoteSuccess={() => setProgress(prev => ({ ...prev, voting: 100 }))} 
+            <TeamVoting 
+              onBack={() => setView('projects')} 
+              activeEvent={freshActiveEvent} 
+              onNavigateToStep={setView} 
+              onVoteSuccess={() => setProgress(prev => ({ ...prev, voting: 100 }))} 
             />
           )}
  
           {view === 'planner' && isLoggedIn && (
-            <EventPlanner onBack={() => setView('projects')} 
-            progress={progress} 
-            setProgress={setProgress} 
-            activeEvent={freshActiveEvent}
-            onNavigateToStep={setView} 
-            onStepSuccess={() => setProgress(prev => ({ ...prev, planner: 100 }))} 
+            <EventPlanner 
+              onBack={() => setView('projects')} 
+              progress={progressFromService}
+              setProgress={setProgress} 
+              activeEvent={freshActiveEvent}
+              onNavigateToStep={setView} 
+              onStepSuccess={() => setProgress(prev => ({ ...prev, planner: 100 }))} 
             />
           )}
  
           {view === 'countdown' && isLoggedIn && (
-            <LiveCountdown onBack={() => setView('projects')} 
-            progress={progress} 
-            activeEvent={freshActiveEvent}
-            onNavigateToStep={setView} 
-            setProgress={setProgress} onTriggerGate={triggerGate} 
+            <LiveCountdown 
+              onBack={() => setView('projects')} 
+              progress={progressFromService}
+              activeEvent={freshActiveEvent}
+              onNavigateToStep={setView} 
+              setProgress={setProgress} onTriggerGate={triggerGate} 
             />
           )}
  
           {view === 'promotion' && isLoggedIn && (
             <EventPromotion
               onBack={() => setView('planner')}
-              progress={progress}
+              progress={progressFromService}
               setProgress={setProgress}
               activeEvent={freshActiveEvent}
               onNavigateToStep={setView}

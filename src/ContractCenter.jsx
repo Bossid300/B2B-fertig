@@ -82,18 +82,6 @@ export default function ContractCenter({ onBack, progress, setProgress, onNaviga
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
   const contractProgress =
     totalPartners > 0
       ? Math.round(
@@ -115,16 +103,6 @@ export default function ContractCenter({ onBack, progress, setProgress, onNaviga
   const allSigned =
     processingCount === 0 &&
     signedCount > 0;
-
-
-
-
-
-
-
-
-
-
 
 
 
