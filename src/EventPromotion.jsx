@@ -49,10 +49,14 @@ useEffect(() => {
   }));
 }, [promoProgress, setProgress]);
 
+
 useEffect(() => {
   const promo =
-    activeEvent?.promotionData || {};
-  setPromoData({
+    activeEvent?.promotionData;
+
+  if (!promo) return;
+  
+    setPromoData({
     title:
       promo.title ||
       activeEvent?.title ||
@@ -99,35 +103,23 @@ const handleSavePromotion = () => {
   );
 };
 
-const currentUserName =
-  localStorage.getItem('gigsda_user_name');
-
-const profiles = JSON.parse(
-  localStorage.getItem('gigsda_profiles') || '[]'
-);
-
-const ownerName =
-  profiles.find(
-    p => p.id === activeEvent?.ownerId
-  )?.name || "Unbekannt";
-
-
-const currentProfile = profiles.find(
-  p =>
-    (p.name || '').toLowerCase() ===
-    (currentUserName || '').toLowerCase()
-);
-
-const currentUserId = currentProfile?.id;
+const currentUserId =
+  localStorage.getItem(
+    'gigsda_profile_id'
+  );
 
 const isOwner =
   activeEvent?.ownerId === currentUserId;
 
-
+const profiles = JSON.parse(
+  localStorage.getItem('gigsda_profiles') || '[]'
+);
 const ownerLead =
   profiles.find(
     p => p.id === activeEvent?.ownerId
   );
+const ownerName =
+  ownerLead?.name || "Unbekannt";
 
   return (
 

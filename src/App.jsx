@@ -44,7 +44,7 @@ import ArtistPortfolio from "./components/ArtistPortfolio";
 import { eventService } from './services/eventService';
 import { progressService } from './services/progressService';
 
-
+import CommunityAlertModal from './components/modals/CommunityAlertModal';
 
 
 export default function App() {
@@ -304,7 +304,8 @@ export default function App() {
     setViewWithStorage(newView);
   };
 
-  const [successBanner, setSuccessBanner] = useState(null);
+
+
   const [activeEvent, setActiveEvent] = useState(null);
   const [isRegInitial, setIsRegInitial] = useState(false);
   // 🔴 SIMULATION: Rote Billardkugel für den Dashboard-Posteingang
@@ -416,14 +417,22 @@ export default function App() {
     localStorage.setItem('gigsda_events', JSON.stringify(updatedEvents));
   };
  
+
+  // 📡 GIGSDA PUSH-Alarm: Community benachrichtigung
   const triggerGate = (message) => {
     if (isLoggedIn) {
-      setSuccessBanner(message);
+      setCommunityAlert(message);
       return;
     }
     setView('login');
   };
- 
+
+  const [communityAlert,
+  setCommunityAlert] =
+  useState(null); 
+
+
+
   // 📡 GIGSDA SIGNAL-EMPFÄNGER: Horcht auf die Profil-Bearbeiten-Buttons
   useEffect(() => {
     const handleProfileRoute = (e) => {
@@ -864,18 +873,18 @@ export default function App() {
         </footer>
       </div>
  
+
       {/* ERFOLGS BANNER */}
-      {successBanner && (
-        <div onClick={() => setSuccessBanner(null)} className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-sm bg-slate-900 border border-emerald-500/30 rounded-3xl p-6 text-center space-y-4">
-            <h3 className="text-sm font-black text-emerald-400 uppercase font-mono tracking-tight">Signal gefeuert!</h3>
-            <p className="text-[11px] text-slate-300 font-sans">{successBanner}</p>
-            <button type="button" onClick={() => setSuccessBanner(null)} className="w-full bg-emerald-500 text-slate-950 font-mono font-black text-[10px] uppercase h-10 rounded-xl">✓ Bestätigen</button>
-          </div>
-        </div>
+      {communityAlert && (
+        <CommunityAlertModal
+          message={communityAlert}
+          onClose={() =>
+            setCommunityAlert(null)
+          }
+        />
       )}
 
-
+      
     </div>
   );
 }

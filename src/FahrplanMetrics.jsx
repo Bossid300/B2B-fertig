@@ -111,9 +111,9 @@ export default function FahrplanMetrics({ progress = {}, activeStep = '', onNavi
       </div>
 
       {/* FAN-VOTING */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+{/*       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {extraModules.map(renderStepButton)}
-      </div>
+      </div> */}
 
     </div>
   );

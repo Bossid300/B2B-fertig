@@ -124,11 +124,17 @@ const handleReleaseEvent = () => {
   const handleSendAlarm = () => {
     setAlarmSent(true);
 
+    if (typeof onTriggerGate === 'function') {
+      onTriggerGate(
+        "🚨 PUSH-ALARM ABGEFEUERT: Die Community wurde erfolgreich informiert!"
+      );
+    }
+
     saveCountdownStatus({
       releaseReady: true,
       alarmSent: true
     });
-};
+  };
     
   const handleStartShow = () => {
     setIsLive(true);
@@ -261,7 +267,19 @@ const countdownReady =
             : 'IN STANDBY 🚨'
           }
           </button>
-          
+
+          {/* DEV: TESTBUTTON ZUM FREISCHALTEN PUSH-ALARM */}
+          <button
+            onClick={() => {
+              setAlarmSent(false);
+              setReleaseReady(true);
+            }}
+            className="..."
+          >
+            🏆
+          </button>          
+
+
           {/* ACTION 2: TRIGGER PUSH ALARM */}
           <button
             type="button"
@@ -289,6 +307,10 @@ const countdownReady =
           >
             {isLive ? '✓ Konzert läuft live' : 'Konzert starten 🚀'}
           </button>
+
+
+
+
 
         </div>
 

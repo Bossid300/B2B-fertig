@@ -23,11 +23,6 @@ const [schedule, setSchedule] = useState(
 ]);
 
 useEffect(() => {
-
-  setSchedule(
-    activeEvent?.timeline || []
-  );
-
   setIsPlannerLocked(
     activeEvent?.plannerLocked || false
   );
