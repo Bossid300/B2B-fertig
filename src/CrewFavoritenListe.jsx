@@ -152,6 +152,7 @@ export default function CrewFavoritenListe({ onNavigate }) {
         const allRequests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
         allRequests.push({
           requestId: "REQ-" + Math.floor(Math.random() * 9000 + 1000),
+          eventId: savedEvents[eventIndex].id,
           eventName: savedEvents[eventIndex].title || savedEvents[eventIndex].name || "B2B Event",
           date: savedEvents[eventIndex].date || "Termin folgt",
           requestedProfileId: fav.id,

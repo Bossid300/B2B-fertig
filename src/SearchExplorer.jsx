@@ -55,13 +55,18 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
       // 1. Schreibt die Anfrage sauber in gigsda_crew_requests für das goldene Fenster
       const newRequest = {
         requestId: "REQ-" + Math.floor(Math.random() * 9000 + 1000),
+        eventId: eventId,
         eventName: eventTitle,
         date: targetEvent.date || "Termin auf Anfrage",
         requestedProfileId: activeRequestUser.id,
         requestedProfileName: activeRequestUser.name,
-        requesterName: localStorage.getItem('gigsda_user_name') || "Veranstalter",
+        requesterName:
+          localStorage.getItem('gigsda_user_name')
+          || "Veranstalter",
         status: "pending",
-        note: requestText || "Standard-B2B Konditionen laut Profil."
+        note:
+          requestText ||
+          "Standard-B2B Konditionen laut Profil."
       };
       allRequests.push(newRequest);
       localStorage.setItem('gigsda_crew_requests', JSON.stringify(allRequests));

@@ -49,13 +49,21 @@ useEffect(() => {
   }));
 }, [promoProgress, setProgress]);
 
+useEffect(() => {
+  const timer = setTimeout(() => {
+    handleSavePromotion();
+  }, 1000);
+
+  return () => clearTimeout(timer);
+
+}, [promoData]);
 
 useEffect(() => {
   const promo =
     activeEvent?.promotionData;
 
   if (!promo) return;
-  
+
     setPromoData({
     title:
       promo.title ||
@@ -172,7 +180,6 @@ const ownerName =
           <div>{promoData.ticketLink ? '✅' : '🔴'} Ticketlink</div>
         </div>
       </div>
-
 
 
 

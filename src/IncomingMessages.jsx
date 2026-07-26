@@ -20,7 +20,11 @@ export default function IncomingMessages() {
       localStorage.setItem('gigsda_crew_requests', JSON.stringify(updatedRequests));
 
       // ✅ Crew im Event updaten
-      const event = events.find(ev => ev.title === request.eventName);
+      const event = events.find(
+        ev =>
+          ev.id === request.eventId ||
+          ev.title === request.eventName
+      );
         if (event && event.crew) {
           event.crew = event.crew.map(member =>
             member.id === request.requestedProfileId

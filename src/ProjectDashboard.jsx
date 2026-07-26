@@ -182,7 +182,10 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
 
               const openRequests = requests.filter(r =>
                 (r.status === "pending" || r.status === "counter_offer") &&
-                r.eventName === evt.title
+                (
+                  r.eventId === evt.id ||
+                  r.eventName === evt.title
+                )
               );
 
               return (

@@ -45,6 +45,7 @@ export default function ContractCenter({ onBack, progress, setProgress, onNaviga
   );
 
   useEffect(() => {
+
     setDealAmounts(
       activeEvent?.dealAmounts || {}
     );
@@ -156,7 +157,8 @@ const handleSendDeal = () => {
     return {
       requestId: `DEAL-${Date.now()}-${member.id}`,
       requestType: "deal",
-
+      
+      eventId: activeEvent.id,
       eventName: activeEvent.title,
       date: activeEvent.date,
 
@@ -193,25 +195,6 @@ const handleSendDeal = () => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   const handleSaveDeal = () => {
     if (!activeEvent) return;
     const events = JSON.parse(
@@ -232,6 +215,23 @@ const handleSendDeal = () => {
       JSON.stringify(updatedEvents)
     );
   };
+
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleSaveDeal();
+    }, 1000);
+
+    return () => clearTimeout(timer);
+
+  }, [dealAmounts]);
+
+
+
+
+
+
+
 
   const totalDealAmount =
   Object.values(dealAmounts)
