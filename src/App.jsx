@@ -335,6 +335,31 @@ export default function App() {
   });
 
 
+
+
+
+
+
+useEffect(() => {
+
+  console.log("APP DB TEST ✅");
+
+  fetch('/2026/api/getProfiles.php')
+    .then(res => res.json())
+    .then(data => {
+      console.log("PROFILE AUS DB ✅", data);
+    })
+    .catch(err => {
+      console.error("DB FEHLER ❌", err);
+    });
+
+}, []);
+
+
+
+
+
+
   useEffect(() => {
     
     const countdownReady =

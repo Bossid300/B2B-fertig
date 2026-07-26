@@ -19,6 +19,20 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
   localStorage.getItem('gigsda_logged_in') === 'true';
 
   useEffect(() => {
+
+console.log("USEEFFECT LÄUFT ✅");
+
+fetch('/2026/api/getProfiles.php')
+.then(res => res.json())
+.then(data => {
+console.log('PROFILE AUS DB ✅', data);
+})
+.catch(err => {
+console.error('DB FEHLER ❌', err);
+});
+
+
+
     try {
       const savedEvents = eventService.getEvents();
 
