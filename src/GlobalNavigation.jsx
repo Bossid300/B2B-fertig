@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
-import { getProfilesDb } from './services/apiService';
+import {
+  getProfilesDb,
+  getCrewRequests
+} from './services/apiService';
 
 export default function GlobalNavigation({ view, setView, onLogout }) {
   // Lokaler Zustand für das mobile Aufklapp-Menü (Burger)
@@ -51,6 +54,71 @@ export default function GlobalNavigation({ view, setView, onLogout }) {
       })
       .catch(console.error);
   }, [userName]);
+
+
+useEffect(() => {
+  const checkRequests = async () => {
+    try {
+      const currentUserId =
+        profileData?.id;
+
+      if (!currentUserId) {
+        setIncomingCount(0);
+        return;
+      }
+
+      const dbRequests =
+        await getCrewRequests();
+
+      console.log(
+        'GLOBALNAV BADGE REQUESTS DB ✅',
+        dbRequests
+      );
+
+      const open = dbRequests.filter(r =>
+        r &&
+        (
+          r.status === 'pending' ||
+          r.status === 'counter_offer'
+        ) &&
+        r.requestedProfileId === currentUserId
+      );
+
+      setIncomingCount(open.length);
+    } catch (e) {
+      console.error(
+        "Badge Fehler:",
+        e
+      );
+    }
+  };
+
+  checkRequests();
+
+  window.addEventListener(
+    'request-sent',
+    checkRequests
+  );
+
+  window.addEventListener(
+    'route-change',
+    checkRequests
+  );
+
+  return () => {
+    window.removeEventListener(
+      'request-sent',
+      checkRequests
+    );
+
+    window.removeEventListener(
+      'route-change',
+      checkRequests
+    );
+  };
+}, [profileData]);
+
+
 
   
   // ✅ Exit-Button: Entfernt alle relevanten LocalStorage-Einträge und lädt die Seite neu
