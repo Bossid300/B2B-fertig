@@ -5,7 +5,7 @@ import CommunityChat from './CommunityChat';
 import IncomingMessages from './IncomingMessages';
 
 import { eventService } from './services/eventService';
-
+import { getProfilesDb } from './services/apiService';
 
 export default function ProjectDashboard({ onNavigateToStep, progress, onSelectEvent, events: propsEvents, onCreateEvent, ticketName }) {
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
@@ -28,6 +28,7 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
   };
 
   const [requests, setRequests] = useState([]);
+  const [currentProfileData, setCurrentProfileData] = useState(null);
 
   useEffect(() => {
     const loadRequests = () => {
@@ -47,19 +48,56 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
 
 
   const currentUserName = localStorage.getItem('gigsda_user_name');
-  const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
+useEffect(() => {
+  if (!currentUserName) return;
 
-  const currentProfile = profiles.find(p =>
-    (p.name || '').toLowerCase() === (currentUserName || '').toLowerCase()
-  );
+  getProfilesDb()
+    .then(profiles => {
+      const found = profiles.find(
+        p =>
+          p &&
+          (p.name || p.user_name || p.display_name || '')
+            .trim()
+            .toLowerCase() ===
+          currentUserName.trim().toLowerCase()
+      );
 
-  const currentUserId = currentProfile?.id;
+      console.log(
+        'PROJECTDASHBOARD PROFILE DB ✅',
+        found
+      );
 
-  const visibleEvents = events.filter(evt =>
-    !evt.ownerId || 
-    evt.ownerId === currentUserId ||
-    evt.crewIds?.includes(currentUserId)
-  );
+      if (!found) return;
+
+      const profileData =
+        found?.profile_json
+          ? JSON.parse(found.profile_json)
+          : found;
+
+      setCurrentProfileData(profileData);
+    })
+    .catch(console.error);
+}, [currentUserName]);
+
+
+
+
+
+const currentUserId =
+  currentProfileData?.id;
+
+
+
+
+const visibleEvents = events.filter(ev =>
+  !currentUserId ||
+  !ev.ownerId ||
+  ev.ownerId === currentUserId ||
+  ev.crewIds?.includes(currentUserId)
+);
+
+
+
 
   return (
     <div className="space-y-6 my-6 max-w-4xl mx-auto text-slate-300 text-xs font-mono animate-fade-in">
@@ -76,22 +114,26 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
           onBack={() => setIsCreatingEvent(false)} 
           onCreateEvent={(newEvent) => {
               const currentUserName = localStorage.getItem('gigsda_user_name');
-              const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
-              const currentProfile = profiles.find(p =>
-                (p.name || '').toLowerCase() === (currentUserName || '').toLowerCase()
-              );
-              const currentUserId = currentProfile?.id
+              const currentUserId = currentProfileData?.id;
 
               const fresh = {
-              id: newEvent.id || "EVT-" + Date.now().toString().slice(-4),
-              title: `${newEvent.title}`,
-              date: newEvent.date,
-              type: newEvent.category === 'Festivals' ? 'Festival' : newEvent.category === 'OpenAirs' ? 'Open Air' : 'Clubshow',
-              text: `Event frisch angelegt. Starte die Crew-Suche im Radar.`,
-              venue: newEvent.venue || "Stadtpark Wiese, Braunau",
-              doneProgress: 0,
-              ownerId: currentUserId,
-              crewIds: [currentUserId],
+                id: newEvent.id || "EVT-" + Date.now().toString().slice(-4),
+                title: `${newEvent.title}`,
+                date: newEvent.date,
+                type: newEvent.category === 'Festivals'
+                  ? 'Festival'
+                  : newEvent.category === 'OpenAirs'
+                    ? 'Open Air'
+                    : 'Clubshow',
+                text: "Event frisch angelegt. Starte die Crew-Suche im Radar.",
+                venue: newEvent.venue || "Stadtpark Wiese, Braunau",
+                doneProgress: 0,
+                ownerId: currentUserId,
+                ownerName:
+                  currentProfileData?.name ||
+                  currentUserName ||
+                  "Unbekannt",
+                crewIds: [currentUserId],
 
               logistics: {
                 setup: false,
@@ -129,9 +171,10 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
 
           <div className="space-y-4">
             {visibleEvents.map((evt) => {
-              const ownerName = (profiles || []).find(p =>
-                (p.id || "").toLowerCase() === (evt.ownerId || "").toLowerCase()
-              )?.name || "Unbekannt";
+              const ownerName =
+                evt.ownerId === currentUserId
+                  ? currentProfileData?.name || currentUserName || "Unbekannt"
+                  : evt.ownerName || "Unbekannt";
 
               const teamSize = evt.crewIds?.length || 0;
               

@@ -1,53 +1,103 @@
 import React, { useState, useEffect } from 'react';
-
 import { eventService } from './services/eventService';
+import { getProfilesDb } from './services/apiService';
+
 
 export default function CrewRequestCenter({ currentProfileName }) {
   const [requests, setRequests] = useState([]);
   const [counterText, setCounterText] = useState('');
   const [activeCounterId, setActiveCounterId] = useState(null);
+  const [currentProfileId, setCurrentProfileId] = useState('');
+
 
 useEffect(() => {
+  if (!currentProfileName) return;
 
+  getProfilesDb()
+    .then(profiles => {
+      const found = profiles.find(
+        p =>
+          p &&
+          (p.name || p.user_name || p.display_name || '')
+            .trim()
+            .toLowerCase() ===
+          currentProfileName.trim().toLowerCase()
+      );
+
+      console.log(
+        'CREWREQUESTCENTER PROFILE DB ✅',
+        found
+      );
+
+      if (!found) return;
+
+      const profileData =
+        found?.profile_json
+          ? JSON.parse(found.profile_json)
+          : found;
+
+      setCurrentProfileId(profileData?.id || '');
+    })
+    .catch(console.error);
+}, [currentProfileName]);
+
+
+useEffect(() => {
   const loadRequests = () => {
     try {
-      const savedRequests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
+      const savedRequests = JSON.parse(
+        localStorage.getItem('gigsda_crew_requests') || '[]'
+      );
 
       const myRequests = savedRequests.filter(req => {
         if (!req) return false;
 
-        // ✅ ALT (Name)
-        const reqName = (req.requestedProfile || '').trim().toLowerCase();
-        const me = (currentProfileName || '').trim().toLowerCase();
+        // ✅ ALT-Fallback über Name
+        const reqName =
+          (req.requestedProfile || req.requestedProfileName || '')
+            .trim()
+            .toLowerCase();
 
-        // ✅ NEU (ID)
-        const reqId = (req.requestedProfileId || '').toLowerCase();
+        const me =
+          (currentProfileName || '')
+            .trim()
+            .toLowerCase();
 
-        const myId = (JSON.parse(localStorage.getItem('gigsda_profiles') || '[]')
-          .find(p => p.name === currentProfileName)?.id || ''
-        ).toLowerCase();
+        // ✅ NEU über DB-Profil-ID
+        const reqId =
+          (req.requestedProfileId || '')
+            .toLowerCase();
+
+        const myId =
+          (currentProfileId || '')
+            .toLowerCase();
 
         return reqId === myId || reqName === me;
       });
 
       setRequests(myRequests);
-
     } catch (e) {
-      console.error("Fehler beim Laden der Crew-Anfragen:", e);
+      console.error(
+        "Fehler beim Laden der Crew-Anfragen:",
+        e
+      );
     }
   };
 
-  // ✅ INITIAL LOAD
   loadRequests();
 
-  // ✅ LIVE UPDATE (kein F5 mehr!)
-  window.addEventListener('request-sent', loadRequests);
+  window.addEventListener(
+    'request-sent',
+    loadRequests
+  );
 
   return () => {
-    window.removeEventListener('request-sent', loadRequests);
+    window.removeEventListener(
+      'request-sent',
+      loadRequests
+    );
   };
-
-}, [currentProfileName]);
+}, [currentProfileName, currentProfileId]);
 
 
   const handleResponse = (requestId, newStatus) => {
