@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { eventService } from './services/eventService';
-import { getProfilesDb } from './services/apiService';
+import {
+  getProfilesDb,
+  getCrewRequests,
+  updateCrewRequest
+} from './services/apiService';
 
 
 export default function CrewRequestCenter({ currentProfileName }) {
@@ -43,16 +47,36 @@ useEffect(() => {
 
 
 useEffect(() => {
-  const loadRequests = () => {
+  const loadRequests = async () => {
     try {
-      const savedRequests = JSON.parse(
+      const dbRequests =
+        await getCrewRequests();
+
+      console.log(
+        'CREWREQUESTCENTER REQUESTS DB ✅',
+        dbRequests
+      );
+
+      // TEMP-FALLBACK:
+      // bleibt drin, bis alle alten lokalen Requests weg sind
+      const localRequests = JSON.parse(
         localStorage.getItem('gigsda_crew_requests') || '[]'
       );
 
-      const myRequests = savedRequests.filter(req => {
+      const mergedRequests = [
+        ...dbRequests,
+        ...localRequests.filter(localReq =>
+          localReq &&
+          !dbRequests.some(
+            dbReq =>
+              dbReq.requestId === localReq.requestId
+          )
+        )
+      ];
+
+      const myRequests = mergedRequests.filter(req => {
         if (!req) return false;
 
-        // ✅ ALT-Fallback über Name
         const reqName =
           (req.requestedProfile || req.requestedProfileName || '')
             .trim()
@@ -63,7 +87,6 @@ useEffect(() => {
             .trim()
             .toLowerCase();
 
-        // ✅ NEU über DB-Profil-ID
         const reqId =
           (req.requestedProfileId || '')
             .toLowerCase();
@@ -100,82 +123,209 @@ useEffect(() => {
 }, [currentProfileName, currentProfileId]);
 
 
-  const handleResponse = (requestId, newStatus) => {
-    try {
-      // 1. Aktualisiert den globalen Request-Status
-      const savedRequests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
-      const reqIndex = savedRequests.findIndex(r => r && r.requestId === requestId);
-      
-      if (reqIndex > -1) {
-        const targetReq = savedRequests[reqIndex];
+const handleResponse = async (requestId, newStatus) => {
+  try {
+    const updatedAt = Date.now();
 
-        targetReq.status = newStatus;
-        savedRequests[reqIndex] = targetReq;
-        localStorage.setItem('gigsda_crew_requests', JSON.stringify(savedRequests));
+    const result = await updateCrewRequest(
+      requestId,
+      {
+        status: newStatus,
+        updatedAt
+      }
+    );
 
-        // 2. 🔗 PANZERGLAS-PROJEKT-SYNCHRONISATION
-        const savedEvents = eventService.getEvents();
-        
-        // WEG A: Versucht das Event über den exakten Namen aus der Anfrage zu finden
-        let eventIndex = savedEvents.findIndex(ev => ev && (ev.title === targetReq.eventName || ev.name === targetReq.eventName));
-        
-        // WEG B (Sicherheits-Fallback): Wenn der Name ein Test-Typo ist (z.B. "sdf"), nehmen wir das aktuell im Dashboard aktive Projekt!
-        if (eventIndex === -1 && savedEvents.length > 0) {
-          // Holt den Titel des Events, das der User gerade im Dashboard geöffnet hat
-          const activeView = localStorage.getItem('gigsda_current_view') || '';
-          // Wir nehmen als Fallback einfach das erste Event, oder das, dessen Name im Profil passt
-          eventIndex = 0; 
-        }
+    console.log(
+      'CREWREQUESTCENTER UPDATE DB ✅',
+      result
+    );
 
-        if (eventIndex > -1 && savedEvents[eventIndex].crew) {
-          // Sucht das Crewmitglied im Event heraus
+    // TEMP-BRÜCKE:
+    // bleibt noch drin, bis alle alten Request-Leser entfernt sind
+    const savedRequests = JSON.parse(
+      localStorage.getItem('gigsda_crew_requests') || '[]'
+    );
 
-          const memberIndex =
-            savedEvents[eventIndex].crew.findIndex(
-              m =>
-                m &&
-                m.id === targetReq.requestedProfileId
-            );
+    const reqIndex = savedRequests.findIndex(
+      r => r && r.requestId === requestId
+    );
 
-          if (memberIndex > -1) {
-            savedEvents[eventIndex].crew[memberIndex].status = newStatus;
-            
-            // Speichert den aktualisierten Stand in beiden Keys ab
-            eventService.saveEvents(savedEvents);
+    const targetReq =
+      reqIndex > -1
+        ? {
+            ...savedRequests[reqIndex],
+            status: newStatus,
+            updatedAt
           }
-        }
+        : requests.find(r => r.requestId === requestId);
 
-        // 3. Feuert die globalen Live-Funksprüche für das reaktive UI-Update
-        window.dispatchEvent(new CustomEvent('request-sent'));
-        window.dispatchEvent(new CustomEvent('route-change'));
-        
-        alert(`B2B-Status erfolgreich auf ${newStatus.toUpperCase()} aktualisiert! ⚡`);
-      }
-    } catch (e) {
-      console.error("Fehler beim Verarbeiten der B2B-Antwort:", e);
+    if (reqIndex > -1) {
+      savedRequests[reqIndex] = targetReq;
+
+      localStorage.setItem(
+        'gigsda_crew_requests',
+        JSON.stringify(savedRequests)
+      );
     }
-  };
+
+    if (targetReq) {
+      const savedEvents = eventService.getEvents();
+
+      let eventIndex = savedEvents.findIndex(ev =>
+        ev &&
+        (
+          ev.id === targetReq.eventId ||
+          ev.eventId === targetReq.eventId ||
+          ev._id === targetReq.eventId ||
+          ev.title === targetReq.eventName ||
+          ev.name === targetReq.eventName
+        )
+      );
+
+      if (eventIndex === -1 && savedEvents.length > 0) {
+        eventIndex = 0;
+      }
+
+      if (eventIndex > -1 && savedEvents[eventIndex].crew) {
+        const memberIndex =
+          savedEvents[eventIndex].crew.findIndex(
+            m =>
+              m &&
+              m.id === targetReq.requestedProfileId
+          );
+
+        if (memberIndex > -1) {
+          savedEvents[eventIndex].crew[memberIndex] = {
+            ...savedEvents[eventIndex].crew[memberIndex],
+            status: newStatus,
+            confirmed: false,
+            changed: true,
+            changedAt: updatedAt
+          };
+
+          eventService.saveEvents(savedEvents);
+        }
+      }
+    }
+
+    setRequests(prev =>
+      prev.map(req =>
+        req.requestId === requestId
+          ? {
+              ...req,
+              status: newStatus,
+              updatedAt
+            }
+          : req
+      )
+    );
+
+    window.dispatchEvent(
+      new CustomEvent('request-sent')
+    );
+
+    window.dispatchEvent(
+      new CustomEvent('route-change')
+    );
+
+    alert(
+      `B2B-Status erfolgreich auf ${newStatus.toUpperCase()} aktualisiert! ⚡`
+    );
+
+  } catch (e) {
+    console.error(
+      "Fehler beim Verarbeiten der B2B-Antwort:",
+      e
+    );
+  }
+};
+
+
   // 🟡 LOGIK FÜR DAS GEGENANGEBOT (COUNTER OFFER)
-  const handleCounterOfferSubmit = (reqId) => {
-    if (!counterText.trim()) return alert("Bitte gib eine kurze Notiz für das Gegenangebot ein!");
-    try {
-      const allRequests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
-      const index = allRequests.findIndex(r => r.requestId === reqId);
-      
-      if (index > -1) {
-        allRequests[index].status = 'counter_offer';
-        allRequests[index].note = `GEGENANGEBOT: ${counterText}`;
-        localStorage.setItem('gigsda_crew_requests', JSON.stringify(allRequests));
-        
-        setRequests(prev => prev.filter(r => r.requestId !== reqId));
-        setActiveCounterId(null);
-        setCounterText('');
-        alert("Gegenangebot erfolgreich an den Veranstalter gefeuert! ⚡🟡");
+const handleCounterOfferSubmit = async (reqId) => {
+  if (!counterText.trim()) {
+    return alert(
+      "Bitte gib eine kurze Notiz für das Gegenangebot ein!"
+    );
+  }
+
+  try {
+    const updatedAt = Date.now();
+
+    const note =
+      `GEGENANGEBOT: ${counterText}`;
+
+    const result = await updateCrewRequest(
+      reqId,
+      {
+        status: 'counter_offer',
+        note,
+        updatedAt
       }
-    } catch (e) {
-      console.error("Fehler beim Senden des Gegenangebots:", e);
-    }
-  };
+    );
+
+    console.log(
+      'CREWREQUESTCENTER COUNTER DB ✅',
+      result
+    );
+
+    // TEMP-BRÜCKE:
+    // bleibt noch drin, bis GlobalNavigation Badge / letzte Altstellen migriert sind
+    const allRequests = JSON.parse(
+      localStorage.getItem('gigsda_crew_requests') || '[]'
+    );
+
+    const updatedRequests = allRequests.map(r =>
+      r.requestId === reqId
+        ? {
+            ...r,
+            status: 'counter_offer',
+            note,
+            updatedAt
+          }
+        : r
+    );
+
+    localStorage.setItem(
+      'gigsda_crew_requests',
+      JSON.stringify(updatedRequests)
+    );
+
+    setRequests(prev =>
+      prev.map(r =>
+        r.requestId === reqId
+          ? {
+              ...r,
+              status: 'counter_offer',
+              note,
+              updatedAt
+            }
+          : r
+      )
+    );
+
+    setActiveCounterId(null);
+    setCounterText('');
+
+    window.dispatchEvent(
+      new CustomEvent('request-sent')
+    );
+
+    window.dispatchEvent(
+      new CustomEvent('route-change')
+    );
+
+    alert(
+      "Gegenangebot erfolgreich an den Veranstalter gefeuert! ⚡🟡"
+    );
+
+  } catch (e) {
+    console.error(
+      "Fehler beim Senden des Gegenangebots:",
+      e
+    );
+  }
+};
 
   // Wenn keine offenen Anfragen oder Gegenangebote da sind, schläft das Modul unsichtbar im Hintergrund
   return null;

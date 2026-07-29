@@ -117,3 +117,51 @@ export async function getProfilesDb() {
 
   return data.profiles || [];
 }
+
+export async function getCrewRequests() {
+  const response = await fetch(
+    '/2026/api/getCrewRequests.php'
+  );
+
+  const data = await response.json();
+
+  return data.requests || [];
+}
+
+
+export async function saveCrewRequest(request) {
+  const response = await fetch(
+    '/2026/api/saveCrewRequest.php',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(request)
+    }
+  );
+
+  return await response.json();
+}
+
+
+export async function updateCrewRequest(
+  requestId,
+  updates
+) {
+  const response = await fetch(
+    '/2026/api/updateCrewRequest.php',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        requestId,
+        updates
+      })
+    }
+  );
+
+  return await response.json();
+}

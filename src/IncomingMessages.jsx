@@ -1,47 +1,110 @@
 import React, { useEffect, useState } from 'react';
 import { eventService } from './services/eventService';
-import { getProfilesDb } from './services/apiService';
+import {
+  getProfilesDb,
+  getCrewRequests,
+  updateCrewRequest
+} from './services/apiService';
+
 
 export default function IncomingMessages() {
   
-  const handleUpdateStatus = (requestId, newStatus) => {
-    try {
-      const requests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
+const handleUpdateStatus = async (requestId, newStatus) => {
+  try {
+    const updatedAt = Date.now();
+
+    const result = await updateCrewRequest(
+      requestId,
+      {
+        status: newStatus,
+        updatedAt
+      }
+    );
+
+    console.log(
+      'INCOMING REQUEST UPDATE DB ✅',
+      result
+    );
+
+    // TEMP-BRÜCKE:
+    // bleibt noch drin, solange CrewRequestCenter / Badge / alte Stellen
+    // noch gigsda_crew_requests lesen
+    const requests = JSON.parse(
+      localStorage.getItem('gigsda_crew_requests') || '[]'
+    );
+
+    const request =
+      requests.find(r => r.requestId === requestId) ||
+      incomingRequests.find(r => r.requestId === requestId);
+
+    const updatedRequests = requests.map(r =>
+      r.requestId === requestId
+        ? {
+            ...r,
+            status: newStatus,
+            updatedAt
+          }
+        : r
+    );
+
+    localStorage.setItem(
+      'gigsda_crew_requests',
+      JSON.stringify(updatedRequests)
+    );
+
+    if (request) {
       const events = eventService.getEvents();
 
-      const request = requests.find(r => r.requestId === requestId);
-      if (!request) return;
-
-      // ✅ Request Status ändern
-      const updatedRequests = requests.map(r =>
-        r.requestId === requestId ? { ...r, status: newStatus } : r
-      );
-
-      localStorage.setItem('gigsda_crew_requests', JSON.stringify(updatedRequests));
-
-      // ✅ Crew im Event updaten
       const event = events.find(
         ev =>
           ev.id === request.eventId ||
           ev.title === request.eventName
       );
-        if (event && event.crew) {
-          event.crew = event.crew.map(member =>
-            member.id === request.requestedProfileId
-              ? { ...member, status: newStatus }
-              : member
-          );
 
-          eventService.saveEvents(events);
-        }
+      if (event && event.crew) {
+        event.crew = event.crew.map(member =>
+          member.id === request.requestedProfileId
+            ? {
+                ...member,
+                status: newStatus,
+                confirmed: false,
+                changed: true,
+                changedAt: updatedAt
+              }
+            : member
+        );
 
-      // 🔥 UI refresh triggern
-      window.dispatchEvent(new CustomEvent('request-sent'));
-
-    } catch (e) {
-      console.error('Fehler beim Status Update:', e);
+        eventService.saveEvents(events);
+      }
     }
-  };
+
+    setIncomingRequests(prev =>
+      prev.map(req =>
+        req.requestId === requestId
+          ? {
+              ...req,
+              status: newStatus,
+              updatedAt
+            }
+          : req
+      )
+    );
+
+    window.dispatchEvent(
+      new CustomEvent('request-sent')
+    );
+
+    window.dispatchEvent(
+      new CustomEvent('route-change')
+    );
+
+  } catch (e) {
+    console.error(
+      'Fehler beim Status Update:',
+      e
+    );
+  }
+};
 
   const [incomingRequests, setIncomingRequests] = useState([]);
   const [allProfiles, setAllProfiles] = useState([]);
@@ -101,39 +164,76 @@ export default function IncomingMessages() {
   const [counterText, setCounterText] =
     useState('');
 
-  useEffect(() => {
-    const loadRequests = () => {
-      try {
-        const requests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
+useEffect(() => {
+  const loadRequests = async () => {
+    try {
+      const dbRequests =
+        await getCrewRequests();
 
-        const currentUserId =
-          currentProfileData?.id ||
-          localStorage.getItem('gigsda_profile_id');
+      console.log(
+        'INCOMING REQUESTS DB ✅',
+        dbRequests
+      );
 
-        const filtered = requests.filter(r =>
-          r.requestedProfileId === currentUserId
-        );
-        setIncomingRequests(filtered);
+      // TEMP-FALLBACK:
+      // bleibt noch drin, bis wirklich alle alten Requests aus localStorage weg sind
+      const localRequests = JSON.parse(
+        localStorage.getItem('gigsda_crew_requests') || '[]'
+      );
 
+      const mergedRequests = [
+        ...dbRequests,
+        ...localRequests.filter(localReq =>
+          localReq &&
+          !dbRequests.some(
+            dbReq =>
+              dbReq.requestId === localReq.requestId
+          )
+        )
+      ];
 
-      } catch (e) {
-        console.error('Fehler beim Laden der Incoming Requests:', e);
-      }
-    };
+      const currentUserId =
+        currentProfileData?.id ||
+        localStorage.getItem('gigsda_profile_id');
 
-    loadRequests();
+      const filtered = mergedRequests.filter(r =>
+        r &&
+        r.requestedProfileId === currentUserId
+      );
 
-    // live refresh wenn was passiert
-    window.addEventListener('request-sent', loadRequests);
-    window.addEventListener('route-change', loadRequests);
+      setIncomingRequests(filtered);
+    } catch (e) {
+      console.error(
+        'Fehler beim Laden der Incoming Requests:',
+        e
+      );
+    }
+  };
 
-    return () => {
-      window.removeEventListener('request-sent', loadRequests);
-      window.removeEventListener('route-change', loadRequests);
-    };
+  loadRequests();
 
-  }, [currentProfileData]);
+  window.addEventListener(
+    'request-sent',
+    loadRequests
+  );
 
+  window.addEventListener(
+    'route-change',
+    loadRequests
+  );
+
+  return () => {
+    window.removeEventListener(
+      'request-sent',
+      loadRequests
+    );
+
+    window.removeEventListener(
+      'route-change',
+      loadRequests
+    );
+  };
+}, [currentProfileData]);
 
   const handleAcceptDeal = (req) => {
     const events = eventService.getEvents();

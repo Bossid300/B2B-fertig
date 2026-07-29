@@ -3,6 +3,7 @@ import ProfileCard from './components/cards/ProfileCard';
 
 import { eventService } from './services/eventService';
 import { getProfiles } from './services/apiService';
+import { saveCrewRequest } from './services/apiService';
 
 
 export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat }) {
@@ -59,7 +60,7 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
 
 
   // ⚡ AUTOMATISCHE DIREKT-PROJEKT-BUCHUNG BEIM ABSENDEN (PERFEKT SYNCED!)
-  const handleSendRequestToProject = (eventId) => {
+  const handleSendRequestToProject = async (eventId) => {
     try {
       const allRequests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
       const savedEvents = eventService.getEvents();
@@ -137,10 +138,25 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
       };
 
 
+      const saveResult =
+        await saveCrewRequest(newRequest);
 
+      console.log(
+        'CREW REQUEST SAVE DB ✅',
+        saveResult
+      );
+
+      // TEMP-BRÜCKE:
+      // bleibt noch drin, bis IncomingMessages und CrewRequestCenter
+      // auf getCrewRequests() umgestellt sind
       allRequests.push(newRequest);
-      localStorage.setItem('gigsda_crew_requests', JSON.stringify(allRequests));
 
+      localStorage.setItem(
+        'gigsda_crew_requests',
+        JSON.stringify(allRequests)
+      );
+
+      
       // 2. Schleust den Partner zeitgleich direkt als "pending" in das Event-Crew-Array ein!
       // 2. Schleust den Partner zeitgleich direkt als "pending" in das Event-Crew-Array ein!
       // 📡 UNZERSTÖRBARE DOPPEL-BRÜCKE: Findet das Projekt oder legt es vollautomatisch neu an!
