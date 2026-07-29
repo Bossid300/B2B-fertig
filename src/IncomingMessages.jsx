@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-
 import { eventService } from './services/eventService';
+import { getProfilesDb } from './services/apiService';
 
 export default function IncomingMessages() {
   
@@ -44,6 +44,57 @@ export default function IncomingMessages() {
   };
 
   const [incomingRequests, setIncomingRequests] = useState([]);
+  const [allProfiles, setAllProfiles] = useState([]);
+  const [currentProfileData, setCurrentProfileData] = useState(null);
+
+  useEffect(() => {
+    const currentUserName =
+      localStorage.getItem('gigsda_user_name') || '';
+
+    getProfilesDb()
+      .then(profiles => {
+        const normalizedProfiles = profiles.map(profile => {
+          let profileData = {};
+
+          try {
+            profileData =
+              profile.profile_json
+                ? JSON.parse(profile.profile_json)
+                : {};
+          } catch (e) {
+            console.error(
+              'INCOMINGMESSAGES JSON FEHLER ❌',
+              e
+            );
+          }
+
+          return {
+            ...profile,
+            ...profileData
+          };
+        });
+
+        setAllProfiles(normalizedProfiles);
+
+        const found = normalizedProfiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name || '')
+              .trim()
+              .toLowerCase() ===
+            currentUserName.trim().toLowerCase()
+        );
+
+        console.log(
+          'INCOMINGMESSAGES PROFILE DB ✅',
+          found
+        );
+
+        setCurrentProfileData(found || null);
+      })
+      .catch(console.error);
+  }, []);
+
   const [counterRequestId, setCounterRequestId] =
     useState(null);
 
@@ -56,7 +107,8 @@ export default function IncomingMessages() {
         const requests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
 
         const currentUserId =
-        localStorage.getItem('gigsda_profile_id');
+          currentProfileData?.id ||
+          localStorage.getItem('gigsda_profile_id');
 
         const filtered = requests.filter(r =>
           r.requestedProfileId === currentUserId
@@ -80,7 +132,7 @@ export default function IncomingMessages() {
       window.removeEventListener('route-change', loadRequests);
     };
 
-  }, []);
+  }, [currentProfileData]);
 
 
   const handleAcceptDeal = (req) => {
@@ -118,10 +170,7 @@ export default function IncomingMessages() {
       ) || '[]'
     );
 
-    const profiles = JSON.parse(
-      localStorage.getItem('gigsda_profiles') || '[]'
-    );
-    const requesterProfile = profiles.find(
+    const requesterProfile = allProfiles.find(
       p =>
         (p.name || '').toLowerCase() ===
         (req.requesterName || '').toLowerCase()
