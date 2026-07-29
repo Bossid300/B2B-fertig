@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import ProfileCard from './components/cards/ProfileCard';
 
 import { eventService } from './services/eventService';
+import { getProfiles } from './services/apiService';
+
 
 export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat }) {
   const [allUsers, setAllUsers] = useState([]);
@@ -151,12 +153,49 @@ console.error('DB FEHLER ❌', err);
   };
 
 
-  // 📁 REINER LOCALSTORAGE-FILTER: Holt nur eure echten Profile frisch von der Festplatte
+
+
+
   useEffect(() => {
-    const localProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
-    // Filtert leere Einträge heraus und sorgt dafür, dass die Live-Daten (Stadt, Genre) geladen werden
-    setAllUsers(localProfiles.filter(user => user && user.name));
-  }, [onNavigate]); // Aktualisiert sich auch beim Zurückwechseln aus dem Profil
+
+    getProfiles()
+      .then(profiles => {
+  console.log("ERSTES PROFIL", profiles[0]);
+  console.log("PROFILE JSON", profiles[0]?.profile_json);
+        console.log("DB PROFILE ✅", profiles);
+
+  const normalizedProfiles = profiles.map(profile => {
+    let profileData = {};
+
+    try {
+      profileData =
+        profile.profile_json
+          ? JSON.parse(profile.profile_json)
+          : {};
+    } catch (e) {
+      console.error("JSON FEHLER", e);
+    }
+
+    return {
+      ...profile,
+      ...profileData
+    };
+  });
+
+  setAllUsers(
+    normalizedProfiles.filter(
+      user => user && user.name
+    )
+  );
+
+
+    })
+    .catch(err => {
+      console.error("PROFILE API FEHLER ❌", err);
+    });
+
+}, [onNavigate]);
+
 
 const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veranstalter', 'Techniker', 'Logistik', 'Security', 'Design'];
 
@@ -208,7 +247,7 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veran
     });
 
   return (
-    <div className="p-6 bg-slate-950 text-white min-h-screen font-mono relative">
+    <div className="max-w-7xl mx-auto p-6 text-white min-h-screen font-mono relative">
       
       {/* 🌌 HEADER SEKTION */}
       <div className="mb-8">

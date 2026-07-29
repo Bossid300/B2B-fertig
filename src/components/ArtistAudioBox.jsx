@@ -3,12 +3,14 @@ import {
   Play, Pause, Edit3, Check, Plus, Trash2, 
   Disc, Music, Clock, Volume2 
 } from 'lucide-react';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ArtistAudioBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profileId, setProfileId] = useState(null);
   const [albums, setAlbums] = useState([]);
-  
+  const [profileData, setProfileData] = useState(null); 
   // Audio-Engine Status
   const [playingTrack, setPlayingTrack] = useState({ albumIdx: null, trackIdx: null });
   const [currentTime, setCurrentTime] = useState(0);
@@ -34,20 +36,36 @@ export default function ArtistAudioBox({ currentProfileName, isOwner }) {
     }
   };
 
+
   // 1. DATEN-PIPELINE: Lädt deine bestehende DevTools-Struktur
   useEffect(() => {
     if (!targetUser) return;
     
-    const storedProfiles = localStorage.getItem('gigsda_profiles');
-    if (storedProfiles) {
-      const profiles = JSON.parse(storedProfiles);
-      const currentProfile = profiles.find(p => 
-        p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-      );
+    getProfilesDb()
+      .then(profiles => {
 
-      if (currentProfile) {
-        setProfileId(currentProfile.id);
-        
+        const found = profiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name)
+              ?.trim()
+              .toLowerCase() ===
+            targetUser.trim().toLowerCase()
+        );
+
+        if (!found) return;
+
+        const currentProfile =
+          found.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+
+        setProfileData(currentProfile);
+
+        setProfileId(
+          currentProfile.id
+        );
+
         const loadedAlbums = [];
         let index = 1;
         
@@ -103,8 +121,10 @@ export default function ArtistAudioBox({ currentProfileName, isOwner }) {
           if (index > 20) break;
         }
         setAlbums(loadedAlbums);
-      }
-    }
+            
+    })
+    .catch(console.error);
+
   }, [targetUser, isEditing]);
 
   // 2. PLAYER LOGIK (30s / 45s Countdown & Fade-out)
@@ -207,19 +227,18 @@ export default function ArtistAudioBox({ currentProfileName, isOwner }) {
     }
   };
 
-  // 4. SPEICHERN: Synchronisiert sauber flach zurück in gigsda_profiles
-  const handleSave = () => {
-    const storedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!storedProfiles || !profileId) return;
+  // 4. SPEICHERN: Synchronisiert sauber flach zurück
+  const handleSave = async () => {
+    if (!profileId) return;
 
-    let profiles = JSON.parse(storedProfiles);
-    const profileIndex = profiles.findIndex(p => p.id === profileId);
+    const updatedProfile = {
+      ...profileData
+    };
 
-    if (profileIndex !== -1) {
       // Alte Album-Metadaten säubern
-      Object.keys(profiles[profileIndex]).forEach(key => {
+      Object.keys(updatedProfile).forEach(key => {
         if (key.startsWith('album') && (key.includes('_title') || key.includes('_cover') || key.includes('_limit') || key.includes('_track'))) {
-          delete profiles[profileIndex][key];
+          delete updatedProfile[key];
         }
       });
 
@@ -227,37 +246,53 @@ export default function ArtistAudioBox({ currentProfileName, isOwner }) {
       albums.forEach((album) => {
         const i = album.index;
         
-        profiles[profileIndex][`album${i}_title`] = album.title;
-        profiles[profileIndex][`album${i}_cover`] = album.cover;
-        profiles[profileIndex][`album${i}_limit`] = album.limit;
+        updatedProfile[`album${i}_title`] = album.title;
+        updatedProfile[`album${i}_cover`] = album.cover;
+        updatedProfile[`album${i}_limit`] = album.limit;
         
         if (i === 1) {
           // ZURÜCKSCHREIBEN AUF DEINE LIVE AUDIO-KEYS FÜR ALBUM 1
-          profiles[profileIndex][`audio1_url`] = album.tracks[0].url;
-          profiles[profileIndex][`audio2_url`] = album.tracks[1].url;
-          profiles[profileIndex][`audio3_url`] = album.tracks[2].url;
-          profiles[profileIndex][`audio4_url`] = album.tracks[3].url;
+          updatedProfile[`audio1_url`] = album.tracks[0].url;
+          updatedProfile[`audio2_url`] = album.tracks[1].url;
+          updatedProfile[`audio3_url`] = album.tracks[2].url;
+          updatedProfile[`audio4_url`] = album.tracks[3].url;
           
-          profiles[profileIndex][`audio1_name`] = album.tracks[0].name;
-          profiles[profileIndex][`audio2_name`] = album.tracks[1].name;
-          profiles[profileIndex][`audio3_name`] = album.tracks[2].name;
-          profiles[profileIndex][`audio4_name`] = album.tracks[3].name;
+          updatedProfile[`audio1_name`] = album.tracks[0].name;
+          updatedProfile[`audio2_name`] = album.tracks[1].name;
+          updatedProfile[`audio3_name`] = album.tracks[2].name;
+          updatedProfile[`audio4_name`] = album.tracks[3].name;
         } else {
           // Keys für alle weiteren Alben
-          profiles[profileIndex][`album${i}_track1_name`] = album.tracks[0].name;
-          profiles[profileIndex][`album${i}_track1_url`] = album.tracks[0].url;
-          profiles[profileIndex][`album${i}_track2_name`] = album.tracks[1].name;
-          profiles[profileIndex][`album${i}_track2_url`] = album.tracks[1].url;
-          profiles[profileIndex][`album${i}_track3_name`] = album.tracks[2].name;
-          profiles[profileIndex][`album${i}_track3_url`] = album.tracks[2].url;
-          profiles[profileIndex][`album${i}_track4_name`] = album.tracks[3].name;
-          profiles[profileIndex][`album${i}_track4_url`] = album.tracks[3].url;
+          updatedProfile[`album${i}_track1_name`] = album.tracks[0].name;
+          updatedProfile[`album${i}_track1_url`] = album.tracks[0].url;
+          updatedProfile[`album${i}_track2_name`] = album.tracks[1].name;
+          updatedProfile[`album${i}_track2_url`] = album.tracks[1].url;
+          updatedProfile[`album${i}_track3_name`] = album.tracks[2].name;
+          updatedProfile[`album${i}_track3_url`] = album.tracks[2].url;
+          updatedProfile[`album${i}_track4_name`] = album.tracks[3].name;
+          updatedProfile[`album${i}_track4_url`] = album.tracks[3].url;
         }
       });
 
-      localStorage.setItem('gigsda_profiles', JSON.stringify(profiles));
+      console.log(
+        'AUDIO PROFILE BEFORE SAVE ✅',
+        updatedProfile
+      );
+
+      const result =
+        await saveProfile(
+          updatedProfile.id,
+          updatedProfile
+        );
+
+      console.log(
+        'AUDIO SAVE DB ✅',
+        result
+      );
+
+      setProfileId(updatedProfile.id);
+
       setIsEditing(false);
-    }
   };
 
   return (

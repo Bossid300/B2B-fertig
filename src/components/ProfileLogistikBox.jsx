@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Truck, Save, Eye, EyeOff, MapPin, Navigation, DollarSign } from 'lucide-react';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ProfileLogistikBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [profileData, setProfileData] = useState(null);
   const [showLogistik, setShowLogistik] = useState(true);
   const [formData, setFormData] = useState({
     travel_radius: '100',
@@ -14,30 +17,48 @@ export default function ProfileLogistikBox({ currentProfileName, isOwner }) {
   const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
   const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
 
-  // 1. DATABASE PIPELINE: Lädt Logistik-Daten live aus gigsda_profiles
+  // 1. DATABASE PIPELINE: Lädt Logistik-Daten live
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles);
-        if (Array.isArray(allProfiles)) {
-          const found = allProfiles.find(
-            p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-          );
-          if (found) {
-            setProfile(found);
-            setShowLogistik(found.show_logistik !== false);
-            setFormData({
-              travel_radius: found.travel_radius || '100',
-              mobility_status: found.mobility_status || '',
-              travel_expenses: found.travel_expenses || ''
-            });
-          }
-        }
-      } catch (e) {
-        console.error("Fehler in der Gigsda Logistik-Pipeline:", e);
-      }
-    }
+  getProfilesDb()
+    .then(profiles => {
+
+      const found = profiles.find(
+        p =>
+          p &&
+          (p.name || p.user_name || p.display_name)
+            ?.trim()
+            .toLowerCase() ===
+          targetUser.trim().toLowerCase()
+      );
+
+      if (!found) return;
+
+      const profile =
+        found.profile_json
+          ? JSON.parse(found.profile_json)
+          : found;
+
+      setProfile(profile);
+      setProfileData(profile);
+
+      setShowLogistik(
+        profile.show_logistik !== false
+      );
+
+      setFormData({
+        travel_radius:
+          profile.travel_radius || '100',
+
+        mobility_status:
+          profile.mobility_status || '',
+
+        travel_expenses:
+          profile.travel_expenses || ''
+      });
+
+    })
+    .catch(console.error);
+
   }, [targetUser, isEditing]);
 
   const handleChange = (e) => {
@@ -46,33 +67,51 @@ export default function ProfileLogistikBox({ currentProfileName, isOwner }) {
   };
 
   // 2. SAVE PIPELINE: Brennt die Logistik-Matrix permanent in die DB
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
+
     e.preventDefault();
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
 
     try {
-      let allProfiles = JSON.parse(savedProfiles);
-      if (!Array.isArray(allProfiles)) return;
 
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          return { 
-            ...p, 
-            ...formData, 
-            show_logistik: showLogistik 
-          };
-        }
-        return p;
-      });
+      const updatedProfile = {
+        ...profileData,
 
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      alert("B2B Logistik- & Reise-Protokoll erfolgreich eingebrannt! 💾🚚");
+        travel_radius: formData.travel_radius,
+        mobility_status: formData.mobility_status,
+        travel_expenses: formData.travel_expenses,
+
+        show_logistik: showLogistik
+      };
+
+      const result =
+        await saveProfile(
+          updatedProfile.id,
+          updatedProfile
+        );
+
+      console.log(
+        'LOGISTIK SAVE DB ✅',
+        result
+      );
+
+      setProfile(updatedProfile);
+      setProfileData(updatedProfile);
+
+      alert(
+        "Logistik-Matrix erfolgreich eingebrannt! 🚚"
+      );
+
       setIsEditing(false);
-      window.dispatchEvent(new Event('storage'));
+
     } catch (e) {
-      console.error("Fehler beim Sichern der Logistik-Daten:", e);
+
+      console.error(
+        "Fehler beim Speichern der Logistik:",
+        e
+      );
+
     }
+
   };
 
   if (!profile) {

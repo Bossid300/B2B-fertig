@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { HelpCircle, Save, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
 import { eventService } from '../services/eventService';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ProfileHilfeBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [profileData, setProfileData] = useState(null);
   const [showHilfe, setShowHilfe] = useState(true);
   
   // Haupt-Status: "ready" (Bereit zum Helfen) oder "none" (Nur Hauptgeschäft)
@@ -21,28 +24,49 @@ export default function ProfileHilfeBox({ currentProfileName, isOwner }) {
   const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
   const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
 
-  // 1. DATABASE PIPELINE: Lädt die Hilfs-Daten live aus gigsda_profiles
+  // 1. DATABASE PIPELINE: Lädt die Hilfs-Daten live
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles);
-        if (Array.isArray(allProfiles)) {
-          const found = allProfiles.find(
-            p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-          );
-          if (found) {
-            setProfile(found);
-            setShowHilfe(found.show_hilfe !== false);
-            setHilfeStatus(found.hilfe_status || 'ready');
-            if (found.hilfe_categories) setCategories(found.hilfe_categories);
+    getProfilesDb()
+      .then(allProfiles => {
+        const found = allProfiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name)
+              ?.trim()
+              .toLowerCase() ===
+            targetUser.trim().toLowerCase()
+        );
+        if (!found) return;
+        const profile =
+          found.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+
+        setProfile(profile);
+        setProfileData(profile);
+        setShowHilfe(
+          profile.show_hilfe !== false
+        );
+        setHilfeStatus(
+          profile.hilfe_status || 'ready'
+        );
+        setCategories(
+          profile.hilfe_categories || {
+            aufbau: true,
+            flyer: true,
+            logistik: false,
+            abbau: false
           }
-        }
-      } catch (e) {
-        console.error("Fehler in der Gigsda Hilfs-Pipeline:", e);
-      }
-    }
+        );
+      })
+      .catch((e) => {
+        console.error(
+          "Fehler in der Gigsda Hilfs-Pipeline:",
+          e
+        );
+      });
   }, [targetUser, isEditing]);
+
 
   const toggleCategory = (key) => {
     if (!isEditing) return;
@@ -50,54 +74,73 @@ export default function ProfileHilfeBox({ currentProfileName, isOwner }) {
   };
 
   // 2. SAVE PIPELINE: Brennt das Hilfs-Protokoll in die DB
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
     try {
-      let allProfiles = JSON.parse(savedProfiles);
-      if (!Array.isArray(allProfiles)) return;
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          return { ...p, hilfe_status: hilfeStatus, hilfe_categories: categories, show_hilfe: showHilfe };
-        }
-        return p;
-      });
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
+      const updatedProfile = {
+        ...profileData,
+        hilfe_status: hilfeStatus,
+        hilfe_categories: categories,
+        show_hilfe: showHilfe
+      };
+      const result =
+        await saveProfile(
+          updatedProfile.id,
+          updatedProfile
+        );
+      console.log(
+        'HILFE SAVE DB ✅',
+        result
+      );
+      setProfile(updatedProfile);
+      setProfileData(updatedProfile);
+
       const currentProfileId =
         localStorage.getItem('gigsda_profile_id');
+      const events =
+        eventService.getEvents();
+      const updatedEvents =
+        events.map((event) => {
 
-      const events = eventService.getEvents();
-      const updatedEvents = events.map(event => {
-        if (!event.riderCenter?.[currentProfileId]) {
-          return event;
-        }
-        return {
-          ...event,
-          riderCenter: {
-            ...event.riderCenter,
-
-            [currentProfileId]: {
-            ...event.riderCenter[currentProfileId],
-              confirmed: false,
-              changed: true,
-              changedAt: Date.now()
-            }
+          if (!event.riderCenter?.[currentProfileId]) {
+            return event;
           }
-        };
-      });
-      eventService.saveEvents(updatedEvents);
+
+          return {
+            ...event,
+
+            riderCenter: {
+              ...event.riderCenter,
+
+              [currentProfileId]: {
+                ...event.riderCenter[currentProfileId],
+                confirmed: false,
+                changed: true,
+                changedAt: Date.now()
+              }
+            }
+          };
+        });
+
+      eventService.saveEvents(
+        updatedEvents
+      );
       window.dispatchEvent(
         new CustomEvent('active-event-updated')
       );
       window.dispatchEvent(
         new CustomEvent('rider-updated')
       );
-      alert("B2B Support- & Hilfsprotokoll erfolgreich eingebrannt! 🏗️📄");
+
+      alert(
+        "B2B Support- & Hilfsprotokoll erfolgreich eingebrannt! 🧱📋"
+      );
       setIsEditing(false);
-      window.dispatchEvent(new Event('storage'));
     } catch (e) {
-      console.error("Fehler beim Sichern der Hilfs-Daten:", e);
+      console.error(
+        "Fehler beim Speichern der Hilfs-Daten:",
+        e
+      );
     }
   };
 

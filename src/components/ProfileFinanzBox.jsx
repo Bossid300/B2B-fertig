@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Landmark, Save, Eye, EyeOff, DollarSign, FileText } from 'lucide-react';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ProfileFinanzBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [profileData, setProfileData] = useState(null);
   const [showFinance, setShowFinance] = useState(false);
   const [formData, setFormData] = useState({
     rate_hour: '',
@@ -20,39 +23,56 @@ export default function ProfileFinanzBox({ currentProfileName, isOwner }) {
   const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
   const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
 
-  // 1. DATABASE PIPELINE: Lädt Finanzkonditionen live aus gigsda_profiles
+  // 1. DATABASE PIPELINE: Lädt Finanzkonditionen live 
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles);
-        if (Array.isArray(allProfiles)) {
-          const found = allProfiles.find(
-            p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-          );
-          if (found) {
-            setProfile(found);
-            setShowFinance(found.show_finance === true);
-            setFormData({
-              company_uid: found.company_uid || found.uid || '',
-              steuernummer: found.steuernummer || '',
-              tax_type: found.tax_type || 'regel',
-              rate_hour: found.rate_hour || '',
-              rate_day: found.rate_day || '',
-              payment_terms: found.payment_terms || '14_netto',
-              // HIER DIE BEIDEN ZEILEN ERGÄNZEN:
-              gage_min: found.gage_min || '',
-              gage_max: found.gage_max || '',
-              duration_max: found.duration_max || ''
-            });
+  getProfilesDb()
+    .then(profiles => {
+      const found = profiles.find(
+        p =>
+          p &&
+          (p.name || p.user_name || p.display_name)
+            ?.trim()
+            .toLowerCase() ===
+          targetUser.trim().toLowerCase()
+      );
+      if (!found) return;
+      const profile =
+        found.profile_json
+          ? JSON.parse(found.profile_json)
+          : found;
 
-          }
-        }
-      } catch (e) {
-        console.error("Fehler in der Gigsda Finanz-Pipeline:", e);
-      }
-    }
-  }, [targetUser, isEditing]);
+      setProfile(profile);
+      setProfileData(profile);
+      setShowFinance(
+        profile.show_finance === true
+      );
+      setFormData({
+        company_uid:
+          profile.company_uid ||
+          profile.uid ||
+          '',
+        steuernummer:
+          profile.steuernummer || '',
+        tax_type:
+          profile.tax_type || 'regel',
+        rate_hour:
+          profile.rate_hour || '',
+        rate_day:
+          profile.rate_day || '',
+        payment_terms:
+          profile.payment_terms ||
+          '14_netto',
+        gage_min:
+          profile.gage_min || '',
+        gage_max:
+          profile.gage_max || '',
+        duration_max:
+          profile.duration_max || ''
+      });
+    })
+  .catch(console.error);
+
+}, [targetUser, isEditing]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,32 +80,44 @@ export default function ProfileFinanzBox({ currentProfileName, isOwner }) {
   };
 
   // 2. SAVE PIPELINE: Sichert das Abrechnungs-Protokoll permanent in die DB
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
-
     try {
-      let allProfiles = JSON.parse(savedProfiles);
-      if (!Array.isArray(allProfiles)) return;
+      const updatedProfile = {
+        ...profileData,
 
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          return { 
-            ...p, 
-            ...formData,
-            show_finance: showFinance
-          };
-        }
-        return p;
-      });
+        company_uid: formData.company_uid,
+        steuernummer: formData.steuernummer,
+        tax_type: formData.tax_type,
+        rate_hour: formData.rate_hour,
+        rate_day: formData.rate_day,
+        payment_terms: formData.payment_terms,
+        gage_min: formData.gage_min,
+        gage_max: formData.gage_max,
+        duration_max: formData.duration_max,
 
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      alert("B2B Abrechnungs-Protokoll erfolgreich verschlüsselt eingebrannt! 💾💼");
+        show_finance: showFinance
+      };
+      const result =
+        await saveProfile(
+          updatedProfile.id,
+          updatedProfile
+        );
+      console.log(
+        'FINANCE SAVE DB ✅',
+        result
+      );
+      setProfile(updatedProfile);
+      setProfileData(updatedProfile);
+      alert(
+        "B2B Abrechnungs-Protokoll erfolgreich verschlüsselt eingebrannt! 💾📇"
+      );
       setIsEditing(false);
-      window.dispatchEvent(new Event('storage'));
     } catch (e) {
-      console.error("Fehler beim Sichern der Finanzen:", e);
+      console.error(
+        "Fehler beim Speichern der Finanzen:",
+        e
+      );
     }
   };
 
@@ -129,16 +161,33 @@ const { company_uid, steuernummer, tax_type, rate_hour, rate_day, payment_terms,
           {canEdit && (
             <button 
               type="button" 
-              onClick={() => {
-                const updatedShow = !showFinance;
-                setShowFinance(updatedShow);
-                const savedProfiles = localStorage.getItem('gigsda_profiles');
-                if (savedProfiles) {
-                  let all = JSON.parse(savedProfiles);
-                  all = all.map(p => p && (p.name || p.user_name || p.display_name)?.toLowerCase() === targetUser.toLowerCase() ? { ...p, show_finance: updatedShow } : p);
-                  localStorage.setItem('gigsda_profiles', JSON.stringify(all));
+              onClick={async () => {
+                try {
+                  const updatedShow =
+                    !showFinance;
+                  const updatedProfile = {
+                    ...profileData,
+                    show_finance: updatedShow
+                  };
+                  const result =
+                    await saveProfile(
+                      updatedProfile.id,
+                      updatedProfile
+                    );
+                  console.log(
+                    'FINANCE VISIBILITY DB ✅',
+                    result
+                  );
+                  setProfile(updatedProfile);
+                  setProfileData(updatedProfile);
+                  setShowFinance(updatedShow);
+                } catch (e) {
+                  console.error(
+                    'Fehler beim Umschalten der Finanzsichtbarkeit:',
+                    e
+                  );
                 }
-              }} 
+              }}
               className={`p-1.5 rounded-lg border transition-all cursor-pointer ${showFinance ? 'text-amber-400 border-amber-500/30 bg-amber-950/10' : 'text-slate-600 border-slate-800 bg-slate-900'}`}
             >
               {showFinance ? <Eye size={12} /> : <EyeOff size={12} />}

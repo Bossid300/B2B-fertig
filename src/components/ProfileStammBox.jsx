@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Pencil, Save, User, Eye, EyeOff } from 'lucide-react';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ProfileStammBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -11,96 +13,102 @@ export default function ProfileStammBox({ currentProfileName, isOwner }) {
 
   // 1. DATABASE PIPELINE: Lädt Stammdaten & Sichtbarkeits-Flags (Default: true)
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles);
-        if (Array.isArray(allProfiles)) {
-          const found = allProfiles.find(
-            p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-          );
-          if (found) {
-            setProfile(found);
-            setFormData({
-              role: found.role || 'Künstler',
-              avatarUrl: found.avatarUrl || '',
-              category: found.category || found.project_name || '',
-              Klarname: found.Klarname || '',
-              name: found.name || targetUser,
-              vorname: found.vorname || '',
-              nachname: found.nachname || '',
-              plz: found.plz || '',
-              city: found.city || '',
-              street: found.street || '',
-              phone: found.phone || '',
-              email: found.email || '',
-              website: found.website || '',
-              genre: found.genre || '',
-              id: found.id || '',
-              ticketName: found.ticketName || targetUser,
-              description: found.description || '',
-              
-              // Privacy Flags
-              show_category: found.show_category !== false,
-              show_Klarname: found.show_Klarname !== false,
-              show_name: found.show_name !== false,
-              show_name_real: found.show_name_real !== false,
-              show_phone: found.show_phone !== false,
-              show_email: found.show_email !== false,
-              show_address: found.show_address !== false,
-              show_website: found.show_website !== false,
-              show_genre: found.show_genre !== false,
-              show_description: found.show_description !== false,
-              show_avatarUrl: found.show_avatarUrl !== false
-            });
-          }
-        }
-      } catch (e) {
-        console.error("Fehler beim Laden der Gigsda-Stammdaten:", e);
-      }
-    }
-  }, [targetUser, isEditing]);
+    getProfilesDb()
+      .then(profiles => {
 
+        const found = profiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name)
+              ?.trim()
+              .toLowerCase() ===
+            targetUser.trim().toLowerCase()
+        );
+
+        if (!found) return;
+
+        const profileData =
+          found.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+
+        setProfile(profileData);
+
+        setFormData({
+          role: profileData.role || 'Künstler',
+          avatarUrl: profileData.avatarUrl || '',
+          category: profileData.category || profileData.project_name || '',
+          Klarname: profileData.Klarname || '',
+          name: profileData.name || targetUser,
+          vorname: profileData.vorname || '',
+          nachname: profileData.nachname || '',
+          plz: profileData.plz || '',
+          city: profileData.city || '',
+          street: profileData.street || '',
+          phone: profileData.phone || '',
+          email: profileData.email || '',
+          website: profileData.website || '',
+          genre: profileData.genre || '',
+          id: profileData.id || '',
+          ticketName: profileData.ticketName || targetUser,
+          description: profileData.description || '',
+
+          show_category: profileData.show_category !== false,
+          show_Klarname: profileData.show_Klarname !== false,
+          show_name: profileData.show_name !== false,
+          show_name_real: profileData.show_name_real !== false,
+          show_phone: profileData.show_phone !== false,
+          show_email: profileData.show_email !== false,
+          show_address: profileData.show_address !== false,
+          show_website: profileData.show_website !== false,
+          show_genre: profileData.show_genre !== false,
+          show_description: profileData.show_description !== false,
+          show_avatarUrl: profileData.show_avatarUrl !== false
+      });
+
+    })
+    .catch(console.error);
+
+
+}, [targetUser, isEditing]);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-
   const toggleVisibility = (fieldName) => {
     setFormData(prev => ({ ...prev, [fieldName]: !prev[fieldName] }));
   };
 
   // 2. SAVE PIPELINE: Brennt Daten & Augen-Zustände sicher in die DB
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
+      try {
+        const updatedProfile = {
+          ...profile,
+          ...formData
+        };
+        delete updatedProfile.project_name;
 
-    try {
-      let allProfiles = JSON.parse(savedProfiles);
-      if (!Array.isArray(allProfiles)) return;
-
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          const updatedProfile = { ...p, ...formData };
-          delete updatedProfile.project_name; 
-          return updatedProfile;
-        }
-        return p;
-      });
-
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      
-      if (targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase()) {
-        if (formData.name) localStorage.setItem('gigsda_user_name', formData.name);
+        const result =
+          await saveProfile(
+            updatedProfile.id,
+            updatedProfile
+          );
+        console.log(
+          'STAMM SAVE DB ✅',
+          result
+        );
+        setProfile(updatedProfile);
+        alert(
+          "Stammdaten & Sichtbarkeiten erfolgreich eingeregelt! 💾"
+        );
+        setIsEditing(false);
+      } catch (e) {
+        console.error(
+          "Fehler beim Brennen der Stammdaten:",
+          e
+        );
       }
-
-      alert("Stammdaten & Sichtbarkeiten erfolgreich eingeregelt! 💾");
-      setIsEditing(false);
-      window.dispatchEvent(new Event('storage'));
-    } catch (e) {
-      console.error("Fehler beim Brennen der Stammdaten:", e);
-    }
   };
 
   if (!profile) {

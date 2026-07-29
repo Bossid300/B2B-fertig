@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Database, Download, Upload, Trash2, ShieldAlert } from 'lucide-react';
+import { getProfilesDb, saveProfile } from '../services/apiService';
 
 export default function ProfileLokalBox({ currentProfileName, isOwner }) {
   const [profile, setProfile] = useState(null);
@@ -11,25 +12,35 @@ export default function ProfileLokalBox({ currentProfileName, isOwner }) {
 
   // 1. DATABASE PIPELINE: Berechnet reaktiv die Profil-Größe
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles);
-        if (Array.isArray(allProfiles)) {
-          const found = allProfiles.find(
-            p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-          );
-          if (found) {
-            setProfile(found);
-            // Berechnet die String-Länge im Speicher
-            const strLen = JSON.stringify(found).length;
-            setDataSize((strLen / 1024).toFixed(2) + ' KB');
-          }
-        }
-      } catch (e) {
-        console.error("Fehler in der Gigsda Lokalen-Pipeline:", e);
-      }
-    }
+    getProfilesDb()
+      .then(allProfiles => {
+        const found = allProfiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name)
+              ?.trim()
+              .toLowerCase() ===
+            targetUser.trim().toLowerCase()
+        );
+        if (!found) return;
+        const profile =
+          found.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+        setProfile(profile);
+        const strlen =
+          JSON.stringify(profile).length;
+
+        setDataSize(
+          (strlen / 1024).toFixed(2) + ' KB'
+        );
+      })
+      .catch((e) => {
+        console.error(
+          "Fehler in der Gigsda Lokal-Pipeline:",
+          e
+        );
+      });
   }, [targetUser]);
 
   // 2. BACKUP ENGINE: Lädt das Profil als JSON-Datei herunter
@@ -45,52 +56,84 @@ export default function ProfileLokalBox({ currentProfileName, isOwner }) {
   };
 
   // 3. RESTORE ENGINE: Liest ein JSON-Backup wieder ein
-  const handleImport = (e) => {
-    const fileReader = new FileReader();
+  const handleImport = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    fileReader.onload = (event) => {
+    const fileReader = new FileReader();
+    fileReader.onload = async (event) => {
       try {
-        const importedData = JSON.parse(event.target.result);
-        const savedProfiles = localStorage.getItem('gigsda_profiles');
-        if (!savedProfiles) return;
-
-        let allProfiles = JSON.parse(savedProfiles);
-        if (!Array.isArray(allProfiles)) return;
-
-        allProfiles = allProfiles.map(p => {
-          if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-            return { ...p, ...importedData, name: p.name }; // Behält den Systemnamen bei
-          }
-          return p;
-        });
-
-        localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-        alert("B2B Profil-Sicherung erfolgreich wiederhergestellt! 🔄⚡");
+        const importedData =
+          JSON.parse(event.target.result);
+        const result =
+          await saveProfile(
+            importedData.id || profile.id,
+            importedData
+          );
+        console.log(
+          'LOCAL IMPORT DB ✅',
+          result
+        );
+        setProfile(importedData);
+        alert(
+          "B2B Profil-Sicherung erfolgreich wiederhergestellt! 💾⚡"
+        );
         window.location.reload();
       } catch (err) {
-        alert("Fehler: Ungültiges Gigsda-Sicherungsprotokoll.");
+        console.error(err);
+        alert(
+          "Fehler: Ungültiges Gigsda-Sicherungsprotokoll."
+        );
       }
     };
     fileReader.readAsText(file);
   };
 
   // 4. PURGE ENGINE: Tilgt das Profil restlos aus dem System
-  const handlePurge = () => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
-
+  const handlePurge = async () => {
+    if (
+      !window.confirm(
+        'Profil wirklich endgültig löschen?'
+      )
+    ) {
+      return;
+    }
     try {
-      let allProfiles = JSON.parse(savedProfiles);
-      allProfiles = allProfiles.filter(p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() !== targetUser.trim().toLowerCase());
-      
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      alert("Profil restlos aus dem Gigsda-Register gelöscht! 🚨");
-      localStorage.removeItem('gigsda_user_name');
+      const response = await fetch(
+        '/api/deleteProfile.php',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            id: profile.id
+          })
+        }
+      );
+      const result =
+        await response.json();
+      console.log(
+        'PROFILE DELETE DB ✅',
+        result
+      );
+      alert(
+        'Profil erfolgreich gelöscht.'
+      );
+      localStorage.removeItem(
+        'gigsda_profile_id'
+      );
+      localStorage.removeItem(
+        'gigsda_user_name'
+      );
       window.location.href = '/';
     } catch (e) {
-      console.error(e);
+      console.error(
+        'Fehler beim Löschen:',
+        e
+      );
+      alert(
+        'Profil konnte nicht gelöscht werden.'
+      );
     }
   };
 

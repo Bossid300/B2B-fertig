@@ -3,6 +3,8 @@ import {
   Eye, EyeOff, Edit3, Check, Plus, Trash2, 
   FileText, Image as ImageIcon, Users, MapPin, DollarSign, Activity 
 } from 'lucide-react';
+import { getProfilesDb } from '../services/apiService';
+import { saveProfile } from '../services/apiService';
 
 export default function LocationRaeumeBox({ currentProfileName, isOwner, selectedRoom }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -20,49 +22,83 @@ export default function LocationRaeumeBox({ currentProfileName, isOwner, selecte
   };
 
   // 2. DATEN-PIPELINE: Lädt Räume passend zur Arena Braunau Struktur
-  useEffect(() => {
-    if (!targetUser) return;
-    
-    const storedProfiles = localStorage.getItem('gigsda_profiles');
-    if (storedProfiles) {
-      const profiles = JSON.parse(storedProfiles);
-      
-      // Exakte Such-Logik aus Zeile 20 deiner Stammbox
-      const currentProfile = profiles.find(p => 
-        p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
+useEffect(() => {
+  if (!targetUser) return;
+
+  getProfilesDb()
+    .then(profiles => {
+      const found = profiles.find(
+        p =>
+          p &&
+          (p.name || p.user_name || p.display_name)
+            ?.trim()
+            .toLowerCase() ===
+          targetUser.trim().toLowerCase()
       );
 
-      if (currentProfile) {
-        setProfileId(currentProfile.id);
-        
-        const loadedRooms = [];
-        let index = 1;
-        
-        // Liest fortlaufend room1, room2, room3 aus deinen Live-Daten
-        while (currentProfile[`room${index}_name`] !== undefined || currentProfile[`room${index}_img`] !== undefined || index <= 1) {
-          loadedRooms.push({
-            index: index,
-            name: currentProfile[`room${index}_name`] || `Raum ${index}`,
-            img: currentProfile[`room${index}_img`] || '',
-            tech_plan: currentProfile[`room${index}_tech_plan`] || '',
-            bankett: currentProfile[`room${index}_bankett`] || '',
-            steh: currentProfile[`room${index}_steh`] || '',
-            theater: currentProfile[`room${index}_theater`] || '',
-            uform: currentProfile[`room${index}_uform`] || '',
-            area: currentProfile[`room${index}_area`] || '',
-            power_supply: currentProfile[`room${index}_power_supply`] || '',
-            curfew_time: currentProfile[`room${index}_curfew_time`] || '',
-            equipment: currentProfile[`room${index}_equipment`] || '',
-            opnv: currentProfile[`room${index}_opnv`] || '',
-            konditionen: currentProfile[`room${index}_konditionen`] || '',
-            isPublic: currentProfile[`room${index}_visibility`] !== false
-          });
-          index++;
-        }
-        setRooms(loadedRooms);
+      console.log(
+        "LOCATIONRAEUME DB ✅",
+        found
+      );
+
+      if (!found) return;
+
+      const profileData =
+        found?.profile_json
+          ? JSON.parse(found.profile_json)
+          : found;
+
+      setProfileId(profileData.id);
+
+      const loadedRooms = [];
+      let index = 1;
+
+      while (
+        profileData[`room${index}_name`] !== undefined ||
+        profileData[`room${index}_img`] !== undefined ||
+        index <= 1
+      ) {
+        loadedRooms.push({
+          index,
+          name:
+            profileData[`room${index}_name`] ||
+            `Raum ${index}`,
+          img:
+            profileData[`room${index}_img`] || '',
+          tech_plan:
+            profileData[`room${index}_tech_plan`] || '',
+          bankett:
+            profileData[`room${index}_bankett`] || '',
+          steh:
+            profileData[`room${index}_steh`] || '',
+          theater:
+            profileData[`room${index}_theater`] || '',
+          uform:
+            profileData[`room${index}_uform`] || '',
+          area:
+            profileData[`room${index}_area`] || '',
+          power_supply:
+            profileData[`room${index}_power_supply`] || '',
+          curfew_time:
+            profileData[`room${index}_curfew_time`] || '',
+          equipment:
+            profileData[`room${index}_equipment`] || '',
+          opnv:
+            profileData[`room${index}_opnv`] || '',
+          konditionen:
+            profileData[`room${index}_konditionen`] || '',
+          isPublic:
+            profileData[`room${index}_visibility`] !== false
+        });
+
+        index++;
       }
-    }
-  }, [targetUser, isEditing]);
+
+      setRooms(loadedRooms);
+    })
+    .catch(console.error);
+}, [targetUser, isEditing]);
+
 
   // Input Handler
   const handleInputChange = (index, field, value) => {
@@ -98,49 +134,45 @@ export default function LocationRaeumeBox({ currentProfileName, isOwner, selecte
     }
   };
 
-  // SPEICHERN: Schreibt flache Keys zurück in gigsda_profiles
-  const handleSave = () => {
-    const storedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!storedProfiles || !profileId) return;
-
-    let profiles = JSON.parse(storedProfiles);
-    const profileIndex = profiles.findIndex(p => p.id === profileId);
-
-    if (profileIndex !== -1) {
-      // Alte Raum-Keys löschen, um Überschneidungen zu verhindern
-      Object.keys(profiles[profileIndex]).forEach(key => {
-        if (key.startsWith('room') && (key.includes('_name') || key.includes('_img') || key.includes('_tech_plan') || key.includes('_bankett') || key.includes('_steh') || key.includes('_theater') || key.includes('_uform') || key.includes('_area') || key.includes('_equipment') || key.includes('_opnv') || key.includes('_konditionen') || key.includes('_visibility'))) {
-          delete profiles[profileIndex][key];
-        }
-      });
-
-      // Flach zurückschreiben
+  // SPEICHERN: Schreibt flache Keys zurück
+  const handleSave = async () => {
+    if (!profileId) return;
+    try {
+      const updatedProfile = {
+        id: profileId
+      };
       rooms.forEach((room, idx) => {
         const i = idx + 1;
-        profiles[profileIndex][`room${i}_name`] = room.name;
-        profiles[profileIndex][`room${i}_img`] = room.img;
-        profiles[profileIndex][`room${i}_tech_plan`] = room.tech_plan;
-        profiles[profileIndex][`room${i}_bankett`] = room.bankett;
-        profiles[profileIndex][`room${i}_steh`] = room.steh;
-        profiles[profileIndex][`room${i}_theater`] = room.theater;
-        profiles[profileIndex][`room${i}_uform`] = room.uform;
-        profiles[profileIndex][`room${i}_area`] = room.area;
-        profiles[profileIndex][`room${i}_power_supply`] = room.power_supply;
-        profiles[profileIndex][`room${i}_curfew_time`] = room.curfew_time;
-        profiles[profileIndex][`room${i}_equipment`] = room.equipment;
-        profiles[profileIndex][`room${i}_opnv`] = room.opnv;
-        profiles[profileIndex][`room${i}_konditionen`] = room.konditionen;
-        profiles[profileIndex][`room${i}_visibility`] = room.isPublic;
+        updatedProfile[`room${i}_name`] = room.name;
+        updatedProfile[`room${i}_img`] = room.img;
+        updatedProfile[`room${i}_tech_plan`] = room.tech_plan;
+        updatedProfile[`room${i}_bankett`] = room.bankett;
+        updatedProfile[`room${i}_steh`] = room.steh;
+        updatedProfile[`room${i}_theater`] = room.theater;
+        updatedProfile[`room${i}_uform`] = room.uform;
+        updatedProfile[`room${i}_area`] = room.area;
+        updatedProfile[`room${i}_power_supply`] = room.power_supply;
+        updatedProfile[`room${i}_curfew_time`] = room.curfew_time;
+        updatedProfile[`room${i}_equipment`] = room.equipment;
+        updatedProfile[`room${i}_opnv`] = room.opnv;
+        updatedProfile[`room${i}_konditionen`] = room.konditionen;
+        updatedProfile[`room${i}_visibility`] = room.isPublic;
       });
+      const result = await saveProfile(
+        profileId,
+        updatedProfile
+      );
+      console.log(
+        'ROOM SAVE DB ✅',
+        result
+      );
 
-      localStorage.setItem('gigsda_profiles', JSON.stringify(profiles));
-try {
-
-  const events = JSON.parse(
-    localStorage.getItem("gigsda_events") || "[]"
-  );
-
-  const updatedEvents = events.map((event) => {
+      // Event-Markierung bleibt
+      try {
+        const events = JSON.parse(
+          localStorage.getItem("gigsda_events") || "[]"
+        );
+        const updatedEvents = events.map((event) => {
 
             if (!event.riderCenter?.[profileId]) {
               return event;
@@ -168,8 +200,12 @@ try {
             err
           );
         }
-
       setIsEditing(false);
+      } catch (err) {
+        console.error(
+        'Location Räume Save Fehler:',
+          err
+      );
     }
   };
 

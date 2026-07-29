@@ -5,37 +5,46 @@ import ProfileStammBox from './components/ProfileStammBox';
 import ProfilePassBox from './components/ProfilePassBox';
 import ProfileCard from './components/cards/ProfileCard';
 
+import { getProfilesDb } from './services/apiService';
+
 export default function DesignProfile({ onBack, ticketName, isOwner }) {
   const [profileData, setProfileData] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
-
   const targetUser = ticketName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-
   const currentProfileId =
     localStorage.getItem('gigsda_profile_id');
-
   const favoriteKey =
     `gigsda_favorites_${currentProfileId}`;
+
     
   // 1. DATABASE PIPELINE: Lädt die Profildaten, um Favoriten-Status zu prüfen
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles);
-        if (Array.isArray(allProfiles)) {
-          const found = allProfiles.find(
-            p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-          );
-          if (found) {
-            setProfileData(found);
-          }
+  getProfilesDb()
+    .then(profiles => {
+      const found = profiles.find(
+        p =>
+          p &&
+          (p.name || p.user_name || p.display_name)
+            ?.trim()
+            .toLowerCase() ===
+          targetUser.trim().toLowerCase()
+      );
+      console.log(
+        'USERPROFILE DB ✅',
+        found
+      );
+      if (found) {
+        if (found?.profile_json) {
+          const dbProfile =
+            JSON.parse(found.profile_json);
+          setProfileData(dbProfile);
+        } else {
+          setProfileData(found);
         }
-      } catch (e) {
-        console.error("Fehler beim Profil-Sync im Mutterschiff:", e);
       }
-    }
-
+    })
+    .catch(console.error);
+      
     // Prüft, ob der User in deiner Favoritenliste steht
     const savedFavs =
       JSON.parse(
@@ -66,14 +75,15 @@ export default function DesignProfile({ onBack, ticketName, isOwner }) {
       window.dispatchEvent(new Event('storage')); // UI-Schubs für reaktive Listen
     };
 
-  // Verhindert Flackern während die Daten laden
-  if (!profileData) {
-    return (
-      <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
-        // GIGSDA CORE CORE PROFILE REDIRECT...
-      </div>
-    );
+    // Verhindert Flackern während die Daten laden
+    if (!profileData) {
+      return (
+        <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
+          // GIGSDA CORE CORE PROFILE REDIRECT...
+        </div>
+      );
   }
+
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl relative space-y-6">

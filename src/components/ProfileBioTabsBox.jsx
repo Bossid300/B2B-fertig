@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Save, Eye, EyeOff, BookOpen, Briefcase, User } from 'lucide-react';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ProfileBioTabsBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -18,28 +20,37 @@ export default function ProfileBioTabsBox({ currentProfileName, isOwner }) {
 
   // 1. DATABASE PIPELINE: Lädt die geteilten Texte live aus gigsda_profiles
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles);
-        if (Array.isArray(allProfiles)) {
-          const found = allProfiles.find(
-            p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-          );
-          if (found) {
-            setProfile(found);
-            setShowBio(found.show_bio !== false);
-            setTextMatrix({
-              einleitung: found.bio_einleitung || found.bio || '', 
-              karriere: found.bio_karriere || '',
-              privates: found.bio_privates || ''
-            });
-          }
-        }
-      } catch (e) {
-        console.error("Fehler in der Gigsda Biografie-Pipeline:", e);
-      }
-    }
+    getProfilesDb()
+      .then(profiles => {
+
+        const found = profiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name)
+              ?.trim()
+              .toLowerCase() ===
+            targetUser.trim().toLowerCase()
+        );
+        if (!found) return;
+        const profileData =
+          found.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+        setProfile(profileData);
+        setShowBio(
+          profileData.show_bio !== false
+        );
+        setTextMatrix({
+          einleitung:
+            profileData.bio_einleitung || '',
+          karriere:
+            profileData.bio_karriere || '',
+          privates:
+            profileData.bio_privates || ''
+        });
+      })
+      .catch(console.error);
+    
   }, [targetUser, isEditing]);
 
   const handleTextChange = (tabKey, value) => {
@@ -47,30 +58,34 @@ export default function ProfileBioTabsBox({ currentProfileName, isOwner }) {
   };
 
   // 2. SAVE PIPELINE: Brennt die Felder permanent in die DB
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     try {
-      const savedProfiles = localStorage.getItem('gigsda_profiles');
-      let allProfiles = savedProfiles ? JSON.parse(savedProfiles) : [];
-      
-      const profileIndex = allProfiles.findIndex(
-        p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
+    const updatedProfile = {
+      ...profile,
+
+      bio_einleitung: textMatrix.einleitung,
+      bio_karriere: textMatrix.karriere,
+      bio_privates: textMatrix.privates,
+
+      show_bio: showBio
+    };
+
+    if (updatedProfile?.id) {
+
+      const result =
+        await saveProfile(
+          updatedProfile.id,
+          updatedProfile
+        );
+
+      console.log(
+        'BIO SAVE DB ✅',
+        result
       );
+      setProfile(updatedProfile);
+    }
 
-      const updatedFields = {
-        bio_einleitung: textMatrix.einleitung,
-        bio_karriere: textMatrix.karriere,
-        bio_privates: textMatrix.privates,
-        show_bio: showBio
-      };
-
-      if (profileIndex !== -1) {
-        allProfiles[profileIndex] = { ...allProfiles[profileIndex], ...updatedFields };
-      } else {
-        allProfiles.push({ name: targetUser, ...updatedFields });
-      }
-
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
       setIsEditing(false);
     } catch (e) {
       console.error("Fehler beim Speichern der Biografie:", e);

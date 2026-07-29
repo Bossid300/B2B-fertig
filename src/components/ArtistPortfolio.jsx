@@ -1,39 +1,60 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import GigsdaPass from "../components/GigsdaPass";
-
-const profiles =
-  JSON.parse(localStorage.getItem("gigsda_profiles")) || [];
-
-
-const activeProfileId =
-  localStorage.getItem('gigsda_portfolio_profile');
-
-const profile = profiles.find(
-  p => p.id === activeProfileId
-);
-
-
-const events =
-  JSON.parse(localStorage.getItem("gigsda_events")) || [];
-
-const references = events.filter(evt => {
-  const hasJoined =
-    Array.isArray(evt.crew) &&
-    evt.crew.some(member =>
-      member &&
-      member.name === profile?.name &&
-      (member.status === "accepted" ||
-       member.status === "confirmed")
-    );
-
-  const isOwner =
-    evt.ownerId === profile?.id;
-
-  return hasJoined || isOwner;
-});
-
+import { getProfilesDb } from "../services/apiService";
 
 export default function ArtistPortfolio() {
+  const [profile, setProfile] = useState(null);
+  const activeProfileId =
+    localStorage.getItem(
+      "gigsda_portfolio_profile"
+    );
+  const events =
+    JSON.parse(
+      localStorage.getItem("gigsda_events")
+    ) || [];
+
+  useEffect(() => {
+    getProfilesDb()
+      .then(allProfiles => {
+        const found = allProfiles.find(p => {
+          const profileData =
+            p.profile_json
+              ? JSON.parse(p.profile_json)
+              : p;
+          return (
+            profileData.id === activeProfileId
+          );
+        });
+        if (!found) return;
+        const loadedProfile =
+          found.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+
+        setProfile(loadedProfile);
+      })
+      .catch(console.error);
+  }, [activeProfileId]);
+  const references =
+    events.filter(evt => {
+      const hasJoined =
+        Array.isArray(evt.crew) &&
+        evt.crew.some(member =>
+          member &&
+          member.name === profile?.name &&
+          (
+            member.status === "accepted" ||
+            member.status === "confirmed"
+          )
+        );
+      const isOwner =
+        evt.ownerId === profile?.id;
+      return hasJoined || isOwner;
+    });
+  if (!profile) {
+    return null;
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 space-y-12">
       {/* 01 // HERO STAGE */}

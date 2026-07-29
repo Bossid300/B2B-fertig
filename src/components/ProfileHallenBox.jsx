@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Layers, Plus, X, Save, Eye, EyeOff, Home, Users, Music, Lightbulb, Tv } from 'lucide-react';
+import { getProfilesDb } from '../services/apiService';
+import { saveProfile } from '../services/apiService';
 
 export default function ProfileHallenBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -26,29 +28,50 @@ export default function ProfileHallenBox({ currentProfileName, isOwner }) {
   const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
   const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
 
-  // 1. DATABASE PIPELINE: Lädt das Hallenregister reaktiv aus gigsda_profiles
-  useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles);
-        if (Array.isArray(allProfiles)) {
-          const found = allProfiles.find(
-            p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-          );
-          if (found) {
-            setProfile(found);
-            setShowHallen(found.show_hallen !== false);
-            if (Array.isArray(found.location_rooms) && found.location_rooms.length > 0) {
-              setRooms(found.location_rooms);
-            }
-          }
-        }
-      } catch (e) {
-        console.error("Fehler in der Gigsda Hallen-Pipeline:", e);
+  // 1. DATABASE PIPELINE: Lädt das Hallenregister reaktiv
+useEffect(() => {
+  getProfilesDb()
+    .then(profiles => {
+      const found = profiles.find(
+        p =>
+          p &&
+          (p.name || p.user_name || p.display_name)
+            ?.trim()
+            .toLowerCase() ===
+          targetUser.trim().toLowerCase()
+      );
+
+      console.log(
+        'PROFILEHALLEN DB ✅',
+        found
+      );
+
+      if (!found) return;
+
+      const profileData =
+        found?.profile_json
+          ? JSON.parse(found.profile_json)
+          : found;
+
+      setProfile(profileData);
+
+      setShowHallen(
+        profileData.show_hallen !== false
+      );
+
+      if (
+        Array.isArray(
+          profileData.location_rooms
+        ) &&
+        profileData.location_rooms.length > 0
+      ) {
+        setRooms(
+          profileData.location_rooms
+        );
       }
-    }
-  }, [targetUser, isEditing]);
+    })
+    .catch(console.error);
+}, [targetUser, isEditing]);
 
   const handleRoomChange = (idx, field, value) => {
     const updatedRooms = [...rooms];
@@ -81,26 +104,32 @@ export default function ProfileHallenBox({ currentProfileName, isOwner }) {
   };
 
   // 2. SAVE PIPELINE: Brennt das Technik- & Raumprotokoll permanent in den Speicher
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
 
     try {
-      let allProfiles = JSON.parse(savedProfiles);
-      if (!Array.isArray(allProfiles)) return;
+      const updatedProfile = {
+        ...profile,
+        location_rooms: rooms,
+        show_hallen: showHallen
+      };
 
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          return { ...p, location_rooms: rooms, show_hallen: showHallen };
-        }
-        return p;
-      });
+      await saveProfile(
+        profile.id,
+        updatedProfile
+      );
 
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      alert("B2B Raum- & Technikregister erfolgreich eingebrannt! 💾🏟️");
+      setProfile(updatedProfile);
       setIsEditing(false);
-      window.dispatchEvent(new Event('storage'));
+
+      alert(
+        "B2B Raum- & Technikregister erfolgreich eingebrannt! 🏢🎛️"
+      );
+
+      window.dispatchEvent(
+        new Event("profile-updated")
+      );
+
     } catch (e) {
       console.error(e);
     }

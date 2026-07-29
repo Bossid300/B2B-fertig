@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Pencil, X, Shield, Music, Landmark, Briefcase, MessageSquare, Eye, EyeOff } from 'lucide-react';
 import { eventService } from '../services/eventService';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ProfileHeaderBox({ 
   currentProfileName, 
@@ -32,22 +34,31 @@ export default function ProfileHeaderBox({
 
   // 1. DATABASE PIPELINE: Lädt die Profildaten für Fremdprofile & befüllt die Inputs
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles);
-        if (Array.isArray(allProfiles)) {
-          const found = allProfiles.find(
-            p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-          );
-          if (found) {
-            setProfileData(found);
-          }
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
+    getProfilesDb()
+      .then(profiles => {
+
+        const found = profiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name)
+              ?.trim()
+              .toLowerCase() ===
+            targetUser.trim().toLowerCase()
+        );
+
+        if (!found) return;
+
+        const profileData =
+          found.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+
+        setProfileData(profileData);
+
+      })
+      .catch(console.error);
+      
+    
   }, [targetUser, isSliderMaskOpen]);
 
   // Synchronisiert die Eingabefelder, sobald die Maske geöffnet wird
@@ -98,28 +109,38 @@ export default function ProfileHeaderBox({
   };
 
   // 2. SAVE PIPELINE: Brennt Daten autark in die DB ein
-  const handleTickerSave = (e) => {
+  const handleTickerSave = async (e) => {
     e.preventDefault();
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
+      try {
 
-    try {
-      let allProfiles = JSON.parse(savedProfiles);
-      if (Array.isArray(allProfiles)) {
-        allProfiles = allProfiles.map(p => {
-          if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-            return { ...p, ...tickerFields };
-          }
-          return p;
-        });
-        localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-        alert("Cloud-Ticker erfolgreich in der Gigsda-Datenbank eingebrannt! 💾🔥");
+        const updatedProfile = {
+          ...profileData,
+          ...tickerFields
+        };
+
+        const result = await saveProfile(
+          updatedProfile.id,
+          updatedProfile
+        );
+
+        console.log(
+          'HEADER SAVE DB ✅',
+          result
+        );
+
+        setProfileData(updatedProfile);
+
+        alert(
+          "Cloud-Ticker erfolgreich in der Gigsda-Datenbank eingebrannt! 💾🔥"
+        );
+
         setIsSliderMaskOpen(false);
-        window.dispatchEvent(new Event('storage'));
+
+      } catch (err) {
+
+        console.error(err);
+
       }
-    } catch (err) {
-      console.error(err);
-    }
   };
 
   const getRoleBadge = (role) => {

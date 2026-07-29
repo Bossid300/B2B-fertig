@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, CheckCircle2 } from 'lucide-react';
+import { createProfile, createAuthUser, getLoginUser, getProfileById } from './services/apiService';
+
+
 
 export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess }) {
   const [isRegistering, setIsRegistering] = useState(isRegisteringInitial);
@@ -18,37 +21,43 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
 
   // 💥 FUNKTION 1: DAS INTELLIGENTE LOGIN (Durchsucht die Festplatte)
   // 🛠️ REAKTIVES LOGIN-UHRWERK (BOMBENFEST UND IMMUN GEGEN VARIABLEN-CRASHES)
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
 
-    const inputName = loginField ? loginField.trim() : "";
+    const inputName =
+      loginField
+        ? loginField.trim()
+        : "";
+
+    const result = await getLoginUser(
+      inputName,
+      loginPass
+    );
+
+    console.log(
+      "LOGIN TEST ✅",
+      result
+    );
+
     if (!inputName) {
       if (typeof setErrorMsg === 'function') setErrorMsg('Bitte gib deine Künstler-ID oder deinen Namen ein! 💡');
       return;
     }
 
-    const authUsers = JSON.parse(
-      localStorage.getItem("gigsda_auth_users") || "[]"
-    );
+    const matchedAuthUser = result.user;
 
-    const matchedAuthUser = authUsers.find(
-      user =>
-        user.email?.toLowerCase() === inputName.toLowerCase() &&
-        user.password === loginPass
-    );
-
-    if (!matchedAuthUser) {
+    if (!result.success || !matchedAuthUser) {
       setErrorMsg("E-Mail oder Passwort falsch.");
       return;
     }
 
-    const profiles = JSON.parse(
-      localStorage.getItem("gigsda_profiles") || "[]"
-    );
+    const profileResult =
+      await getProfileById(
+        matchedAuthUser.profileId
+      );
 
-    const matchedProfile = profiles.find(
-      p => p.id === matchedAuthUser.profileId
-    );
+    const matchedProfile =
+      profileResult.profile;
 
     if (!matchedProfile) {
       setErrorMsg("Profil konnte nicht geladen werden.");
@@ -102,8 +111,13 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
     }
   };
 
+
+
+
+
+
   // 💥 FUNKTION 2: DIE REGISTRIERUNG
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     // 🔒 RIEGEL: Wenn keine Rolle ausgewählt wurde, bricht das Abschicken sofort ab!
     if (!regRole) {
@@ -122,10 +136,25 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
       role: regRole
     };
 
+    await createProfile({
+      id: generatedId,
+      name: regName,
+      role: regRole,
+      city: '',
+      bio: ''
+    });
+
+    await createAuthUser({
+      id: "AUTH-" + Date.now(),
+      email: regEmail,
+      password: regPass,
+      profileId: generatedId
+    });
+
+
     // 📁 Speichern in Tabelle 1 (gigsda_profiles)
     const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
     savedProfiles.push(newProfile);
-
 
 const authUsers = JSON.parse(
   localStorage.getItem("gigsda_auth_users") || "[]"
@@ -183,8 +212,9 @@ localStorage.setItem('gigsda_profiles', JSON.stringify(savedProfiles));
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {[
                     { id: 'Fan', icon: '🎫', label: 'Fan', code: '[FAN_ZONE]' },
-                    { id: 'Veranstalter', icon: '💼', label: 'Veranstalter', code: '[ORG_CENTER]' },
                     { id: 'Künstler', icon: '🎤', label: 'Künstler', code: '[ACT_READY]' },
+                    { id: 'Location', icon: '📍', label: 'Location', code: '[VENUE_HUB]' },
+                    { id: 'Veranstalter', icon: '💼', label: 'Veranstalter', code: '[ORG_CENTER]' },
                     { id: 'Techniker', icon: '🎛️', label: 'Techniker', code: '[CREW_PATCH]' },
                     { id: 'Catering', icon: '🍽️', label: 'Catering', code: '[FOOD_SUPP]' },
                     { id: 'Verleiher', icon: '🔌', label: 'Verleiher', code: '[PA_BACKLINE]' },

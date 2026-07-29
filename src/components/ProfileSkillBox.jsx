@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldAlert, Plus, X, Save, Eye, EyeOff, Award } from 'lucide-react';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
+
 
 export default function ProfileSkillBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [profileData, setProfileData] = useState(null);
   const [skills, setSkills] = useState([]);
   const [certificates, setCertificates] = useState([]);
   const [showSkills, setShowSkills] = useState(true);
@@ -17,27 +21,52 @@ export default function ProfileSkillBox({ currentProfileName, isOwner }) {
 
   // 1. DATABASE PIPELINE: Lädt Skills & Zertifikate live aus der DB
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles);
-        if (Array.isArray(allProfiles)) {
-          const found = allProfiles.find(
-            p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-          );
-          if (found) {
-            setProfile(found);
-            setSkills(Array.isArray(found.skills) ? found.skills : (found.skills ? found.skills.split(',').map(s => s.trim()) : []));
-            setCertificates(Array.isArray(found.certificates) ? found.certificates : (found.certificates ? found.certificates.split(',').map(c => c.trim()) : []));
-            setShowSkills(found.show_skills !== false);
-            setShowCertificates(found.show_certificates !== false);
-          }
-        }
-      } catch (e) {
-        console.error("Fehler in der Gigsda Skill-Pipeline:", e);
-      }
-    }
-  }, [targetUser, isEditing]);
+    getProfilesDb()
+      .then(profiles => {
+
+        const found = profiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name)
+              ?.trim()
+              .toLowerCase() ===
+            targetUser.trim().toLowerCase()
+        );
+
+        if (!found) return;
+
+        const profile =
+          found.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+
+        setProfile(profile);
+        setProfileData(profile);
+
+        setSkills(
+          Array.isArray(profile.skills)
+            ? profile.skills
+            : []
+        );
+
+        setCertificates(
+          Array.isArray(profile.certificates)
+            ? profile.certificates
+            : []
+        );
+
+        setShowSkills(
+          profile.show_skills !== false
+        );
+
+    setShowCertificates(
+      profile.show_certificates !== false
+    );
+
+    })
+    .catch(console.error);
+
+    }, [targetUser, isEditing]);
 
   const addSkill = () => {
     if (!newSkill.trim()) return;
@@ -64,34 +93,51 @@ export default function ProfileSkillBox({ currentProfileName, isOwner }) {
   };
 
   // 2. SAVE PIPELINE: Sichert die Änderungen
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
-
     try {
-      let allProfiles = JSON.parse(savedProfiles);
-      if (!Array.isArray(allProfiles)) return;
 
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          return { 
-            ...p, 
-            skills, 
-            certificates,
-            show_skills: showSkills,
-            show_certificates: showCertificates
-          };
-        }
-        return p;
-      });
+      const updatedProfile = {
+        ...profileData,
 
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      alert("Skills & Qualifikations-Protokoll erfolgreich eingebrannt! 💾🔒");
+        skills,
+        certificates,
+
+        show_skills: showSkills,
+        show_certificates: showCertificates
+      };
+
+      console.log(
+        'SKILL PROFILE BEFORE SAVE ✅',
+        updatedProfile
+      );
+      
+      const result =
+        await saveProfile(
+          updatedProfile.id,
+          updatedProfile
+        );
+
+      console.log(
+        'SKILL SAVE DB ✅',
+        result
+      );
+
+      setProfile(updatedProfile);
+      setProfileData(updatedProfile);
+
+      alert(
+        "Skills & Qualifikations-Protokoll erfolgreich eingebrannt! 📋🔐"
+      );
+
       setIsEditing(false);
-      window.dispatchEvent(new Event('storage'));
+
     } catch (e) {
-      console.error("Fehler beim Sichern der Skills:", e);
+
+      console.error(
+        "Fehler beim Speichern der Skills:",
+        e
+      );
     }
   };
 

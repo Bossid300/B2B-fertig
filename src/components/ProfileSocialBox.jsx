@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Share2, Save, Eye, EyeOff, Globe } from 'lucide-react';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ProfileSocialBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [profileData, setProfileData] = useState(null);
   const [showSocials, setShowSocials] = useState(true);
   const [formData, setFormData] = useState({
     social_instagram: '',
@@ -15,32 +18,47 @@ export default function ProfileSocialBox({ currentProfileName, isOwner }) {
   const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
   const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
 
-  // 1. DATABASE PIPELINE: Lädt die Social-Links live aus gigsda_profiles
+  // 1. DATABASE PIPELINE: Lädt die Social-Links live
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles);
-        if (Array.isArray(allProfiles)) {
-          const found = allProfiles.find(
-            p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-          );
-          if (found) {
-            setProfile(found);
-            setShowSocials(found.show_socials !== false);
-            setFormData({
-              social_instagram: found.social_instagram || '',
-              social_linkedin: found.social_linkedin || '',
-              social_spotify: found.social_spotify || '',
-              social_youtube: found.social_youtube || ''
-            });
-          }
-        }
-      } catch (e) {
-        console.error("Fehler in der Gigsda Social-Pipeline:", e);
-      }
-    }
+    getProfilesDb()
+      .then(allProfiles => {
+        const found = allProfiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name)
+              ?.trim()
+              .toLowerCase() ===
+            targetUser.trim().toLowerCase()
+        );
+        if (!found) return;
+        const profile =
+          found.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+        setProfile(profile);
+        setProfileData(profile);
+        setShowSocials(
+          profile.show_socials !== false
+        );
+        setFormData({
+          social_instagram:
+            profile.social_instagram || '',
+          social_linkedin:
+            profile.social_linkedin || '',
+          social_spotify:
+            profile.social_spotify || '',
+          social_youtube:
+            profile.social_youtube || ''
+        });
+      })
+      .catch((e) => {
+        console.error(
+          "Fehler in der Gigsda Social-Pipeline:",
+          e
+        );
+      });
   }, [targetUser, isEditing]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,32 +66,42 @@ export default function ProfileSocialBox({ currentProfileName, isOwner }) {
   };
 
   // 2. SAVE PIPELINE: Sichert die Social-Links permanent in die DB
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
-
     try {
-      let allProfiles = JSON.parse(savedProfiles);
-      if (!Array.isArray(allProfiles)) return;
-
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          return { 
-            ...p, 
-            ...formData, 
-            show_socials: showSocials 
-          };
-        }
-        return p;
-      });
-
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      alert("B2B Web- & Social-Radar erfolgreich eingebrannt! 💾🌐");
+      const updatedProfile = {
+        ...profileData,
+        social_instagram:
+          formData.social_instagram,
+        social_linkedin:
+          formData.social_linkedin,
+        social_spotify:
+          formData.social_spotify,
+        social_youtube:
+          formData.social_youtube,
+        show_socials:
+          showSocials
+      };
+      const result =
+        await saveProfile(
+          updatedProfile.id,
+          updatedProfile
+        );
+      console.log(
+        'SOCIAL SAVE DB ✅',
+        result
+      );
+      setProfile(updatedProfile);
+      setProfileData(updatedProfile);
+      alert(
+        "B2B Web- & Social-Radar erfolgreich eingebrannt! 🌐📱"
+      );
       setIsEditing(false);
-      window.dispatchEvent(new Event('storage'));
     } catch (e) {
-      console.error("Fehler beim Sichern der Social-Daten:", e);
+      console.error(
+        "Fehler beim Speichern der Social-Daten:",
+        e
+      );
     }
   };
 
@@ -104,7 +132,33 @@ export default function ProfileSocialBox({ currentProfileName, isOwner }) {
           {canEdit && isEditing && (
             <button 
               type="button" 
-              onClick={() => setShowSocials(!showSocials)} 
+              onClick={async () => {
+                try {
+                  const updatedShow =
+                    !showSocials;
+                  const updatedProfile = {
+                    ...profileData,
+                    show_socials: updatedShow
+                  };
+                  const result =
+                    await saveProfile(
+                      updatedProfile.id,
+                      updatedProfile
+                    );
+                  console.log(
+                    'SOCIAL VISIBILITY DB ✅',
+                    result
+                  );
+                  setProfile(updatedProfile);
+                  setProfileData(updatedProfile);
+                  setShowSocials(updatedShow);
+                } catch (e) {
+                  console.error(
+                    'Fehler beim Umschalten der Social-Sichtbarkeit:',
+                    e
+                  );
+                }
+              }} 
               className={`p-1.5 rounded-lg border transition-all cursor-pointer ${showSocials ? 'text-cyan-400 border-cyan-500/30 bg-cyan-950/10' : 'text-slate-600 border-slate-800 bg-slate-900'}`}
             >
               {showSocials ? <Eye size={12} /> : <EyeOff size={12} />}

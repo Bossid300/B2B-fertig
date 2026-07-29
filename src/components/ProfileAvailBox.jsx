@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Calendar, Save, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ProfileAvailBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -14,28 +16,42 @@ export default function ProfileAvailBox({ currentProfileName, isOwner }) {
   const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
   const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
 
-  // 1. DATABASE PIPELINE: Lädt Verfügbarkeiten live aus gigsda_profiles
+  // 1. DATABASE PIPELINE: Lädt Verfügbarkeiten live
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles);
-        if (Array.isArray(allProfiles)) {
-          const found = allProfiles.find(
-            p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-          );
-          if (found) {
-            setProfile(found);
-            setShowAvail(found.show_avail !== false);
-            setGeneralStatus(found.general_status || 'available');
-            if (found.avail_days) setDays(found.avail_days);
-          }
+    getProfilesDb()
+      .then(profiles => {
+        const found = profiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name)
+              ?.trim()
+              .toLowerCase() ===
+            targetUser.trim().toLowerCase()
+        );
+        console.log(
+          'PROFILEAVAIL DB ✅',
+          found
+        );
+        if (!found) return;
+        const profileData =
+          found?.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+        setProfile(profileData);
+        setShowAvail(
+          profileData.show_avail !== false
+        );
+        setGeneralStatus(
+          profileData.general_status ||
+          'available'
+        );
+        if (profileData.avail_days) {
+          setDays(profileData.avail_days);
         }
-      } catch (e) {
-        console.error("Fehler in der Gigsda Verfügbarkeits-Pipeline:", e);
-      }
-    }
+      })
+      .catch(console.error);
   }, [targetUser, isEditing]);
+
 
   const toggleDay = (dayKey) => {
     if (!isEditing) return;
@@ -43,30 +59,42 @@ export default function ProfileAvailBox({ currentProfileName, isOwner }) {
   };
 
   // 2. SAVE PIPELINE: Sichert das Kalender-Protokoll
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
-
     try {
-      let allProfiles = JSON.parse(savedProfiles);
-      if (!Array.isArray(allProfiles)) return;
-
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          return { ...p, general_status: generalStatus, avail_days: days, show_avail: showAvail };
-        }
-        return p;
-      });
-
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      alert("B2B Verfügbarkeits-Protokoll erfolgreich eingebrannt! 📅⚡");
+      const updatedProfile = {
+        ...profile,
+        general_status: generalStatus,
+        avail_days: days,
+        show_avail: showAvail
+      };
+      if (updatedProfile?.id) {
+        const result =
+          await saveProfile(
+            updatedProfile.id,
+            updatedProfile
+          );
+        console.log(
+          'AVAIL SAVE DB ✅',
+          result
+        );
+      }
+      alert(
+        "B2B Verfügbarkeits-Protokoll erfolgreich eingebrannt! 📅⚡"
+      );
+      setProfile(updatedProfile);
       setIsEditing(false);
-      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(
+        new Event('storage')
+      );
     } catch (e) {
-      console.error("Fehler beim Sichern der Verfügbarkeit:", e);
+      console.error(
+        "Fehler beim Sichern der Verfügbarkeit:",
+        e
+      );
     }
   };
+
 
   if (!profile) {
     return (

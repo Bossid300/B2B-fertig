@@ -41,7 +41,7 @@ export default function GuestEvents({ onNavigate }) {
   });
 
   return (
-    <div className="p-6 bg-slate-950 text-white min-h-screen font-mono relative">
+    <div className="max-w-7xl mx-auto p-6 text-white min-h-screen font-mono relative">
       
       {/* 🌌 HEADER SEKTION */}
       <div className="mb-8">

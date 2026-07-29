@@ -73,7 +73,7 @@ export default function ProfileDokumenteBox({ currentProfileName, isOwner }) {
   };
 
   // 2. SAVE PIPELINE: Brennt die Dokumenten-Matrix permanent in die DB
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     const savedProfiles = localStorage.getItem('gigsda_profiles');
     if (!savedProfiles) return;
@@ -88,6 +88,29 @@ export default function ProfileDokumenteBox({ currentProfileName, isOwner }) {
         }
         return p;
       });
+
+const updatedProfile = allProfiles.find(
+  p =>
+    p &&
+    (p.name || p.user_name || p.display_name)
+      ?.trim()
+      .toLowerCase() ===
+    targetUser.trim().toLowerCase()
+);
+
+if (updatedProfile?.id) {
+
+  const result =
+    await saveProfile(
+      updatedProfile.id,
+      updatedProfile
+    );
+
+  console.log(
+    'DOCS SAVE DB ✅',
+    result
+  );
+}
 
       localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
       alert("B2B Dokumenten- & Rider-Protokoll erfolgreich eingebrannt! 💾📄");

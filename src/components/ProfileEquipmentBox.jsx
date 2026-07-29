@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Truck, Plus, X, Save, Eye, EyeOff, Wrench } from 'lucide-react';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ProfileEquipmentBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [profileData, setProfileData] = useState(null);
   const [showEquipment, setShowEquipment] = useState(true);
   const [equipmentList, setEquipmentList] = useState([]);
 
@@ -15,27 +18,43 @@ export default function ProfileEquipmentBox({ currentProfileName, isOwner }) {
   const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
   const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
 
-  // 1. DATABASE PIPELINE: Lädt das Inventar live aus gigsda_profiles
+  // 1. DATABASE PIPELINE: Lädt das Inventar live
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles);
-        if (Array.isArray(allProfiles)) {
-          const found = allProfiles.find(
-            p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-          );
-          if (found) {
-            setProfile(found);
-            setShowEquipment(found.show_equipment !== false);
-            setEquipmentList(Array.isArray(found.equipment) ? found.equipment : []);
-          }
-        }
-      } catch (e) {
-        console.error("Fehler in der Gigsda Equipment-Pipeline:", e);
-      }
-    }
+    getProfilesDb()
+      .then(allProfiles => {
+        const found = allProfiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name)
+              ?.trim()
+              .toLowerCase() ===
+            targetUser.trim().toLowerCase()
+        );
+        if (!found) return;
+        const profile =
+          found.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+        setProfile(profile);
+        setProfileData(profile);
+        setShowEquipment(
+          profile.show_equipment !== false
+        );
+        setEquipmentList(
+          Array.isArray(profile.equipment)
+            ? profile.equipment
+            : []
+        );
+      })
+      .catch(e => {
+        console.error(
+          "Fehler in der Gigsda Equipment-Pipeline:",
+          e
+        );
+      });
+
   }, [targetUser, isEditing]);
+
 
   const addItem = () => {
     if (!newItem.trim()) return;
@@ -56,32 +75,34 @@ export default function ProfileEquipmentBox({ currentProfileName, isOwner }) {
   };
 
   // 2. SAVE PIPELINE: Brennt die Equipment-Matrix permanent in die DB
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
-
     try {
-      let allProfiles = JSON.parse(savedProfiles);
-      if (!Array.isArray(allProfiles)) return;
-
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          return { 
-            ...p, 
-            equipment: equipmentList, 
-            show_equipment: showEquipment 
-          };
-        }
-        return p;
-      });
-
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      alert("B2B Equipment- & Fuhrpark-Protokoll erfolgreich eingebrannt! 💾🔧");
+      const updatedProfile = {
+        ...profileData,
+        equipment: equipmentList,
+        show_equipment: showEquipment
+      };
+      const result =
+        await saveProfile(
+          updatedProfile.id,
+          updatedProfile
+        );
+      console.log(
+        'EQUIPMENT SAVE DB ✅',
+        result
+      );
+      setProfile(updatedProfile);
+      setProfileData(updatedProfile);
+      alert(
+        "Equipment- & Fuhrpark-Protokoll erfolgreich eingebrannt! 📦"
+      );
       setIsEditing(false);
-      window.dispatchEvent(new Event('storage'));
     } catch (e) {
-      console.error("Fehler beim Sichern des Equipments:", e);
+      console.error(
+        "Fehler beim Speichern des Equipments:",
+        e
+      );
     }
   };
 

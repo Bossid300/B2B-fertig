@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Sliders, Music, Zap, Radio, Clock, Save, Edit2, X } from 'lucide-react';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ArtistStammBox({ profileOwnerName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [profileData, setProfileData] = useState(null);
   const [formData, setFormData] = useState({
     mainInstrument: '',
     subInstruments: '',
@@ -17,27 +20,47 @@ export default function ArtistStammBox({ profileOwnerName, isOwner }) {
   // 1. Profildaten aus gigsda_profiles laden anhand des Namens
   useEffect(() => {
     if (!profileOwnerName) return;
-    try {
-      const storedProfiles = localStorage.getItem('gigsda_profiles');
-      if (storedProfiles) {
-        const profilesArray = JSON.parse(storedProfiles);
-        const currentProfile = profilesArray.find(p => p.name === profileOwnerName);
-        if (currentProfile) {
-          setFormData({
-            mainInstrument: currentProfile.mainInstrument || '',
-            subInstruments: currentProfile.subInstruments || '',
-            genre: currentProfile.genre || '',
-            formation: currentProfile.formation || 'solo',
-            rider_monitors: currentProfile.rider_monitors || '',
-            rider_backline: currentProfile.rider_backline || '',
-            setup_time: currentProfile.setup_time || '',
-            event_types: currentProfile.event_types || ''
-          });
-        }
-      }
-    } catch (error) {
-      console.error("Fehler beim Laden der ArtistStammBox:", error);
-    }
+
+    getProfilesDb()
+      .then(profiles => {
+
+        const found = profiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name)
+              ?.trim()
+              .toLowerCase() ===
+            profileOwnerName.trim().toLowerCase()
+        );
+
+        if (!found) return;
+
+        const profile =
+          found.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+
+        setProfileData(profile);
+
+        setFormData({
+          mainInstrument: profile.mainInstrument || '',
+          subInstruments: profile.subInstruments || '',
+          genre: profile.genre || '',
+          formation: profile.formation || 'solo',
+          rider_monitors: profile.rider_monitors || '',
+          rider_backline: profile.rider_backline || '',
+          setup_time: profile.setup_time || '',
+          event_types: profile.event_types || ''
+        });
+
+      })
+      .catch(error => {
+        console.error(
+          'Fehler beim Laden der ArtistStammBox:',
+          error
+        );
+      });
+
   }, [profileOwnerName]);
 
   const handleChange = (e) => {
@@ -46,40 +69,49 @@ export default function ArtistStammBox({ profileOwnerName, isOwner }) {
   };
 
   // 2. Speicher-Pipeline: Schreibt alle B2B-Felder direkt in gigsda_profiles
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    try {
-      const storedProfiles = localStorage.getItem('gigsda_profiles');
-      let profilesArray = storedProfiles ? JSON.parse(storedProfiles) : [];
-      const profileIndex = profilesArray.findIndex(p => p.name === profileOwnerName);
 
-      const updatedData = {
-        name: profileOwnerName,
+    try {
+
+      const updatedProfile = {
+        ...profileData,
+
         mainInstrument: formData.mainInstrument,
         subInstruments: formData.subInstruments,
         genre: formData.genre,
         formation: formData.formation,
         rider_monitors: formData.rider_monitors,
         rider_backline: formData.rider_backline,
-        setup_time: formData.setup_time !== '' ? Number(formData.setup_time) : '',
+        setup_time:
+          formData.setup_time !== ''
+            ? Number(formData.setup_time)
+            : '',
         event_types: formData.event_types
       };
 
-      if (profileIndex !== -1) {
-        profilesArray[profileIndex] = { ...profilesArray[profileIndex], ...updatedData };
-      } else {
-        profilesArray.push(updatedData);
-      }
+      const result =
+        await saveProfile(
+          updatedProfile.id,
+          updatedProfile
+        );
 
-      localStorage.setItem('gigsda_profiles', JSON.stringify(profilesArray));
+      console.log(
+        'ARTIST STAMM SAVE DB ✅',
+        result
+      );
+
+      setProfileData(updatedProfile);
+
       setIsEditing(false);
-      
-      // Optionaler Reload, falls Suchergebnisse live reagieren müssen
-      if (typeof window !== 'undefined') {
-        window.location.reload();
-      }
+
     } catch (error) {
-      console.error("Fehler beim Speichern in ArtistStammBox:", error);
+
+      console.error(
+        "Fehler beim Speichern in ArtistStammBox:",
+        error
+      );
+
     }
   };
 

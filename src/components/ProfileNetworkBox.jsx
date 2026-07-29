@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Eye, EyeOff } from 'lucide-react';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ProfileNetworkBox({ currentProfileName, isOwner }) {
   const [profile, setProfile] = useState(null);
+  const [profileData, setProfileData] = useState(null);
   const [networkUsers, setNetworkUsers] = useState([]);
   const [showNetwork, setShowNetwork] = useState(true);
   const [stats, setStats] = useState({ requestsCount: 0, favoritedByCount: 0 });
@@ -20,91 +23,136 @@ export default function ProfileNetworkBox({ currentProfileName, isOwner }) {
 
   // 1. DYNAMIC B2B NETWORK & METRIC ENGINE
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    const savedRequests = localStorage.getItem('gigsda_crew_requests');
-    
-    const savedFavs =
-      localStorage.getItem(favoriteKey);
+  const savedRequests =
+    localStorage.getItem('gigsda_crew_requests');
 
+  const savedFavs =
+    localStorage.getItem(favoriteKey);
 
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles) || [];
+    getProfilesDb()
+      .then(allProfiles => {
         const found = allProfiles.find(
-          p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name)
+              ?.trim()
+              .toLowerCase() ===
+            targetUser.trim().toLowerCase()
         );
-
-        if (found) {
-          setProfile(found);
-          setShowNetwork(found.show_network !== false);
-
-          // B2B-Synergien (Vorschau-Partner)
-          const partnerList = allProfiles.filter(p => 
-            p && 
-            p.name?.toLowerCase() !== targetUser.toLowerCase() && 
-            (p.role === found.role || p.city === found.city || found.skills?.includes(p.role))
+        if (!found) return;
+        const profile =
+          found.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+        setProfile(profile);
+        setProfileData(profile);
+        setShowNetwork(
+          profile.show_network !== false
+        );
+        const partnerList =
+          allProfiles.filter(p =>
+            p &&
+            p.name?.toLowerCase() !==
+              targetUser.toLowerCase() &&
+            (
+              p.role === profile.role ||
+              p.city === profile.city ||
+              profile.skills?.includes(p.role)
+            )
           ).slice(0, 3);
-          
-          setNetworkUsers(partnerList);
-
-          // Namens-Variations-Matrix zur schreibweisen-unabhängigen Filterung
-          const nameVariations = [
-            targetUser.trim().toLowerCase(),
-            (found.name || '').trim().toLowerCase(),
-            (found.Klarname || '').trim().toLowerCase(),
-            (found.project_name || '').trim().toLowerCase(),
-            (found.category || '').trim().toLowerCase()
-          ].filter(v => v !== '');
-
-          // A. CREW-REQUEST FILTER (Wer hat wen für Jobs angefragt)
-          const reqs = JSON.parse(savedRequests || '[]');
-          let myRequests = [];
-          if (targetUser.toLowerCase() === loggedInUser.toLowerCase()) {
-            myRequests = reqs.filter(r => r && r.requestedProfile && nameVariations.includes(r.requestedProfile.trim().toLowerCase()));
-          } else {
-            myRequests = reqs.filter(r => r && r.requesterName && nameVariations.includes(r.requesterName.trim().toLowerCase()));
-          }
-
-          // B. MISCH-FAVORITEN FILTER (Liest Strings UND komplexe Objekte fehlerfrei aus!)
-          const favs = JSON.parse(savedFavs || '[]');
-          const isFavInLists = favs.filter(f => {
-            if (!f) return false;
-            // Falls der Eintrag ein Objekt ist, nimm f.name, ansonsten nutze den String direkt!
-            const entryName = (typeof f === 'object' && f.name) ? f.name : f;
-            return nameVariations.includes(entryName.trim().toLowerCase());
-          });
-
-          setStats({
-            requestsCount: myRequests.length,
-            // Gibt die echten Treffer aus deiner Liste aus
-            favoritedByCount: isFavInLists.length
-          });
-        }
-
-      } catch (e) {
-        console.error("Fehler im Gigsda Netzwerk-Protokoll:", e);
-      }
+        setNetworkUsers(partnerList);
+        const nameVariations = [
+          targetUser.trim().toLowerCase(),
+          (profile.name || '').trim().toLowerCase(),
+          (profile.Klarname || '').trim().toLowerCase(),
+          (profile.project_name || '').trim().toLowerCase(),
+          (profile.category || '').trim().toLowerCase()
+        ].filter(v => v !== '');
+        const savedFavs =
+          localStorage.getItem(favoriteKey);
+    const reqs =
+      JSON.parse(savedRequests || '[]');
+    let myRequests = [];
+    if (
+      targetUser.toLowerCase() ===
+      loggedInUser.toLowerCase()
+    ) {
+      myRequests = reqs.filter(
+        r =>
+          r &&
+          r.requestedProfile &&
+          nameVariations.includes(
+            r.requestedProfile.trim().toLowerCase()
+          )
+      );
+    } else {
+      myRequests = reqs.filter(
+        r =>
+          r &&
+          r.requesterName &&
+          nameVariations.includes(
+            r.requesterName.trim().toLowerCase()
+          )
+      );
     }
-  }, [targetUser, showNetwork]);
-
-  const toggleNetworkPrivacy = () => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
-    try {
-      let allProfiles = JSON.parse(savedProfiles);
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          return { ...p, show_network: !showNetwork };
-        }
-        return p;
+    const favs =
+      JSON.parse(savedFavs || '[]');
+    const isFavInLists =
+      favs.filter(f => {
+        if (!f) return false;
+        const entryName =
+          (typeof f === 'object' && f.name)
+            ? f.name
+            : f;
+        return nameVariations.includes(
+          entryName.trim().toLowerCase()
+        );
       });
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      setShowNetwork(!showNetwork);
-      window.dispatchEvent(new Event('storage'));
-    } catch (e) {
-      console.error(e);
-    }
-  };
+    setStats({
+      requestsCount: myRequests.length,
+      favoritedByCount: isFavInLists.length
+    });
+
+    })
+    .catch(console.error);
+
+}, [targetUser, showNetwork]);
+
+
+const toggleNetworkPrivacy = async () => {
+
+  try {
+
+    const updatedProfile = {
+      ...profileData,
+      show_network: !showNetwork
+    };
+
+    const result =
+      await saveProfile(
+        updatedProfile.id,
+        updatedProfile
+      );
+
+    console.log(
+      'NETWORK SAVE DB ✅',
+      result
+    );
+
+    setProfile(updatedProfile);
+    setProfileData(updatedProfile);
+    setShowNetwork(!showNetwork);
+
+  } catch (e) {
+
+    console.error(
+      'Fehler beim Speichern der Netzwerk-Sichtbarkeit:',
+      e
+    );
+
+  }
+
+};
 
   if (!profile) {
     return (

@@ -3,10 +3,14 @@ import {
   Edit3, Check, FileText, Image as ImageIcon, 
   Plus, Trash2, Sliders, Radio, Activity, LayoutList 
 } from 'lucide-react';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
+
 
 export default function ArtistTechRiderBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profileId, setProfileId] = useState(null);
+  const [profileData, setProfileData] = useState(null);
   const [channels, setChannels] = useState([]);
   
   // Technische Rider-Links & Monitore initialisieren
@@ -28,41 +32,57 @@ export default function ArtistTechRiderBox({ currentProfileName, isOwner }) {
   // 1. DATEN-PIPELINE: Lädt flache Keys inklusive deinem korrekten stageplot_url
   useEffect(() => {
     if (!targetUser) return;
-    
-    const storedProfiles = localStorage.getItem('gigsda_profiles');
-    if (storedProfiles) {
-      const profiles = JSON.parse(storedProfiles);
-      const currentProfile = profiles.find(p => 
-        p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-      );
-
-      if (currentProfile) {
+    getProfilesDb()
+      .then(profiles => {
+        const found = profiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name)
+              ?.trim()
+              .toLowerCase() ===
+            targetUser.trim().toLowerCase()
+        );
+        if (!found) return;
+        const currentProfile =
+          found.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+        setProfileData(currentProfile);
         setProfileId(currentProfile.id);
-        
-        // stageplot_url greift jetzt exakt auf deinen Live-Key zu
         setTechData({
-          rider_pdf_url: currentProfile.rider_pdf_url || '',
-          rider_stageplot_url: currentProfile.stageplot_url || '', // KORRIGIERT
-          rider_monitors: currentProfile.rider_monitors || '',
-          rider_backline: currentProfile.rider_backline || ''
+          rider_pdf_url:
+            currentProfile.rider_pdf_url || '',
+          rider_stageplot_url:
+            currentProfile.rider_stageplot_url ||
+            currentProfile.stageplot_url ||
+            '',
+          rider_monitors:
+            currentProfile.rider_monitors || '',
+          rider_backline:
+            currentProfile.rider_backline || ''
         });
-
-        // Kanalliste laden
         const loadedChannels = [];
         let index = 1;
-        while (currentProfile[`ch${index}_signal`] !== undefined || currentProfile[`ch${index}_mic`] !== undefined || index <= 4) {
+        while (
+          currentProfile[`ch${index}_signal`] !== undefined ||
+          currentProfile[`ch${index}_mic`] !== undefined ||
+          index <= 4
+        ) {
           loadedChannels.push({
-            index: index,
-            signal: currentProfile[`ch${index}_signal`] || '',
-            mic: currentProfile[`ch${index}_mic`] || '',
-            stand: currentProfile[`ch${index}_stand`] || ''
+            index,
+            signal:
+              currentProfile[`ch${index}_signal`] || '',
+            mic:
+              currentProfile[`ch${index}_mic`] || '',
+            stand:
+              currentProfile[`ch${index}_stand`] || ''
           });
           index++;
           if (index > 64) break;
         }
         setChannels(loadedChannels);
-      }
-    }
+      })
+      .catch(console.error);
   }, [targetUser, isEditing]);
 
   // Handler für allgemeine Felder
@@ -94,80 +114,102 @@ export default function ArtistTechRiderBox({ currentProfileName, isOwner }) {
   };
 
   // 2. SPEICHERN: Schreibt die Werte exakt flach (ch1_signal, etc.) zurück
-  const handleSave = () => {
-    const storedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!storedProfiles || !profileId) return;
-
-    let profiles = JSON.parse(storedProfiles);
-    const profileIndex = profiles.findIndex(p => p.id === profileId);
-
-    if (profileIndex !== -1) {
-      // Allgemeine Felder speichern
-      profiles[profileIndex].rider_pdf_url = techData.rider_pdf_url;
-      profiles[profileIndex].rider_stageplot_url = techData.rider_stageplot_url;
-      profiles[profileIndex].rider_monitors = techData.rider_monitors;
-      profiles[profileIndex].rider_backline = techData.rider_backline;
-
-      // Alte chX_ Keys im Profil bereinigen, um Datenmüll zu verhindern
-      Object.keys(profiles[profileIndex]).forEach(key => {
-        if (key.startsWith('ch') && (key.includes('_signal') || key.includes('_mic') || key.includes('_stand'))) {
-          delete profiles[profileIndex][key];
-        }
-      });
-
-      // Kanalliste flach in die erste Ebene zurückschreiben (ch1_signal, ch1_mic, etc.)
-      channels.forEach((ch, idx) => {
-        const i = idx + 1; // Werden fortlaufend neu durchnummeriert ch1, ch2, ch3...
-        profiles[profileIndex][`ch${i}_signal`] = ch.signal;
-        profiles[profileIndex][`ch${i}_mic`] = ch.mic;
-        profiles[profileIndex][`ch${i}_stand`] = ch.stand;
-      });
-
-      localStorage.setItem('gigsda_profiles', JSON.stringify(profiles));
-
-      try {
-        const events = JSON.parse(
-          localStorage.getItem("gigsda_events") || "[]"
-        );
-
-        const updatedEvents = events.map((event) => {
-
-          if (!event.riderCenter?.[profileId]) {
-            return event;
-          }
-            return {
-              ...event,
-
-              riderCenter: {
-                ...event.riderCenter,
-
-                [profileId]: {
-                  ...event.riderCenter[profileId],
-
-                  confirmed: false,
-                  changed: true,
-                  changedAt: Date.now()
-                }
-              }
-            };
-        });
-
-        localStorage.setItem(
-          "gigsda_events",
-          JSON.stringify(updatedEvents)
-        );
-
-        window.dispatchEvent(
-          new CustomEvent("rider-updated")
-        );
-
-      } catch (err) {
-        console.error(err);
-      }
-
-      setIsEditing(false);
+  const handleSave = async () => {
+    console.log('RIDER SAVE CLICK ✅');
+    if (!profileId || !profileData) return;
+    const updatedProfile = {
+      ...profileData,
+      rider_pdf_url: techData.rider_pdf_url,
+      rider_stageplot_url: techData.rider_stageplot_url,
+      rider_monitors: techData.rider_monitors,
+      rider_backline: techData.rider_backline
+    };
+  Object.keys(updatedProfile).forEach(key => {
+    if (
+      key.startsWith('ch') &&
+      (
+        key.includes('_signal') ||
+        key.includes('_mic') ||
+        key.includes('_stand')
+      )
+    ) {
+      delete updatedProfile[key];
     }
-  };
+  });
+
+  channels.forEach((ch, idx) => {
+    const i = idx + 1;
+    updatedProfile[`ch${i}_signal`] = ch.signal;
+    updatedProfile[`ch${i}_mic`] = ch.mic;
+    updatedProfile[`ch${i}_stand`] = ch.stand;
+
+  });
+
+console.log(
+  'RIDER PROFILE BEFORE SAVE ✅',
+  updatedProfile
+);
+
+const result =
+  await saveProfile(
+    updatedProfile.id,
+    updatedProfile
+  );
+
+console.log(
+  'RIDER SAVE DB ✅',
+  result
+);
+
+setProfileData(updatedProfile);
+
+try {
+
+  const events = JSON.parse(
+    localStorage.getItem('gigsda_events') || '[]'
+  );
+
+  const updatedEvents = events.map(event => {
+
+    if (!event.riderCenter?.[profileId]) {
+      return event;
+    }
+
+      return {
+        ...event,
+
+        riderCenter: {
+          ...event.riderCenter,
+
+          [profileId]: {
+            ...event.riderCenter[profileId],
+
+            confirmed: false,
+            changed: true,
+            changedAt: Date.now()
+          }
+        }
+      };
+
+  });
+
+  localStorage.setItem(
+    'gigsda_events',
+    JSON.stringify(updatedEvents)
+  );
+
+  window.dispatchEvent(
+    new CustomEvent('rider-updated')
+  );
+
+} catch (err) {
+
+  console.error(err);
+
+}
+
+setIsEditing(false);
+};
 
   return (
     <div className="bg-[#0b111e] rounded-xl border border-slate-800/50 shadow-xl p-3 mb-3 text-slate-200 font-sans">

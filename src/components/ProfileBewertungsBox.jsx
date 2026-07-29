@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Star, Save, Eye, EyeOff, CheckCircle2, User, AlertTriangle } from 'lucide-react';
-
 import { eventService } from '../services/eventService';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [profileData, setProfileData] = useState(null);
   const [showReviews, setShowReviews] = useState(true);
   const [reviewsList, setReviewsList] = useState([]);
   
@@ -21,21 +23,41 @@ export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
 
   // 1. DATABASE & SECURITY PIPELINE: Prüft Zusammenarbeit & verhindert Doppel-Bewertungen
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    const savedEvents = eventService.getEvents();
+      const savedEvents =
+        eventService.getEvents();
 
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles) || [];
-        const found = allProfiles.find(
-          p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-        );
+      getProfilesDb()
+        .then(allProfiles => {
 
-        if (found) {
-          setProfile(found);
-          setShowReviews(found.show_reviews !== false);
-          
-          const existingReviews = Array.isArray(found.reviews) ? found.reviews : [];
+          const found =
+            allProfiles.find(
+              p =>
+                p &&
+                (p.name || p.user_name || p.display_name)
+                  ?.trim()
+                  .toLowerCase() ===
+                targetUser.trim().toLowerCase()
+            );
+
+          if (!found) return;
+
+          const profile =
+            found.profile_json
+              ? JSON.parse(found.profile_json)
+              : found;
+
+          setProfile(profile);
+          setProfileData(profile);
+
+          setShowReviews(
+            profile.show_reviews !== false
+          );
+
+          const existingReviews =
+            Array.isArray(profile.reviews)
+              ? profile.reviews
+              : [];
+
           setReviewsList(existingReviews);
 
           // SECURITY CHECK: Haben loggedInUser und targetUser zusammen gearbeitet?
@@ -65,24 +87,20 @@ export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
               }
             }
           }
-        }
-      } catch (e) {
-        console.error("Fehler in der Gigsda Bewertungs-Pipeline:", e);
-      }
-    }
+        })
+        .catch((e) => {
+          console.error(
+            "Fehler in der Gigsda Bewertungs-Pipeline:",
+            e
+          );
+        });
   }, [targetUser, isEditing, loggedInUser]);
 
   // 2. SAVE PIPELINE: Brennt die Bewertung permanent ein
-  const handleSubmitReview = (e) => {
+  const handleSubmitReview = async (e) => {
     e.preventDefault();
     if (!newText.trim() || !connectedProject) return;
-
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
-
     try {
-      let allProfiles = JSON.parse(savedProfiles);
-      
       const newReviewObject = {
         from: loggedInUser,
         project: connectedProject,
@@ -90,42 +108,67 @@ export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
         text: newText.trim(),
         date: new Date().toLocaleDateString('de-DE')
       };
+      const existing =
+        Array.isArray(profileData?.reviews)
+          ? profileData.reviews
+          : [];
+      const updatedProfile = {
+        ...profileData,
+        reviews: [
+          newReviewObject,
+          ...existing
+        ]
+      };
+      const result =
+        await saveProfile(
+          updatedProfile.id,
+          updatedProfile
+        );
+      console.log(
+        'REVIEWS SAVE DB ✅',
+        result
+      );
+      setProfile(updatedProfile);
+      setProfileData(updatedProfile);
+      setReviewsList(updatedProfile.reviews);
 
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          const existing = Array.isArray(p.reviews) ? p.reviews : [];
-          return { ...p, reviews: [newReviewObject, ...existing] };
-        }
-        return p;
-      });
-
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      alert("B2B Rezension erfolgreich im Gigsda-Protokoll eingebrannt! 💾⭐");
       setNewText('');
-      setCanReview(false); 
+      setCanReview(false);
       setIsEditing(false);
-      window.dispatchEvent(new Event('storage'));
+      alert(
+        "B2B Rezension erfolgreich eingebrannt! ⭐"
+      );
     } catch (err) {
       console.error(err);
     }
   };
 
-  const toggleReviewsPrivacy = () => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
+
+  const toggleReviewsPrivacy = async () => {
     try {
-      let allProfiles = JSON.parse(savedProfiles);
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          return { ...p, show_reviews: !showReviews };
-        }
-        return p;
-      });
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      setShowReviews(!showReviews);
-      window.dispatchEvent(new Event('storage'));
+      const updatedShow =
+        !showReviews;
+      const updatedProfile = {
+        ...profileData,
+        show_reviews: updatedShow
+      };
+      const result =
+        await saveProfile(
+          updatedProfile.id,
+          updatedProfile
+        );
+      console.log(
+        'REVIEWS PRIVACY DB ✅',
+        result
+      );
+      setProfile(updatedProfile);
+      setProfileData(updatedProfile);
+      setShowReviews(updatedShow);
     } catch (e) {
-      console.error(e);
+      console.error(
+        'Fehler beim Umschalten der Review-Sichtbarkeit:',
+        e
+      );
     }
   };
 

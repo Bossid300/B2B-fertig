@@ -9,8 +9,7 @@ import { eventService } from './services/eventService';
 
 export default function ProjectDashboard({ onNavigateToStep, progress, onSelectEvent, events: propsEvents, onCreateEvent, ticketName }) {
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
-  
-  const [events, setEvents] = useState(() => {
+    const [events, setEvents] = useState(() => {
     return eventService.getEvents();
   });
 

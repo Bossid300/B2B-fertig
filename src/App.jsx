@@ -45,7 +45,7 @@ import { eventService } from './services/eventService';
 import { progressService } from './services/progressService';
 
 import CommunityAlertModal from './components/modals/CommunityAlertModal';
-
+import { createProfile } from './services/apiService';
 
 export default function App() {
 
@@ -304,8 +304,6 @@ export default function App() {
     setViewWithStorage(newView);
   };
 
-
-
   const [activeEvent, setActiveEvent] = useState(null);
   const [isRegInitial, setIsRegInitial] = useState(false);
   // 🔴 SIMULATION: Rote Billardkugel für den Dashboard-Posteingang
@@ -340,6 +338,8 @@ export default function App() {
 
 
 
+
+
 useEffect(() => {
 
   console.log("APP DB TEST ✅");
@@ -354,6 +354,8 @@ useEffect(() => {
     });
 
 }, []);
+
+
 
 
 

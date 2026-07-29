@@ -1,42 +1,71 @@
 import React, { useState, useEffect } from 'react';
 import { Pencil, Save, Image, Eye, EyeOff, X, Maximize2 } from 'lucide-react';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ProfileGalleryBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
+  const [profileData, setProfileData] = useState(null);
   const [gallery, setGallery] = useState([]);
   const [activeLightbox, setActiveLightbox] = useState(null);
 
   const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
   const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
 
-  // 1. DATABASE PIPELINE: Lädt die Galerie-Kacheln live aus gigsda_profiles
+  // 1. DATABASE PIPELINE: Lädt die Galerie-Kacheln live 
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles);
-        if (Array.isArray(allProfiles)) {
-          const found = allProfiles.find(
-            p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-          );
-          if (found) {
-            setProfile(found);
-            
-            const defaultGallery = [
-              { url: found.gallery_slot1_url || '', title: found.gallery_slot1_title || 'Slot 1', visible: found.gallery_slot1_visible !== false },
-              { url: found.gallery_slot2_url || '', title: found.gallery_slot2_title || 'Slot 2', visible: found.gallery_slot2_visible !== false },
-              { url: found.gallery_slot3_url || '', title: found.gallery_slot3_title || 'Slot 3', visible: found.gallery_slot3_visible !== false },
-              { url: found.gallery_slot4_url || '', title: found.gallery_slot4_title || 'Slot 4', visible: found.gallery_slot4_visible !== false }
-            ];
-            setGallery(defaultGallery);
-          }
+  getProfilesDb()
+    .then(profiles => {
+
+      const found = profiles.find(
+        p =>
+          p &&
+          (p.name || p.user_name || p.display_name)
+            ?.trim()
+            .toLowerCase() ===
+          targetUser.trim().toLowerCase()
+      );
+
+      if (!found) return;
+
+      const profile =
+        found.profile_json
+          ? JSON.parse(found.profile_json)
+          : found;
+
+      setProfile(profile);
+      setProfileData(profile);
+
+      const defaultGallery = [
+        {
+          url: profile.gallery_slot1_url || '',
+          title: profile.gallery_slot1_title || 'Slot 1',
+          visible: profile.gallery_slot1_visible !== false
+        },
+        {
+          url: profile.gallery_slot2_url || '',
+          title: profile.gallery_slot2_title || 'Slot 2',
+          visible: profile.gallery_slot2_visible !== false
+        },
+        {
+          url: profile.gallery_slot3_url || '',
+          title: profile.gallery_slot3_title || 'Slot 3',
+          visible: profile.gallery_slot3_visible !== false
+        },
+        {
+          url: profile.gallery_slot4_url || '',
+          title: profile.gallery_slot4_title || 'Slot 4',
+          visible: profile.gallery_slot4_visible !== false
         }
-      } catch (e) {
-        console.error("Fehler in der Gigsda Galerie-Pipeline:", e);
-      }
-    }
-  }, [targetUser, isEditing]);
+      ];
+
+      setGallery(defaultGallery);
+
+      })
+      .catch(console.error);
+
+      }, [targetUser, isEditing]);
 
   const handleInputChange = (index, field, value) => {
     setGallery(prev => prev.map((item, idx) => idx === index ? { ...item, [field]: value } : item));
@@ -47,34 +76,47 @@ export default function ProfileGalleryBox({ currentProfileName, isOwner }) {
   };
 
   // 2. SAVE PIPELINE: Brennt die Kacheln fehlerfrei mit Index-Mapping in die Profile
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
 
     try {
-      let allProfiles = JSON.parse(savedProfiles);
-      if (!Array.isArray(allProfiles)) return;
 
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          return { 
-            ...p, 
-            gallery_slot1_url: gallery[0].url, gallery_slot1_title: gallery[0].title, gallery_slot1_visible: gallery[0].visible,
-            gallery_slot2_url: gallery[1].url, gallery_slot2_title: gallery[1].title, gallery_slot2_visible: gallery[1].visible,
-            gallery_slot3_url: gallery[2].url, gallery_slot3_title: gallery[2].title, gallery_slot3_visible: gallery[2].visible,
-            gallery_slot4_url: gallery[3].url, gallery_slot4_title: gallery[3].title, gallery_slot4_visible: gallery[3].visible
-          };
-        }
-        return p;
-      });
+      const updatedProfile = {
+        ...profileData,
 
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      alert("B2B Medien-Portfolio erfolgreich eingebrannt! 💾🖼️");
+        gallery_slot1_url: gallery[0].url,
+        gallery_slot1_title: gallery[0].title,
+        gallery_slot1_visible: gallery[0].visible,
+
+        gallery_slot2_url: gallery[1].url,
+        gallery_slot2_title: gallery[1].title,
+        gallery_slot2_visible: gallery[1].visible,
+
+        gallery_slot3_url: gallery[2].url,
+        gallery_slot3_title: gallery[2].title,
+        gallery_slot3_visible: gallery[2].visible,
+
+        gallery_slot4_url: gallery[3].url,
+        gallery_slot4_title: gallery[3].title,
+        gallery_slot4_visible: gallery[3].visible
+      };
+
+      await saveProfile(
+        updatedProfile.id,
+        updatedProfile
+      );
+
+      alert("B2B Medien-Portfolio erfolgreich eingebrannt! 🖼️🎞️");
+
       setIsEditing(false);
-      window.dispatchEvent(new Event('storage'));
+
     } catch (e) {
-      console.error("Fehler beim Sichern der Galerie:", e);
+
+      console.error(
+        "Fehler beim Speichern der Galerie:",
+        e
+      );
+
     }
   };
 

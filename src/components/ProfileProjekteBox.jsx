@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Briefcase, Eye, EyeOff, Calendar, Users, CheckCircle } from 'lucide-react';
 import { eventService } from '../services/eventService';
+import { saveProfile } from '../services/apiService';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ProfileProjekteBox({ currentProfileName, isOwner }) {
   const [profile, setProfile] = useState(null);
+  const [profileData, setProfileData] = useState(null);
   const [projects, setProjects] = useState([]);
   const [showProjects, setShowProjects] = useState(true);
   const [crewCounts, setCrewCounts] = useState({});
@@ -13,20 +16,29 @@ export default function ProfileProjekteBox({ currentProfileName, isOwner }) {
 
   // 1. NESTED CREW PIPELINE: Filtert die Einsätze direkt aus den Event-Objekten!
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    const savedEvents = eventService.getEvents();
-
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles) || [];
+    getProfilesDb()
+      .then(allProfiles => {
         const found = allProfiles.find(
-          p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name)
+              ?.trim()
+              .toLowerCase() ===
+            targetUser.trim().toLowerCase()
         );
-
+        if (!found) return;
+        const profile =
+          found.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+        setProfile(profile);
+        setProfileData(profile);
+        setShowProjects(
+          profile.show_projects !== false
+        );
         if (found) {
           setProfile(found);
           setShowProjects(found.show_projects !== false);
-
           // Alle denkbaren Namensvariationen des aktuellen Profils sammeln
           const nameVariations = [
             targetUser.trim().toLowerCase(),
@@ -34,15 +46,12 @@ export default function ProfileProjekteBox({ currentProfileName, isOwner }) {
             (found.Klarname || '').trim().toLowerCase(),
             (found.project_name || '').trim().toLowerCase()
           ].filter(v => v !== '');
-
           const allEvents = JSON.parse(savedEvents);
           const joinedProjects = [];
           const counts = {};
-
           if (Array.isArray(allEvents)) {
             allEvents.forEach(evt => {
               if (!evt) return;
-
               // Prüft, ob ein Crew-Mitglied im verschachtelten Array zu den Namensvariationen passt
               const hasJoined = Array.isArray(evt.crew) && evt.crew.some(member => 
                 member && 
@@ -50,16 +59,13 @@ export default function ProfileProjekteBox({ currentProfileName, isOwner }) {
                 nameVariations.includes(member.name.trim().toLowerCase()) &&
                 (member.status === 'accepted' || member.status === 'confirmed')
               );
-
               const isProjectOwner =
                 evt.ownerId &&
                 found.id &&
                 evt.ownerId === found.id;
-
               // Falls der User Teil der Crew ist, pushen wir das Event als verifizierte Referenz!
               if (hasJoined || isProjectOwner) {
                 joinedProjects.push(evt);
-
                 const totalAcceptedCrew =
                   Array.isArray(evt.crew)
                     ? evt.crew.filter(m =>
@@ -67,39 +73,50 @@ export default function ProfileProjekteBox({ currentProfileName, isOwner }) {
                         (m.status === 'accepted' || m.status === 'confirmed')
                       ).length
                     : 0;
-
                 counts[evt.id || evt.title] = totalAcceptedCrew;
               }
             });
           }
-
           setProjects(joinedProjects);
           setCrewCounts(counts);
-        }
-      } catch (e) {
-        console.error("Fehler in der Gigsda B2B-Projekt-Pipeline:", e);
-      }
-    }
-  }, [targetUser]);
-
-  const toggleProjectPrivacy = () => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
-    try {
-      let allProfiles = JSON.parse(savedProfiles);
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          return { ...p, show_projects: !showProjects };
-        }
-        return p;
+        }   // <-- schließt if(found)
+      })
+      .catch((e) => {
+        console.error(
+          "Fehler in der Gigsda B2B-Projekt-Pipeline:",
+          e
+        );
       });
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      setShowProjects(!showProjects);
-      window.dispatchEvent(new Event('storage'));
-    } catch (e) {
-      console.error(e);
-    }
-  };
+
+}, [targetUser]);
+
+const toggleProjectPrivacy = async () => {
+  try {
+    const updatedShow =
+      !showProjects;
+    const updatedProfile = {
+      ...profileData,
+      show_projects: updatedShow
+    };
+    const result =
+      await saveProfile(
+        updatedProfile.id,
+        updatedProfile
+      );
+    console.log(
+      'PROJECT PRIVACY DB ✅',
+      result
+    );
+    setProfile(updatedProfile);
+    setProfileData(updatedProfile);
+    setShowProjects(updatedShow);
+  } catch (e) {
+    console.error(
+      'Fehler beim Umschalten der Projekt-Sichtbarkeit:',
+      e
+    );
+  }
+};
 
   if (!profile) {
     return (
