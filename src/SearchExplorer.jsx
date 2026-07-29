@@ -16,40 +16,47 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
   // 🏟️ ECHTZEIT-PROJEKTLISTE FÜR DIE EXPLORER-DIREKTANFRAGE
   const [events, setEvents] = useState([]);
   const [showProjectSelect, setShowProjectSelect] = useState(false);
-
+  const [currentProfileData, setCurrentProfileData] = useState(null);
   const isLoggedIn =
   localStorage.getItem('gigsda_logged_in') === 'true';
 
+
   useEffect(() => {
+    console.log("USEEFFECT LÄUFT ✅");
 
-console.log("USEEFFECT LÄUFT ✅");
-
-fetch('/2026/api/getProfiles.php')
-.then(res => res.json())
-.then(data => {
-console.log('PROFILE AUS DB ✅', data);
-})
-.catch(err => {
-console.error('DB FEHLER ❌', err);
-});
-
-
+    fetch('/2026/api/getProfiles.php')
+      .then(res => res.json())
+      .then(data => {
+        console.log('PROFILE AUS DB ✅', data);
+      })
+      .catch(err => {
+        console.error('DB FEHLER ❌', err);
+      });
 
     try {
       const savedEvents = eventService.getEvents();
 
       const currentProfileId =
+        currentProfileData?.id ||
         localStorage.getItem('gigsda_profile_id');
 
-      const myEvents = savedEvents.filter(
-        ev => ev.ownerId === currentProfileId
+      const myEvents = savedEvents.filter(ev =>
+        ev &&
+        (
+          ev.ownerId === currentProfileId ||
+          ev.crewIds?.includes(currentProfileId)
+        )
       );
 
       setEvents(myEvents);
     } catch (e) {
-      console.error("Fehler beim Laden der Events im Explorer:", e);
+      console.error(
+        "Fehler beim Laden der Events im Explorer:",
+        e
+      );
     }
-  }, [activeRequestUser]);
+  }, [activeRequestUser, currentProfileData]);
+
 
   // ⚡ AUTOMATISCHE DIREKT-PROJEKT-BUCHUNG BEIM ABSENDEN (PERFEKT SYNCED!)
   const handleSendRequestToProject = (eventId) => {
@@ -69,21 +76,68 @@ console.error('DB FEHLER ❌', err);
       }));
 
       // 1. Schreibt die Anfrage sauber in gigsda_crew_requests für das goldene Fenster
+      const now = Date.now();
+
+      const requesterProfileId =
+        currentProfileData?.id ||
+        localStorage.getItem('gigsda_profile_id') ||
+        '';
+
+      const requesterProfileName =
+        currentProfileData?.name ||
+        localStorage.getItem('gigsda_user_name') ||
+        "Veranstalter";
+
       const newRequest = {
-        requestId: "REQ-" + Math.floor(Math.random() * 9000 + 1000),
+        requestId:
+          "REQ-" + Math.floor(Math.random() * 9000 + 1000),
+
         eventId: eventId,
         eventName: eventTitle,
-        date: targetEvent.date || "Termin auf Anfrage",
-        requestedProfileId: activeRequestUser.id,
-        requestedProfileName: activeRequestUser.name,
+        date:
+          targetEvent.date ||
+          "Termin auf Anfrage",
+
+        requestedProfileId:
+          activeRequestUser.id,
+
+        requestedProfileName:
+          activeRequestUser.name,
+
+        requestedProfileRole:
+          activeRequestUser.role ||
+          activeRequestUser.type ||
+          activeRequestUser.gewerk ||
+          "Crew",
+
+        requestedProfileCity:
+          activeRequestUser.city ||
+          activeRequestUser.ort ||
+          "",
+
+        requesterProfileId:
+          requesterProfileId,
+
+        requesterProfileName:
+          requesterProfileName,
+
         requesterName:
-          localStorage.getItem('gigsda_user_name')
-          || "Veranstalter",
+          requesterProfileName,
+
         status: "pending",
+
+        source: "search_explorer",
+
+        createdAt: now,
+        updatedAt: now,
+
         note:
           requestText ||
           "Standard-B2B Konditionen laut Profil."
       };
+
+
+
       allRequests.push(newRequest);
       localStorage.setItem('gigsda_crew_requests', JSON.stringify(allRequests));
 
@@ -160,41 +214,55 @@ console.error('DB FEHLER ❌', err);
 
     getProfiles()
       .then(profiles => {
-  console.log("ERSTES PROFIL", profiles[0]);
-  console.log("PROFILE JSON", profiles[0]?.profile_json);
-        console.log("DB PROFILE ✅", profiles);
+    console.log("ERSTES PROFIL", profiles[0]);
+    console.log("PROFILE JSON", profiles[0]?.profile_json);
+          console.log("DB PROFILE ✅", profiles);
 
-  const normalizedProfiles = profiles.map(profile => {
-    let profileData = {};
+    const normalizedProfiles = profiles.map(profile => {
+      let profileData = {};
 
-    try {
-      profileData =
-        profile.profile_json
-          ? JSON.parse(profile.profile_json)
-          : {};
-    } catch (e) {
-      console.error("JSON FEHLER", e);
-    }
+      try {
+        profileData =
+          profile.profile_json
+            ? JSON.parse(profile.profile_json)
+            : {};
+      } catch (e) {
+        console.error("JSON FEHLER", e);
+      }
 
-    return {
-      ...profile,
-      ...profileData
-    };
-  });
-
-  setAllUsers(
-    normalizedProfiles.filter(
-      user => user && user.name
-    )
-  );
-
-
-    })
-    .catch(err => {
-      console.error("PROFILE API FEHLER ❌", err);
+      return {
+        ...profile,
+        ...profileData
+      };
     });
 
-}, [onNavigate]);
+    const currentUserName =
+      localStorage.getItem('gigsda_user_name') || '';
+
+    const currentProfile =
+      normalizedProfiles.find(
+        p =>
+          p &&
+          (p.name || p.user_name || p.display_name || '')
+            .trim()
+            .toLowerCase() ===
+          currentUserName.trim().toLowerCase()
+      );
+
+    setCurrentProfileData(currentProfile || null);
+
+    setAllUsers(
+      normalizedProfiles.filter(
+        user => user && user.name
+      )
+    );
+
+      })
+      .catch(err => {
+        console.error("PROFILE API FEHLER ❌", err);
+      });
+
+  }, [onNavigate]);
 
 
 const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veranstalter', 'Techniker', 'Logistik', 'Security', 'Design'];

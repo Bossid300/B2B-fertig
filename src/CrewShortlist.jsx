@@ -5,6 +5,7 @@ import CrewCard from './components/cards/CrewCard';
 import EventHeaderBox from "./components/EventHeaderBox";
 
 import { eventService } from './services/eventService';
+import { getProfilesDb } from './services/apiService';
 
 export default function CrewShortlist({ 
   onBack, 
@@ -15,39 +16,117 @@ export default function CrewShortlist({
 }) {
 
 const addFromShortlist = (eventId, profileName) => {
-  const savedEvents = eventService.getEvents();
-  const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
-
-  const targetProfile = profiles.find(p =>
-    (p.name || '').toLowerCase() === (profileName || '').toLowerCase()
-  );
-
-  if (!targetProfile) return;
-
-  const updated = events.map(evt => {
-    if (evt.id === eventId) {
-      if (!evt.crewIds || !evt.crewIds.includes(targetProfile.id)) {
-        evt.crewIds = evt.crewIds || [];
-        evt.crewIds.push(targetProfile.id);
-      }
+  try {
+    const savedEvents = eventService.getEvents();
+    const targetProfile = allProfiles.find(
+      p =>
+        (p.name || '').toLowerCase() ===
+        (profileName || '').toLowerCase()
+    );
+    if (!targetProfile) {
+      console.warn(
+        'CREWSHORTLIST Zielprofil nicht gefunden:',
+        profileName
+      );
+      return;
     }
-    return evt;
-  });
+    const updated = savedEvents.map(evt => {
+      const evtId =
+        evt.id ||
+        evt.eventId ||
+        evt._id;
 
-  eventService.saveEvents(updated);
-  location.reload();
+      if (String(evtId) === String(eventId)) {
+        const updatedEvent = {
+          ...evt,
+          crewIds: Array.isArray(evt.crewIds)
+            ? [...evt.crewIds]
+            : []
+        };
+        if (!updatedEvent.crewIds.includes(targetProfile.id)) {
+          updatedEvent.crewIds.push(targetProfile.id);
+        }
+        if (Array.isArray(updatedEvent.crew)) {
+          updatedEvent.crew = updatedEvent.crew.map(member =>
+            member.id === targetProfile.id
+              ? {
+                  ...member,
+                  status: 'accepted',
+                  confirmed: true,
+                  changed: true,
+                  changedAt: Date.now()
+                }
+              : member
+          );
+        }
+        return updatedEvent;
+      }
+      return evt;
+    });
+    eventService.saveEvents(updated);
+    window.dispatchEvent(
+      new CustomEvent('request-sent')
+    );
+    window.dispatchEvent(
+      new CustomEvent('route-change')
+    );
+  } catch (e) {
+    console.error(
+      'Fehler beim Übernehmen aus der Shortlist:',
+      e
+    );
+  }
 };
 
   
   const [allProfiles, setAllProfiles] = useState([]);
+  const [currentProfileData, setCurrentProfileData] = useState(null);
+  const currentUserName = localStorage.getItem('gigsda_user_name');
+
   useEffect(() => {
-  try {
-    const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
-    setAllProfiles(profiles);
-  } catch (e) {
-    console.error("Fehler beim Laden der Profile:", e);
-  }
-}, []);
+    getProfilesDb()
+      .then(profiles => {
+        const normalizedProfiles = profiles.map(profile => {
+          let profileData = {};
+
+          try {
+            profileData =
+              profile.profile_json
+                ? JSON.parse(profile.profile_json)
+                : {};
+          } catch (e) {
+            console.error("CREWSHORTLIST JSON FEHLER ❌", e);
+          }
+
+          return {
+            ...profile,
+            ...profileData
+          };
+        });
+
+        setAllProfiles(normalizedProfiles);
+
+        const found = normalizedProfiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name || '')
+              .trim()
+              .toLowerCase() ===
+            (currentUserName || '')
+              .trim()
+              .toLowerCase()
+        );
+
+        console.log(
+          'CREWSHORTLIST PROFILE DB ✅',
+          found
+        );
+
+        setCurrentProfileData(found || null);
+      })
+      .catch(console.error);
+  }, [currentUserName]);
+
 
   const [dbCrew, setDbCrew] = useState([]);
   const crewProfiles = dbCrew
@@ -98,15 +177,9 @@ const addFromShortlist = (eventId, profileName) => {
         
         // Wenn das Event gefunden wurde, laden wir SEINE Crew. Wenn nicht, bleibt die Liste LEER!
         if (matchedEvent && Array.isArray(matchedEvent.crewIds)) {
-
-          const profiles = JSON.parse(
-            localStorage.getItem('gigsda_profiles') || '[]'
-          );
-
           const resolvedCrew = matchedEvent.crew || [];
 
           setDbCrew(resolvedCrew);
-
         } else {
           setDbCrew([]);
         }
@@ -143,19 +216,25 @@ const addFromShortlist = (eventId, profileName) => {
       }
       const eventIndex = savedEvents.findIndex(ev => ev && (ev.id === targetId || ev.eventId === targetId || ev._id === targetId));
       if (eventIndex > -1 && savedEvents[eventIndex].crewIds) {
-        const profiles = JSON.parse(
-          localStorage.getItem('gigsda_profiles') || '[]'
-        );
-        const targetProfile = profiles.find(
+        const targetProfile = allProfiles.find(
           p =>
             (p.name || '').toLowerCase() ===
             memberName.toLowerCase()
         );
-        if (targetProfile) {
-          savedEvents[eventIndex].crewIds =
-            savedEvents[eventIndex].crewIds.filter(
-              id => id !== targetProfile.id
-            );
+
+        if (!targetProfile) {
+          console.warn(
+            'CREWSHORTLIST Remove: Profil nicht gefunden:',
+            memberName
+          );
+          return;
+        }
+
+        savedEvents[eventIndex].crewIds =
+          savedEvents[eventIndex].crewIds.filter(
+            id => id !== targetProfile.id
+          );
+
         if (savedEvents[eventIndex].crew) {
           const crewMember = savedEvents[eventIndex].crew.find(
             m => m.id === targetProfile.id
@@ -164,16 +243,18 @@ const addFromShortlist = (eventId, profileName) => {
           if (crewMember) {
             crewMember.status = "removed";
           }
-        }}
+        }
+
         const memberIndex = dbCrew.findIndex(
           m => m.id === targetProfile.id
         );
+
         if (memberIndex > -1) {
           dbCrew[memberIndex].status = "removed";
         }
-        // Schreibt den gesäuberten Stand zurück auf die Festplatte
+
         eventService.saveEvents(savedEvents);
-        // Feuert die globalen Live-Funksprüche für die sofortige reaktive UI-Aktualisierung ohne F5!
+
         window.dispatchEvent(new CustomEvent('request-sent'));
         window.dispatchEvent(new CustomEvent('route-change'));
       }
@@ -182,31 +263,27 @@ const addFromShortlist = (eventId, profileName) => {
     }
   };
 
-  const activeStub = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
+  const activeStub = JSON.parse(
+    localStorage.getItem('gigsda_active_event') || 'null'
+  );
+
   const events = eventService.getEvents();
-  const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
-
-  const currentUserName =
-  localStorage.getItem('gigsda_user_name');
-
-  const currentProfile =
-    profiles.find(
-      p =>
-        (p.name || '').toLowerCase() ===
-        (currentUserName || '').toLowerCase()
-    );
 
   const currentUserId =
-    currentProfile?.id;
+    currentProfileData?.id;
 
-  const currentEvent = events.find(e => e.id === activeStub?.id);
+  const currentEvent =
+    events.find(e => e.id === activeStub?.id);
 
   const isOwner =
-  currentEvent?.ownerId === currentUserId;
+    currentEvent?.ownerId === currentUserId;
 
-  const crewMembers = (currentEvent?.crewIds || [])
-    .map(id => profiles.find(p => p.id === id))
-    .filter(Boolean);
+  const crewMembers =
+    (currentEvent?.crewIds || [])
+      .map(id =>
+        allProfiles.find(p => p.id === id)
+      )
+      .filter(Boolean);
 
   // STATUSBERECHNUNG FÜR FAHRPLANMETRICS
   const totalRequests =
@@ -245,9 +322,11 @@ const addFromShortlist = (eventId, profileName) => {
   // ENDE STATUSBERECHNUNG
 
   const ownerName =
-    profiles.find(
+    allProfiles.find(
       p => p.id === currentEvent?.ownerId
-    )?.name || "Unbekannt";
+    )?.name ||
+    currentEvent?.ownerName ||
+    "Unbekannt";
 
 
   return (

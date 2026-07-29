@@ -1,16 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Send, Users, ShieldCheck, MapPin } from 'lucide-react';
 
 import { eventService } from './services/eventService';
+import { getProfilesDb } from './services/apiService';
 
 export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
 
-  const currentUserName = localStorage.getItem('gigsda_user_name');
-  const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
-  const currentProfile = profiles.find(p =>
-    (p.name || '').toLowerCase() === (currentUserName || '').toLowerCase()
-  );
-  const currentUserId = currentProfile?.id || "";
+  const currentUserName =
+    localStorage.getItem('gigsda_user_name');
+
+  const [allProfiles, setAllProfiles] = useState([]);
+  const [currentProfileData, setCurrentProfileData] = useState(null);
+
+  useEffect(() => {
+    getProfilesDb()
+      .then(profiles => {
+        const normalizedProfiles = profiles.map(profile => {
+          let profileData = {};
+
+          try {
+            profileData =
+              profile.profile_json
+                ? JSON.parse(profile.profile_json)
+                : {};
+          } catch (e) {
+            console.error(
+              "COMMUNITYCHAT JSON FEHLER ❌",
+              e
+            );
+          }
+
+          return {
+            ...profile,
+            ...profileData
+          };
+        });
+
+        setAllProfiles(normalizedProfiles);
+
+        const found = normalizedProfiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name || '')
+              .trim()
+              .toLowerCase() ===
+            (currentUserName || '')
+              .trim()
+              .toLowerCase()
+        );
+
+        console.log(
+          "COMMUNITYCHAT PROFILE DB ✅",
+          found
+        );
+
+        setCurrentProfileData(found || null);
+      })
+      .catch(console.error);
+  }, [currentUserName]);
+
+  const currentUserId =
+    currentProfileData?.id || "";
+
+
 
   const activeStub = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
   const events = eventService.getEvents();
@@ -26,15 +78,21 @@ export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
   // 1. Die Teilnehmerliste (Sidebar) direkt aus eurer Projekt-Crew
 
 const crewChannels = (() => {
-  const activeStub = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
+  const activeStub = JSON.parse(
+    localStorage.getItem('gigsda_active_event') || 'null'
+  );
+
   const events = eventService.getEvents();
-  const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
 
-  const currentEvent = events.find(e => e.id === activeStub?.id);
+  const currentEvent =
+    events.find(e => e.id === activeStub?.id);
 
-  const members = (currentEvent?.crewIds || [])
-    .map(id => profiles.find(p => p.id === id))
-    .filter(Boolean);
+  const members =
+    (currentEvent?.crewIds || [])
+      .map(id =>
+        allProfiles.find(p => p.id === id)
+      )
+      .filter(Boolean);
 
     return [
       {
@@ -144,7 +202,13 @@ const [activeChannel, setActiveChannel] = useState('USR-8717');
 
   // Filtert nur die Nachrichten für den aktuell ausgewählten Kanal
   const filteredMessages = chatHistory.filter(m => m.channel === activeChannel);
-
+  if (!currentProfileData) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 text-center text-slate-500">
+        // COMMUNITY CHAT PROFILE SYNC...
+      </div>
+    );
+  }
   if (!hasAccess) {
     return (
       <div className="max-w-4xl mx-auto p-6 text-center text-slate-400">
@@ -230,7 +294,7 @@ const [activeChannel, setActiveChannel] = useState('USR-8717');
              filteredMessages.map((msg) => {
                 const isMe = msg.user?.includes("(Du)");
                 const senderName =
-                  profiles.find(p => p.id === msg.senderId)?.name ||
+                  allProfiles.find(p => p.id === msg.senderId)?.name ||
                   msg.user ||
                   "Unbekannt";
 
