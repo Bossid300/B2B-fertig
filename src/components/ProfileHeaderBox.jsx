@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Pencil, X, Shield, Music, Landmark, Briefcase, MessageSquare, Eye, EyeOff } from 'lucide-react';
 import { eventService } from '../services/eventService';
-import { saveProfile } from '../services/apiService';
-import { getProfilesDb } from '../services/apiService';
+import {
+  saveProfile,
+  getProfilesDb,
+  saveCrewRequest
+} from '../services/apiService';
+
 
 export default function ProfileHeaderBox({ 
   currentProfileName, 
@@ -88,12 +92,18 @@ export default function ProfileHeaderBox({
 
         const savedEvents = eventService.getEvents();
 
-        const currentProfileId =
-          localStorage.getItem('gigsda_profile_id');
+const currentProfileId =
+  profileData?.id ||
+  localStorage.getItem('gigsda_profile_id');
 
-        const myEvents = savedEvents.filter(
-          ev => ev.ownerId === currentProfileId
-        );
+const myEvents = savedEvents.filter(
+  ev =>
+    ev &&
+    (
+      ev.ownerId === currentProfileId ||
+      ev.crewIds?.includes(currentProfileId)
+    )
+);
 
         setMyProjects(myEvents);
 
@@ -101,7 +111,7 @@ export default function ProfileHeaderBox({
         console.error(e);
       }
     }
-  }, [isRequestMaskOpen]);
+}, [isRequestMaskOpen, profileData]);
 
   const handleTickerChange = (e) => {
     const { name, value } = e.target;
@@ -143,6 +153,174 @@ export default function ProfileHeaderBox({
       }
   };
 
+
+
+const submitB2BRequest = async (project) => {
+  try {
+    const now = Date.now();
+
+    const requesterProfileId =
+      profileData?.id ||
+      localStorage.getItem('gigsda_profile_id') ||
+      '';
+
+    const requesterProfileName =
+      profileData?.name ||
+      localStorage.getItem('gigsda_user_name') ||
+      "Veranstalter";
+
+    const requestedProfileId =
+      activeFields?.id || '';
+
+    if (!requestedProfileId) {
+      alert("Zielprofil konnte nicht eindeutig geladen werden.");
+      return;
+    }
+
+    const newRequest = {
+      requestId:
+        "REQ-" + Math.floor(Math.random() * 9000 + 1000),
+
+      eventId:
+        project.id ||
+        project.eventId ||
+        project._id ||
+        '',
+
+      eventName:
+        project.title ||
+        project.name ||
+        "B2B Event",
+
+      date:
+        project.date ||
+        "Termin folgt",
+
+      requestedProfileId:
+        requestedProfileId,
+
+      requestedProfileName:
+        activeFields.display_name ||
+        activeFields.name ||
+        targetUser,
+
+      requestedProfileRole:
+        activeFields.role ||
+        activeFields.type ||
+        activeFields.user_type ||
+        "Crew",
+
+      requestedProfileCity:
+        activeFields.city ||
+        activeFields.ort ||
+        "",
+
+      requesterProfileId:
+        requesterProfileId,
+
+      requesterProfileName:
+        requesterProfileName,
+
+      requesterName:
+        requesterProfileName,
+
+      status: "pending",
+
+      source: "profile_direct",
+
+      createdAt: now,
+      updatedAt: now,
+
+      note:
+        `Direktanfrage über Profil von ${activeFields.display_name || activeFields.name || targetUser}.`
+    };
+
+    const saveResult =
+      await saveCrewRequest(newRequest);
+
+    console.log(
+      'PROFILE HEADER REQUEST SAVE DB ✅',
+      saveResult
+    );
+
+    // TEMP-BRÜCKE:
+    // bleibt drin, bis alle alten Request-Stellen final entfernt sind
+    const allRequests = JSON.parse(
+      localStorage.getItem('gigsda_crew_requests') || '[]'
+    );
+
+    allRequests.push(newRequest);
+
+    localStorage.setItem(
+      'gigsda_crew_requests',
+      JSON.stringify(allRequests)
+    );
+
+    // Event-Crew pending synchronisieren, Events bleiben aktuell noch localStorage
+    const savedEvents = eventService.getEvents();
+
+    const eventIndex = savedEvents.findIndex(ev =>
+      ev &&
+      (
+        ev.id === newRequest.eventId ||
+        ev.eventId === newRequest.eventId ||
+        ev._id === newRequest.eventId ||
+        ev.title === newRequest.eventName ||
+        ev.name === newRequest.eventName
+      )
+    );
+
+    if (eventIndex > -1) {
+      if (!savedEvents[eventIndex].crew) {
+        savedEvents[eventIndex].crew = [];
+      }
+
+      const alreadyInCrew =
+        savedEvents[eventIndex].crew.some(
+          member =>
+            member &&
+            member.id === requestedProfileId
+        );
+
+      if (!alreadyInCrew) {
+        savedEvents[eventIndex].crew.push({
+          id: requestedProfileId,
+          name: newRequest.requestedProfileName,
+          role: newRequest.requestedProfileRole,
+          status: "pending",
+          city: newRequest.requestedProfileCity,
+          addedAt: new Date().toLocaleDateString('de-DE')
+        });
+
+        eventService.saveEvents(savedEvents);
+      }
+    }
+
+    window.dispatchEvent(
+      new CustomEvent('request-sent')
+    );
+
+    window.dispatchEvent(
+      new CustomEvent('route-change')
+    );
+
+    alert(
+      `B2B-Anfrage an ${newRequest.requestedProfileName} erfolgreich gesendet! ⚡`
+    );
+
+    setIsRequestMaskOpen(false);
+
+  } catch (err) {
+    console.error(
+      "Fehler beim Senden der Profil-Direktanfrage:",
+      err
+    );
+  }
+};
+
+
+
+
   const getRoleBadge = (role) => {
     const cleanRole = role ? role.trim().toLowerCase() : 'künstler';
     if (cleanRole.includes('security')) return { text: 'SECURITY SERVICE', icon: <Shield size={12} className="text-rose-400" />, style: 'border-rose-900/50 bg-rose-950/20 text-rose-400' };
@@ -159,6 +337,8 @@ export default function ProfileHeaderBox({
     { url: activeFields.slide3_url || 'https://unsplash.com', l1: activeFields.slide3_line1 || 'BOOKING & ANFRAGEN', l2: activeFields.slide3_line2 || 'JETZT TERMIN SICHERN' },
     { url: activeFields.slide4_url || 'https://unsplash.com', l1: activeFields.slide4_line1 || 'NEXT GIGS', l2: activeFields.slide4_line2 || 'CHECK DEN EVENT RADAR' }
   ];
+
+
 
   return (
     <div className="w-full max-w-5xl mx-auto space-y-3 mb-6 text-white select-none font-mono">
@@ -209,7 +389,10 @@ export default function ProfileHeaderBox({
               <div className="p-4 bg-purple-950/10 border border-purple-900/30 rounded-xl text-xs text-purple-300">Wähle das B2B-Zielprojekt aus, für das du <span className="text-white font-bold">{activeFields.display_name || activeFields.name}</span> anfragen möchtest.</div>
               <div className="grid grid-cols-1 gap-2 max-h-[180px] overflow-y-auto pr-1">
                 {myProjects.length > 0 ? (myProjects.map((proj, idx) => (
-                  <button key={idx} type="button" onClick={() => submitB2BRequest(proj.title || proj.name)} className="w-full text-left p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-white hover:border-purple-500 hover:bg-purple-950/10 transition-all cursor-pointer">📐 Projekt: <span className="text-purple-400 font-bold">{proj.title || proj.name}</span></button>
+                  <button key={idx} type="button" onClick={() => submitB2BRequest(proj)} className="w-full text-left p-3 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-white hover:border-purple-500 hover:bg-purple-950/10 transition-all cursor-pointer">
+                    📐 Projekt: 
+                    <span className="text-purple-400 font-bold">{proj.title || proj.name}</span>
+                  </button>
                 ))) : (<div className="text-slate-500 text-xs">// KEINE AKTIVEN PROJEKTE GEFOUNDEN</div>)}
               </div>
             </div>
