@@ -2,12 +2,18 @@ import React, { useState, useEffect } from 'react';
 import FavoritenCard from './components/cards/FavoritenCard';
 
 import { eventService } from './services/eventService';
+import {
+  getProfilesDb,
+  saveCrewRequest
+} from './services/apiService';
+
+
 
 export default function CrewFavoritenListe({ onNavigate }) {
   const [favorites, setFavorites] = useState([]);
   const [filterRole, setFilterRole] = useState('all');
   const [allProfiles, setAllProfiles] = useState([]);
-
+const [currentProfileData, setCurrentProfileData] = useState(null);
 
   const currentProfileId =
     localStorage.getItem('gigsda_profile_id');
@@ -30,19 +36,53 @@ export default function CrewFavoritenListe({ onNavigate }) {
     }
   }, []);
 
-  useEffect(() => {
-    try {
-      const storedProfiles = JSON.parse(
-        localStorage.getItem('gigsda_profiles') || '[]'
+useEffect(() => {
+  const currentUserName =
+    localStorage.getItem('gigsda_user_name') || '';
+
+  getProfilesDb()
+    .then(profiles => {
+      const normalizedProfiles = profiles.map(profile => {
+        let profileData = {};
+
+        try {
+          profileData =
+            profile.profile_json
+              ? JSON.parse(profile.profile_json)
+              : {};
+        } catch (e) {
+          console.error(
+            'CREWFAVORITEN JSON FEHLER ❌',
+            e
+          );
+        }
+
+        return {
+          ...profile,
+          ...profileData
+        };
+      });
+
+      setAllProfiles(normalizedProfiles);
+
+      const found = normalizedProfiles.find(
+        p =>
+          p &&
+          (p.name || p.user_name || p.display_name || '')
+            .trim()
+            .toLowerCase() ===
+          currentUserName.trim().toLowerCase()
       );
 
-      setAllProfiles(storedProfiles);
+      console.log(
+        'CREWFAVORITEN PROFILE DB ✅',
+        found
+      );
 
-
-    } catch (e) {
-      console.error("Fehler beim Laden der Profile:", e);
-    }
-  }, []);
+      setCurrentProfileData(found || null);
+    })
+    .catch(console.error);
+}, []);
 
   const removeFavorite = (id) => {
     const updated = favorites.filter(f => f !== id);
@@ -70,24 +110,38 @@ export default function CrewFavoritenListe({ onNavigate }) {
     try {
       const savedEvents = eventService.getEvents();
 
-      const currentProfileId =
-        localStorage.getItem('gigsda_profile_id');
+const currentProfileId =
+  currentProfileData?.id ||
+  localStorage.getItem('gigsda_profile_id');
 
-      const myEvents = savedEvents.filter(
-        ev => ev.ownerId === currentProfileId
-      );
+const myEvents = savedEvents.filter(
+  ev =>
+    ev &&
+    (
+      ev.ownerId === currentProfileId ||
+      ev.crewIds?.includes(currentProfileId)
+    )
+);
 
       setEvents(myEvents);
 
     } catch (e) {
       console.error("Fehler beim Event-Load:", e);
     }
-  }, [activeSelectFav]);
+ }, [activeSelectFav, currentProfileData]);
 
 
   // ⚡ INJIZIERT DEN FAVORITEN IN DIE CREWLISTE DES AUSGEWÄHLTEN EVENTS
-  const handleAddFavToProject = (eventId, fav) => {
+  const handleAddFavToProject = async (eventId, fav) => {
     try {
+
+console.log(
+  'CREWFAVORITEN HANDLE START ✅',
+  {
+    eventId,
+    fav
+  }
+);
         const savedEvents = eventService.getEvents();
         
         // 📡 Sucht das Event über die ID heraus
@@ -123,6 +177,17 @@ export default function CrewFavoritenListe({ onNavigate }) {
           member && member.id === fav.id
         );
 
+console.log(
+  'CREWFAVORITEN ALREADY CHECK ✅',
+  {
+    alreadyInCrew,
+    eventIndex,
+    eventId,
+    favId: fav.id,
+    crew: savedEvents[eventIndex].crew
+  }
+);
+
         if (alreadyInCrew) {
           alert(`${fav.name} ist bereits in der Crewliste dieses Projekts eingetragen!`);
           setActiveSelectFav(null);
@@ -149,19 +214,96 @@ export default function CrewFavoritenListe({ onNavigate }) {
         window.dispatchEvent(new CustomEvent('route-change'));
 
         // Zusätzlich direkt eine Crew-Anfrage im globalen System anlegen!
-        const allRequests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
-        allRequests.push({
-          requestId: "REQ-" + Math.floor(Math.random() * 9000 + 1000),
-          eventId: savedEvents[eventIndex].id,
-          eventName: savedEvents[eventIndex].title || savedEvents[eventIndex].name || "B2B Event",
-          date: savedEvents[eventIndex].date || "Termin folgt",
-          requestedProfileId: fav.id,
-          requestedProfileName: fav.name,
-          requesterName: localStorage.getItem('gigsda_user_name') || "Veranstalter",
-          status: "pending",
-          note: `Automatisch über Crew-Favoritenliste hinzugefügt.`
-        });
-        localStorage.setItem('gigsda_crew_requests', JSON.stringify(allRequests));
+const now = Date.now();
+
+const requesterProfileId =
+  currentProfileData?.id ||
+  localStorage.getItem('gigsda_profile_id') ||
+  '';
+
+const requesterProfileName =
+  currentProfileData?.name ||
+  localStorage.getItem('gigsda_user_name') ||
+  "Veranstalter";
+
+const newRequest = {
+  requestId:
+    "REQ-" + Math.floor(Math.random() * 9000 + 1000),
+
+  eventId:
+    savedEvents[eventIndex].id,
+
+  eventName:
+    savedEvents[eventIndex].title ||
+    savedEvents[eventIndex].name ||
+    "B2B Event",
+
+  date:
+    savedEvents[eventIndex].date ||
+    "Termin folgt",
+
+  requestedProfileId:
+    fav.id,
+
+  requestedProfileName:
+    fav.name,
+
+  requestedProfileRole:
+    fav.role ||
+    fav.type ||
+    "Crew",
+
+  requestedProfileCity:
+    fav.city ||
+    fav.ort ||
+    "",
+
+  requesterProfileId:
+    requesterProfileId,
+
+  requesterProfileName:
+    requesterProfileName,
+
+  requesterName:
+    requesterProfileName,
+
+  status: "pending",
+
+  source: "favorites",
+
+  createdAt: now,
+  updatedAt: now,
+
+  note:
+    "Automatisch über Crew-Favoritenliste hinzugefügt."
+};
+
+console.log(
+  'CREWFAVORITEN BEFORE DB SAVE ✅',
+  newRequest
+);
+
+const saveResult =
+  await saveCrewRequest(newRequest);
+
+console.log(
+  'CREWFAVORITEN REQUEST SAVE DB ✅',
+  saveResult
+);
+
+// TEMP-BRÜCKE:
+// bleibt noch drin, bis alle alten Request-Stellen final entfernt sind
+const allRequests = JSON.parse(
+  localStorage.getItem('gigsda_crew_requests') || '[]'
+);
+
+allRequests.push(newRequest);
+
+localStorage.setItem(
+  'gigsda_crew_requests',
+  JSON.stringify(allRequests)
+);
+
 
         // Globalen Funkspruch feuern, damit alle Dashboards live updaten!
         window.dispatchEvent(new CustomEvent('request-sent'));
