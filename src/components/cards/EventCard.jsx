@@ -15,6 +15,53 @@ export default function EventCard({ event }) {
 
   if (!event) return null;
 
+  const eventDate =
+  event.date ||
+  event.event_date;
+
+let weekday = '--';
+let dateLabel = '--.--';
+
+if (
+  eventDate &&
+  /^\d{4}-\d{2}-\d{2}$/.test(eventDate)
+) {
+  const date =
+    new Date(eventDate);
+
+  const weekdays = [
+    'SO',
+    'MO',
+    'DI',
+    'MI',
+    'DO',
+    'FR',
+    'SA'
+  ];
+
+  const months = [
+    'JAN',
+    'FEB',
+    'MÄR',
+    'APR',
+    'MAI',
+    'JUN',
+    'JUL',
+    'AUG',
+    'SEP',
+    'OKT',
+    'NOV',
+    'DEZ'
+  ];
+
+  weekday =
+    weekdays[date.getDay()];
+
+  dateLabel =
+    `${String(date.getDate()).padStart(2,'0')}.${months[date.getMonth()]}`;
+}
+
+
   return (
 
     <div className="bg-slate-950 border border-slate-900 rounded-2xl shadow-2xl relative overflow-hidden flex flex-col group hover:border-slate-800 transition-all duration-300 min-h-[300px]">
@@ -41,11 +88,11 @@ export default function EventCard({ event }) {
           </span>
 
           <span className="text-[10px] font-black text-white">
-            FR
+            {weekday}
           </span>
 
           <span className="text-[11px] font-black text-white">
-            18.SEP
+            {dateLabel}
           </span>
 
         </div>

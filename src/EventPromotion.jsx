@@ -50,16 +50,17 @@ useEffect(() => {
   }));
 }, [promoProgress, setProgress]);
 
+
 useEffect(() => {
   const timer = setTimeout(() => {
     handleSavePromotion();
   }, 1000);
-
   return () => clearTimeout(timer);
-
 }, [promoData]);
 
+
 useEffect(() => {
+
   const promo =
     activeEvent?.promotionData;
 
@@ -88,10 +89,11 @@ useEffect(() => {
       promo.startTime || ''
   });
 
-}, [activeEvent]);
+}, [activeEvent?.id]);
 
 
 const handleSavePromotion = () => {
+
   if (!activeEvent) return;
 const events =
   eventService.getEvents();
@@ -135,6 +137,47 @@ const ownerLead =
   );
 const ownerName =
   ownerLead?.name || "Unbekannt";
+
+
+
+
+
+
+
+const formatPromotionDate = (value) => {
+  if (!value) return '';
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+
+  const [year, month, day] = value.split('-');
+
+  const date = new Date(
+    Number(year),
+    Number(month) - 1,
+    Number(day)
+  );
+
+  const weekdays = [
+    'So.',
+    'Mo.',
+    'Di.',
+    'Mi.',
+    'Do.',
+    'Fr.',
+    'Sa.'
+  ];
+
+  return `${weekdays[date.getDay()]} ${day}.${month}.${year}`;
+};
+
+
+
+
+
+
+
 
   return (
 
@@ -287,7 +330,7 @@ const ownerName =
 
     <input
       type="text"
-      value={activeEvent?.date || ''}
+      value={formatPromotionDate(activeEvent?.date)}
       disabled={!isOwner}
       readOnly
       className="

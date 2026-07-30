@@ -70,6 +70,28 @@ const addFromShortlist = (eventId, profileName) => {
     window.dispatchEvent(
       new CustomEvent('route-change')
     );
+eventService.saveEvents(updated);
+
+const changedEvent =
+  updated.find(evt => {
+    const evtId =
+      evt.id ||
+      evt.eventId ||
+      evt._id;
+
+    return String(evtId) === String(eventId);
+  });
+
+if (changedEvent) {
+  eventService.saveEvent(changedEvent);
+}
+
+window.dispatchEvent(
+  new CustomEvent('request-sent')
+);
+
+
+
   } catch (e) {
     console.error(
       'Fehler beim Übernehmen aus der Shortlist:',

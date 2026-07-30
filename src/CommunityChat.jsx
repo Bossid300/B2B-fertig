@@ -3,6 +3,11 @@ import { Send, Users, ShieldCheck, MapPin } from 'lucide-react';
 
 import { eventService } from './services/eventService';
 import { getProfilesDb } from './services/apiService';
+import {
+  saveMessage,
+  getMessages
+} from './services/apiService';
+
 
 export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
 
@@ -11,6 +16,44 @@ export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
 
   const [allProfiles, setAllProfiles] = useState([]);
   const [currentProfileData, setCurrentProfileData] = useState(null);
+  const [chatHistory, setChatHistory] = useState([]);
+  const currentUserId =
+    currentProfileData?.id || "";
+  const activeStub = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
+  const events = eventService.getEvents();
+  const activeEvent = events.find(e => e.id === activeStub?.id);
+
+  const loadMessages = async () => {
+    if (!activeEvent?.id) return;
+
+    try {
+      const result =
+        await getMessages(activeEvent.id);
+
+      console.log(
+        'CHAT LOAD DB ✅',
+        result
+      );
+
+      const dbMessages =
+        (result.messages || []).map(msg => ({
+          id: msg.id,
+          senderId: msg.sender_profile_id,
+          channel: msg.channel,
+          text: msg.message_text,
+          time: msg.created_at
+        }));
+
+      setChatHistory(dbMessages);
+
+    } catch (e) {
+      console.error(
+        'CHAT LOAD DB FEHLER ❌',
+        e
+      );
+    }
+  };
+
 
   useEffect(() => {
     getProfilesDb()
@@ -59,15 +102,6 @@ export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
       .catch(console.error);
   }, [currentUserName]);
 
-  const currentUserId =
-    currentProfileData?.id || "";
-
-
-
-  const activeStub = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
-  const events = eventService.getEvents();
-
-  const activeEvent = events.find(e => e.id === activeStub?.id);
   const hasAccess =
   activeEvent &&
   (
@@ -116,17 +150,24 @@ const crewChannels = (() => {
 const [activeChannel, setActiveChannel] = useState('USR-8717');
   const [message, setMessage] = useState('');
     
-  // Beispiel-Nachrichten für das System
-    const [chatHistory, setChatHistory] = useState(() => {
-    const saved = JSON.parse(localStorage.getItem('gigsda_chats') || '[]');
-    if (!activeEvent) return [];
-    const eventChat = saved.find(c => c.eventId === activeEvent.id);
-    return eventChat?.messages || [];
-  });
+
+  useEffect(() => {
+  loadMessages();
+  }, [activeEvent?.id]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      loadMessages();
+    }, 3000);
+
+    return () => clearInterval(timer);
+
+  }, [activeEvent?.id]);
+
 
   const currentChannelInfo = crewChannels.find(c => c.id === activeChannel);
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!message.trim()) return;
 
@@ -139,8 +180,31 @@ const [activeChannel, setActiveChannel] = useState('USR-8717');
       time: "Jetzt"
     };
     
+    await saveMessage({
+      id: `MSG-${Date.now()}`,
+      eventId: activeEvent.id,
+      senderProfileId: currentUserId,
+      channel: activeChannel,
+      messageText: message
+    });
+
+    console.log('CHAT SAVE DB ✅');
+
+    const result =
+      await getMessages(activeEvent.id);
+
+    const dbMessages =
+      (result.messages || []).map(msg => ({
+        id: msg.id,
+        senderId: msg.sender_profile_id,
+        channel: msg.channel,
+        text: msg.message_text,
+        time: msg.created_at
+      }));
+
+    setChatHistory(dbMessages);
+
     const chats = JSON.parse(localStorage.getItem('gigsda_chats') || '[]');
-    const activeEvent = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
 
     if (!activeEvent) return;
 

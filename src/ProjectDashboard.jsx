@@ -250,9 +250,6 @@ const visibleEvents = events
 
 
 
-
-
-
   return (
     <div className="space-y-6 my-6 max-w-4xl mx-auto text-slate-300 text-xs font-mono animate-fade-in">
       

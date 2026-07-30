@@ -164,6 +164,12 @@ const handleResponse = async (requestId, newStatus) => {
           };
 
           eventService.saveEvents(savedEvents);
+          const changedEvent =
+  savedEvents[eventIndex];
+
+if (changedEvent) {
+  await eventService.saveEvent(changedEvent);
+}
         }
       }
     }

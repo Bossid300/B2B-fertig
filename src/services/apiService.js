@@ -178,3 +178,26 @@ export async function saveEvent(event) {
 
   return await response.json();
 }
+
+export async function saveMessage(message) {
+  const response = await fetch(
+    '/2026/api/saveMessage.php',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(message)
+    }
+  );
+
+  return await response.json();
+}
+
+export async function getMessages(eventId) {
+  const response = await fetch(
+    `/2026/api/getMessages.php?eventId=${eventId}`
+  );
+
+  return await response.json();
+}

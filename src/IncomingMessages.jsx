@@ -54,6 +54,9 @@ const handleUpdateStatus = async (requestId, newStatus) => {
         );
 
         eventService.saveEvents(events);
+        if (event) {
+  await eventService.saveEvent(event);
+}
       }
     }
 
