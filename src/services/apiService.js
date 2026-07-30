@@ -12,9 +12,7 @@ export async function getEvents() {
   const response = await fetch(
     '/2026/api/getEvents.php'
   );
-
   const data = await response.json();
-
   return data.events || [];
 }
 
@@ -160,6 +158,21 @@ export async function updateCrewRequest(
         requestId,
         updates
       })
+    }
+  );
+
+  return await response.json();
+}
+
+export async function saveEvent(event) {
+  const response = await fetch(
+    '/2026/api/saveEvent.php',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(event)
     }
   );
 

@@ -310,6 +310,11 @@ const handleCounterOffer = async (
   }
 };
 
+const openRequests = incomingRequests.filter(
+  req =>
+    req.status === 'pending' ||
+    req.status === 'counter_offer'
+);
 
 
   return (

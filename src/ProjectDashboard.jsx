@@ -7,7 +7,8 @@ import IncomingMessages from './IncomingMessages';
 import { eventService } from './services/eventService';
 import {
   getProfilesDb,
-  getCrewRequests
+  getCrewRequests,
+  saveEvent
 } from './services/apiService';
 
 
@@ -137,6 +138,8 @@ const visibleEvents = events.filter(ev =>
       
       {/* 📊 DIE NEUE MANAGER-KOMMANDOZENTRALE */}
       <ManagerOverview />
+
+
       {/* Ab hier folgt eure originale Überschrift "Übersicht deiner Events" und die .map-Schleife ... */}
       <div className="flex justify-between items-center border-b border-slate-900 pb-1.5 mb-4">
         <span className="text-[9px] text-slate-500 uppercase tracking-widest font-black">// Ubersicht deiner Events</span>
@@ -255,13 +258,17 @@ const visibleEvents = events.filter(ev =>
                 ) / 5
               );
 
-              const openRequests = requests.filter(r =>
-                (r.status === "pending" || r.status === "counter_offer") &&
-                (
-                  r.eventId === evt.id ||
-                  r.eventName === evt.title
-                )
-              );
+const eventOpenRequests = requests.filter(r =>
+  r &&
+  (
+    r.status === "pending" ||
+    r.status === "counter_offer"
+  ) &&
+  (
+    r.eventId === evt.id ||
+    r.eventName === evt.title
+  )
+);
 
               return (
                   <div
@@ -316,7 +323,7 @@ const visibleEvents = events.filter(ev =>
                       </p>
 
                       <p className="text-[10px] text-slate-400">
-                        📍 Ort: {evt.venue} ({evt.date})
+                        📍 Ort: {evt.venue} ({evt.displayDate || evt.date})
                       </p>
                     </div>
                   </div>
@@ -324,7 +331,7 @@ const visibleEvents = events.filter(ev =>
                   <div className="relative z-10 flex items-center gap-2">
 
                     {/* 🔴 INCOMMING REQUEST KUGEL */}
-                    {openRequests.length > 0 && (
+                    {eventOpenRequests.length > 0 && (
                       <span
                         onClick={(e) => {
                           e.stopPropagation();
@@ -349,7 +356,7 @@ const visibleEvents = events.filter(ev =>
 
                         className="bg-red-500 text-white text-[8px] font-black px-1.5 py-0.5 rounded-full animate-pulse cursor-pointer hover:scale-110 transition"
                       >
-                        {openRequests.length}
+                        {eventOpenRequests.length}
                       </span>
                     )}
 
