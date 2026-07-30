@@ -88,7 +88,15 @@ const handleDelete = (eventId, e) => {
     });
 
     setEvents(updated);
+
     eventService.saveEvents(updated);
+
+    const archivedEvent =
+      updated.find(evt => evt.id === eventId);
+
+    if (archivedEvent) {
+      eventService.saveEvent(archivedEvent);
+    }
 
     window.dispatchEvent(
       new CustomEvent('route-change')
@@ -258,50 +266,60 @@ const visibleEvents = events
       </div>
 
       {isCreatingEvent ? (
-        <CreateEventForm 
-          onBack={() => setIsCreatingEvent(false)} 
-          onCreateEvent={(newEvent) => {
-              const currentUserName = localStorage.getItem('gigsda_user_name');
-              const currentUserId = currentProfileData?.id;
+      <CreateEventForm
+        onBack={() => setIsCreatingEvent(false)}
+        onCreateEvent={async (newEvent) => {
+          const currentUserName =
+            localStorage.getItem('gigsda_user_name');
 
-              const fresh = {
-                id: newEvent.id || "EVT-" + Date.now().toString().slice(-4),
-                title: `${newEvent.title}`,
-                date: newEvent.date,
-                type: newEvent.category === 'Festivals'
-                  ? 'Festival'
-                  : newEvent.category === 'OpenAirs'
-                    ? 'Open Air'
-                    : 'Clubshow',
-                text: "Event frisch angelegt. Starte die Crew-Suche im Radar.",
-                venue: newEvent.venue || "Stadtpark Wiese, Braunau",
-                doneProgress: 0,
-                ownerId: currentUserId,
-                ownerName:
-                  currentProfileData?.name ||
-                  currentUserName ||
-                  "Unbekannt",
-                crewIds: [currentUserId],
+          const currentUserId =
+            currentProfileData?.id ||
+            localStorage.getItem('gigsda_profile_id') ||
+            '';
 
-              logistics: {
-                setup: false,
-                power: false,
-                catering: false,
-                security: false,
-              }
+          const fresh = {
+            id: newEvent.id || "EVT-" + Date.now().toString().slice(-4),
+            title: `${newEvent.title}`,
+            date: newEvent.date,
+            displayDate: newEvent.displayDate,
+            type:
+              newEvent.category === 'Festivals'
+                ? 'Festival'
+                : newEvent.category === 'OpenAirs'
+                  ? 'Open Air'
+                  : 'Clubshow',
+            text: "Event frisch angelegt. Starte die Crew-Suche im Radar.",
+            venue: newEvent.venue || "Stadtpark Wiese, Braunau",
+            doneProgress: 0,
+            ownerId: currentUserId,
+            ownerName:
+              currentProfileData?.name ||
+              currentUserName ||
+              "Unbekannt",
+            crewIds: [currentUserId],
+            logistics: {
+              setup: false,
+              power: false,
+              catering: false,
+              security: false
+            }
+          };
 
-            };
-            
-            // 💾 DER FESTPLATTEN-SPEICHER FÜR NEUE EVENTS
-            const updatedList = [fresh, ...events];
-            setEvents(updatedList);
-            eventService.saveEvents(updatedList);
+          const updatedList = [fresh, ...events];
 
-            // Synchronisiert das neue Event hoch zur Hauptleitung (App.jsx)
-            if (onCreateEvent) onCreateEvent(fresh); 
-            setIsCreatingEvent(false);
-          }}
-        />
+          setEvents(updatedList);
+
+          eventService.saveEvents(updatedList);
+
+          await eventService.saveEvent(fresh);
+
+          if (onCreateEvent) {
+            onCreateEvent(fresh);
+          }
+
+          setIsCreatingEvent(false);
+        }}
+      />
       ) : (
         <>
           <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl">
