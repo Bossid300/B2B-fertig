@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { getProfilesDb } from '../services/apiService';
 import { saveProfile } from '../services/apiService';
+import { eventService } from '../services/eventService';
 
 export default function LocationRaeumeBox({ currentProfileName, isOwner, selectedRoom }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -169,9 +170,8 @@ useEffect(() => {
 
       // Event-Markierung bleibt
       try {
-        const events = JSON.parse(
-          localStorage.getItem("gigsda_events") || "[]"
-        );
+const events =
+  eventService.getEvents();
         const updatedEvents = events.map((event) => {
 
             if (!event.riderCenter?.[profileId]) {
@@ -190,10 +190,16 @@ useEffect(() => {
               }
             };
           });
-          localStorage.setItem(
-            "gigsda_events",
-            JSON.stringify(updatedEvents)
-          );
+eventService.saveEvents(updatedEvents);
+
+const changedEvent =
+  updatedEvents.find(event =>
+    event.riderCenter?.[profileId]
+  );
+
+if (changedEvent) {
+  await eventService.saveEvent(changedEvent);
+}
         } catch (err) {
           console.error(
             "Location Rider Status Fehler:",

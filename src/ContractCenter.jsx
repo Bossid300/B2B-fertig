@@ -6,6 +6,7 @@ import {
   getCrewRequests,
   saveCrewRequest
 } from './services/apiService';
+import { eventService } from './services/eventService';
 
 export default function ContractCenter({ onBack, progress, setProgress, onNavigateToStep, onContractSigned, activeEvent }) {
 
@@ -118,9 +119,8 @@ export default function ContractCenter({ onBack, progress, setProgress, onNaviga
 const handleSendDeal = async () => {
 
   if (!activeEvent) return;
-  const events = JSON.parse(
-    localStorage.getItem("gigsda_events") || "[]"
-  );
+  const events =
+    eventService.getEvents();
   const requests =
     await getCrewRequests();
   const profiles = JSON.parse(
@@ -169,10 +169,16 @@ const handleSendDeal = async () => {
     };
     }).filter(Boolean);
 
-    localStorage.setItem(
-      "gigsda_events",
-      JSON.stringify(updatedEvents)
-    );
+    eventService.saveEvents(updatedEvents);
+
+    const changedEvent =
+      updatedEvents.find(event =>
+        event.id === activeEvent.id
+      );
+
+    if (changedEvent) {
+      await eventService.saveEvent(changedEvent);
+}
     for (const dealRequest of newDealRequests) {
       const saveResult =
         await saveCrewRequest(dealRequest);
@@ -190,25 +196,33 @@ const handleSendDeal = async () => {
 
 
 
-  const handleSaveDeal = () => {
+  const handleSaveDeal = async () => {
     if (!activeEvent) return;
-    const events = JSON.parse(
-      localStorage.getItem("gigsda_events") || "[]"
-    );
+
+    const events =
+      eventService.getEvents();
+
     const updatedEvents = events.map(event => {
       if (event.id !== activeEvent.id) {
         return event;
       }
+
       return {
         ...event,
-
         dealAmounts
       };
     });
-    localStorage.setItem(
-      "gigsda_events",
-      JSON.stringify(updatedEvents)
-    );
+
+    eventService.saveEvents(updatedEvents);
+
+    const changedEvent =
+      updatedEvents.find(event =>
+        event.id === activeEvent.id
+      );
+
+    if (changedEvent) {
+      await eventService.saveEvent(changedEvent);
+    }
   };
 
 
@@ -525,28 +539,38 @@ const handleSendDeal = async () => {
                 )}
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={async () => {
                     const updatedAcceptedDeals = {
                       ...acceptedDeals,
                       [member.id]: true
                     };
+
                     setAcceptedDeals(updatedAcceptedDeals);
-                    const events = JSON.parse(
-                      localStorage.getItem("gigsda_events") || "[]"
-                    );
+
+                    const events =
+                      eventService.getEvents();
+
                     const updatedEvents = events.map(event => {
                       if (event.id !== activeEvent.id) {
                         return event;
                       }
+
                       return {
                         ...event,
                         acceptedDeals: updatedAcceptedDeals
                       };
                     });
-                    localStorage.setItem(
-                      "gigsda_events",
-                      JSON.stringify(updatedEvents)
-                    );
+
+                    eventService.saveEvents(updatedEvents);
+
+                    const changedEvent =
+                      updatedEvents.find(event =>
+                        event.id === activeEvent.id
+                      );
+
+                    if (changedEvent) {
+                      await eventService.saveEvent(changedEvent);
+                    }
                   }}
 
                   className={

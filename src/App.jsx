@@ -125,7 +125,7 @@ export default function App() {
           JSON.parse(localStorage.getItem("gigsda_active_event"));
 
         const events =
-          JSON.parse(localStorage.getItem("gigsda_events")) || [];
+          eventService.getEvents();
 
         if (storedActiveEvent?.id) {
           const restoredEvent = events.find(
@@ -463,18 +463,32 @@ useEffect(() => {
   // FUNKTION: Aktualisiert die Crew exklusiv für das aktive Event im Master-Array
   const handleUpdateCrewForEvent = (newCrewIds) => {
     if (!activeEvent) return;
- 
+
     const updatedEvents = events.map(evt => {
       if (evt.id === activeEvent.id) {
-        const updatedEvent = { ...evt, crewIds: newCrewIds };
-        setActiveEvent(updatedEvent); // Aktualisiert den Fokus live mit
+        const updatedEvent = {
+          ...evt,
+          crewIds: newCrewIds
+        };
+
+        setActiveEvent(updatedEvent);
+
         return updatedEvent;
       }
+
       return evt;
     });
- 
+
     setEvents(updatedEvents);
-    localStorage.setItem('gigsda_events', JSON.stringify(updatedEvents));
+
+    eventService.saveEvents(updatedEvents);
+
+    const updatedEvent =
+      updatedEvents.find(evt => evt.id === activeEvent.id);
+
+    if (updatedEvent) {
+      eventService.saveEvent(updatedEvent);
+    }
   };
  
 

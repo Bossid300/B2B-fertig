@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowRight, Clock, MapPin, Truck, Radio, Calendar } from 'lucide-react';
 import FahrplanMetrics from './FahrplanMetrics';
 import EventHeaderBox from "./components/EventHeaderBox";
+import { eventService } from './services/eventService';
 
 export default function EventPlanner({ onBack, progress, setProgress, onNavigateToStep, onStepSuccess, activeEvent }) {
 
@@ -54,9 +55,8 @@ const handleAddTimelineItem = () => {
 
 const handleSaveTimeline = () => {
   if (!activeEvent) return;
-  const events = JSON.parse(
-    localStorage.getItem("gigsda_events") || "[]"
-  );
+const events =
+  eventService.getEvents();
   const cleanSchedule = schedule.map(item => ({
     id: item.id,
     time: item.time,
@@ -75,10 +75,16 @@ const handleSaveTimeline = () => {
       plannerLocked: isPlannerLocked
     };
   });
-  localStorage.setItem(
-    "gigsda_events",
-    JSON.stringify(updatedEvents)
+eventService.saveEvents(updatedEvents);
+
+const changedEvent =
+  updatedEvents.find(event =>
+    event.id === activeEvent.id
   );
+
+if (changedEvent) {
+  eventService.saveEvent(changedEvent);
+}
 };
 
 
@@ -89,9 +95,8 @@ const [notesSaved, setNotesSaved] = useState(false);
 const handleSaveProductionNotes = () => {
   if (!activeEvent) return;
 
-  const events = JSON.parse(
-    localStorage.getItem("gigsda_events") || "[]"
-  );
+const events =
+  eventService.getEvents();
 
   const updatedEvents = events.map(event => {
     if (event.id !== activeEvent.id) {
@@ -104,10 +109,16 @@ const handleSaveProductionNotes = () => {
     };
   });
 
-  localStorage.setItem(
-    "gigsda_events",
-    JSON.stringify(updatedEvents)
+eventService.saveEvents(updatedEvents);
+
+const changedEvent =
+  updatedEvents.find(event =>
+    event.id === activeEvent.id
   );
+
+if (changedEvent) {
+  eventService.saveEvent(changedEvent);
+}
   
   setNotesSaved(true);
   setIsEditingNotes(false);
@@ -247,9 +258,8 @@ const isOwner =
 
     setIsPlannerLocked(newLockedState);
 
-    const events = JSON.parse(
-      localStorage.getItem("gigsda_events") || "[]"
-    );
+const events =
+  eventService.getEvents();
 
     const updatedEvents = events.map(event => {
 
@@ -264,10 +274,16 @@ const isOwner =
 
     });
 
-    localStorage.setItem(
-      "gigsda_events",
-      JSON.stringify(updatedEvents)
-    );
+eventService.saveEvents(updatedEvents);
+
+const changedEvent =
+  updatedEvents.find(event =>
+    event.id === activeEvent?.id
+  );
+
+if (changedEvent) {
+  eventService.saveEvent(changedEvent);
+}
 
   };
 
@@ -883,9 +899,8 @@ const isOwner =
                 onClick={() => {
                   if (!activeEvent) return;
 
-                  const events = JSON.parse(
-                    localStorage.getItem("gigsda_events") || "[]"
-                  );
+const events =
+  eventService.getEvents();
 
                   const updated = events.map(evt =>
                     evt.id === activeEvent.id
@@ -899,10 +914,17 @@ const isOwner =
                       : evt
                   );
 
-                  localStorage.setItem(
-                    "gigsda_events",
-                    JSON.stringify(updated)
-                  );
+eventService.saveEvents(updated);
+
+const changedEvent =
+  updated.find(evt =>
+    evt.id === activeEvent.id
+  );
+
+if (changedEvent) {
+  eventService.saveEvent(changedEvent);
+}
+
                   window.location.reload();
                   window.dispatchEvent(
                     new CustomEvent("active-event-updated")
@@ -927,9 +949,8 @@ const isOwner =
                 onClick={() => {
                   if (!activeEvent) return;
 
-                  const events = JSON.parse(
-                    localStorage.getItem("gigsda_events") || "[]"
-                  );
+const events =
+  eventService.getEvents();
 
                   const updated = events.map(evt =>
                     evt.id === activeEvent.id
@@ -943,10 +964,16 @@ const isOwner =
                       : evt
                   );
 
-                  localStorage.setItem(
-                    "gigsda_events",
-                    JSON.stringify(updated)
-                  );
+eventService.saveEvents(updated);
+
+const changedEvent =
+  updated.find(evt =>
+    evt.id === activeEvent.id
+  );
+
+if (changedEvent) {
+  eventService.saveEvent(changedEvent);
+}
                   window.location.reload();
                   window.dispatchEvent(
                     new CustomEvent("active-event-updated")
@@ -971,9 +998,8 @@ const isOwner =
                 onClick={() => {
                   if (!activeEvent) return;
 
-                  const events = JSON.parse(
-                    localStorage.getItem("gigsda_events") || "[]"
-                  );
+const events =
+  eventService.getEvents();
 
                   const updated = events.map(evt =>
                     evt.id === activeEvent.id
@@ -987,10 +1013,16 @@ const isOwner =
                       : evt
                   );
 
-                  localStorage.setItem(
-                    "gigsda_events",
-                    JSON.stringify(updated)
-                  );
+eventService.saveEvents(updated);
+
+const changedEvent =
+  updated.find(evt =>
+    evt.id === activeEvent.id
+  );
+
+if (changedEvent) {
+  eventService.saveEvent(changedEvent);
+}
                   window.location.reload();
                   window.dispatchEvent(
                     new CustomEvent("active-event-updated")
@@ -1015,9 +1047,8 @@ const isOwner =
                 onClick={() => {
                   if (!activeEvent) return;
 
-                  const events = JSON.parse(
-                    localStorage.getItem("gigsda_events") || "[]"
-                  );
+const events =
+  eventService.getEvents();
 
                   const updated = events.map(evt =>
                     evt.id === activeEvent.id
@@ -1031,10 +1062,16 @@ const isOwner =
                       : evt
                   );
 
-                  localStorage.setItem(
-                    "gigsda_events",
-                    JSON.stringify(updated)
-                  );
+eventService.saveEvents(updated);
+
+const changedEvent =
+  updated.find(evt =>
+    evt.id === activeEvent.id
+  );
+
+if (changedEvent) {
+  eventService.saveEvent(changedEvent);
+}
                   window.location.reload();
                   window.dispatchEvent(
                     new CustomEvent("active-event-updated")

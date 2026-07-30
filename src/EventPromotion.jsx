@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import EventCard from './components/cards/EventCard';
 import FahrplanMetrics from './FahrplanMetrics';
 import EventHeaderBox from "./components/EventHeaderBox";
+import { eventService } from './services/eventService';
 
 export default function EventPromotion({
   onBack,
@@ -92,9 +93,9 @@ useEffect(() => {
 
 const handleSavePromotion = () => {
   if (!activeEvent) return;
-  const events = JSON.parse(
-    localStorage.getItem("gigsda_events") || "[]"
-  );
+const events =
+  eventService.getEvents();
+
   const updatedEvents = events.map(event => {
     if (event.id !== activeEvent.id) {
       return event;
@@ -105,10 +106,16 @@ const handleSavePromotion = () => {
       promotionData: promoData
     };
   });
-  localStorage.setItem(
-    "gigsda_events",
-    JSON.stringify(updatedEvents)
+eventService.saveEvents(updatedEvents);
+
+const changedEvent =
+  updatedEvents.find(event =>
+    event.id === activeEvent.id
   );
+
+if (changedEvent) {
+  eventService.saveEvent(changedEvent);
+}
 };
 
 const currentUserId =

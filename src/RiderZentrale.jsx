@@ -23,9 +23,8 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
 
     const refresh = () => {
 
-      const events = JSON.parse(
-        localStorage.getItem("gigsda_events") || "[]"
-      );
+const events =
+  eventService.getEvents();
 
       const activeStored = JSON.parse(
         localStorage.getItem("gigsda_active_event") || "null"
@@ -65,9 +64,8 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
 
   useEffect(() => {
     try {
-      const events = JSON.parse(
-        localStorage.getItem("gigsda_events") || "[]"
-      );
+const events =
+  eventService.getEvents();
 
       const allProfiles = JSON.parse(
         localStorage.getItem("gigsda_profiles") || "[]"

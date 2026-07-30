@@ -99,6 +99,7 @@ const currentProfileId =
 const myEvents = savedEvents.filter(
   ev =>
     ev &&
+    ev.archived !== true &&
     (
       ev.ownerId === currentProfileId ||
       ev.crewIds?.includes(currentProfileId)

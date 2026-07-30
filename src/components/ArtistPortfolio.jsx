@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import GigsdaPass from "../components/GigsdaPass";
 import { getProfilesDb } from "../services/apiService";
+import { eventService } from '../services/eventService';
 
 export default function ArtistPortfolio() {
   const [profile, setProfile] = useState(null);
@@ -8,10 +9,8 @@ export default function ArtistPortfolio() {
     localStorage.getItem(
       "gigsda_portfolio_profile"
     );
-  const events =
-    JSON.parse(
-      localStorage.getItem("gigsda_events")
-    ) || [];
+const events =
+  eventService.getEvents();
 
   useEffect(() => {
     getProfilesDb()

@@ -43,6 +43,7 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
 
       const myEvents = savedEvents.filter(ev =>
         ev &&
+        ev.archived !== true &&
         (
           ev.ownerId === currentProfileId ||
           ev.crewIds?.includes(currentProfileId)
@@ -129,7 +130,7 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
         (eventTitle && (ev.title === eventTitle || ev.name === eventTitle))
       ));
 
-      // 🚨 AUTOMATISCHE INITIALISIERUNG: Falls das Event in gigsda_events fehlt, erschaffen wir es live!
+      // 🚨 AUTOMATISCHE INITIALISIERUNG: 
       if (eventIndex === -1) {
         const newEventPlaceholder = {
           id: eventId || "EVT-" + Math.floor(Math.random() * 9000 + 1000),
@@ -167,7 +168,14 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
             addedAt: new Date().toLocaleDateString('de-DE')
           });
 
-          localStorage.setItem('gigsda_events', JSON.stringify(savedEvents));
+eventService.saveEvents(savedEvents);
+
+const changedEvent =
+  savedEvents[eventIndex];
+
+if (changedEvent) {
+  eventService.saveEvent(changedEvent);
+}
         }
       }
 

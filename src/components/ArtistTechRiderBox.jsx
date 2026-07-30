@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
-
+import { eventService } from '../services/eventService';
 
 export default function ArtistTechRiderBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -165,9 +165,8 @@ setProfileData(updatedProfile);
 
 try {
 
-  const events = JSON.parse(
-    localStorage.getItem('gigsda_events') || '[]'
-  );
+const events =
+  eventService.getEvents();
 
   const updatedEvents = events.map(event => {
 
@@ -193,10 +192,16 @@ try {
 
   });
 
-  localStorage.setItem(
-    'gigsda_events',
-    JSON.stringify(updatedEvents)
+const changedEvent =
+  updatedEvents.find(event =>
+    event.id === activeEvent?.id
   );
+
+  eventService.saveEvents(updatedEvents);
+
+if (changedEvent) {
+  await eventService.saveEvent(changedEvent);
+}
 
   window.dispatchEvent(
     new CustomEvent('rider-updated')

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Clock, Radio, Users, Ticket, Bell, AlertTriangle } from 'lucide-react';
 import FahrplanMetrics from './FahrplanMetrics';
 import EventHeaderBox from "./components/EventHeaderBox";
+import { eventService } from './services/eventService';
 
 export default function LiveCountdown({ onBack, progress, onNavigateToStep, setProgress, onTriggerGate, activeEvent }) {
 
@@ -67,9 +68,8 @@ const ownerName =
 
   const saveCountdownStatus = (updates) => {
   if (!activeEvent) return;
-  const events = JSON.parse(
-    localStorage.getItem("gigsda_events") || "[]"
-  );
+const events =
+  eventService.getEvents();
   const updatedEvents = events.map(event => {
     if (event.id !== activeEvent.id) {
       return event;
@@ -86,10 +86,16 @@ const ownerName =
     };
   });
 
-  localStorage.setItem(
-    "gigsda_events",
-    JSON.stringify(updatedEvents)
+eventService.saveEvents(updatedEvents);
+
+const changedEvent =
+  updatedEvents.find(event =>
+    event.id === activeEvent.id
   );
+
+if (changedEvent) {
+  eventService.saveEvent(changedEvent);
+}
 };
 
 

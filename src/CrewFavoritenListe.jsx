@@ -117,6 +117,7 @@ export default function CrewFavoritenListe({ onNavigate }) {
   const myEvents = savedEvents.filter(
     ev =>
       ev &&
+      ev.archived !== true &&
       (
         ev.ownerId === currentProfileId ||
         ev.crewIds?.includes(currentProfileId)
@@ -207,8 +208,15 @@ export default function CrewFavoritenListe({ onNavigate }) {
         savedEvents[eventIndex].crew.push(newCrewMember);
         
         // Speichern in den korrekten Keys (Sicherheits-Fallback für beide Schreibweisen)
-        localStorage.setItem('gigsda_events', JSON.stringify(savedEvents));
+        eventService.saveEvents(savedEvents);
 
+        const changedEvent =
+          savedEvents[eventIndex];
+
+        if (changedEvent) {
+          eventService.saveEvent(changedEvent);
+        }
+        
         // ⚡ ZÜNDET DEN REAKTIVEN LIVE-FUNKSPRUCH FÜR DANIELS DASHBOARD!
         window.dispatchEvent(new CustomEvent('request-sent'));
         window.dispatchEvent(new CustomEvent('route-change'));
