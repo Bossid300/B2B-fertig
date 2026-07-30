@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Eye, EyeOff } from 'lucide-react';
-import { saveProfile } from '../services/apiService';
-import { getProfilesDb } from '../services/apiService';
+import {
+  saveProfile,
+  getProfilesDb,
+  getCrewRequests
+} from '../services/apiService';
+
 
 export default function ProfileNetworkBox({ currentProfileName, isOwner }) {
   const [profile, setProfile] = useState(null);
@@ -22,101 +26,126 @@ export default function ProfileNetworkBox({ currentProfileName, isOwner }) {
   const canEditPrivacy = isOwner || targetUser.toLowerCase() === loggedInUser.toLowerCase();
 
   // 1. DYNAMIC B2B NETWORK & METRIC ENGINE
-  useEffect(() => {
-  const savedRequests =
-    localStorage.getItem('gigsda_crew_requests');
+useEffect(() => {
+  const loadNetworkData = async () => {
+    try {
+      const reqs =
+        await getCrewRequests();
 
-  const savedFavs =
-    localStorage.getItem(favoriteKey);
+      const savedFavs =
+        localStorage.getItem(favoriteKey);
 
-    getProfilesDb()
-      .then(allProfiles => {
-        const found = allProfiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-              ?.trim()
-              .toLowerCase() ===
-            targetUser.trim().toLowerCase()
-        );
-        if (!found) return;
-        const profile =
-          found.profile_json
-            ? JSON.parse(found.profile_json)
-            : found;
-        setProfile(profile);
-        setProfileData(profile);
-        setShowNetwork(
-          profile.show_network !== false
-        );
-        const partnerList =
-          allProfiles.filter(p =>
-            p &&
-            p.name?.toLowerCase() !==
-              targetUser.toLowerCase() &&
-            (
-              p.role === profile.role ||
-              p.city === profile.city ||
-              profile.skills?.includes(p.role)
-            )
-          ).slice(0, 3);
-        setNetworkUsers(partnerList);
-        const nameVariations = [
-          targetUser.trim().toLowerCase(),
-          (profile.name || '').trim().toLowerCase(),
-          (profile.Klarname || '').trim().toLowerCase(),
-          (profile.project_name || '').trim().toLowerCase(),
-          (profile.category || '').trim().toLowerCase()
-        ].filter(v => v !== '');
-        const savedFavs =
-          localStorage.getItem(favoriteKey);
-    const reqs =
-      JSON.parse(savedRequests || '[]');
-    let myRequests = [];
-    if (
-      targetUser.toLowerCase() ===
-      loggedInUser.toLowerCase()
-    ) {
-      myRequests = reqs.filter(
-        r =>
-          r &&
-          r.requestedProfile &&
-          nameVariations.includes(
-            r.requestedProfile.trim().toLowerCase()
-          )
-      );
-    } else {
-      myRequests = reqs.filter(
-        r =>
-          r &&
-          r.requesterName &&
-          nameVariations.includes(
-            r.requesterName.trim().toLowerCase()
-          )
+      getProfilesDb()
+        .then(allProfiles => {
+          const found = allProfiles.find(
+            p =>
+              p &&
+              (p.name || p.user_name || p.display_name)
+                ?.trim()
+                .toLowerCase() ===
+              targetUser.trim().toLowerCase()
+          );
+
+          if (!found) return;
+
+          const profile =
+            found.profile_json
+              ? JSON.parse(found.profile_json)
+              : found;
+
+          setProfile(profile);
+          setProfileData(profile);
+
+          setShowNetwork(
+            profile.show_network !== false
+          );
+
+          const partnerList =
+            allProfiles
+              .filter(p =>
+                p &&
+                p.name?.toLowerCase() !==
+                  targetUser.toLowerCase() &&
+                (
+                  p.role === profile.role ||
+                  p.city === profile.city ||
+                  profile.skills?.includes(p.role)
+                )
+              )
+              .slice(0, 3);
+
+          setNetworkUsers(partnerList);
+
+          const nameVariations = [
+            targetUser.trim().toLowerCase(),
+            (profile.name || '').trim().toLowerCase(),
+            (profile.klarname || '').trim().toLowerCase(),
+            (profile.project_name || '').trim().toLowerCase(),
+            (profile.category || '').trim().toLowerCase()
+          ].filter(v => v !== '');
+
+          const savedFavs =
+            localStorage.getItem(favoriteKey);
+
+          let myRequests = [];
+
+          if (
+            targetUser.toLowerCase() ===
+            loggedInUser.toLowerCase()
+          ) {
+            myRequests = reqs.filter(
+              r =>
+                r &&
+                r.requestedProfileName &&
+                nameVariations.includes(
+                  r.requestedProfileName.trim().toLowerCase()
+                )
+            );
+          } else {
+            myRequests = reqs.filter(
+              r =>
+                r &&
+                r.requesterProfileName &&
+                nameVariations.includes(
+                  r.requesterProfileName.trim().toLowerCase()
+                )
+            );
+          }
+
+          const favs =
+            JSON.parse(savedFavs || '[]');
+
+          const isFavInLists =
+            favs.filter(f => {
+              if (!f) return false;
+
+              const entryName =
+                typeof f === 'object' && f.name
+                  ? f.name
+                  : f;
+
+              return nameVariations.includes(
+                entryName.trim().toLowerCase()
+              );
+            });
+
+          setStats({
+            requestsCount: myRequests.length,
+            favoritedByCount: isFavInLists.length
+          });
+        })
+        .catch(console.error);
+
+    } catch (e) {
+      console.error(
+        'NETWORK REQUESTS DB FEHLER ❌',
+        e
       );
     }
-    const favs =
-      JSON.parse(savedFavs || '[]');
-    const isFavInLists =
-      favs.filter(f => {
-        if (!f) return false;
-        const entryName =
-          (typeof f === 'object' && f.name)
-            ? f.name
-            : f;
-        return nameVariations.includes(
-          entryName.trim().toLowerCase()
-        );
-      });
-    setStats({
-      requestsCount: myRequests.length,
-      favoritedByCount: isFavInLists.length
-    });
+  };
 
-    })
-    .catch(console.error);
-
-}, [targetUser, showNetwork]);
+  loadNetworkData();
+}, [targetUser, showNetwork, favoriteKey]);
 
 
 const toggleNetworkPrivacy = async () => {

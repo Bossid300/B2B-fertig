@@ -5,7 +5,11 @@ import CommunityChat from './CommunityChat';
 import IncomingMessages from './IncomingMessages';
 
 import { eventService } from './services/eventService';
-import { getProfilesDb } from './services/apiService';
+import {
+  getProfilesDb,
+  getCrewRequests
+} from './services/apiService';
+
 
 export default function ProjectDashboard({ onNavigateToStep, progress, onSelectEvent, events: propsEvents, onCreateEvent, ticketName }) {
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
@@ -31,19 +35,48 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
   const [currentProfileData, setCurrentProfileData] = useState(null);
 
   useEffect(() => {
-    const loadRequests = () => {
+    const loadRequests = async () => {
       try {
-        const data = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
+        const data =
+          await getCrewRequests();
+
+        console.log(
+          'PROJECTDASHBOARD REQUESTS DB ✅',
+          data
+        );
+
         setRequests(data);
       } catch (e) {
-        console.error("Fehler beim Laden der Requests:", e);
+        console.error(
+          "Fehler beim Laden der Requests:",
+          e
+        );
       }
     };
 
     loadRequests();
 
-    window.addEventListener('request-sent', loadRequests);
-    return () => window.removeEventListener('request-sent', loadRequests);
+    window.addEventListener(
+      'request-sent',
+      loadRequests
+    );
+
+    window.addEventListener(
+      'route-change',
+      loadRequests
+    );
+
+    return () => {
+      window.removeEventListener(
+        'request-sent',
+        loadRequests
+      );
+
+      window.removeEventListener(
+        'route-change',
+        loadRequests
+      );
+    };
   }, []);
 
 

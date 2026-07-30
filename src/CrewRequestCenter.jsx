@@ -57,24 +57,7 @@ useEffect(() => {
         dbRequests
       );
 
-      // TEMP-FALLBACK:
-      // bleibt drin, bis alle alten lokalen Requests weg sind
-      const localRequests = JSON.parse(
-        localStorage.getItem('gigsda_crew_requests') || '[]'
-      );
-
-      const mergedRequests = [
-        ...dbRequests,
-        ...localRequests.filter(localReq =>
-          localReq &&
-          !dbRequests.some(
-            dbReq =>
-              dbReq.requestId === localReq.requestId
-          )
-        )
-      ];
-
-      const myRequests = mergedRequests.filter(req => {
+      const myRequests = dbRequests.filter(req => {
         if (!req) return false;
 
         const reqName =
@@ -99,6 +82,7 @@ useEffect(() => {
       });
 
       setRequests(myRequests);
+
     } catch (e) {
       console.error(
         "Fehler beim Laden der Crew-Anfragen:",
@@ -140,33 +124,9 @@ const handleResponse = async (requestId, newStatus) => {
       result
     );
 
-    // TEMP-BRÜCKE:
-    // bleibt noch drin, bis alle alten Request-Leser entfernt sind
-    const savedRequests = JSON.parse(
-      localStorage.getItem('gigsda_crew_requests') || '[]'
-    );
-
-    const reqIndex = savedRequests.findIndex(
-      r => r && r.requestId === requestId
-    );
-
     const targetReq =
-      reqIndex > -1
-        ? {
-            ...savedRequests[reqIndex],
-            status: newStatus,
-            updatedAt
-          }
-        : requests.find(r => r.requestId === requestId);
-
-    if (reqIndex > -1) {
-      savedRequests[reqIndex] = targetReq;
-
-      localStorage.setItem(
-        'gigsda_crew_requests',
-        JSON.stringify(savedRequests)
-      );
-    }
+      requests.find(r => r.requestId === requestId) ||
+      result?.request;
 
     if (targetReq) {
       const savedEvents = eventService.getEvents();
@@ -267,28 +227,6 @@ const handleCounterOfferSubmit = async (reqId) => {
     console.log(
       'CREWREQUESTCENTER COUNTER DB ✅',
       result
-    );
-
-    // TEMP-BRÜCKE:
-    // bleibt noch drin, bis GlobalNavigation Badge / letzte Altstellen migriert sind
-    const allRequests = JSON.parse(
-      localStorage.getItem('gigsda_crew_requests') || '[]'
-    );
-
-    const updatedRequests = allRequests.map(r =>
-      r.requestId === reqId
-        ? {
-            ...r,
-            status: 'counter_offer',
-            note,
-            updatedAt
-          }
-        : r
-    );
-
-    localStorage.setItem(
-      'gigsda_crew_requests',
-      JSON.stringify(updatedRequests)
     );
 
     setRequests(prev =>

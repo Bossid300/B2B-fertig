@@ -243,20 +243,6 @@ const submitB2BRequest = async (project) => {
       saveResult
     );
 
-    // TEMP-BRÜCKE:
-    // bleibt drin, bis alle alten Request-Stellen final entfernt sind
-    const allRequests = JSON.parse(
-      localStorage.getItem('gigsda_crew_requests') || '[]'
-    );
-
-    allRequests.push(newRequest);
-
-    localStorage.setItem(
-      'gigsda_crew_requests',
-      JSON.stringify(allRequests)
-    );
-
-    // Event-Crew pending synchronisieren, Events bleiben aktuell noch localStorage
     const savedEvents = eventService.getEvents();
 
     const eventIndex = savedEvents.findIndex(ev =>

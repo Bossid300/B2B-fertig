@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { ShieldCheck, FileText, CheckCircle2, ArrowRight, Download } from 'lucide-react';
 import FahrplanMetrics from './FahrplanMetrics';
 import EventHeaderBox from "./components/EventHeaderBox";
+import {
+  getCrewRequests,
+  saveCrewRequest
+} from './services/apiService';
 
 export default function ContractCenter({ onBack, progress, setProgress, onNavigateToStep, onContractSigned, activeEvent }) {
 
@@ -111,31 +115,23 @@ export default function ContractCenter({ onBack, progress, setProgress, onNaviga
 
 
   // 📥 Deal senden Funktion
-const handleSendDeal = () => {
+const handleSendDeal = async () => {
 
   if (!activeEvent) return;
-
   const events = JSON.parse(
     localStorage.getItem("gigsda_events") || "[]"
   );
-
-  const requests = JSON.parse(
-    localStorage.getItem("gigsda_crew_requests") || "[]"
-  );
-
+  const requests =
+    await getCrewRequests();
   const profiles = JSON.parse(
     localStorage.getItem("gigsda_profiles") || "[]"
   );
-
   const currentUserName =
     localStorage.getItem("gigsda_user_name");
-
   const updatedEvents = events.map(event => {
-
     if (event.id !== activeEvent.id) {
       return event;
     }
-
     return {
       ...event,
       dealSent: true
@@ -144,54 +140,53 @@ const handleSendDeal = () => {
   });
 
   const newDealRequests = dealPartners.map(member => {
-
     const alreadyExists = requests.some(
       r =>
         r.requestType === "deal" &&
         r.eventName === activeEvent.title &&
         r.requestedProfileId === member.id
     );
-
     if (alreadyExists) return null;
-
     return {
       requestId: `DEAL-${Date.now()}-${member.id}`,
       requestType: "deal",
-      
+      source: "contract_center",
+
       eventId: activeEvent.id,
       eventName: activeEvent.title,
-      date: activeEvent.date,
-
-      requesterName: currentUserName,
+      date: activeEvent.date || "Termin folgt",
 
       requestedProfileId: member.id,
       requestedProfileName: member.name,
 
+      requesterName: currentUserName,
       status: "pending",
 
-      note: "Deal zur Bestätigung erhalten."
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+
+      note: "Deal-/Vertragsfreigabe über ContractCenter."
     };
-  }).filter(Boolean);
+    }).filter(Boolean);
 
-  localStorage.setItem(
-    "gigsda_events",
-    JSON.stringify(updatedEvents)
-  );
+    localStorage.setItem(
+      "gigsda_events",
+      JSON.stringify(updatedEvents)
+    );
+    for (const dealRequest of newDealRequests) {
+      const saveResult =
+        await saveCrewRequest(dealRequest);
 
-  localStorage.setItem(
-    "gigsda_crew_requests",
-    JSON.stringify([
-      ...requests,
-      ...newDealRequests
-    ])
-  );
-
-  setDealSent(true);
-
-  window.dispatchEvent(
-    new CustomEvent("request-sent")
-  );
-};
+      console.log(
+        'CONTRACT DEAL REQUEST SAVE DB ✅',
+        saveResult
+      );
+    }
+    setDealSent(true);
+    window.dispatchEvent(
+      new CustomEvent("request-sent")
+    );
+  };
 
 
 

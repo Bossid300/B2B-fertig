@@ -3,7 +3,8 @@ import { eventService } from './services/eventService';
 import {
   getProfilesDb,
   getCrewRequests,
-  updateCrewRequest
+  updateCrewRequest,
+  saveCrewRequest
 } from './services/apiService';
 
 
@@ -26,31 +27,9 @@ const handleUpdateStatus = async (requestId, newStatus) => {
       result
     );
 
-    // TEMP-BRÜCKE:
-    // bleibt noch drin, solange CrewRequestCenter / Badge / alte Stellen
-    // noch gigsda_crew_requests lesen
-    const requests = JSON.parse(
-      localStorage.getItem('gigsda_crew_requests') || '[]'
-    );
-
     const request =
-      requests.find(r => r.requestId === requestId) ||
-      incomingRequests.find(r => r.requestId === requestId);
-
-    const updatedRequests = requests.map(r =>
-      r.requestId === requestId
-        ? {
-            ...r,
-            status: newStatus,
-            updatedAt
-          }
-        : r
-    );
-
-    localStorage.setItem(
-      'gigsda_crew_requests',
-      JSON.stringify(updatedRequests)
-    );
+      incomingRequests.find(r => r.requestId === requestId) ||
+      result?.request;
 
     if (request) {
       const events = eventService.getEvents();
@@ -170,38 +149,22 @@ useEffect(() => {
       const dbRequests =
         await getCrewRequests();
 
+      const currentUserId =
+        currentProfileData?.id ||
+        localStorage.getItem('gigsda_profile_id');
+
+      const filtered = dbRequests.filter(r =>
+        r &&
+        r.requestedProfileId === currentUserId
+      );
+
       console.log(
         'INCOMING REQUESTS DB ✅',
         dbRequests
       );
 
-      // TEMP-FALLBACK:
-      // bleibt noch drin, bis wirklich alle alten Requests aus localStorage weg sind
-      const localRequests = JSON.parse(
-        localStorage.getItem('gigsda_crew_requests') || '[]'
-      );
-
-      const mergedRequests = [
-        ...dbRequests,
-        ...localRequests.filter(localReq =>
-          localReq &&
-          !dbRequests.some(
-            dbReq =>
-              dbReq.requestId === localReq.requestId
-          )
-        )
-      ];
-
-      const currentUserId =
-        currentProfileData?.id ||
-        localStorage.getItem('gigsda_profile_id');
-
-      const filtered = mergedRequests.filter(r =>
-        r &&
-        r.requestedProfileId === currentUserId
-      );
-
       setIncomingRequests(filtered);
+
     } catch (e) {
       console.error(
         'Fehler beim Laden der Incoming Requests:',
@@ -260,21 +223,19 @@ useEffect(() => {
     );
   };
 
-  const handleCounterOffer = (
-    req,
-    counterText
-  ) => {
-    const requests = JSON.parse(
-      localStorage.getItem(
-        'gigsda_crew_requests'
-      ) || '[]'
-    );
 
+const handleCounterOffer = async (
+  req,
+  counterText
+) => {
+  try {
     const requesterProfile = allProfiles.find(
       p =>
         (p.name || '').toLowerCase() ===
         (req.requesterName || '').toLowerCase()
     );
+
+    const now = Date.now();
 
     const newCounterRequest = {
       requestId:
@@ -282,31 +243,57 @@ useEffect(() => {
 
       requestType: 'counter',
 
-      eventName: req.eventName,
-      date: req.date,
+      eventId:
+        req.eventId || '',
+
+      eventName:
+        req.eventName,
+
+      date:
+        req.date,
+
+      requesterProfileId:
+        req.requestedProfileId,
+
+      requesterProfileName:
+        req.requestedProfileName,
 
       requesterName:
         req.requestedProfileName,
 
       requestedProfileId:
-        requesterProfile?.id,
+        requesterProfile?.id ||
+        req.requesterProfileId ||
+        '',
 
-      status: 'pending',
+      requestedProfileName:
+        req.requesterName,
 
-      note: counterText
+      status:
+        'pending',
+
+      source:
+        'counter_offer',
+
+      createdAt:
+        now,
+
+      updatedAt:
+        now,
+
+      note:
+        counterText
     };
 
-    const updatedRequests = [
-      ...requests,
-      newCounterRequest
-    ];
+    const saveResult =
+      await saveCrewRequest(newCounterRequest);
 
-    localStorage.setItem(
-      'gigsda_crew_requests',
-      JSON.stringify(updatedRequests)
+    console.log(
+      'INCOMING COUNTER REQUEST SAVE DB ✅',
+      saveResult
     );
 
-    handleUpdateStatus(
+    await handleUpdateStatus(
       req.requestId,
       'counter_offer'
     );
@@ -314,21 +301,14 @@ useEffect(() => {
     window.dispatchEvent(
       new CustomEvent('request-sent')
     );
-  };
 
-
-
-
-
-
-
-
-
-  const openRequests = incomingRequests.filter(
-    req =>
-      req.status === 'pending' ||
-      req.status === 'counter_offer'
-  );
+  } catch (e) {
+    console.error(
+      'Fehler beim Senden des Gegenangebots:',
+      e
+    );
+  }
+};
 
 
 

@@ -45,38 +45,71 @@ import { eventService } from './services/eventService';
 import { progressService } from './services/progressService';
 
 import CommunityAlertModal from './components/modals/CommunityAlertModal';
-import { createProfile } from './services/apiService';
+import {
+  createProfile,
+  getCrewRequests
+} from './services/apiService';
 
 export default function App() {
 
 
     // 📡 REAKTIVER CREW-ALARM EMPFÄNGER
   const [hasPendingRequests, setHasPendingRequests] = useState(false);
-
-  const checkPendingRequests = () => {
+  const checkPendingRequests = async () => {
     try {
-      const savedReqs = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
-      
-      const currentUserName = (localStorage.getItem('gigsda_user_name') || '').trim().toLowerCase();
-      
-      const hasPending = savedReqs.some(r => {
+      const dbRequests =
+        await getCrewRequests();
+
+      const currentUserName =
+        (localStorage.getItem('gigsda_user_name') || '')
+          .trim()
+          .toLowerCase();
+
+      const currentProfileId =
+        localStorage.getItem('gigsda_profile_id') || '';
+
+      const hasPending = dbRequests.some(r => {
         if (!r) return false;
-        
-        const reqName = (r.requestedProfile || '').trim().toLowerCase();
-        const senderName = (r.requesterName || '').trim().toLowerCase();
-        const reqStatus = (r.status || '').trim().toLowerCase();
-        
-        // 🟢 WEG 1: Ich bin der angefragte Partner (Empfänger) und die Anfrage ist neu
-        const isIncomingPending = (reqName === currentUserName && reqStatus === 'pending');
-        
-        // 🟡 WEG 2: Ich bin der Absender (Veranstalter) und der Partner hat mir ein Gegenangebot geschickt
-        const isOutgoingCounter = (senderName === currentUserName && reqStatus === 'counter_offer');
-        
+
+        const requestedName =
+          (r.requestedProfile || r.requestedProfileName || '')
+            .trim()
+            .toLowerCase();
+
+        const requesterName =
+          (r.requesterName || r.requesterProfileName || '')
+            .trim()
+            .toLowerCase();
+
+        const reqStatus =
+          (r.status || '')
+            .trim()
+            .toLowerCase();
+
+        const isIncomingPending =
+          (
+            r.requestedProfileId === currentProfileId ||
+            requestedName === currentUserName
+          ) &&
+          reqStatus === 'pending';
+
+        const isOutgoingCounter =
+          (
+            r.requesterProfileId === currentProfileId ||
+            requesterName === currentUserName
+          ) &&
+          reqStatus === 'counter_offer';
+
         return isIncomingPending || isOutgoingCounter;
       });
-      
+
       setHasPendingRequests(hasPending);
     } catch (e) {
+      console.error(
+        'APP REQUEST ALARM DB FEHLER ❌',
+        e
+      );
+
       setHasPendingRequests(false);
     }
   };

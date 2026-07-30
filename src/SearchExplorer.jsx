@@ -62,81 +62,59 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
   // ⚡ AUTOMATISCHE DIREKT-PROJEKT-BUCHUNG BEIM ABSENDEN (PERFEKT SYNCED!)
   const handleSendRequestToProject = async (eventId) => {
     try {
-      const allRequests = JSON.parse(localStorage.getItem('gigsda_crew_requests') || '[]');
       const savedEvents = eventService.getEvents();
-      
-      const targetEvent = savedEvents.find(ev => ev && (ev.id === eventId || ev.eventId === eventId || ev._id === eventId));
+            const targetEvent = savedEvents.find(ev => ev && (ev.id === eventId || ev.eventId === eventId || ev._id === eventId));
       if (!targetEvent) return;
-
       const eventTitle = targetEvent.title || targetEvent.name || "B2B Event";
-
       // 📡 LIVE-SPEICHER-KOPPLUNG: Zwingt den Browser, sofort reaktiv auf dieses aktive Projekt umzuschalten!
       localStorage.setItem('gigsda_active_event', JSON.stringify({
         id: eventId,
         title: eventTitle
       }));
-
-      // 1. Schreibt die Anfrage sauber in gigsda_crew_requests für das goldene Fenster
       const now = Date.now();
-
       const requesterProfileId =
         currentProfileData?.id ||
         localStorage.getItem('gigsda_profile_id') ||
         '';
-
       const requesterProfileName =
         currentProfileData?.name ||
         localStorage.getItem('gigsda_user_name') ||
         "Veranstalter";
-
       const newRequest = {
         requestId:
           "REQ-" + Math.floor(Math.random() * 9000 + 1000),
-
         eventId: eventId,
         eventName: eventTitle,
         date:
           targetEvent.date ||
           "Termin auf Anfrage",
-
         requestedProfileId:
           activeRequestUser.id,
-
         requestedProfileName:
           activeRequestUser.name,
-
         requestedProfileRole:
           activeRequestUser.role ||
           activeRequestUser.type ||
           activeRequestUser.gewerk ||
           "Crew",
-
         requestedProfileCity:
           activeRequestUser.city ||
           activeRequestUser.ort ||
           "",
-
         requesterProfileId:
           requesterProfileId,
-
         requesterProfileName:
           requesterProfileName,
-
         requesterName:
           requesterProfileName,
-
         status: "pending",
-
         source: "search_explorer",
-
         createdAt: now,
         updatedAt: now,
-
         note:
           requestText ||
           "Standard-B2B Konditionen laut Profil."
       };
-
 
       const saveResult =
         await saveCrewRequest(newRequest);
@@ -146,20 +124,6 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
         saveResult
       );
 
-      // TEMP-BRÜCKE:
-      // bleibt noch drin, bis IncomingMessages und CrewRequestCenter
-      // auf getCrewRequests() umgestellt sind
-      allRequests.push(newRequest);
-
-      localStorage.setItem(
-        'gigsda_crew_requests',
-        JSON.stringify(allRequests)
-      );
-
-      
-      // 2. Schleust den Partner zeitgleich direkt als "pending" in das Event-Crew-Array ein!
-      // 2. Schleust den Partner zeitgleich direkt als "pending" in das Event-Crew-Array ein!
-      // 📡 UNZERSTÖRBARE DOPPEL-BRÜCKE: Findet das Projekt oder legt es vollautomatisch neu an!
       let eventIndex = savedEvents.findIndex(ev => ev && (
         (eventId && (ev.id === eventId || ev.eventId === eventId || ev._id === eventId)) ||
         (eventTitle && (ev.title === eventTitle || ev.name === eventTitle))
