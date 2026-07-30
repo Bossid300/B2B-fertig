@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ManagerOverview from './ManagerOverview';
 import CreateEventForm from './CreateEventForm';
 import CommunityChat from './CommunityChat';
@@ -11,26 +11,91 @@ import {
   saveEvent
 } from './services/apiService';
 
-
 export default function ProjectDashboard({ onNavigateToStep, progress, onSelectEvent, events: propsEvents, onCreateEvent, ticketName }) {
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
-    const [events, setEvents] = useState(() => {
+
+  const skipNextEventSave = useRef(false);
+  const hasMountedEvents = useRef(false);
+
+  const [events, setEvents] = useState(() => {
     return eventService.getEvents();
   });
 
   useEffect(() => {
+    const syncEvents = async () => {
+      try {
+        const dbEvents =
+          await eventService.syncFromDb();
+
+        console.log(
+          'PROJECTDASHBOARD EVENTS SYNC DB ✅',
+          dbEvents
+        );
+
+        skipNextEventSave.current = true;
+        setEvents(dbEvents);
+      } catch (e) {
+        console.error(
+          'PROJECTDASHBOARD EVENTS SYNC DB FEHLER ❌',
+          e
+        );
+      }
+    };
+
+    syncEvents();
+  }, []);
+
+
+  useEffect(() => {
+    if (!hasMountedEvents.current) {
+      hasMountedEvents.current = true;
+      return;
+    }
+
+    if (skipNextEventSave.current) {
+      skipNextEventSave.current = false;
+      return;
+    }
+
     eventService.saveEvents(events);
   }, [events]);
 
-  // 🗑️ LÖSCHT DAS EVENT NUN AUCH DIREKT VON DER FESTPLATTE
-  const handleDelete = (eventId, e) => {
-    e.stopPropagation();
-    if (window.confirm("Möchtest du dieses Event wirklich unwiderruflich aus deinem Dashboard löschen? 🗑️")) {
-      const remaining = events.filter(evt => evt.id !== eventId);
-      setEvents(remaining);
-      eventService.saveEvents(remaining);
-    }
-  };
+
+const handleDelete = (eventId, e) => {
+  e.stopPropagation();
+
+  if (
+    window.confirm(
+      "Möchtest du dieses Event aus deinem aktiven Dashboard archivieren? Es bleibt als Referenz erhalten. 🗂️"
+    )
+  ) {
+    const now = Date.now();
+
+    const updated = events.map(evt => {
+      if (evt.id !== eventId) return evt;
+
+      return {
+        ...evt,
+        archived: true,
+        archivedAt: now,
+        archivedBy:
+          currentProfileData?.id ||
+          localStorage.getItem('gigsda_profile_id') ||
+          '',
+        changed: true,
+        changedAt: now
+      };
+    });
+
+    setEvents(updated);
+    eventService.saveEvents(updated);
+
+    window.dispatchEvent(
+      new CustomEvent('route-change')
+    );
+  }
+};
+
 
   const [requests, setRequests] = useState([]);
   const [currentProfileData, setCurrentProfileData] = useState(null);
@@ -114,21 +179,68 @@ useEffect(() => {
 }, [currentUserName]);
 
 
+const formatEventDateDe = (isoDate) => {
+  if (!isoDate) return '';
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) {
+    return isoDate;
+  }
+
+  const [year, month, day] = isoDate.split('-');
+
+  const date = new Date(
+    Number(year),
+    Number(month) - 1,
+    Number(day)
+  );
+
+  const weekdays = [
+    'So.',
+    'Mo.',
+    'Di.',
+    'Mi.',
+    'Do.',
+    'Fr.',
+    'Sa.'
+  ];
+
+  return `${weekdays[date.getDay()]} ${day}.${month}.${year}`;
+};
 
 
 
 const currentUserId =
   currentProfileData?.id;
 
+const getEventSortValue = (ev) => {
+  const rawDate =
+    ev.event_date ||
+    ev.date ||
+    '';
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+    return new Date(rawDate).getTime();
+  }
+
+  return Number.MAX_SAFE_INTEGER;
+};
+
+const visibleEvents = events
+  .filter(ev =>
+    ev &&
+    ev.archived !== true &&
+    (
+      !currentUserId ||
+      !ev.ownerId ||
+      ev.ownerId === currentUserId ||
+      ev.crewIds?.includes(currentUserId)
+    )
+  )
+  .sort((a, b) =>
+    getEventSortValue(a) - getEventSortValue(b)
+  );
 
 
-
-const visibleEvents = events.filter(ev =>
-  !currentUserId ||
-  !ev.ownerId ||
-  ev.ownerId === currentUserId ||
-  ev.crewIds?.includes(currentUserId)
-);
 
 
 
@@ -323,7 +435,7 @@ const eventOpenRequests = requests.filter(r =>
                       </p>
 
                       <p className="text-[10px] text-slate-400">
-                        📍 Ort: {evt.venue} ({evt.displayDate || evt.date})
+                        📍 Ort: {evt.venue} ({formatEventDateDe(evt.date || evt.event_date)})
                       </p>
                     </div>
                   </div>
