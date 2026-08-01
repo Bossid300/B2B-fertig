@@ -27,6 +27,13 @@ import ProfileCard from './components/cards/ProfileCard';
 
 import { getProfilesDb } from './services/apiService';
 
+import { subscriptionService }
+from '../moduls/subscriptions/subscriptionService';
+
+import { FEATURES }
+from '../moduls/subscriptions/featureGates';
+
+
 export default function UserProfile({ onBack, ticketName, isOwner }) {
   const [profileData, setProfileData] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -161,11 +168,31 @@ export default function UserProfile({ onBack, ticketName, isOwner }) {
       <ProfileHilfeBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileLokalBox currentProfileName={targetUser} isOwner={isOwner} />
       
-      <ProfilePassBox 
-        currentProfileName={targetUser}
-        profileId={profileData?.id || 'GIGS-XXXX'}
-        onBackToDashboard={onBack}
-      />
+      {
+        subscriptionService.hasFeature(
+          FEATURES.PREMIUM_PORTFOLIO
+        ) ? (
+
+          <ProfilePassBox
+            currentProfileName={targetUser}
+            profileId={profileData?.id || 'GIGS-XXXX'}
+            onBackToDashboard={onBack}
+          />
+
+        ) : (
+
+          <div className="bg-slate-900/40 border border-cyan-500/20 rounded-2xl p-6">
+            <h3 className="text-cyan-400 font-bold uppercase">
+              🔒 GIGSDA PASS & PREMIUM PORTFOLIO
+            </h3>
+
+            <p className="text-slate-400 mt-3 text-sm">
+              Premium Portfolio, QR-Code, PDF-Bewerbungsmappe
+              und GIGSDA Pass sind Teil von GIGSDA PRO.
+            </p>
+          </div>
+        )
+      }
 
 
     </div>

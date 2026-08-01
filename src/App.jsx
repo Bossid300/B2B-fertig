@@ -801,8 +801,8 @@ useEffect(() => {
               onNavigateToStep={setView}
               setFavorites={(artistView) => {
 
-                setActiveGuestArtist(name);
-                localStorage.setItem('gigsda_active_guest_artist', name);
+                setActiveGuestArtist(artistView);
+                localStorage.setItem('gigsda_active_guest_artist', artistView);
                 setView('profile');
               }}
             />;

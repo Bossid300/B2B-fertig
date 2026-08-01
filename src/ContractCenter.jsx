@@ -7,13 +7,33 @@ import {
   saveCrewRequest
 } from './services/apiService';
 import { eventService } from './services/eventService';
+import { getProfilesDb } from './services/apiService';
 
 export default function ContractCenter({ onBack, progress, setProgress, onNavigateToStep, onContractSigned, activeEvent }) {
 
 
-  const profiles = JSON.parse(
-    localStorage.getItem("gigsda_profiles") || "[]"
-  );
+const [profiles, setProfiles] = useState([]);
+
+useEffect(() => {
+  getProfilesDb()
+    .then(data => {
+      const normalized = data.map(profile => {
+        try {
+          return {
+            ...profile,
+            ...(profile.profile_json
+              ? JSON.parse(profile.profile_json)
+              : {})
+          };
+        } catch {
+          return profile;
+        }
+      });
+
+      setProfiles(normalized);
+    })
+    .catch(console.error);
+}, []);
 
   const ownerName =
     profiles.find(
@@ -123,9 +143,7 @@ const handleSendDeal = async () => {
     eventService.getEvents();
   const requests =
     await getCrewRequests();
-  const profiles = JSON.parse(
-    localStorage.getItem("gigsda_profiles") || "[]"
-  );
+
   const currentUserName =
     localStorage.getItem("gigsda_user_name");
   const updatedEvents = events.map(event => {
@@ -537,6 +555,22 @@ const handleSendDeal = async () => {
                   </div>
 
                 )}
+
+
+<span
+  className={
+    acceptedDeals[member.id]
+      ? "text-emerald-400"
+      : dealSent
+      ? "text-amber-400"
+      : "text-red-400"
+  }
+>
+  ●
+</span>
+
+
+{/* 
                 <button
                   type="button"
                   onClick={async () => {
@@ -583,6 +617,8 @@ const handleSendDeal = async () => {
                 >
                   ●
                 </button>
+ */}
+
 
               </div>
             </div>

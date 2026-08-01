@@ -3,6 +3,7 @@ import EventCard from './components/cards/EventCard';
 import FahrplanMetrics from './FahrplanMetrics';
 import EventHeaderBox from "./components/EventHeaderBox";
 import { eventService } from './services/eventService';
+import { getProfilesDb } from './services/apiService';
 
 export default function EventPromotion({
   onBack,
@@ -11,6 +12,29 @@ export default function EventPromotion({
   onNavigateToStep, 
   activeEvent
 }) {
+
+const [profiles, setProfiles] = useState([]);
+useEffect(() => {
+  getProfilesDb()
+    .then(data => {
+      const normalized = data.map(profile => {
+        try {
+          return {
+            ...profile,
+            ...(profile.profile_json
+              ? JSON.parse(profile.profile_json)
+              : {})
+          };
+        } catch {
+          return profile;
+        }
+      });
+
+      setProfiles(normalized);
+    })
+    .catch(console.error);
+}, []);
+
 
 const [promoData, setPromoData] = useState(
   activeEvent?.promotionData || {
@@ -128,9 +152,7 @@ const currentUserId =
 const isOwner =
   activeEvent?.ownerId === currentUserId;
 
-const profiles = JSON.parse(
-  localStorage.getItem('gigsda_profiles') || '[]'
-);
+
 const ownerLead =
   profiles.find(
     p => p.id === activeEvent?.ownerId

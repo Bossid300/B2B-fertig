@@ -8,6 +8,7 @@ import ProfileGalleryBox from "./components/ProfileGalleryBox";
 import ProfileHilfeBox from './components/ProfileHilfeBox';
 
 import { eventService } from './services/eventService';
+import { getProfilesDb} from './services/apiService';
 
 export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
   
@@ -62,29 +63,40 @@ const events =
     }
   }, [currentEvent]);
 
-  useEffect(() => {
-    try {
+useEffect(() => {
+const loadData = async () => {
+try {
 const events =
   eventService.getEvents();
 
-      const allProfiles = JSON.parse(
-        localStorage.getItem("gigsda_profiles") || "[]"
-      );
+const profileData =
+  await getProfilesDb();
 
-      setProfiles(allProfiles);
+const allProfiles =
+  profileData.map(profile => {
+    try {
+      return {
+        ...profile,
+        ...(profile.profile_json
+          ? JSON.parse(profile.profile_json)
+          : {})
+      };
+    } catch {
+      return profile;
+    }
+  });
 
+setProfiles(allProfiles);
       let targetId =
         activeEvent?.id ||
         activeEvent?.eventId ||
         activeEvent?._id;
-
       if (!targetId) {
         const activeStored = JSON.parse(
           localStorage.getItem("gigsda_active_event") || "null"
         );
         targetId = activeStored?.id;
       }
-
       const event = events.find(
         (ev) =>
           ev &&
@@ -94,22 +106,17 @@ const events =
             ev._id === targetId
           )
       );
-
       if (event) {
         setCurrentEvent(event);
-        
-        const preselectedRider =
+                const preselectedRider =
           localStorage.getItem(
             "gigsda_selected_rider"
           );
-
         if (preselectedRider) {
-
           const riderProfile =
             allProfiles.find(
               p => p.id === preselectedRider
             );
-
           if (riderProfile) {
             setSelectedMember(riderProfile);
 
@@ -117,15 +124,17 @@ const events =
             "gigsda_selected_rider"
             );
           }
-
         }
-
       }
-
     } catch (err) {
-      console.error("RiderZentrale Load Error:", err);
+      console.error(
+        "RiderZentrale Load Error:",
+        err
+      );
     }
-  }, [activeEvent]);
+  };
+  loadData();
+}, [activeEvent]);
 
   const crewMembers = useMemo(() => {
     if (!currentEvent?.crewIds?.length) return [];
@@ -146,7 +155,7 @@ const events =
       ? Math.round((confirmedCount / crewMembers.length) * 100)
       : 0;
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (!selectedMember || !currentEvent) return;
 
     try {
@@ -168,13 +177,20 @@ const events =
           },
         };
       });
-      eventService.saveEvents(updatedEvents);
+eventService.saveEvents(updatedEvents);
 
-      const updatedEvent = updatedEvents.find(
-        (e) => e.id === currentEvent?.id
-      );
-      setCurrentEvent(updatedEvent);
-      eventService.saveEvents(updatedEvents);
+const updatedEvent = updatedEvents.find(
+  (e) => e.id === currentEvent?.id
+);
+
+setCurrentEvent(updatedEvent);
+
+if (updatedEvent) {
+  await eventService.saveEvent(updatedEvent);
+}
+
+eventService.saveEvents(updatedEvents);
+
       window.dispatchEvent(
         new CustomEvent("active-event-updated")
       );
@@ -441,6 +457,7 @@ const events =
               setSelectedMember(member)
             }
               onProfileClick={() => {
+
                 if (typeof setFavorites === "function") {
                   setFavorites(member.name);
                 }

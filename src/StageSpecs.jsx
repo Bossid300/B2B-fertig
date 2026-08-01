@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react';
 import FahrplanMetrics from './FahrplanMetrics';
 import EventHeaderBox from "./components/EventHeaderBox";
+import { getProfilesDb } from './services/apiService';
 
 export default function StageSpecs({ 
   onBack, 
@@ -13,7 +14,27 @@ export default function StageSpecs({
 }) {
 
 
-  const profiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
+  const [profiles, setProfiles] = useState([]);
+  useEffect(() => {
+    getProfilesDb()
+      .then(data => {
+        const normalized = data.map(profile => {
+          try {
+            return {
+              ...profile,
+              ...(profile.profile_json
+                ? JSON.parse(profile.profile_json)
+                : {})
+            };
+          } catch {
+            return profile;
+          }
+        });
+
+        setProfiles(normalized);
+      })
+      .catch(console.error);
+  }, []);
 
 
   const ownerName = profiles.find(
@@ -219,9 +240,6 @@ export default function StageSpecs({
 
         <div className="space-y-2">
             {sortedCrewIds.map((crewId) => {
-              const profiles = JSON.parse(
-                localStorage.getItem("gigsda_profiles") || "[]"
-              );
 
               const member = profiles.find(
                 p => p.id === crewId
@@ -267,14 +285,16 @@ export default function StageSpecs({
                 >
                   <div>
 
-                    <div className="text-[11px] text-white font-bold">
-                      {member?.name || crewId}
-                    </div>
+<div className="text-[11px] text-white font-bold">
+  {member?.name || crewId}
+</div>
 
-                    <div className="text-[9px] text-slate-500">
-                      {(roleIcon[member?.role] || "⚫")}{" "}
-                      {member?.role || "Unbekannt"}
-                    </div>
+<div className="text-[9px] text-slate-500">
+  {(roleIcon[member?.role] || "⚫")}{" "}
+  {member?.role || "Unbekannt"}
+  {" • "}
+  {crewId}
+</div>
 
                   </div>
 

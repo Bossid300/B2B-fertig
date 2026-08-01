@@ -11,6 +11,10 @@ import {
   saveEvent
 } from './services/apiService';
 
+import { subscriptionService }
+from '../moduls/subscriptions/subscriptionService';
+
+
 export default function ProjectDashboard({ onNavigateToStep, progress, onSelectEvent, events: propsEvents, onCreateEvent, ticketName }) {
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
 
@@ -325,9 +329,39 @@ const visibleEvents = events
                 <span className="text-[10px] text-cyan-400 font-bold uppercase tracking-wider">// Backstage-Ebene</span>
                 <h2 className="text-xl font-bold text-white mt-0.5">Übersicht deiner Events</h2>
               </div>
-              <button type="button" onClick={() => setIsCreatingEvent(true)} className="bg-emerald-400 text-slate-950 font-black px-4 py-2 rounded-xl text-[11px] uppercase tracking-wider shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer">
-                ✨ Neues Event erstellen
-              </button>
+
+                <button 
+                type="button" 
+                onClick={() => setIsCreatingEvent(true)} 
+                className=
+                "bg-emerald-400 text-slate-950 font-black px-4 py-2 rounded-xl text-[11px] uppercase tracking-wider shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                >
+                  ✨ ALT: Event erstellen
+                </button>
+
+              {
+              subscriptionService.canCreateEvent() ? (
+                <button 
+                type="button" 
+                onClick={() => setIsCreatingEvent(true)} 
+                className=
+                "bg-emerald-400 text-slate-950 font-black px-4 py-2 rounded-xl text-[11px] uppercase tracking-wider shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                >
+                  ✅ Event erstellen (Frei)
+                </button>
+                ) : (
+                <button 
+                type="button" 
+                onClick={() => {
+                    alert('GIGSDA PRO erforderlich');
+                  }} 
+                className=
+                "bg-emerald-400 text-slate-950 font-black px-4 py-2 rounded-xl text-[11px] uppercase tracking-wider shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                >
+                  🔒 Event erstellen (PRO)
+                </button>
+                )
+              }
             </div>
           </div>
 

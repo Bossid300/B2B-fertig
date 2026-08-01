@@ -145,8 +145,8 @@ export default function TechnikerProfile({ onBack, ticketName, isOwner }) {
 
       <ProfileBioTabsBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileSkillBox currentProfileName={targetUser} isOwner={isOwner} />
-
-            <ArtistAudioBox currentProfileName={targetUser} isOwner={isOwner} />
+      <ProfileComplianceBox currentProfileName={targetUser} isOwner={isOwner} />
+      <ArtistAudioBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileGalleryBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileNetworkBox currentProfileName={targetUser} isOwner={isOwner} />
       <ProfileProjekteBox currentProfileName={targetUser} isOwner={isOwner} />

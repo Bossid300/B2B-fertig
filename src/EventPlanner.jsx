@@ -3,8 +3,33 @@ import { ArrowRight, Clock, MapPin, Truck, Radio, Calendar } from 'lucide-react'
 import FahrplanMetrics from './FahrplanMetrics';
 import EventHeaderBox from "./components/EventHeaderBox";
 import { eventService } from './services/eventService';
+import { getProfilesDb } from './services/apiService';
 
 export default function EventPlanner({ onBack, progress, setProgress, onNavigateToStep, onStepSuccess, activeEvent }) {
+
+const [profiles, setProfiles] = useState([]);
+useEffect(() => {
+  getProfilesDb()
+    .then(data => {
+      const normalized = data.map(profile => {
+        try {
+          return {
+            ...profile,
+            ...(profile.profile_json
+              ? JSON.parse(profile.profile_json)
+              : {})
+          };
+        } catch {
+          return profile;
+        }
+      });
+
+      setProfiles(normalized);
+    })
+    .catch(console.error);
+}, []);
+
+
 
 const [isPlannerLocked, setIsPlannerLocked] =
   useState(
@@ -133,11 +158,6 @@ const [productionNotes, setProductionNotes] = useState(
   activeEvent?.productionNotes || ""
 );
 
-
-
-const profiles = JSON.parse(
-  localStorage.getItem("gigsda_profiles") || "[]"
-);
 
 
 const ownerName =

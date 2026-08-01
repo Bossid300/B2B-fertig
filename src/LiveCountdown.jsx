@@ -3,12 +3,31 @@ import { Clock, Radio, Users, Ticket, Bell, AlertTriangle } from 'lucide-react';
 import FahrplanMetrics from './FahrplanMetrics';
 import EventHeaderBox from "./components/EventHeaderBox";
 import { eventService } from './services/eventService';
+import { getProfilesDb } from './services/apiService';
 
 export default function LiveCountdown({ onBack, progress, onNavigateToStep, setProgress, onTriggerGate, activeEvent }) {
 
-const profiles = JSON.parse(
-  localStorage.getItem("gigsda_profiles") || "[]"
-);
+const [profiles, setProfiles] = useState([]);
+useEffect(() => {
+  getProfilesDb()
+    .then(data => {
+      const normalized = data.map(profile => {
+        try {
+          return {
+            ...profile,
+            ...(profile.profile_json
+              ? JSON.parse(profile.profile_json)
+              : {})
+          };
+        } catch {
+          return profile;
+        }
+      });
+
+      setProfiles(normalized);
+    })
+    .catch(console.error);
+}, []);
 
 const currentUserName =
   localStorage.getItem("gigsda_user_name");
