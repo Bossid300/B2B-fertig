@@ -184,59 +184,59 @@ export default function PricingPage() {
 
 
 
-{/* DEV TOOLS */}
+      {/* DEV TOOLS */}
 
-<div className="mt-8 border border-cyan-500/20 rounded-2xl p-6">
+      <div className="mt-8 border border-cyan-500/20 rounded-2xl p-6">
 
-  <h3 className="text-cyan-400 font-black uppercase tracking-widest mb-4 font-mono">
-    DEV PLAN SWITCHER
-  </h3>
+        <h3 className="text-cyan-400 font-black uppercase tracking-widest mb-4 font-mono">
+          DEV PLAN SWITCHER
+        </h3>
 
-  <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-3">
 
-    <button
-      onClick={() => {
-        localStorage.setItem('gigsda_plan', 'COMMUNITY');
-        window.location.reload();
-      }}
-      className="px-4 py-2 rounded-xl border border-cyan-500/30"
-    >
-      COMMUNITY
-    </button>
+          <button
+            onClick={() => {
+              localStorage.setItem('gigsda_plan', 'COMMUNITY');
+              window.location.reload();
+            }}
+            className="px-4 py-2 rounded-xl border border-cyan-500/30"
+          >
+            COMMUNITY
+          </button>
 
-    <button
-      onClick={() => {
-        localStorage.setItem('gigsda_plan', 'TRIAL');
-        window.location.reload();
-      }}
-      className="px-4 py-2 rounded-xl border border-pink-500/30"
-    >
-      TRIAL
-    </button>
+          <button
+            onClick={() => {
+              localStorage.setItem('gigsda_plan', 'TRIAL');
+              window.location.reload();
+            }}
+            className="px-4 py-2 rounded-xl border border-pink-500/30"
+          >
+            TRIAL
+          </button>
 
-    <button
-      onClick={() => {
-        localStorage.setItem('gigsda_plan', 'PRO');
-        window.location.reload();
-      }}
-      className="px-4 py-2 rounded-xl border border-pink-500/30"
-    >
-      PRO
-    </button>
+          <button
+            onClick={() => {
+              localStorage.setItem('gigsda_plan', 'PRO');
+              window.location.reload();
+            }}
+            className="px-4 py-2 rounded-xl border border-pink-500/30"
+          >
+            PRO
+          </button>
 
-    <button
-      onClick={() => {
-        localStorage.setItem('gigsda_plan', 'AGENCY');
-        window.location.reload();
-      }}
-      className="px-4 py-2 rounded-xl border border-yellow-500/30"
-    >
-      AGENCY
-    </button>
+          <button
+            onClick={() => {
+              localStorage.setItem('gigsda_plan', 'AGENCY');
+              window.location.reload();
+            }}
+            className="px-4 py-2 rounded-xl border border-yellow-500/30"
+          >
+            AGENCY
+          </button>
 
-  </div>
+        </div>
 
-</div>
+      </div>
 
 
 

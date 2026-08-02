@@ -9,7 +9,7 @@ export const PLAN_CONFIG = {
 
     canCreateEvents: false,
 
-    features: [
+    displayFeatures: [
       'Profil',
       'Community',
       'Favoriten',
@@ -58,6 +58,15 @@ export const PLAN_CONFIG = {
     canCreateEvents: true,
 
     features: [
+      FEATURES.PREMIUM_PORTFOLIO,
+      FEATURES.GIGSDA_PASS,
+      FEATURES.PROMOTION,
+      FEATURES.AGENCY_DASHBOARD,
+      FEATURES.DOCUMENTS,
+      FEATURES.TEAM_MANAGEMENT
+    ],
+
+    displayFeatures: [
       'Alles aus PRO',
       'Agency Dashboard',
       'Dokumente',
@@ -78,6 +87,12 @@ export const PLAN_CONFIG = {
     canCreateEvents: true,
 
     features: [
+      FEATURES.PREMIUM_PORTFOLIO,
+      FEATURES.GIGSDA_PASS,
+      FEATURES.PROMOTION
+    ],
+
+    displayFeatures: [
       'Event-Erstellung',
       'Event-Chat',
       'Crew-Management',
