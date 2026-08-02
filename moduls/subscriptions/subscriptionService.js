@@ -3,7 +3,9 @@ import { PLAN_CONFIG } from './subscriptionPlans';
 export const subscriptionService = {
 
   getPlan() {
-    return 'COMMUNITY';
+    return localStorage.getItem(
+      'gigsda_plan'
+    ) || 'PRO';
   },
 
   canCreateEvent() {

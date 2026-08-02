@@ -50,8 +50,10 @@ const [videoMuted, setVideoMuted] = useState(true);
         <div className="w-full md:w-7/12 text-left space-y-6 z-20">
           <div className="space-y-2">
             <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tight leading-tight select-none">
-              FINDE DEINEN VIBE.<br />
-              <span className="bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent">ERLEBE LIVE-MUSIK.</span>
+                FINDE DEINEN VIBE.<br />
+              <span className="bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent">
+                ERLEBE LIVE-MUSIK.
+              </span>
             </h1>
             <p className="text-sm md:text-base text-slate-300 font-medium tracking-wide">
               Die größte Gig-Datenbank für deine Region.
@@ -172,9 +174,7 @@ const [videoMuted, setVideoMuted] = useState(true);
               <div className="absolute bottom-3 left-4 text-[12px] font-mono text-cyan-400 tracking-widest uppercase">
                 // Live Concert Feed Active
               </div>
-
             </div>
-          <div className="absolute bottom-4 left-4 text-left font-mono text-[9px] text-cyan-400 font-bold uppercase tracking-widest animate-pulse">// LIVE CONCERT FEED CHANNEL active</div>
         </div>
 
       </div>
@@ -184,7 +184,9 @@ const [videoMuted, setVideoMuted] = useState(true);
         {initialGigs.map((gig) => (
           <div 
             key={gig.id}
-            className="p-[2px] bg-gradient-to-r from-cyan-500/80 to-pink-500/80 rounded-2xl shadow-lg hover:shadow-[0_0_20px_rgba(236,72,153,0.15)] transition-all duration-300 transform hover:scale-[1.01] flex flex-col"
+            className="
+            p-[2px] bg-gradient-to-r from-cyan-500/80 to-pink-500/80 rounded-2xl shadow-lg hover:shadow-[0_0_20px_rgba(236,72,153,0.15)] transition-all duration-300 transform hover:scale-[1.01] flex flex-col
+            "
           >
             <div className="bg-[#0b0f19] rounded-[14px] p-4 flex items-center gap-4 text-left h-full">
               {/* BAND-FOTO */}

@@ -112,6 +112,34 @@ export default function UserProfile({ onBack, ticketName, isOwner }) {
   }
 
 
+
+
+
+console.log(
+  'PLAN:',
+  subscriptionService.getPlan()
+);
+
+console.log(
+  'FEATURE:',
+  FEATURES.PREMIUM_PORTFOLIO
+);
+
+console.log(
+  'HAS PORTFOLIO:',
+  subscriptionService.hasFeature(
+    FEATURES.PREMIUM_PORTFOLIO
+  )
+);
+
+
+
+
+
+
+
+
+
   return (
     <div className="max-w-4xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl relative space-y-6">
 

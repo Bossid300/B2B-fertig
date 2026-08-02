@@ -34,9 +34,20 @@ export default function GuestNavigation({ setView, activeView }) {
           className={`${desktopBase} ${activeView === 'guestEvents' ? activeClass : inactiveClass}`}>
             🏃 Events-Radar
           </button>
-          <button onClick={() => handleNavClick('radar')} 
-          className={`${desktopBase} ${activeView === 'radar' ? activeClass : inactiveClass}`}>
+          <button 
+            onClick={() => handleNavClick('radar')} 
+            className={`${desktopBase} ${activeView === 'radar' ? activeClass : inactiveClass}`}>
             🗣 Search-Explorer
+          </button>
+          <button
+            onClick={() => handleNavClick('pricing')}
+            className={`${desktopBase} ${
+              activeView === 'pricing'
+                ? activeClass
+                : inactiveClass
+            }`}
+          >
+            💎 Preise
           </button>
         </div>
 
@@ -72,6 +83,16 @@ export default function GuestNavigation({ setView, activeView }) {
           </button>
           <button onClick={() => handleNavClick('radar')} className={`${mobileBase} ${activeView === 'radar' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
             🗣 Search-Explorer
+          </button>
+          <button
+            onClick={() => handleNavClick('pricing')}
+            className={`${mobileBase} ${
+              activeView === 'pricing'
+                ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold"
+                : "text-slate-400 border-transparent"
+            }`}
+          >
+            💎 Preise
           </button>
         </div>
       )}

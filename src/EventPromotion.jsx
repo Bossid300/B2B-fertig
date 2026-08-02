@@ -5,6 +5,13 @@ import EventHeaderBox from "./components/EventHeaderBox";
 import { eventService } from './services/eventService';
 import { getProfilesDb } from './services/apiService';
 
+import { subscriptionService }
+from '../moduls/subscriptions/subscriptionService';
+
+import { FEATURES }
+from '../moduls/subscriptions/featureGates';
+
+
 export default function EventPromotion({
   onBack,
   progress,
@@ -747,6 +754,93 @@ const formatPromotionDate = (value) => {
           />
 
         </div>
+
+
+
+
+
+
+
+
+
+
+
+
+    {/* EVENT-PROMOTION + Aboteil */}
+
+<div className="bg-slate-900/40 border border-cyan-500/20 rounded-2xl p-6 mt-8">
+
+  <div className="flex items-center gap-2 mb-4">
+    <span className="text-cyan-400">🚀</span>
+    <h3 className="text-cyan-400 font-bold uppercase">
+      PROMOTION+
+    </h3>
+  </div>
+
+  <p className="text-slate-400 text-sm mb-6">
+    Erweiterte Vermarktungsoptionen für mehr Reichweite.
+    Dieser Bereich befindet sich aktuell im Aufbau.
+  </p>
+
+  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+    <button
+      type="button"
+      className="bg-slate-800 border border-cyan-500/20 rounded-xl p-4 text-left"
+    >
+      <div className="font-bold text-cyan-300">
+        🖨 PRINT
+      </div>
+
+      <div className="text-xs text-slate-400 mt-2">
+        Flyer, Plakate und Druckprodukte
+      </div>
+    </button>
+
+    <button
+      type="button"
+      className="bg-slate-800 border border-cyan-500/20 rounded-xl p-4 text-left"
+    >
+      <div className="font-bold text-cyan-300">
+        📢 MEDIEN
+      </div>
+
+      <div className="text-xs text-slate-400 mt-2">
+        Presse, Magazine und Eventportale
+      </div>
+    </button>
+
+    <button
+      type="button"
+      className="bg-slate-800 border border-cyan-500/20 rounded-xl p-4 text-left"
+    >
+      <div className="font-bold text-cyan-300">
+        📈 BOOST
+      </div>
+
+      <div className="text-xs text-slate-400 mt-2">
+        Zusätzliche Sichtbarkeit und Reichweite
+      </div>
+    </button>
+
+  </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         {isOwner && (
         <button

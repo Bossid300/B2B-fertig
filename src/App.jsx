@@ -50,6 +50,10 @@ import {
   getCrewRequests
 } from './services/apiService';
 
+import PricingPage from './PricingPage';
+
+
+
 export default function App() {
 
 
@@ -932,6 +936,13 @@ useEffect(() => {
           {view === "artistPortfolio" && (
             <ArtistPortfolio />
           )}
+
+
+          {view === 'pricing' && (
+            <PricingPage />
+          )}
+
+
 
 
  
