@@ -51,7 +51,8 @@ import {
 } from './services/apiService';
 
 import PricingPage from './PricingPage';
-
+import BillingCenter
+from './components/BillingCenter';
 
 
 export default function App() {
@@ -731,7 +732,7 @@ useEffect(() => {
               else if (currentProfile?.role === 'Logistik') { return <LogistikProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
               else if (currentProfile?.role === 'Security') { return <SecurityProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
               else if (currentProfile?.role === 'Design' || currentProfile?.role === 'Deko') { return <DesignProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
-              else { return <UserProfile ticketName={activeGuestArtist} onBack={() => setView('radar')} isOwner={false} />; }
+              else { return <UserProfile ticketName={activeGuestArtist} onBack={() => setView('radar')} isOwner={false} setView={setView}/>; }
             })()
           )}
 
@@ -749,7 +750,7 @@ useEffect(() => {
               else if (currentProfile?.role === 'Logistik') { return <LogistikProfile ticketName={ticketName} onNavigate={setView} />; }
               else if (currentProfile?.role === 'Security') { return <SecurityProfile ticketName={ticketName} onNavigate={setView} />; }
               else if (currentProfile?.role === 'Design' || currentProfile?.role === 'Deko') { return <DesignProfile ticketName={ticketName} onNavigate={setView} />; }
-              else { return <UserProfile ticketName={ticketName} onBack={() => setView('projects')} isOwner={true} />; }
+              else { return <UserProfile ticketName={ticketName} onBack={() => setView('projects')} isOwner={true} setView={setView}/>; }
             })()
           )}
 
@@ -943,6 +944,9 @@ useEffect(() => {
           )}
 
 
+          {view === 'billing' && (
+            <BillingCenter />
+          )}
 
 
  

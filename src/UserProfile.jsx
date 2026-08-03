@@ -34,7 +34,7 @@ import { FEATURES }
 from '../moduls/subscriptions/featureGates';
 
 
-export default function UserProfile({ onBack, ticketName, isOwner }) {
+export default function UserProfile({ onBack, ticketName, isOwner, setView }) {
   const [profileData, setProfileData] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const targetUser = ticketName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
@@ -159,6 +159,7 @@ console.log(
         localFields={profileData} 
         isFavorite={isFavorite}
         handleToggleFavorite={handleToggleFavorite}
+        setView={setView}
         // 🚨 HIER FEHLEN DIE BEIDEN KABEL FÜR DEN SLIDER!
       />
 

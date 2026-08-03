@@ -10,11 +10,6 @@ import { subscriptionService }
 from '../../moduls/subscriptions/subscriptionService';
 import { achievementService }
 from '../../moduls/achievements/achievementService';
-import {
-  getInvoices,
-  getPendingOrders,
-  updateSubscriptionOrderStatus
-} from '../services/apiService';
 
 
 export default function ProfileHeaderBox({ 
@@ -30,70 +25,6 @@ export default function ProfileHeaderBox({
   const [isSliderMaskOpen, setIsSliderMaskOpen] = useState(false);
   const [myProjects, setMyProjects] = useState([]);
   const [profileData, setProfileData] = useState(null);
-  
-  const [isBillingOpen, setIsBillingOpen] =
-    useState(false);
-
-  const [selectedInvoice, setSelectedInvoice] =
-    useState(null);
-
-  const [invoices, setInvoices] =
-    useState([]);
-
-  const [pendingOrders, setPendingOrders] =
-    useState([]);
-  
-  
-  useEffect(() => {
-
-    const profileId =
-      localStorage.getItem(
-        'gigsda_profile_id'
-      );
-
-    if (!profileId) return;
-
-    getInvoices(profileId)
-      .then(result => {
-
-        console.log(
-          'INVOICES RESULT',
-          result
-        );
-
-        if (result?.success) {
-
-          setInvoices(
-            result.invoices || []
-          );
-
-        }
-
-      })
-      .catch(console.error);
-
-      getPendingOrders(profileId)
-      .then(result => {
-
-        console.log(
-          'PENDING ORDERS',
-          result
-        );
-
-        if (result?.success) {
-
-          setPendingOrders(
-            result.orders || []
-          );
-
-        }
-
-      })
-      .catch(console.error);
-
-  }, []);
-
-
 
 
   // Eigerer Zustand für das flache Mitschreiben der Ticker-Inputs
@@ -130,9 +61,6 @@ const currentAchievement =
     myCompletedEvents
   );
 
-console.log('ACHIEVEMENT TEST ✅');
-console.log(myCompletedEvents);
-console.log(currentAchievement);
 
   // 1. DATABASE PIPELINE: Lädt die Profildaten für Fremdprofile & befüllt die Inputs
   useEffect(() => {
@@ -460,11 +388,12 @@ const submitB2BRequest = async (project) => {
 
         <button
           type="button"
-          onClick={() => setIsBillingOpen(true)}
+          onClick={() => setView('billing')}
           className="px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-slate-950 text-emerald-300 text-[10px] font-mono uppercase tracking-widest hover:border-emerald-400 cursor-pointer"
         >
-          📄 {invoices.length}
+          📄 BILLING
         </button>
+
 
           <button type="button" onClick={() => setIsRequestMaskOpen(true)} className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-950/40 border border-purple-900/50 text-purple-400 text-[10px] font-mono hover:border-purple-500 transition-all cursor-pointer shadow-md uppercase font-black tracking-wider whitespace-nowrap"><MessageSquare size={10} /> Anfrage</button>
           <button type="button" onClick={handleToggleFavorite} className={`flex items-center gap-1 px-3 py-1.5 rounded-xl border text-[10px] font-mono transition-all cursor-pointer shadow-md uppercase font-black tracking-wider whitespace-nowrap ${isFavorite ? 'bg-amber-950/40 border-amber-500 text-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.1)]' : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'}`}><span>{isFavorite ? '★' : '☆'}</span> {isFavorite ? 'Aktiv' : 'Favorit'}</button>
@@ -510,263 +439,6 @@ const submitB2BRequest = async (project) => {
             </div>
           </div>
         )}
-
-
-        {isBillingOpen && (
-          <div className="absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-md p-6 font-mono text-sm text-slate-300 overflow-y-auto rounded-3xl">
-            <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-2">
-              <h3 className="text-emerald-400 text-xs tracking-widest font-bold uppercase">
-                // KONTO & ABRECHNUNG
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsBillingOpen(false)}
-                className="text-slate-500 hover:text-white"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="space-y-3">
-              <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl text-xs">
-                Aktueller Plan:
-                {' '}
-                <span className="text-cyan-400 font-bold">
-                  {subscriptionService.getPlan()}
-                </span>
-              </div>
-
-              <div className="p-3 bg-slate-900/50 border border-amber-500/30 rounded-xl">
-                <div className="text-amber-400 font-bold mb-2">
-                  OFFENE BESTELLUNGEN
-                </div>
-                {pendingOrders.length === 0 ? (
-                  <div>
-                    Keine offenen Bestellungen
-                  </div>
-                ) : (
-                  pendingOrders.map(order => (
-                    <div
-                      key={order.id}
-                      className="mb-2 p-2 border border-slate-800 rounded-lg"
-                    >
-                      <div>
-                        {order.plan}
-                      </div>
-                      <div>
-                        {order.price} €
-                      </div>
-                      <div>
-                        Status: {order.status}
-                      </div>
-                      <button
-                        type="button"
-                        className="mt-2 px-3 py-1 rounded-lg border border-emerald-500/30 text-emerald-400 text-xs"
-                        onClick={async () => {
-
-                          await updateSubscriptionOrderStatus(
-                            order.id,
-                            'paid'
-                          );
-
-                          window.location.reload();
-
-                        }}
-                      >
-                        ZAHLUNG ABSCHLIESSEN
-                      </button>
-                    </div>
-                  ))
-                )}
-
-              </div>
-
-              {invoices.map(invoice => (
-                <div
-                  key={invoice.id}
-                  className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl"
-                >
-                  <div>
-                    {invoice.invoice_number}
-                  </div>
-                  <div>
-                    {invoice.plan}
-                  </div>
-                  <div>
-                    {invoice.amount} €
-                  </div>
-                  <button
-                  type="button"
-                  className="mt-2 px-3 py-1 rounded-lg border border-cyan-500/30 text-cyan-400 text-xs"
-                  onClick={() => {
-                    console.log('INVOICE CLICK');
-                    console.log(invoice);
-                    setSelectedInvoice(invoice);
-                  }}
-                >
-                  ANSEHEN
-                </button>
-                </div>
-              ))}
-
-                {selectedInvoice && (
-                <div className="p-3 bg-slate-950 border border-cyan-500/30 rounded-xl">
-                  <div className="text-cyan-400 font-bold mb-2">
-                    RECHNUNG
-                  </div>
-                  <div>
-                    Nummer:
-                    {' '}
-                    {selectedInvoice.invoice_number}
-                  </div>
-
-                  <div>
-                    Status:
-                    {' '}
-                    <span className="text-emerald-400">
-                      BEZAHLT
-                    </span>
-                  </div>
-
-                  <div>
-                    Kunde:
-                    {' '}
-                    {selectedInvoice.profile_id}
-                  </div>
-
-                  <div>
-                    Plan:
-                    {' '}
-                    {selectedInvoice.plan}
-                  </div>
-
-                  <div>
-                    Betrag:
-                    {' '}
-                    {selectedInvoice.amount} €
-                  </div>
-
-                  <div>
-                    Leistung:
-                    {' '}
-                    GIGSDA PRO Mitgliedschaft
-                  </div>
-
-                  <div>Netto: 8,25 €</div>
-                  <div>MwSt: 1,65 €</div>
-                  <div>Brutto: 9,90 €</div>
-
-                  <div>
-                    Datum:
-                    {' '}
-                    {selectedInvoice.created_at}
-                    
-                    <button
-                      type="button"
-                      className="mt-4 px-4 py-2 rounded-xl border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase"
-                      onClick={() => {
-
-                        const printWindow =
-                          window.open(
-                            '',
-                            '_blank'
-                          );
-
-                        printWindow.document.write(`
-                          <html>
-                            <head>
-                              <title>
-                                ${selectedInvoice.invoice_number}
-                              </title>
-                              <style>
-                                body{
-                                  font-family: Arial, sans-serif;
-                                  max-width: 800px;
-                                  margin: 40px auto;
-                                  padding: 20px;
-                                }
-
-                                h1{
-                                  color:#0ea5e9;
-                                }
-
-                                .section{
-                                  margin-top:25px;
-                                }
-
-                                .total{
-                                  font-size:18px;
-                                  font-weight:bold;
-                                }
-                              </style>
-                            </head>
-
-                            <body>
-
-                              <h1>GIGSDA</h1>
-
-                              <h2>
-                                Rechnung
-                                ${selectedInvoice.invoice_number}
-                              </h2>
-
-                              <hr>
-
-                              <p>
-                                Rechnungsempfänger:
-                                ${selectedInvoice.profile_id}
-                              </p>
-
-                              <p>
-                                Leistung:
-                                GIGSDA PRO Mitgliedschaft
-                              </p>
-
-                              <p>
-                                Status:
-                                BEZAHLT
-                              </p>
-
-                              <p>
-                                Netto:
-                                8,25 €
-                              </p>
-
-                              <p>
-                                MwSt:
-                                1,65 €
-                              </p>
-
-                              <p>
-                                Brutto:
-                                9,90 €
-                              </p>
-
-                              <p>
-                                Datum:
-                                ${selectedInvoice.created_at}
-                              </p>
-
-                            </body>
-                          </html>
-                        `);
-
-                        printWindow.document.close();
-
-                        printWindow.print();
-
-                      }}
-                    >
-                      📄 RECHNUNG DRUCKEN
-                    </button>
-                                  
-                  </div>
-                </div>
-              )}
-
-            </div>
-          </div>
-        )}
-
 
 
 
