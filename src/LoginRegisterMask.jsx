@@ -65,6 +65,11 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
     }
 
     localStorage.setItem(
+      "gigsda_plan",
+      matchedProfile.subscription_plan || "COMMUNITY"
+    );
+
+    localStorage.setItem(
       "gigsda_reg_role",
       matchedProfile.role || "Fan"
     );

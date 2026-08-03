@@ -449,6 +449,152 @@ if (changedEvent) {
 
 
 
+
+
+
+
+
+      {/* Nächster Meilenstein */}
+      <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
+        <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+            Nächster Meilenstein
+          </h3>
+
+          <span className="text-sm text-cyan-400 font-black uppercase">
+            System Empfehlung
+          </span>
+        </div>
+
+        <div className="space-y-3">
+          {openCount > 0 ? (
+            <>
+              <div className="text-lg font-black text-amber-400">
+                🎯 Rider-Check abschließen
+              </div>
+
+              <div className="text-slate-400 text-sm">
+                Noch {openCount} Gewerke benötigen Aufmerksamkeit.
+              </div>
+
+              <div className="text-[11px] text-slate-500 uppercase tracking-wider">
+                Nächster Bereich: Rider-Check
+              </div>
+            </>
+
+          ) : (
+
+            <>
+              <div className="text-lg font-black text-emerald-400">
+                ✅ Bereit für Zusage-Deal
+              </div>
+
+              <div className="text-slate-400 text-sm">
+                Alle Rider wurden geprüft und freigegeben.
+              </div>
+
+              <div className="text-[11px] text-slate-500 uppercase tracking-wider">
+                Nächster Bereich: Zusage-Deal
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+      {/* Verantwortlichkeiten */}
+      <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
+
+        <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
+
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+            Verantwortlichkeiten
+          </h3>
+
+          <span className="text-sm text-cyan-400 font-black uppercase">
+            Projektleitung
+          </span>
+
+        </div>
+
+        <div className="space-y-3">
+
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">👑 Owner</span>
+            <span className="text-white font-bold">
+              {ownerLead?.name || "Owner"}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">🎤 Künstler</span>
+            <span className="text-white font-bold">
+              {artistLead?.name || "Offen"}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">🏟️ Location</span>
+            <span className="text-white font-bold">
+              {locationLead?.name || "Offen"}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">🎚️ Technik</span>
+            <span className="text-white font-bold">
+              {techLead?.name || "Offen"}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">📦 Material</span>
+            <span className="text-white font-bold">
+              {materialLead?.name || "Offen"}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">📣 Promotion</span>
+            <span className="text-amber-400 font-bold">
+              Offen
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">🛡️ Security</span>
+            <span className="text-amber-400 font-bold">
+              Offen
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="text-slate-400">👥 Fan Community Support</span>
+            <span className="text-amber-400 font-bold">
+              {fanLead?.name || "Offen"}
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
       {/* Projektstatus */}
       <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
         <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
@@ -632,133 +778,13 @@ if (changedEvent) {
 
 
 
-      {/* Nächster Meilenstein */}
-      <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
-        <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-            Nächster Meilenstein
-          </h3>
-
-          <span className="text-sm text-cyan-400 font-black uppercase">
-            System Empfehlung
-          </span>
-        </div>
-
-        <div className="space-y-3">
-          {openCount > 0 ? (
-            <>
-              <div className="text-lg font-black text-amber-400">
-                🎯 Rider-Check abschließen
-              </div>
-
-              <div className="text-slate-400 text-sm">
-                Noch {openCount} Gewerke benötigen Aufmerksamkeit.
-              </div>
-
-              <div className="text-[11px] text-slate-500 uppercase tracking-wider">
-                Nächster Bereich: Rider-Check
-              </div>
-            </>
-
-          ) : (
-
-            <>
-              <div className="text-lg font-black text-emerald-400">
-                ✅ Bereit für Zusage-Deal
-              </div>
-
-              <div className="text-slate-400 text-sm">
-                Alle Rider wurden geprüft und freigegeben.
-              </div>
-
-              <div className="text-[11px] text-slate-500 uppercase tracking-wider">
-                Nächster Bereich: Zusage-Deal
-              </div>
-            </>
-          )}
-        </div>
-      </div>
 
 
 
 
 
 
-      {/* Verantwortlichkeiten */}
-      <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-5 shadow-xl">
 
-        <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-4">
-
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider">
-            Verantwortlichkeiten
-          </h3>
-
-          <span className="text-sm text-cyan-400 font-black uppercase">
-            Projektleitung
-          </span>
-
-        </div>
-
-        <div className="space-y-3">
-
-          <div className="flex justify-between items-center">
-            <span className="text-slate-400">👑 Owner</span>
-            <span className="text-white font-bold">
-              {ownerLead?.name || "Owner"}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-slate-400">🎤 Künstler</span>
-            <span className="text-white font-bold">
-              {artistLead?.name || "Offen"}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-slate-400">🏟️ Location</span>
-            <span className="text-white font-bold">
-              {locationLead?.name || "Offen"}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-slate-400">🎚️ Technik</span>
-            <span className="text-white font-bold">
-              {techLead?.name || "Offen"}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-slate-400">📦 Material</span>
-            <span className="text-white font-bold">
-              {materialLead?.name || "Offen"}
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-slate-400">📣 Promotion</span>
-            <span className="text-amber-400 font-bold">
-              Offen
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-slate-400">🛡️ Security</span>
-            <span className="text-amber-400 font-bold">
-              Offen
-            </span>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-slate-400">👥 Fan Community Support</span>
-            <span className="text-amber-400 font-bold">
-              {fanLead?.name || "Offen"}
-            </span>
-          </div>
-
-        </div>
-      </div>
 
 
 
@@ -841,12 +867,7 @@ if (changedEvent) {
             </span>
           </div>
 
-          <textarea
-            value={productionNotes}
-            onChange={(e) =>
-              setProductionNotes(e.target.value)
-            }
-            placeholder="Besonderheiten, Absprachen, Hinweise..."
+          <div
             className="
               w-full
               min-h-[300px]
@@ -857,10 +878,12 @@ if (changedEvent) {
               p-4
               text-slate-300
               text-sm
-              resize-none
-              outline-none
+              whitespace-pre-wrap
+              transition-all hover:scale-[1.02] active:scale-[0.98]
             "
-          />
+          >
+            {productionNotes || "Besonderheiten, Absprachen, Hinweise."}
+          </div>
 
           {isOwner && (
             <button
@@ -878,6 +901,7 @@ if (changedEvent) {
                 rounded-xl
                 text-xm
                 uppercase
+                transition-all shadow-[0_0_20px_rgba(6,182,212,0.2)] hover:scale-[1.02] active:scale-[0.98]
               "
             >
               ✏️ Produktionsnotizen Bearbeiten

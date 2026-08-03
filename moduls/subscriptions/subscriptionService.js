@@ -20,4 +20,11 @@ export const subscriptionService = {
     return PLAN_CONFIG[plan]?.features?.includes(feature);
   },
 
+
+  getLimit(limitName) {
+    const plan = this.getPlan();
+    return PLAN_CONFIG[plan]?.[limitName];
+  },
+
+
 };

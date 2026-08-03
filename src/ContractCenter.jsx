@@ -68,6 +68,9 @@ useEffect(() => {
   const [dealSent, setDealSent] = useState(
     activeEvent?.dealSent || false
   );
+  const [showPopup, setShowPopup] = useState(false);
+  const [popupTitle, setPopupTitle] = useState('');
+  const [popupMessage, setPopupMessage] = useState('');
 
   useEffect(() => {
 
@@ -136,7 +139,7 @@ useEffect(() => {
 
 
   // 📥 Deal senden Funktion
-const handleSendDeal = async () => {
+  const handleSendDeal = async () => {
 
   if (!activeEvent) return;
   const events =
@@ -210,7 +213,14 @@ const handleSendDeal = async () => {
     window.dispatchEvent(
       new CustomEvent("request-sent")
     );
-  };
+    setPopupTitle('📡 Deal versendet');
+
+    setPopupMessage(
+      `Der Deal wurde an ${dealPartners.length} Crewmitglieder gesendet.`
+    );
+
+    setShowPopup(true);
+};
 
 
 
@@ -241,8 +251,8 @@ const handleSendDeal = async () => {
     if (changedEvent) {
       await eventService.saveEvent(changedEvent);
     }
-  };
 
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -252,6 +262,23 @@ const handleSendDeal = async () => {
     return () => clearTimeout(timer);
 
   }, [dealAmounts]);
+
+
+ 
+
+
+
+
+const handleSaveDealWithPopup = async () => {
+  await handleSaveDeal();
+
+  setPopupTitle('🛡 Gagen eingebrannt');
+  setPopupMessage(
+    'Die Gagen wurden gespeichert und revisionssicher im Event hinterlegt.'
+  );
+  setShowPopup(true);
+};
+
 
 
 
@@ -683,7 +710,7 @@ const handleSendDeal = async () => {
 
         <button
           type="button"
-          onClick={handleSaveDeal}
+          onClick={handleSaveDealWithPopup}
           className="
             h-11
             px-6
@@ -801,6 +828,40 @@ const handleSendDeal = async () => {
           Nächster Meilenstein: Event Planner <ArrowRight className="w-4 h-4" />
         </button>
       </div>
+
+
+      {showPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-slate-950 border border-cyan-500/30 rounded-3xl p-6 shadow-2xl">
+
+            <h3 className="text-cyan-400 font-black text-lg mb-3">
+              {popupTitle}
+            </h3>
+
+            <p className="text-slate-300 text-sm mb-6">
+              {popupMessage}
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setShowPopup(false)}
+              className="
+                w-full
+                h-11
+                rounded-xl
+                bg-cyan-500
+                text-slate-950
+                font-black
+                uppercase
+                cursor-pointer
+              "
+            >
+              OK
+            </button>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -6,6 +6,7 @@ export const PLAN_CONFIG = {
     title: 'COMMUNITY',
     price: '0 €',
     badge: null,
+    maxEvents: 0,
 
     canCreateEvents: false,
 
@@ -28,6 +29,7 @@ export const PLAN_CONFIG = {
     title: 'PRO',
     price: '9,90 €',
     badge: 'BELIEBTESTE WAHL',
+    maxEvents: 25,
 
     canCreateEvents: true,
 
@@ -54,7 +56,8 @@ export const PLAN_CONFIG = {
   AGENCY: {
     title: 'AGENCY',
     price: '24,90 €',
-
+    maxEvents: 100,
+    
     canCreateEvents: true,
 
     features: [
@@ -81,6 +84,7 @@ export const PLAN_CONFIG = {
     title: 'TRIAL',
     price: '0 €',
     badge: '3 MONATE TEST',
+    maxEvents: 5,
 
     color: 'pink',
 

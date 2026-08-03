@@ -252,7 +252,13 @@ const visibleEvents = events
     getEventSortValue(a) - getEventSortValue(b)
   );
 
+const currentEvents = visibleEvents.length;
 
+const maxEvents =
+subscriptionService.getLimit('maxEvents');
+
+const eventLimitReached =
+currentEvents >= maxEvents;
 
   return (
     <div className="space-y-6 my-6 max-w-4xl mx-auto text-slate-300 text-xs font-mono animate-fade-in">
@@ -330,17 +336,19 @@ const visibleEvents = events
                 <h2 className="text-xl font-bold text-white mt-0.5">Übersicht deiner Events</h2>
               </div>
 
-                <button 
-                type="button" 
-                onClick={() => setIsCreatingEvent(true)} 
-                className=
-                "bg-emerald-400 text-slate-950 font-black px-4 py-2 rounded-xl text-[11px] uppercase tracking-wider shadow-[0_0_15px_rgba(52,211,153,0.2)] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                >
-                  ✨ ALT: Event erstellen
-                </button>
+              <div className="px-4 py-2 rounded-xl border border-cyan-500/30 text-cyan-300 text-[11px] uppercase tracking-wider font-mono">
+
+                Events:
+                {' '}
+                {visibleEvents.length}
+                {' / '}
+                {subscriptionService.getLimit('maxEvents')}
+              </div>
 
               {
-              subscriptionService.canCreateEvent() ? (
+                subscriptionService.canCreateEvent() &&
+                !eventLimitReached ? (
+  
                 <button 
                 type="button" 
                 onClick={() => setIsCreatingEvent(true)} 

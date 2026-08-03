@@ -201,3 +201,72 @@ export async function getMessages(eventId) {
 
   return await response.json();
 }
+
+export async function updateSubscriptionPlan(
+  profileId,
+  plan
+) {
+
+  const response = await fetch(
+    '/2026/api/updateSubscriptionPlan.php',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        profileId,
+        plan
+      })
+    }
+  );
+
+  return await response.json();
+
+}
+
+export async function updateSubscriptionOrderStatus(
+  orderId,
+  status
+) {
+
+  const response = await fetch(
+    '/2026/api/updateSubscriptionOrderStatus.php',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        orderId,
+        status
+      })
+    }
+  );
+
+  return await response.json();
+}
+
+export async function getInvoices(
+  profileId
+) {
+
+  const response = await fetch(
+    `/2026/api/getInvoices.php?profileId=${profileId}`
+  );
+
+  return await response.json();
+
+}
+
+export async function getPendingOrders(
+  profileId
+) {
+
+  const response = await fetch(
+    `/2026/api/getPendingOrders.php?profileId=${profileId}`
+  );
+
+  return await response.json();
+}
+

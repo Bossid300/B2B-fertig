@@ -5,10 +5,11 @@ import { PROMOTION_PLANS }
 from '../moduls/subscriptions/promotionPlans';
 import { subscriptionService }
 from '../moduls/subscriptions/subscriptionService';
+import {
+  updateSubscriptionPlan,
+  updateSubscriptionOrderStatus
+} from './services/apiService';
 
-console.log(PLAN_CONFIG);
-console.log(PROMOTION_PLANS);
-console.log(subscriptionService);
 
 export default function PricingPage() {
 
@@ -19,7 +20,7 @@ export default function PricingPage() {
     
     <div className="max-w-7xl mx-auto px-6 py-12 ">
       <div className="mb-12">
-        <h1 className="text-cyan-400 text-4xl font-black uppercase tracking-wider font-mono flex items-center gap-4">
+        <h1 className="text-cyan-400 text-3xl font-black uppercase tracking-wider font-mono flex items-center gap-4">
           💎 GIGSDA MODEL
         </h1>
         <p className="text-slate-500 mt-4 font-mono">
@@ -29,7 +30,7 @@ export default function PricingPage() {
 
       {/* PREISTABELLE */}
 
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {Object.entries(PLAN_CONFIG).map(([key, plan]) => {
           const isCurrentPlan =
             currentPlan === key;
@@ -63,12 +64,12 @@ export default function PricingPage() {
             >
 
               {plan.badge && (
-                <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-[10px] font-black tracking-widest uppercase font-mono">
+                <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-pink-500/20 text-pink-300 text-[12px] font-black tracking-widest uppercase font-mono">
                   {plan.badge}
                 </div>
               )}
               {isCurrentPlan && (
-                <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-black tracking-widest uppercase font-mono">
+                <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-[12px] font-black tracking-widest uppercase font-mono">
                   DEIN PLAN
                 </div>
               )}
@@ -110,15 +111,37 @@ export default function PricingPage() {
                     ))}
                   </>
                 )}
-
               </div>
 
-
+              {currentPlan === key ? (
+                <div className="mt-8">
+                  <div className="w-full py-3 rounded-xl bg-cyan-500 text-slate-900 text-center font-black uppercase tracking-widest">
+                    ✅ DEIN PLAN
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-8">
+                  <button
+                    className="w-full py-3 rounded-xl font-black uppercase tracking-widest bg-slate-700 text-slate-300 hover:bg-cyan-500/20"
+                    onClick={async () => {
+                      const profileId =
+                        localStorage.getItem(
+                          'gigsda_profile_id'
+                        );
+                      await updateSubscriptionPlan(
+                        profileId,
+                        key
+                      );
+                      window.location.reload();
+                    }}
+                  >
+                    PLAN WECHSELN
+                  </button>
+                </div>
+              )}
             </div>
-
           );
         })}
-
       </div>
 
 
@@ -179,67 +202,6 @@ export default function PricingPage() {
           Alle Preise dienen aktuell der internen Entwicklung
           und können sich bis zum offiziellen Start ändern.
         </div>
-
-
-
-
-
-      {/* DEV TOOLS */}
-
-      <div className="mt-8 border border-cyan-500/20 rounded-2xl p-6">
-
-        <h3 className="text-cyan-400 font-black uppercase tracking-widest mb-4 font-mono">
-          DEV PLAN SWITCHER
-        </h3>
-
-        <div className="flex flex-wrap gap-3">
-
-          <button
-            onClick={() => {
-              localStorage.setItem('gigsda_plan', 'COMMUNITY');
-              window.location.reload();
-            }}
-            className="px-4 py-2 rounded-xl border border-cyan-500/30"
-          >
-            COMMUNITY
-          </button>
-
-          <button
-            onClick={() => {
-              localStorage.setItem('gigsda_plan', 'TRIAL');
-              window.location.reload();
-            }}
-            className="px-4 py-2 rounded-xl border border-pink-500/30"
-          >
-            TRIAL
-          </button>
-
-          <button
-            onClick={() => {
-              localStorage.setItem('gigsda_plan', 'PRO');
-              window.location.reload();
-            }}
-            className="px-4 py-2 rounded-xl border border-pink-500/30"
-          >
-            PRO
-          </button>
-
-          <button
-            onClick={() => {
-              localStorage.setItem('gigsda_plan', 'AGENCY');
-              window.location.reload();
-            }}
-            className="px-4 py-2 rounded-xl border border-yellow-500/30"
-          >
-            AGENCY
-          </button>
-
-        </div>
-
-      </div>
-
-
-
 
 
       </div>
