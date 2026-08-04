@@ -51,8 +51,7 @@ import {
 } from './services/apiService';
 
 import PricingPage from './PricingPage';
-import BillingCenter
-from './components/BillingCenter';
+import BillingCenter from './components/BillingCenter';
 
 
 export default function App() {
@@ -923,10 +922,13 @@ useEffect(() => {
 
           {/* DIE UNIVERSELLE GIGSDA B2B MATRIXSUCHE IN APP.JSX */}
           {view === 'artists' && (
-            <UniversalSearchPage 
+            <UniversalSearchPage
               onNavigate={(name) => {
                 setActiveGuestArtist(name);
-                localStorage.setItem('gigsda_active_guest_artist', name);
+                localStorage.setItem(
+                  'gigsda_active_guest_artist',
+                  name
+                );
                 setView('profile');
               }}
               setView={setView}
@@ -940,7 +942,9 @@ useEffect(() => {
 
 
           {view === 'pricing' && (
-            <PricingPage />
+            <PricingPage
+              setView={setView}
+            />
           )}
 
 

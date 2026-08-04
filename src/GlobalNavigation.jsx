@@ -4,6 +4,12 @@ import {
   getProfilesDb,
   getCrewRequests
 } from './services/apiService';
+import { subscriptionService }
+from '../moduls/subscriptions/subscriptionService';
+
+import { FEATURES }
+from '../moduls/subscriptions/featureGates';
+
 
 export default function GlobalNavigation({ view, setView, onLogout }) {
   // Lokaler Zustand für das mobile Aufklapp-Menü (Burger)
@@ -153,13 +159,25 @@ useEffect(() => {
 
       {/* NAV */}
       <div className="hidden sm:flex items-center gap-6 select-none ml-auto shrink-0">
-{/*        <span
-          onClick={() => triggerNav('artists')}
-          className={`${desktopBase} ${view === 'artists' ? activeClass : inactiveClass}`}
-        >
-          🔍 MATRIX
-        </span> 
-*/}
+        {
+          subscriptionService.hasFeature(
+            FEATURES.MATRIX_SEARCH
+          ) && (
+
+            <span
+              onClick={() => triggerNav('artists')}
+              className={`${desktopBase} ${
+                view === 'artists'
+                  ? activeClass
+                  : inactiveClass
+              }`}
+            >
+              🔮 MATRIX
+            </span>
+
+          )
+        }
+
        
         <span
           onClick={() => triggerNav('radar')}
@@ -285,11 +303,26 @@ useEffect(() => {
     {/* ── MOBILE DROP-DOWN (KLAPPT SAUBER UNTEREINANDER RECHTSBÜNDIG AUF) ── */}
       {isOpen && (
         <div className="sm:hidden w-full bg-slate-950 border-t border-slate-900 p-3 flex flex-col gap-1.5 animate-fadeIn">
- {/*          
-          <button onClick={() => triggerNav('artists')} className={`${mobileBase} ${view === 'artists' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
-            🔍 MATRIX
-          </button>
-*/}
+        
+          {
+            subscriptionService.hasFeature(
+              FEATURES.MATRIX_SEARCH
+            ) && (
+
+              <button
+                onClick={() => triggerNav('artists')}
+                className={`${mobileBase} ${
+                  view === 'artists'
+                    ? 'bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold'
+                    : 'text-slate-400 border-transparent'
+                }`}
+              >
+                🔮 MATRIX
+              </button>
+
+          )
+          }
+
           <button onClick={() => triggerNav('radar')} className={`${mobileBase} ${view === 'radar' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
             🗣 SEARCH-EXPLORER
           </button>

@@ -66,7 +66,8 @@ export const PLAN_CONFIG = {
       FEATURES.PROMOTION,
       FEATURES.AGENCY_DASHBOARD,
       FEATURES.DOCUMENTS,
-      FEATURES.TEAM_MANAGEMENT
+      FEATURES.TEAM_MANAGEMENT,
+      FEATURES.MATRIX_SEARCH
     ],
 
     displayFeatures: [
@@ -75,6 +76,7 @@ export const PLAN_CONFIG = {
       'Dokumente',
       'Statistiken',
       'Erweiterte Crewsuche',
+      'MATRIX Suche',
       'Höhere Event-Kapazitäten'
     ]
   },

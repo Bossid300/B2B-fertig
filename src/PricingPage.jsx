@@ -1,4 +1,6 @@
 import React from 'react';
+import { useState } from 'react';
+
 import { PLAN_CONFIG }
 from '../moduls/subscriptions/subscriptionPlans';
 import { PROMOTION_PLANS }
@@ -11,11 +13,20 @@ import {
 } from './services/apiService';
 
 
-export default function PricingPage() {
-
+export default function PricingPage({
+  setView
+}) {
+  
   const currentPlan =
     subscriptionService.getPlan();
 
+  const [showOrderSuccess, setShowOrderSuccess] =
+    useState(false);
+
+  const [selectedPlanName, setSelectedPlanName] =
+    useState('');
+  
+  
   return (
     
     <div className="max-w-7xl mx-auto px-6 py-12 ">
@@ -124,15 +135,8 @@ export default function PricingPage() {
                   <button
                     className="w-full py-3 rounded-xl font-black uppercase tracking-widest bg-slate-700 text-slate-300 hover:bg-cyan-500/20"
                     onClick={async () => {
-                      const profileId =
-                        localStorage.getItem(
-                          'gigsda_profile_id'
-                        );
-                      await updateSubscriptionPlan(
-                        profileId,
-                        key
-                      );
-                      window.location.reload();
+                      setSelectedPlanName(key);
+                      setShowOrderSuccess(true);
                     }}
                   >
                     PLAN WECHSELN
@@ -205,6 +209,79 @@ export default function PricingPage() {
 
 
       </div>
+
+      {showOrderSuccess && (
+
+        <div className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center">
+
+          <div className="w-full max-w-lg rounded-3xl border border-cyan-500/30 bg-slate-950 p-8 font-mono">
+
+            <div className="text-cyan-400 text-xl font-black mb-4 uppercase">
+              🚀 Upgrade bestätigen
+            </div>
+
+            <div className="text-slate-300 mb-6">
+
+              Du bist dabei auf
+
+              <span className="text-cyan-400 font-bold">
+                {' '}{selectedPlanName}{' '}
+              </span>
+
+              zu wechseln.
+
+            </div>
+
+            <div className="space-y-2 text-xs text-slate-400 mb-8">
+
+              <div>✓ Bestellung anlegen</div>
+              <div>✓ Zahlungsart auswählen</div>
+              <div>✓ Zahlung bestätigen</div>
+              <div>✓ Abo sofort aktivieren</div>
+
+            </div>
+
+            <div className="flex gap-3">
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowOrderSuccess(false)
+                }
+                className="flex-1 py-3 rounded-xl border border-slate-700 text-slate-300"
+              >
+                ABBRECHEN
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+
+                  const profileId =
+                    localStorage.getItem(
+                      'gigsda_profile_id'
+                    );
+
+                  await updateSubscriptionPlan(
+                    profileId,
+                    selectedPlanName
+                  );
+                  setShowOrderSuccess(false);
+                  setView('billing');
+                }}
+                className="flex-1 py-3 rounded-xl bg-cyan-500 text-slate-950 font-black"
+              >
+                BESTELLEN
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      )}
+      
     </div>
   );
 }

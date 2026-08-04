@@ -1,10 +1,21 @@
 import React, { useState, useEffect} from 'react';
-import { getPendingOrders } from '../services/apiService';
-import { getInvoices } from '../services/apiService';
+import {
+  getPendingOrders,
+  getInvoices,
+  updateSubscriptionOrderStatus
+} from '../services/apiService';
 import { subscriptionService } from '../../moduls/subscriptions/subscriptionService';
 
 
 export default function BillingCenter() {
+const [showPaymentGateway, setShowPaymentGateway] =
+  useState(false);
+
+const [selectedOrder, setSelectedOrder] =
+  useState(null);
+
+const [selectedProvider, setSelectedProvider] =
+  useState('paypal');
 
 const [pendingOrders, setPendingOrders] =
   useState([]);
@@ -99,17 +110,28 @@ const [selectedInvoice, setSelectedInvoice] =
             className="p-3 rounded-xl border border-slate-800 mb-2"
             >
 
-            <div>
-                {order.plan}
-            </div>
+              <div>
+                  {order.plan}
+              </div>
 
-            <div>
-                {order.price} €
-            </div>
+              <div>
+                  {order.price} €
+              </div>
 
-            <div>
-                {order.status}
-            </div>
+              <div>
+                  {order.status}
+              </div>
+
+              <button
+                type="button"
+                className="mt-2 px-3 py-1 rounded-lg border border-emerald-500/30 text-emerald-400 text-xs"
+                onClick={() => {
+                  setSelectedOrder(order);
+                  setShowPaymentGateway(true);
+                }}
+              >
+                ZAHLUNG ABSCHLIESSEN
+              </button>
 
             </div>
 
@@ -173,144 +195,234 @@ const [selectedInvoice, setSelectedInvoice] =
 
       {/* RECHNUNGSVIEWER */}
         {selectedInvoice && (
-        <div className="p-4 rounded-xl border border-cyan-500/20 bg-slate-950">
-            
-            <div className="text-cyan-400 text-xs uppercase mb-3">
-            Rechnung Details
-            </div>
+          <div className="p-4 rounded-xl border border-cyan-500/20 bg-slate-950">
+              
+              <div className="text-cyan-400 text-xs uppercase mb-3">
+              Rechnung Details
+              </div>
 
-            <div>
-            Nummer: {selectedInvoice?.invoice_number}
-            </div>
+              <div>
+              Nummer: {selectedInvoice?.invoice_number}
+              </div>
 
-            <div>
-            Status:
-            <span className="text-emerald-400 ml-2">
-            BEZAHLT
-            </span>
-            </div>
+              <div>
+              Status:
+              <span className="text-emerald-400 ml-2">
+              BEZAHLT
+              </span>
+              </div>
 
-            <div>
-            Kunde: {selectedInvoice?.profile_id}
-            </div>
+              <div>
+              Kunde: {selectedInvoice?.profile_id}
+              </div>
 
-            <div>
-            Plan: {selectedInvoice?.plan}
-            </div>
+              <div>
+              Plan: {selectedInvoice?.plan}
+              </div>
 
-            <div>
-            Betrag: {selectedInvoice?.amount} €
-            </div>
+              <div>
+              Betrag: {selectedInvoice?.amount} €
+              </div>
 
-            <div>
-            Leistung: GIGSDA {selectedInvoice?.plan} Mitgliedschaft
-            </div>
+              <div>
+              Leistung: GIGSDA {selectedInvoice?.plan} Mitgliedschaft
+              </div>
 
-            <div>Netto: {(selectedInvoice.amount / 1.2).toFixed(2)} €</div>
-            <div>MwSt: {(selectedInvoice.amount - (selectedInvoice.amount / 1.2)).toFixed(2)} €</div>
-            <div>Brutto: {selectedInvoice.amount} €</div>
+              <div>Netto: {(selectedInvoice.amount / 1.2).toFixed(2)} €</div>
+              <div>MwSt: {(selectedInvoice.amount - (selectedInvoice.amount / 1.2)).toFixed(2)} €</div>
+              <div>Brutto: {selectedInvoice.amount} €</div>
 
-            <button
-                type="button"
-                className="mt-4 px-4 py-2 rounded-xl border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase"
-                onClick={() => {
+              <button
+                  type="button"
+                  className="mt-4 px-4 py-2 rounded-xl border border-emerald-500/30 text-emerald-400 text-xs font-bold uppercase"
+                  onClick={() => {
 
-                const printWindow =
-                    window.open(
-                    '',
-                    '_blank'
+                  const printWindow =
+                      window.open(
+                      '',
+                      '_blank'
+                      );
+
+                  printWindow.document.write(`
+                      <html>
+                      <head>
+                          <title>
+                          ${selectedInvoice.invoice_number}
+                          </title>
+                          <style>
+                          body{
+                              font-family: Arial, sans-serif;
+                              max-width: 800px;
+                              margin: 40px auto;
+                              padding: 20px;
+                          }
+
+                          h1{
+                              color:#0ea5e9;
+                          }
+
+                          .section{
+                              margin-top:25px;
+                          }
+
+                          .total{
+                              font-size:18px;
+                              font-weight:bold;
+                          }
+                          </style>
+                      </head>
+
+                      <body>
+
+                          <h1>GIGSDA</h1>
+
+                          <h2>
+                          Rechnung
+                          ${selectedInvoice.invoice_number}
+                          </h2>
+
+                          <hr>
+
+                          <p>
+                          Rechnungsempfänger:
+                          ${selectedInvoice.profile_id}
+                          </p>
+
+                          <p>
+                          Leistung:
+                          ${selectedInvoice?.plan ? `GIGSDA ${selectedInvoice.plan} Mitgliedschaft` : 'Unbekannte Leistung'}
+                          </p>
+
+                          <p>
+                          Status:
+                          ${selectedInvoice?.status || 'BEZAHLT'}
+                          </p>
+
+                          <p>
+                          Netto:
+                          ${(selectedInvoice.amount / 1.2).toFixed(2)} €
+                          </p>
+
+                          <p>
+                          MwSt:
+                          ${(selectedInvoice.amount - (selectedInvoice.amount / 1.2)).toFixed(2)} €
+                          </p>
+
+                          <p>
+                          Brutto:
+                          ${selectedInvoice.amount} €
+                          </p>
+
+                          <p>
+                          Datum:
+                          ${selectedInvoice.created_at}
+                          </p>
+
+                      </body>
+                      </html>
+                  `);
+
+                  printWindow.document.close();
+
+                  printWindow.print();
+
+                  }}
+              >
+                  📄 RECHNUNG DRUCKEN
+              </button>
+
+          </div>
+        )}
+
+      {/* PAYPAL */}
+        {showPaymentGateway && selectedOrder && (
+          <div className="absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-sm flex items-center justify-center">
+
+            <div className="w-full max-w-lg bg-slate-950 border border-cyan-500/20 rounded-3xl p-6">
+
+              <h3 className="text-cyan-400 font-black mb-4">
+                💳 GIGSDA PAYMENT GATEWAY
+              </h3>
+
+              <div className="mb-4">
+                Plan: {selectedOrder.plan}
+              </div>
+
+              <div className="mb-6">
+                Betrag: {selectedOrder.price} €
+              </div>
+
+              <div className="space-y-2 mb-6">
+
+                <label className="block">
+                  <input
+                    type="radio"
+                    checked={selectedProvider === 'paypal'}
+                    onChange={() =>
+                      setSelectedProvider('paypal')
+                    }
+                  />
+                  {' '}PayPal
+                </label>
+
+                <label className="block">
+                  <input
+                    type="radio"
+                    checked={selectedProvider === 'klarna'}
+                    onChange={() =>
+                      setSelectedProvider('klarna')
+                    }
+                  />
+                  {' '}Klarna
+                </label>
+
+                <label className="block">
+                  <input
+                    type="radio"
+                    checked={selectedProvider === 'sepa'}
+                    onChange={() =>
+                      setSelectedProvider('sepa')
+                    }
+                  />
+                  {' '}SEPA
+                </label>
+
+              </div>
+
+              <div className="flex gap-2">
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowPaymentGateway(false)
+                  }
+                >
+                  ABBRECHEN
+                </button>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+
+                    await updateSubscriptionOrderStatus(
+                      selectedOrder.id,
+                      'paid'
                     );
 
-                printWindow.document.write(`
-                    <html>
-                    <head>
-                        <title>
-                        ${selectedInvoice.invoice_number}
-                        </title>
-                        <style>
-                        body{
-                            font-family: Arial, sans-serif;
-                            max-width: 800px;
-                            margin: 40px auto;
-                            padding: 20px;
-                        }
+                    window.location.reload();
 
-                        h1{
-                            color:#0ea5e9;
-                        }
+                  }}
+                >
+                  ZAHLUNG BESTÄTIGEN
+                </button>
 
-                        .section{
-                            margin-top:25px;
-                        }
+              </div>
 
-                        .total{
-                            font-size:18px;
-                            font-weight:bold;
-                        }
-                        </style>
-                    </head>
+            </div>
 
-                    <body>
+          </div>
 
-                        <h1>GIGSDA</h1>
-
-                        <h2>
-                        Rechnung
-                        ${selectedInvoice.invoice_number}
-                        </h2>
-
-                        <hr>
-
-                        <p>
-                        Rechnungsempfänger:
-                        ${selectedInvoice.profile_id}
-                        </p>
-
-                        <p>
-                        Leistung:
-                        ${selectedInvoice?.plan ? `GIGSDA ${selectedInvoice.plan} Mitgliedschaft` : 'Unbekannte Leistung'}
-                        </p>
-
-                        <p>
-                        Status:
-                        ${selectedInvoice?.status || 'BEZAHLT'}
-                        </p>
-
-                        <p>
-                        Netto:
-                        ${(selectedInvoice.amount / 1.2).toFixed(2)} €
-                        </p>
-
-                        <p>
-                        MwSt:
-                        ${(selectedInvoice.amount - (selectedInvoice.amount / 1.2)).toFixed(2)} €
-                        </p>
-
-                        <p>
-                        Brutto:
-                        ${selectedInvoice.amount} €
-                        </p>
-
-                        <p>
-                        Datum:
-                        ${selectedInvoice.created_at}
-                        </p>
-
-                    </body>
-                    </html>
-                `);
-
-                printWindow.document.close();
-
-                printWindow.print();
-
-                }}
-            >
-                📄 RECHNUNG DRUCKEN
-            </button>
-
-        </div>
-        )}
+        )}        
     </div>
 
   );

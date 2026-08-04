@@ -5,6 +5,8 @@ export const FEATURES = {
   RADAR_BOOST: 'radar_boost',
   GIGSDA_PASS: 'gigsda_pass',
 
+  MATRIX_SEARCH: 'matrix_search',
+
   AGENCY_DASHBOARD: 'agency_dashboard',
   DOCUMENTS: 'documents',
   TEAM_MANAGEMENT: 'team_management',
