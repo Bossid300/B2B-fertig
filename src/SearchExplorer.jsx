@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Search, MapPin, Star, Briefcase, Calendar, ChevronRight, X, Sparkles, Filter, ShieldCheck, Heart, User, Clock, ArrowRight } from 'lucide-react';
+
+
 import ProfileCard from './components/cards/ProfileCard';
 
 import { eventService } from './services/eventService';
@@ -13,13 +16,16 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
   const [selectedRole, setSelectedRole] = useState('Alle');
   const [activeRequestUser, setActiveRequestUser] = useState(null); // Sichert das Anfrage-Popup!
   const [requestText, setRequestText] = useState(''); // Speichert euren eingetippten Text
-  
+  const [baseLocation, setBaseLocation] = useState('Braunau');
+  const [genreFilter, setGenreFilter] = useState('');
+  const [formationFilter, setFormationFilter] = useState('');
+  const [eventTypeFilter, setEventTypeFilter] = useState('');
+
   // 🏟️ ECHTZEIT-PROJEKTLISTE FÜR DIE EXPLORER-DIREKTANFRAGE
   const [events, setEvents] = useState([]);
   const [showProjectSelect, setShowProjectSelect] = useState(false);
   const [currentProfileData, setCurrentProfileData] = useState(null);
-  const isLoggedIn =
-  localStorage.getItem('gigsda_logged_in') === 'true';
+  const isLoggedIn = localStorage.getItem('gigsda_logged_in') === 'true';
 
 
   useEffect(() => {
@@ -168,14 +174,14 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
             addedAt: new Date().toLocaleDateString('de-DE')
           });
 
-eventService.saveEvents(savedEvents);
+          eventService.saveEvents(savedEvents);
 
-const changedEvent =
-  savedEvents[eventIndex];
+          const changedEvent =
+            savedEvents[eventIndex];
 
-if (changedEvent) {
-  eventService.saveEvent(changedEvent);
-}
+          if (changedEvent) {
+            eventService.saveEvent(changedEvent);
+          }
         }
       }
 
@@ -202,11 +208,9 @@ if (changedEvent) {
 
     getProfiles()
       .then(profiles => {
-    console.log("ERSTES PROFIL", profiles[0]);
-    console.log("PROFILE JSON", profiles[0]?.profile_json);
-          console.log("DB PROFILE ✅", profiles);
 
     const normalizedProfiles = profiles.map(profile => {
+      
       let profileData = {};
 
       try {
@@ -220,7 +224,9 @@ if (changedEvent) {
 
       return {
         ...profile,
-        ...profileData
+        ...profileData,
+        role: profile.role,
+        type: profile.type
       };
     });
 
@@ -253,16 +259,41 @@ if (changedEvent) {
   }, [onNavigate]);
 
 
-const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veranstalter', 'Techniker', 'Logistik', 'Security', 'Design'];
+const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Verleiher', 'Location', 'Veranstalter', 'Techniker', 'Logistik', 'Security', 'Design'];
 
   // 🗺️ DIE LIVE-ENTFERNUNGSMATRIX (Gemessen von eurer Heimatbasis Braunau)
-  const getDistanceTo = (city) => {
+  const getDistanceTo = (base, city) => {
+    const from = (base || '').toLowerCase().trim();
     const target = (city || '').toLowerCase().trim();
-    if (target.includes('braunau')) return 0;   // Direkt vor Ort
-    if (target.includes('altötting')) return 28; // ca. 28 km entfernt
-    if (target.includes('linz')) return 120;     // ca. 120 km entfernt
-    if (target.includes('wien')) return 290;     // ca. 290 km entfernt
-    return 45; // Fallback für unbekannte Städte im Bezirk
+
+    if (from.includes('braunau')) {
+      if (target.includes('braunau')) return 0;
+      if (target.includes('altötting')) return 28;
+      if (target.includes('linz')) return 120;
+      if (target.includes('wien')) return 290;
+    }
+
+    if (from.includes('linz')) {
+      if (target.includes('linz')) return 0;
+      if (target.includes('braunau')) return 120;
+      if (target.includes('wien')) return 185;
+      if (target.includes('passau')) return 95;
+    }
+
+    if (from.includes('wien')) {
+      if (target.includes('wien')) return 0;
+      if (target.includes('linz')) return 185;
+      if (target.includes('braunau')) return 290;
+    }
+
+
+    if (from.includes('passau')) {
+      if (target.includes('passau')) return 0;
+      if (target.includes('braunau')) return 65;
+      if (target.includes('linz')) return 95;
+    }
+
+    return 45;
   };
 
   // ⚡ DIE ERWEITERTE FILTER-SCHLEIFE (Filtert nach Name, Rolle UND Radius!)
@@ -272,8 +303,29 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veran
     user.name?.toLowerCase().includes(searchValue);
   const matchesId =
     user.id?.toLowerCase().includes(searchValue);   
-  
-  
+  const matchesGenre =
+  !genreFilter ||
+  (user.genre || '')
+    .toLowerCase()
+    .includes(
+      genreFilter.toLowerCase()
+    );
+  const matchesFormation =
+  !formationFilter ||
+  (user.formation || '')
+    .toLowerCase()
+    .includes(
+      formationFilter.toLowerCase()
+    );
+  const matchesEventType =
+  !eventTypeFilter ||
+  (user.event_types || '')
+    .toLowerCase()
+    .includes(
+      eventTypeFilter.toLowerCase()
+    );
+
+
     // 1. Rollen-Filter (original von Daniel)
     const userRole = (user.role || user.type || 'Künstler').toLowerCase();
     let matchesRole = false;
@@ -281,80 +333,175 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veran
       matchesRole = true;
     } else if (selectedRole === 'Caterer') {
       matchesRole = userRole.includes('cater');
-    } else if (selectedRole === 'Rental') {
-      matchesRole = userRole.includes('rental') || userRole.includes('material');
+    } else if (selectedRole === 'Verleiher') {
+      matchesRole = userRole.includes('verleiher');
     } else if (selectedRole === 'Location') {
-      matchesRole = userRole.includes('location') || userRole.includes('club');
+      matchesRole = userRole.includes('location');
     } else if (selectedRole === 'Veranstalter') {
-      matchesRole = userRole.includes('veranstalter') || userRole.includes('promoter');
+      matchesRole = userRole.includes('veranstalter');
     } else if (selectedRole === 'Techniker') {
-      matchesRole = userRole.includes('technik') || userRole.includes('crew');
+      matchesRole = userRole.includes('technik');
     } else {
       matchesRole = userRole.includes(selectedRole.toLowerCase());
     }
 
     // 2. 🛰️ DER REAKTIVE RADIUS-FILTER: Prüft die km-Distanz gegen den Schieberegler!
-    const userDistance = getDistanceTo(user.location || user.city);
+    const userDistance =
+      getDistanceTo(
+        baseLocation,
+        user.location || user.city
+      );
     const matchesRadius = userDistance <= searchRadius;
 
     return (matchesName || matchesId) &&
        matchesRole &&
-       matchesRadius;
+       matchesRadius &&
+       matchesGenre &&
+       matchesFormation &&
+       matchesEventType;
     });
 
-  return (
-    <div className="max-w-7xl mx-auto p-6 text-white min-h-screen font-mono relative">
-      
-      {/* 🌌 HEADER SEKTION */}
-      <div className="mb-8">
-        <h1 className="text-xl font-black text-cyan-400 uppercase tracking-wider mb-2">// B2B REGIONAL-RADAR</h1>
-        <p className="text-xs text-slate-400">Durchsuche das zweiseitige Industrie-Netzwerk punktgenau nach Partnern.</p>
-      </div>
+
+
+return (
+  <div className="max-w-7xl mx-auto p-6 text-white min-h-screen font-mono relative">
+
+      {/* BANNER HEADER */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-slate-900 p-8 mb-8 shadow-2xl">
+        <div className="absolute top-0 right-0 p-6 text-slate-800 opacity-20 pointer-events-none">
+          <Sparkles size={160} />
+        </div>
+        <div className="relative z-10 max-w-2xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/40 border border-cyan-500/30 text-cyan-400 text-[10px] font-black uppercase tracking-widest mb-4 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+            <ShieldCheck size={12} /> Gigsda Engine V3.0 Activated
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2 bg-gradient-to-r from-white via-slate-200 to-slate-500 bg-clip-text text-transparent">B2B Crew Explorer</h1>
+          <p className="text-xs text-slate-400 leading-relaxed max-w-lg uppercase tracking-wide">
+            Durchsuche das verifizierte Gigsda-Netzwerk nach Technikern, Künstlern und Allianzen für deine anstehenden Produktionen.
+          </p>
+        </div>
+      </div>    
+
 
       {/* 🎛️ FILTER-LEISTE */}
-      <div className="flex flex-wrap gap-2 mb-6 border-b border-slate-900 pb-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
         {ROLES_LIST.map((role) => (
           <button
             key={role}
             onClick={() => setSelectedRole(role)}
-            className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-xl border transition-all duration-300 cursor-pointer ${
+            className={`text-xs uppercase font-bold tracking-widest px-3 py-1.5 rounded-xl 
+              border transition-all duration-300 cursor-pointer 
+              ${
               selectedRole === role
                 ? 'bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.2)]'
                 : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
             }`}
           >
-            {role === 'Alle' ? '// ALLES ANZEIGEN' : `// ${role}`}
+            {role === 'Alle' ? 'ALLES ANZEIGEN' : ` ${role}`}
           </button>
         ))}
       </div>
 
-      {/* 🎛️ SMART-KOMBI: SUCHE & REICHWEITENSKALA IN DANIELS ORIGINAL-STYLE */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 max-w-3xl font-mono">
+
+      {/* Zeile 1: Künstlersuche, Standort, Genre */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 pt-6">
         
-        {/* Linke Seite: Nach Namen suchen */}
-        <div className="flex flex-col justify-end">
-          <label className="text-[8px] text-slate-500 uppercase font-black mb-1.5">// Nach Partner suchen</label>
+        {/* 1. Künstlersuche */}
+        <div>
+          <label className="text-xs font-mono text-slate-500 uppercase block mb-1.5">
+            // Netzwerk durchsuchen
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Nach Namen suchen..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="
+              w-full bg-slate-900/60 border border-slate-800 focus:border-cyan-500/50 
+              rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-all 
+              placeholder:text-slate-600
+              "
+            />
+          </div>
+        </div>
+
+        {/* 2. Basis-Standort */}
+        <div>
+          <label className="text-xs font-mono text-slate-500 uppercase block mb-1.5">
+            // Basis-Standort
+          </label>
           <input
             type="text"
-            placeholder="Nach Namen suchen..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-800 focus:border-cyan-500/40 rounded-xl px-4 py-2.5 text-xs outline-none text-white placeholder-slate-600 h-[38px]"
+            placeholder="z.B. Braunau, Linz..."
+            value={baseLocation}
+            onChange={(e) => setBaseLocation(e.target.value)}
+            className="
+            w-full bg-slate-900/60 border border-slate-800 
+            focus:border-cyan-500/50 rounded-xl px-4 py-2.5 
+            text-sm text-white focus:outline-none transition-all 
+            placeholder:text-slate-600
+            "
           />
         </div>
 
-        {/* Rechte Seite: Perfekt angeglichene Reichweitenskala */}
-        <div className="flex flex-col justify-end">
+        {/* 3. Genre */}
+        <div>
+          <label className="text-xs font-mono text-slate-500 uppercase block mb-1.5">
+            // Genre durchsuchen
+          </label>
+          <input
+            type="text"
+            placeholder="Genre Durchsuchen Text"
+            value={genreFilter}
+            onChange={(e) => setGenreFilter(e.target.value)}
+            className="
+            w-full bg-slate-900/60 border border-slate-800 focus:border-cyan-500/50 
+            rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-all 
+            placeholder:text-slate-600
+            "
+          />
+        </div>
+
+      </div>
+
+
+      {/* Zeile 2: Besetzung, Aktionsradius, Passend für (Type) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
+        {/* 1. Besetzung */}
+        <div>
+          <label className="text-xs font-mono text-slate-500 uppercase block mb-1.5">
+            // Besetzung
+          </label>
+          <select 
+            value={formationFilter}
+            onChange={(e) =>
+              setFormationFilter(e.target.value)
+            }
+            className="
+            w-full bg-slate-900/60 border border-slate-800 focus:border-cyan-500/50 
+            rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none transition-all cursor-pointer appearance-none
+            ">
+            <option value="">Alle Formationen</option>
+            <option value="solo">🎙 Solo-Act</option>
+            <option value="duo">👥 Duo / Trio</option>
+            <option value="band">🎸 Band / Musikgruppe</option>
+            <option value="dj">🎧 DJ / Producer</option>
+          </select>
+        </div>
+
+        {/* 2. Aktionsradius */}
+        <div>
           <div className="flex justify-between items-center mb-1.5">
-            <label className="text-[8px] text-slate-500 uppercase font-black">// Such-Umkreis</label>
-            <span className="text-[10px] text-cyan-400 font-bold tracking-wider font-mono">
-              🛰️ {searchRadius} KM
+            <label className="text-xs font-mono text-slate-500 uppercase">
+              // Aktionsradius
+            </label>
+            <span className="text-xs font-mono font-bold text-cyan-400">
+              🛰️ {searchRadius} km
             </span>
           </div>
-          
-          {/* Gleicher Kasten wie das Suchfeld daneben */}
-          <div className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 flex items-center gap-3 h-[38px]">
-            <span className="text-[8px] text-slate-600 font-mono font-bold">500KM</span>
+          <div className="pt-2">
             <input
               type="range"
               min="0"
@@ -362,31 +509,64 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veran
               step="10"
               value={searchRadius}
               onChange={(e) => setSearchRadius(Number(e.target.value))}
-              className="flex-grow bg-slate-950 h-1 rounded-none appearance-none cursor-pointer border border-slate-950
-                accent-cyan-500
-                [&::-webkit-slider-thumb]:appearance-none 
-                [&::-webkit-slider-thumb]:h-2 
-                [&::-webkit-slider-thumb]:w-2 
-                [&::-webkit-slider-thumb]:bg-cyan-400 
-                [&::-webkit-slider-thumb]:border 
-                [&::-webkit-slider-thumb]:border-cyan-500 
-                [&::-webkit-slider-thumb]:shadow-[0_0_6px_rgba(34,211,238,0.6)] 
-                [&::-webkit-slider-thumb]:transition-all 
-                [&::-webkit-slider-thumb]:duration-150
-                [&::-webkit-slider-thumb]:hover:scale-125
-                [&::-moz-range-thumb]:h-2 
-                [&::-moz-range-thumb]:w-2 
-                [&::-moz-range-thumb]:bg-cyan-400 
-                [&::-moz-range-thumb]:border 
-                [&::-moz-range-thumb]:border-cyan-500 
-                [&::-moz-range-thumb]:rounded-none
-                [&::-moz-range-thumb]:shadow-[0_0_6px_rgba(34,211,238,0.6)]"
+              className="w-full accent-cyan-500 bg-slate-900 h-1.5 rounded-lg cursor-pointer"
             />
-            <span className="text-[8px] text-slate-600 font-mono font-bold">100KM</span>
           </div>
         </div>
 
+        {/* 3. Passend für (Type) */}
+        <div>
+          <label className="text-xs font-mono text-slate-500 uppercase block mb-1.5">
+            // Passend für
+          </label>
+          <select 
+            value={eventTypeFilter}
+            onChange={(e) =>
+              setEventTypeFilter(e.target.value)
+            }
+            className="
+            w-full bg-slate-900/60 border border-slate-800 focus:border-cyan-500/50 
+            rounded-xl px-4 py-2.5 text-sm text-slate-300 focus:outline-none transition-all cursor-pointer appearance-none
+            ">
+            <option value="">Jeder Event-Typ</option>
+            <option value="club">Club / Festival</option>
+            <option value="corporate">Firmenevent / Gala</option>
+            <option value="wedding">Hochzeit / Privat</option>
+            <option value="bar">Bar / Lounge</option>
+          </select>
+        </div>
+
       </div>
+
+      {/* 💳 TREFFER */}
+      <div className="
+        mt-6
+        mb-4
+        inline-flex
+        items-center
+        gap-2
+        px-3
+        py-1
+        rounded-xl
+        border
+        border-yellow-500/30
+        bg-yellow-500/5
+      ">
+        <span className="animate-pulse">
+          ⚡
+        </span>
+
+        <span className="
+          text-yellow-400
+          text-xs
+          uppercase
+          tracking-widest
+          font-black
+        ">
+          {filteredUsers.length} TREFFER GEFUNDEN
+        </span>
+      </div>
+
 
       {/* 💳 VISITENKARTEN-GRID */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -412,11 +592,12 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Rental', 'Location', 'Veran
           ))
 
         ) : (
-          <div className="col-span-full bg-slate-900/10 border border-dashed border-slate-900 rounded-2xl p-12 text-center text-xs text-slate-600 font-mono">
+          <div className="col-span-full bg-slate-900/10 border border-dashed border-slate-900 rounded-2xl p-12 text-center text-sm text-slate-600 font-mono">
             // KEINE PASSENDEN B2B-PARTNER GEFUNDEN 🧹
           </div>
         )}
       </div>
+      
       {/* 🌌 DAS ECHTE NEON-ANFRAGETERMINAL (OVERLAY POPUP) */}
       {activeRequestUser && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center z-50 p-4 font-mono">

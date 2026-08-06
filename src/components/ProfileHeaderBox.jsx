@@ -81,9 +81,14 @@ const currentAchievement =
         const profileData =
           found.profile_json
             ? JSON.parse(found.profile_json)
-            : found;
+            : {};
 
-        setProfileData(profileData);
+        setProfileData({
+          ...profileData,
+          ...found,
+          role: found.role,
+          type: found.type
+        });
 
       localStorage.setItem(
         'gigsda_plan',

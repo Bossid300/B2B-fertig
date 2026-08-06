@@ -145,8 +145,17 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
       id: generatedId,
       name: regName,
       role: regRole,
-      city: '',
-      bio: ''
+
+      profile_json: JSON.stringify({
+        id: generatedId,
+        name: regName,
+        role: regRole,
+        city: '',
+        bio: '',
+        avatarUrl: '',
+        skills: [],
+        equipment: []
+      })
     });
 
     await createAuthUser({

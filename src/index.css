@@ -59,3 +59,46 @@
   }
 
 }
+
+.gigsda-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+/*   background: #0b0f19; Dunkler Hintergrund */
+/*   padding: 24px; */
+}
+ 
+.gigsda-box {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(0, 229, 255, 0.2); /* Dezenter Cyan-Rahmen */
+  border-radius: 12px;
+  padding: 16px 20px;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+ 
+/* Aktiver / Hover-Zustand mit Neon-Glow */
+.gigsda-box:hover,
+.gigsda-box.active {
+  border-color: #00e5ff;
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.25);
+  background: rgba(0, 229, 255, 0.05);
+}
+ 
+.gigsda-icon {
+  width: 24px;
+  height: 24px;
+  stroke: #00e5ff; /* Neon-Cyan für die Linien */
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}

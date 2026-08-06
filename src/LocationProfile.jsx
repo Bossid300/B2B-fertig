@@ -58,7 +58,12 @@ export default function LocationProfile({ onBack, ticketName, isOwner }) {
             const dbProfile =
               JSON.parse(found.profile_json);
 
-            setProfileData(dbProfile);
+            setProfileData({
+              ...dbProfile,
+              ...found,
+              role: found.role,
+              type: found.type
+            });
           } else {
             setProfileData(found);
           }

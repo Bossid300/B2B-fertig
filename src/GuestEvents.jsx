@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Search, MapPin, Star, Briefcase, Calendar, ChevronRight, X, Sparkles, Filter, ShieldCheck, Heart, User, Clock, ArrowRight } from 'lucide-react';
+
 import EventCard from './components/cards/EventCard';
 
 import { eventService } from './services/eventService';
@@ -8,122 +10,223 @@ export default function GuestEvents({ onNavigate }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Alle');
   const [searchRadius, setSearchRadius] = useState(500); // 📡 Live-Suchumkreis
+  const [baseLocation, setBaseLocation] = useState('Braunau');
 
   useEffect(() => {
     const localEvents = eventService.getEvents();
     setEvents(localEvents.filter(evt => evt && evt.title));
   }, []);
 
+
   const CATEGORIES_LIST = ['Alle', 'Konzerte', 'Festivals', 'Club-Gigs', 'B2B-Messen'];
 
   // 🗺️ DIE LIVE-ENTFERNUNGSMATRIX (Exakt identisch zum SearchExplorer von eurer Heimatbasis Braunau)
-  const getDistanceTo = (city) => {
+  const getDistanceTo = (base, city) => {
+    const from = (base || '').toLowerCase().trim();
     const target = (city || '').toLowerCase().trim();
-    if (target.includes('braunau')) return 0;   // Direkt vor Ort
-    if (target.includes('altötting')) return 28; // ca. 28 km entfernt
-    if (target.includes('linz')) return 120;     // ca. 120 km entfernt
-    if (target.includes('wien')) return 290;     // ca. 290 km entfernt
-    return 45; // Fallback
+
+    if (from.includes('braunau')) {
+      if (target.includes('braunau')) return 0;
+      if (target.includes('altötting')) return 28;
+      if (target.includes('linz')) return 120;
+      if (target.includes('wien')) return 290;
+    }
+
+    if (from.includes('linz')) {
+      if (target.includes('linz')) return 0;
+      if (target.includes('braunau')) return 120;
+      if (target.includes('wien')) return 185;
+      if (target.includes('passau')) return 95;
+    }
+
+    if (from.includes('wien')) {
+      if (target.includes('wien')) return 0;
+      if (target.includes('linz')) return 185;
+      if (target.includes('braunau')) return 290;
+    }
+
+
+    if (from.includes('passau')) {
+      if (target.includes('passau')) return 0;
+      if (target.includes('braunau')) return 65;
+      if (target.includes('linz')) return 95;
+    }
+
+    return 45;
   };
 
   // ⚡ DIE ZWILLINGS-FILTER-SCHLEIFE (Filtert nach Name, Kategorie UND Radius!)
   const filteredEvents = events.filter(event => {
-    const matchesName = event.title?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    // Kategorie-Weiche
-    const matchesCategory = selectedCategory === 'Alle' || event.category === selectedCategory;
 
-    // 🛰️ REAKTIVE RADIUS-PRÜFUNG gegen den Schieberegler
-    const eventDistance = getDistanceTo(event.city);
-    const matchesRadius = eventDistance <= searchRadius;
+    const searchValue =
+      searchTerm.toLowerCase();
 
-    return matchesName && matchesCategory && matchesRadius;
+    const matchesName =
+      event.title?.toLowerCase()
+        .includes(searchValue);
+
+    const matchesId =
+      event.id?.toLowerCase().includes(searchValue) ||
+      event.eventId?.toLowerCase().includes(searchValue);
+
+    const matchesCategory =
+      selectedCategory === 'Alle' ||
+      event.category === selectedCategory;
+
+    const eventDistance =
+      getDistanceTo(
+        baseLocation,
+        event.city
+      );
+
+    const matchesRadius =
+      eventDistance <= searchRadius;
+
+    return (
+      (matchesName || matchesId) &&
+      matchesCategory &&
+      matchesRadius
+    );
+
   });
 
-  return (
+return (
     <div className="max-w-7xl mx-auto p-6 text-white min-h-screen font-mono relative">
       
-      {/* 🌌 HEADER SEKTION */}
-      <div className="mb-8">
-        <h1 className="text-xl font-black text-cyan-400 uppercase tracking-wider mb-2">// EVENT-RADAR</h1>
-        <p className="text-xs text-slate-400">Durchsuche alle anstehenden Veranstaltungen und regionalen B2B-Gigs im Umkreis.</p>
-      </div>
+      {/* BANNER HEADER */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-slate-900 p-8 mb-8 shadow-2xl">
+        <div className="absolute top-0 right-0 p-6 text-slate-800 opacity-20 pointer-events-none">
+          <Sparkles size={160} />
+        </div>
+        <div className="relative z-10 max-w-2xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/40 border border-cyan-500/30 text-cyan-400 text-[10px] font-black uppercase tracking-widest mb-4 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+            <ShieldCheck size={12} /> Gigsda Engine V3.0 Activated
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2 bg-gradient-to-r from-white via-slate-200 to-slate-500 bg-clip-text text-transparent">
+            EVENT-RADAR
+          </h1>
+          <p className="text-xs text-slate-400 leading-relaxed max-w-lg uppercase tracking-wide">
+            Durchsuche alle anstehenden Veranstaltungen und regionalen B2B-Gigs im Umkreis.
+          </p>
+        </div>
+      </div>   
+
 
       {/* 🎛️ FILTER-LEISTE (KATEGORIEN) */}
-      <div className="flex flex-wrap gap-2 mb-6 border-b border-slate-900 pb-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
         {CATEGORIES_LIST.map((cat) => (
           <button
             key={cat}
             onClick={() => setSelectedCategory(cat)}
-            className={`text-[10px] uppercase font-bold tracking-widest px-3 py-1.5 rounded-xl border transition-all duration-300 cursor-pointer ${
+            className={`text-xs uppercase font-bold tracking-widest px-3 py-1.5 rounded-xl border transition-all duration-300 cursor-pointer ${
               selectedCategory === cat
                 ? 'bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-[0_0_12px_rgba(34,211,238,0.2)]'
                 : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-white'
             }`}
           >
-            {cat === 'Alle' ? '// ALLES ANZEIGEN' : `// ${cat}`}
+            {cat === 'Alle' ? ' ALLES ANZEIGEN' : ` ${cat}`}
           </button>
         ))}
       </div>
 
-      {/* 🎛️ DANIELS SMART-KOMBI: SUCHE & REICHWEITENSKALA IN EXAKTER SYMMETRIE */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 max-w-3xl font-mono">
+
+      {/* Zeile 1: Künstlersuche, Standort, Genre */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 pt-6">
         
-        {/* Linke Seite: Nach Event-Namen suchen */}
-        <div className="flex flex-col justify-end">
-          <label className="text-[8px] text-slate-500 uppercase font-black mb-1.5">// Nach Event suchen</label>
+        {/* 1. Künstlersuche */}
+        <div>
+          <label className="text-xs font-mono text-slate-500 uppercase block mb-1.5">
+            // Events durchsuchen
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Nach Namen suchen..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="
+              w-full bg-slate-900/60 border border-slate-800 focus:border-cyan-500/50 
+              rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none transition-all 
+              placeholder:text-slate-600
+              "
+            />
+          </div>
+        </div>
+
+        {/* 2. Basis-Standort */}
+        <div>
+          <label className="text-xs font-mono text-slate-500 uppercase block mb-1.5">
+            // Basis-Standort
+          </label>
           <input
             type="text"
-            placeholder="Event-Titel suchen..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-900 border border-slate-800 focus:border-cyan-500/40 rounded-xl px-4 py-2.5 text-xs outline-none text-white placeholder-slate-600 h-[38px]"
+            placeholder="z.B. Braunau, Linz..."
+            value={baseLocation}
+            onChange={(e) => setBaseLocation(e.target.value)}
+            className="
+            w-full bg-slate-900/60 border border-slate-800 
+            focus:border-cyan-500/50 rounded-xl px-4 py-2.5 
+            text-sm text-white focus:outline-none transition-all 
+            placeholder:text-slate-600
+            "
           />
         </div>
 
-        {/* Rechte Seite: Perfekt angeglichene Reichweitenskala (Zwillings-Design) */}
-        <div className="flex flex-col justify-end">
+        {/* 2. Aktionsradius */}
+        <div>
           <div className="flex justify-between items-center mb-1.5">
-            <label className="text-[8px] text-slate-500 uppercase font-black">// Event-Umkreis</label>
-            <span className="text-[10px] text-cyan-400 font-bold tracking-wider font-mono">
-              🛰️ {searchRadius} KM
+            <label className="text-xs font-mono text-slate-500 uppercase">
+              // Aktionsradius
+            </label>
+            <span className="text-xs font-mono font-bold text-cyan-400">
+              🛰️ {searchRadius} km
             </span>
           </div>
-          
-          <div className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 flex items-center gap-3 h-[38px]">
-            <span className="text-[8px] text-slate-600 font-mono font-bold">500KM</span>
+          <div className="pt-2">
             <input
               type="range"
               min="0"
-              max="500" // Kannst du analog zum SearchExplorer auf 150 oder 200 erhöhen
+              max="500"
               step="10"
               value={searchRadius}
               onChange={(e) => setSearchRadius(Number(e.target.value))}
-              className="flex-grow bg-slate-950 h-1 rounded-none appearance-none cursor-pointer border border-slate-950
-                accent-cyan-500
-                [&::-webkit-slider-thumb]:appearance-none 
-                [&::-webkit-slider-thumb]:h-2 
-                [&::-webkit-slider-thumb]:w-2 
-                [&::-webkit-slider-thumb]:bg-cyan-400 
-                [&::-webkit-slider-thumb]:border 
-                [&::-webkit-slider-thumb]:border-cyan-500 
-                [&::-webkit-slider-thumb]:shadow-[0_0_6px_rgba(34,211,238,0.6)] 
-                [&::-webkit-slider-thumb]:transition-all 
-                [&::-webkit-slider-thumb]:duration-150
-                [&::-webkit-slider-thumb]:hover:scale-125
-                [&::-moz-range-thumb]:h-2 
-                [&::-moz-range-thumb]:w-2 
-                [&::-moz-range-thumb]:bg-cyan-400 
-                [&::-moz-range-thumb]:border 
-                [&::-moz-range-thumb]:border-cyan-500 
-                [&::-moz-range-thumb]:rounded-none
-                [&::-moz-range-thumb]:shadow-[0_0_6px_rgba(34,211,238,0.6)]"
+              className="w-full accent-cyan-500 bg-slate-900 h-1.5 rounded-lg cursor-pointer"
             />
-            <span className="text-[8px] text-slate-600 font-mono font-bold">100KM</span>
           </div>
         </div>
 
       </div>
+
+
+      {/* 💳 TREFFER */}
+      <div className="
+        mt-4
+        mb-4
+        inline-flex
+        items-center
+        gap-2
+        px-3
+        py-1
+        rounded-xl
+        border
+        border-yellow-500/30
+        bg-yellow-500/5
+      ">
+        <span className="animate-pulse">
+          ⚡
+        </span>
+
+        <span className="
+          text-yellow-400
+          text-xs
+          uppercase
+          tracking-widest
+          font-black
+        ">
+          {filteredEvents.length} TREFFER GEFUNDEN
+        </span>
+      </div>
+
 
 
 
@@ -137,24 +240,47 @@ export default function GuestEvents({ onNavigate }) {
               key={`${event.id || 'event'}-${index}`}
               event={{
                 ...event,
-                title:
-                  event.promotionData?.title ||
-                  event.title,
-                category:
-                  event.promotionData?.category ||
-                  event.category,
-                shortDescription:
-                  event.promotionData?.shortDescription,
-                slide1_url:
-                  event.promotionData?.promoImage ||
-                  event.slide1_url,
-                entryTime:
-                  event.promotionData?.entryTime,
-                startTime:
-                  event.promotionData?.startTime,
-                city:
-                  event.venue ||
-                  event.city
+
+                  title:
+                    event.promotionData?.title ||
+                    event.title,
+
+                  category:
+                    event.promotionData?.category ||
+                    event.category,
+
+                  shortDescription:
+                    event.promotionData?.shortDescription,
+
+                  slide1_url:
+                    event.promotionData?.promoImage ||
+                    event.slide1_url,
+
+                  entryTime:
+                    event.promotionData?.entryTime,
+
+                  startTime:
+                    event.promotionData?.startTime,
+
+                  ticketPrice:
+                    event.promotionData?.ticketPrice,
+
+                  ticketStatus:
+                    event.promotionData?.ticketStatus,
+
+                  fsk:
+                    event.promotionData?.fsk,
+
+                  lineup:
+                    event.promotionData?.lineup,
+
+                  amenities:
+                    event.promotionData?.amenities,
+
+                  city:
+                    event.venue ||
+                    event.city
+
               }}
             />
           ))

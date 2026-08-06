@@ -30,7 +30,7 @@ const cards = [
     </h2>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         {cards.map((card, index) => (
-        <div key={index} className="overflow-hidden rounded-2xl border border-cyan-500/30 bg-slate-900/">
+        <div key={index} className="overflow-hidden rounded-2xl border border-cyan-500/30 bg-slate-900/ transition-transform duration-300 hover:scale-105 hover:shadow-lg">
             {/* HIER WAR VORHER NUR {card.image} */}
             <img src={card.image} alt={card.alt} className="w-full h-auto object-cover" />
         </div>

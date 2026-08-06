@@ -20,6 +20,7 @@ export default function EventPromotion({
   activeEvent
 }) {
 
+
 const [profiles, setProfiles] = useState([]);
 useEffect(() => {
   getProfilesDb()
@@ -52,7 +53,12 @@ const [promoData, setPromoData] = useState(
     promoImage: '',
     ticketLink: '',
     entryTime: '',
-    startTime: ''
+    startTime: '',
+    ticketPrice: '',
+    ticketStatus: '',
+    fsk: '',
+    lineup: '',
+    amenities: ''
   }
 );
 
@@ -64,7 +70,12 @@ const promoChecks = [
   promoData.promoImage,
   promoData.shortDescription,
   promoData.description,
-  promoData.ticketLink
+  promoData.ticketLink,
+
+  promoData.ticketPrice,
+  promoData.ticketStatus,
+  promoData.fsk,
+  promoData.lineup
 ];
 
 const completedPromoChecks =
@@ -94,9 +105,7 @@ useEffect(() => {
 
   const promo =
     activeEvent?.promotionData;
-
   if (!promo) return;
-
     setPromoData({
     title:
       promo.title ||
@@ -117,7 +126,17 @@ useEffect(() => {
     entryTime:
       promo.entryTime || '',
     startTime:
-      promo.startTime || ''
+      promo.startTime || '',
+    ticketPrice:
+      promo.ticketPrice || '',
+    ticketStatus:
+      promo.ticketStatus || '',
+    fsk:
+      promo.fsk || '',
+    lineup:
+      promo.lineup || '',
+    amenities:
+      promo.amenities || ''
   });
 
 }, [activeEvent?.id]);
@@ -126,29 +145,36 @@ useEffect(() => {
 const handleSavePromotion = () => {
 
   if (!activeEvent) return;
-const events =
-  eventService.getEvents();
+  const events =
+    eventService.getEvents();
 
-  const updatedEvents = events.map(event => {
-    if (event.id !== activeEvent.id) {
-      return event;
-    }
-    return {
-      ...event,
+    const updatedEvents = events.map(event => {
+      if (event.id !== activeEvent.id) {
+        return event;
+      }
+      return {
+        ...event,
 
-      promotionData: promoData
-    };
-  });
-eventService.saveEvents(updatedEvents);
+        promotionData: promoData
+      };
+    });
+  eventService.saveEvents(updatedEvents);
 
-const changedEvent =
-  updatedEvents.find(event =>
-    event.id === activeEvent.id
-  );
+  const changedEvent =
+    updatedEvents.find(event =>
+      event.id === activeEvent.id
+    );
 
-if (changedEvent) {
-  eventService.saveEvent(changedEvent);
-}
+  if (changedEvent) {
+    eventService.saveEvent(changedEvent);
+  }
+
+  setSaveMessage(true);
+
+  setTimeout(() => {
+    setSaveMessage(false);
+  }, 3000);
+
 };
 
 const currentUserId =
@@ -167,6 +193,7 @@ const ownerLead =
 const ownerName =
   ownerLead?.name || "Unbekannt";
 
+const [saveMessage, setSaveMessage] = useState(false);
 
 
 
@@ -208,7 +235,36 @@ const formatPromotionDate = (value) => {
 
 
 
-  return (
+return (
+
+  <>
+    {saveMessage && (
+      <div
+        className="
+          fixed
+          top-6
+          right-6
+          z-[9999]
+          px-6
+          py-4
+          rounded-2xl
+          border
+          border-cyan-500/30
+          bg-slate-950/95
+          backdrop-blur-sm
+          shadow-[0_0_30px_rgba(6,182,212,0.35)]
+        "
+      >
+        <div className="text-cyan-400 font-black uppercase tracking-wider">
+          🚀 Promotion eingebrannt
+        </div>
+
+        <div className="text-slate-400 text-xs mt-1">
+          Event-Radar aktualisiert.
+        </div>
+      </div>
+    )}
+
 
     
     <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
@@ -249,15 +305,33 @@ const formatPromotionDate = (value) => {
             style={{ width: `${promoProgress}%` }}
           />
         </div>
-        <div className="space-y-2 text-sm">
-          <div>{promoData.title ? '✅' : '🔴'} Eventtitel</div>
-          <div>{promoData.category || activeEvent?.category ? '✅' : '🔴'} Kategorie</div>
-          <div>{activeEvent?.venue ? '✅' : '🔴'} Veranstaltungsort</div>
-          <div>{activeEvent?.date ? '✅' : '🔴'} Datum</div>
-          <div>{promoData.shortDescription ? '✅' : '🔴'} Kurzbeschreibung</div>
-          <div>{promoData.description ? '✅' : '🔴'} Beschreibung</div>
-          <div>{promoData.ticketLink ? '✅' : '🔴'} Ticketlink</div>
-        </div>
+          <div className="grid md:grid-cols-2 gap-2 text-sm">
+
+            <div>{promoData.title ? '✅' : '🔴'} Eventtitel</div>
+
+            <div>{promoData.category || activeEvent?.category ? '✅' : '🔴'} Kategorie</div>
+
+            <div>{activeEvent?.venue ? '✅' : '🔴'} Veranstaltungsort</div>
+
+            <div>{activeEvent?.date ? '✅' : '🔴'} Datum</div>
+
+            <div>{promoData.promoImage ? '✅' : '🔴'} Promobild</div>
+
+            <div>{promoData.shortDescription ? '✅' : '🔴'} Kurzbeschreibung</div>
+
+            <div>{promoData.description ? '✅' : '🔴'} Beschreibung</div>
+
+            <div>{promoData.ticketLink ? '✅' : '🔴'} Ticketlink</div>
+
+            <div>{promoData.ticketPrice ? '✅' : '🔴'} Ticketpreis</div>
+
+            <div>{promoData.ticketStatus ? '✅' : '🔴'} Eventstatus</div>
+
+            <div>{promoData.fsk ? '✅' : '🔴'} FSK</div>
+
+            <div>{promoData.lineup ? '✅' : '🔴'} Line-Up</div>
+            
+          </div>
       </div>
 
 
@@ -533,6 +607,135 @@ const formatPromotionDate = (value) => {
 
 
 
+<div className="grid md:grid-cols-3 gap-5">
+
+  <div>
+    <label className="block text-xs uppercase text-slate-500 mb-2">
+      Ticketpreis
+    </label>
+    <input
+      type="text"
+      value={promoData.ticketPrice || ""}
+      onChange={(e) =>
+        setPromoData({
+          ...promoData,
+          ticketPrice: e.target.value
+        })
+      }
+      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white"
+      placeholder="z.B. 39,50 €"
+    />
+  </div>
+
+  <div>
+    <label className="block text-xs uppercase text-slate-500 mb-2">
+      Eventstatus
+    </label>
+    <select
+      value={promoData.ticketStatus || ""}
+      onChange={(e) =>
+        setPromoData({
+          ...promoData,
+          ticketStatus: e.target.value
+        })
+      }
+      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white"
+    >
+      <option value="">Bitte wählen</option>
+      <option value="Verfügbar">Verfügbar</option>
+      <option value="Fast ausverkauft">Fast ausverkauft</option>
+      <option value="Ausverkauft">Ausverkauft</option>
+    </select>
+  </div>
+
+  <div>
+    <label className="block text-xs uppercase text-slate-500 mb-2">
+      FSK
+    </label>
+    <select
+      value={promoData.fsk || ""}
+      onChange={(e) =>
+        setPromoData({
+          ...promoData,
+          fsk: e.target.value
+        })
+      }
+      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white"
+    >
+      <option value="">Keine Angabe</option>
+      <option value="Ohne Altersbeschränkung">0</option>
+      <option value="Ab 12 Jahren">12</option>
+      <option value="Ab 16 Jahren">16</option>
+      <option value="Ab 18 Jahren">18</option>
+    </select>
+  </div>
+
+</div>
+
+
+
+
+
+
+
+
+
+<div>
+  <label className="block text-xs uppercase text-slate-500 mb-2">
+    Line-Up
+  </label>
+
+  <textarea
+    rows={4}
+    value={promoData.lineup || ""}
+    onChange={(e) =>
+      setPromoData({
+        ...promoData,
+        lineup: e.target.value
+      })
+    }
+    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white resize-none"
+    placeholder={`The Foos
+DJ Spark
+Electro Giants
+Local Heroes`}
+  />
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<div>
+  <label className="block text-xs uppercase text-slate-500 mb-2">
+    Fan-Annehmlichkeiten
+  </label>
+
+  <textarea
+    rows={3}
+    value={promoData.amenities || ""}
+    onChange={(e) =>
+      setPromoData({
+        ...promoData,
+        amenities: e.target.value
+      })
+    }
+    className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white resize-none"
+    placeholder="Barrierefrei, kostenlose Parkplätze, VIP-Bereich ..."
+  />
+</div>
+
+
+
+
+
+
 
 
 
@@ -636,6 +839,14 @@ const formatPromotionDate = (value) => {
 
     <div>{promoData.ticketLink ? '✅' : '🔴'} Ticketlink</div>
 
+    <div>{promoData.ticketPrice ? '✅' : '🔴'} Ticketpreis</div>
+
+    <div>{promoData.ticketStatus ? '✅' : '🔴'} Eventstatus</div>
+
+    <div>{promoData.fsk ? '✅' : '🔴'} FSK</div>
+
+    <div>{promoData.lineup ? '✅' : '🔴'} Line-Up</div>
+
   </div>
 
 </div>
@@ -671,18 +882,24 @@ const formatPromotionDate = (value) => {
         <EventCard
           event={{
             ...activeEvent,
-            title:
-                promoData.title || activeEvent?.title,
-            category:
-                promoData.category || activeEvent?.category,
-            shortDescription:
-                promoData.shortDescription,
+
+            title: promoData.title || activeEvent?.title,
+            category: promoData.category || activeEvent?.category,
+            shortDescription: promoData.shortDescription,
+
             entryTime: promoData.entryTime,
             startTime: promoData.startTime,
-            city:
-                activeEvent?.venue,
+
+            ticketPrice: promoData.ticketPrice,
+            ticketStatus: promoData.ticketStatus,
+            fsk: promoData.fsk,
+            lineup: promoData.lineup,
+            amenities: promoData.amenities,
+
+            city: activeEvent?.venue,
+
             slide1_url:
-                promoData.promoImage ||
+              promoData.promoImage ||
               "https://placehold.co/1200x600/png"
           }}
         />
@@ -855,6 +1072,11 @@ const formatPromotionDate = (value) => {
             font-black
             uppercase
             tracking-wider
+            transform
+            transition-all
+            hover:scale-[1.02]
+            active:scale-[0.98]
+            shadow-[0_0_20px_rgba(6,182,212,0.2)]
           "
         >
           Speichern 💾
@@ -874,7 +1096,7 @@ const formatPromotionDate = (value) => {
       </div>
       
     </div>
-
+  </>
   );
 
 }

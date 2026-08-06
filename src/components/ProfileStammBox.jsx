@@ -30,40 +30,47 @@ export default function ProfileStammBox({ currentProfileName, isOwner }) {
         const profileData =
           found.profile_json
             ? JSON.parse(found.profile_json)
-            : found;
+            : {};
 
-        setProfile(profileData);
+        const mergedProfile = {
+          ...profileData,
+          ...found,
+          role: found.role,
+          type: found.type
+        };
+
+        setProfile(mergedProfile);
 
         setFormData({
-          role: profileData.role || 'Künstler',
-          avatarUrl: profileData.avatarUrl || '',
-          category: profileData.category || profileData.project_name || '',
-          Klarname: profileData.Klarname || '',
-          name: profileData.name || targetUser,
-          vorname: profileData.vorname || '',
-          nachname: profileData.nachname || '',
-          plz: profileData.plz || '',
-          city: profileData.city || '',
-          street: profileData.street || '',
-          phone: profileData.phone || '',
-          email: profileData.email || '',
-          website: profileData.website || '',
-          genre: profileData.genre || '',
-          id: profileData.id || '',
-          ticketName: profileData.ticketName || targetUser,
-          description: profileData.description || '',
+          role: mergedProfile.role || 'Künstler',
+          avatarUrl: mergedProfile.avatarUrl || '',
+          category: mergedProfile.category || mergedProfile.project_name || '',
+          Klarname: mergedProfile.Klarname || '',
+          name: mergedProfile.name || targetUser,
+          vorname: mergedProfile.vorname || '',
+          nachname: mergedProfile.nachname || '',
+          plz: mergedProfile.plz || '',
+          city: mergedProfile.city || '',
+          street: mergedProfile.street || '',
+          phone: mergedProfile.phone || '',
+          email: mergedProfile.email || '',
+          website: mergedProfile.website || '',
+          genre: mergedProfile.genre || '',
+          id: mergedProfile.id || '',
+          ticketName: mergedProfile.ticketName || targetUser,
+          description: mergedProfile.description || '',
 
-          show_category: profileData.show_category !== false,
-          show_Klarname: profileData.show_Klarname !== false,
-          show_name: profileData.show_name !== false,
-          show_name_real: profileData.show_name_real !== false,
-          show_phone: profileData.show_phone !== false,
-          show_email: profileData.show_email !== false,
-          show_address: profileData.show_address !== false,
-          show_website: profileData.show_website !== false,
-          show_genre: profileData.show_genre !== false,
-          show_description: profileData.show_description !== false,
-          show_avatarUrl: profileData.show_avatarUrl !== false
+          show_category: mergedProfile.show_category !== false,
+          show_Klarname: mergedProfile.show_Klarname !== false,
+          show_name: mergedProfile.show_name !== false,
+          show_name_real: mergedProfile.show_name_real !== false,
+          show_phone: mergedProfile.show_phone !== false,
+          show_email: mergedProfile.show_email !== false,
+          show_address: mergedProfile.show_address !== false,
+          show_website: mergedProfile.show_website !== false,
+          show_genre: mergedProfile.show_genre !== false,
+          show_description: mergedProfile.show_description !== false,
+          show_avatarUrl: mergedProfile.show_avatarUrl !== false
       });
 
     })

@@ -3,6 +3,7 @@ import { Search, MapPin, Ticket, Shield, Sliders, Calendar, ArrowRight, CheckCir
 import GuestPass from './GuestPass';
 import Roadmap from "./components/Roadmap";
 import ASoFunktioniertEs from "./components/a_SoFunktioniertEs";
+import A3bildernetzwerk from "./components/a_3bilder_netzwerk";
 
 
 // 📡 Daniels originale Testdaten (Bands, Termine und geile Locations)
@@ -204,180 +205,380 @@ const [videoMuted, setVideoMuted] = useState(true);
         ))}
       </div>
 
+
+
       {/* 🛠️ SPERREN-SEKTION: "SO FUNKTIONIERT ES" */}
       <div className="max-w-6xl mx-auto px-4 md:px-8 pt-6 border-t border-slate-900/60 text-left font-mono z-10 relative">
-
-
         <ASoFunktioniertEs onEnterCenter={onEnterCenter} />
+      </div>  
 
 
-              <section>
-                {/* 🌌 ZENTRIERTES CYBERPUNK-LOGO-ZENTRUM */}
-                <div className="w-full flex flex-col items-center justify-center my-12 md:my-16 font-mono select-none pointer-events-none">
-                {/* DER LEUCHTENDE HINTERGRUND-AURA-RING */}
-                <div className="relative flex items-center justify-center">
-                  {/* 📡 PULSIERENDE RADAR-NEON-WELLE IM HINTERGRUND */}
-                  <span className="animate-ping absolute inline-flex h-24 w-24 md:h-36 md:w-36 rounded-full bg-cyan-500/10 border border-cyan-500/20 opacity-40"></span>
-                  {/* DAS ECHTE LOGO (Frisch aus eurem Assets-Ordner!) */}
-                  <img 
-                    src="/2026/logos/gigsda-logo-1.svg" 
-                    alt="Gigsda Portal Logo" 
-                    className="h-36 md:h-48 w-auto object-contain relative z-10 drop-shadow-[0_0_15px_rgba(6,182,212,0.25)]"
-                    onError={(e) => {
-                      // 🚨 SECURITY-FALLBACK: Falls Daniels Pfad anders heißt, zeichnet der Code ein edles SVG-Ersatz-Icon, damit nichts abstürzt!
-                      e.target.onerror = null;
-                      e.target.style.display = 'none';
-                      e.target.parentNode.insertAdjacentHTML('beforeend', `
-                        <div class="h-16 w-16 md:h-20 md:w-20 bg-gradient-to-tr from-cyan-500 to-pink-500 rounded-2xl flex items-center justify-center font-sans font-black text-xl text-white border border-cyan-400/40 shadow-[0_0_20px_rgba(6,182,212,0.3)] animate-pulse">
-                          G
-                        </div>
-                      `);
-                    }}
-                  />
-                  </div>
-                  {/* REAKTIVE DESIGN-TRENNDOTTS */}
-                  <div className="flex gap-1.5 mt-4 opacity-20">
-                    <span className="h-1 w-1 bg-cyan-400 rounded-full"></span>
-                    <span className="h-1 w-6 bg-gradient-to-r from-cyan-400 to-pink-500 rounded-full"></span>
-                    <span className="h-1 w-1 bg-pink-500 rounded-full"></span>
-                  </div>
+      {/* ================================================================ */}
+      {/* FÜR ALLE BESUCHER */}
+      {/* ================================================================ */}
+
+      <section className="mt-12 max-w-6xl mx-auto pt-6 px-4 md:px-8 space-y-10">
+        <div className="relative overflow-hidden rounded-3xl border border-cyan-500/20 bg-slate-950/60 backdrop-blur-sm p-8 md:p-12">
+
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-purple-500/5 pointer-events-none" />
+
+          <div className="relative z-10 max-w-4xl">
+            <div className="text-xs font-mono uppercase tracking-[0.3em] text-yellow-400 mb-4">
+              // Für alle Besucher
+            </div>
+
+            <h2 className="text-4xl md:text-4xl font-black text-white uppercase leading-tight">
+              Erlebe die Eventwelt
+              <br />
+              hinter den Kulissen.
+            </h2>
+
+            <p className="text-slate-500 text-grey text-xd font-sans leading-relaxed max-w-3xl mt-6">
+              GIGSDA ist mehr als ein Eventkalender.
+              Entdecke Veranstaltungen, lerne Künstler kennen und verfolge
+              Projekte bereits lange bevor die erste Bühne aufgebaut wird.
+              Die Plattform verbindet Besucher mit den Menschen, Teams und
+              Ideen, die Live-Events möglich machen.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              {[
+                "Events entdecken",
+                "Künstler kennenlernen",
+                "Projekte verfolgen",
+                "Die Szene erleben",
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="
+                    px-4 py-2 rounded-full
+                    border border-cyan-500/20
+                    bg-slate-900/60
+                    text-cyan-300
+                    text-sm
+                    uppercase
+                    tracking-wide
+                  "
+                >
+                  {item}
                 </div>
-              </section>
+              ))}
+            </div>
 
-              {/* Building Gigsda In Public */}
-              <div className="max-w-6xl mx-auto">
-                <Roadmap />
-              </div>
-              
-              <section>
-              {/* ANKER-VORSCHAU-PFEIL */}
-              <div className="mt-10 flex justify-center text-slate-600 animate-bounce">
-                <div className="text-center font-mono text-xm uppercase tracking-widest">
-                  für alle Besucher
-                  <ChevronDown className="w-4 h-4 mx-auto mt-1 text-cyan-500/60" />
+            <div className="mt-10 flex items-center gap-4">
+              <div className="h-px w-20 bg-gradient-to-r from-cyan-400 to-purple-500" />
+              <span className="text-white font-bold uppercase tracking-widest">
+                Live. Lokal. Vernetzt.
+              </span>
+            </div>
+
+            <p className="mt-4 text-sm text-slate-500">
+              Kostenlos als Gast nutzbar.
+            </p>
+          </div>
+        </div>
+      </section>
+
+
+
+      <section>
+        {/* 🌌 ZENTRIERTES CYBERPUNK-LOGO-ZENTRUM */}
+        <div className="w-full flex flex-col items-center justify-center my-12 md:my-16 font-mono select-none pointer-events-none">
+        {/* DER LEUCHTENDE HINTERGRUND-AURA-RING */}
+        <div className="relative flex items-center justify-center">
+          {/* 📡 PULSIERENDE RADAR-NEON-WELLE IM HINTERGRUND */}
+          <span className="animate-ping absolute inline-flex h-24 w-24 md:h-36 md:w-36 rounded-full bg-cyan-500/10 border border-cyan-500/20 opacity-40"></span>
+          {/* DAS ECHTE LOGO (Frisch aus eurem Assets-Ordner!) */}
+          <img 
+            src="/2026/logos/gigsda-logo-1.svg" 
+            alt="Gigsda Portal Logo" 
+            className="h-36 md:h-48 w-auto object-contain relative z-10 drop-shadow-[0_0_15px_rgba(6,182,212,0.25)]"
+            onError={(e) => {
+              // 🚨 SECURITY-FALLBACK: Falls Daniels Pfad anders heißt, zeichnet der Code ein edles SVG-Ersatz-Icon, damit nichts abstürzt!
+              e.target.onerror = null;
+              e.target.style.display = 'none';
+              e.target.parentNode.insertAdjacentHTML('beforeend', `
+                <div class="h-16 w-16 md:h-20 md:w-20 bg-gradient-to-tr from-cyan-500 to-pink-500 rounded-2xl flex items-center justify-center font-sans font-black text-xl text-white border border-cyan-400/40 shadow-[0_0_20px_rgba(6,182,212,0.3)] animate-pulse">
+                  G
                 </div>
-              </div>
-              </section>
+              `);
+            }}
+          />
+          </div>
+          {/* REAKTIVE DESIGN-TRENNDOTTS */}
+          <div className="flex gap-1.5 mt-4 opacity-20">
+            <span className="h-1 w-1 bg-cyan-400 rounded-full"></span>
+            <span className="h-1 w-6 bg-gradient-to-r from-cyan-400 to-pink-500 rounded-full"></span>
+            <span className="h-1 w-1 bg-pink-500 rounded-full"></span>
+          </div>
+        </div>
+      </section>
 
-              {/* ========================================================================= */}
-              {/* SEKTION 4: DAS KÜNSTLER- & PLANER-VERSPRECHEN                             */}
-              {/* ========================================================================= */}
-              <section className="mt-6 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+
+      <section className="max-w-6xl mx-auto space-y-10">
+        <div className="text-center max-w-4xl mx-auto space-y-3 mt-12">
+          <h2 className="text-4xl font-black text-white uppercase tracking-tight leading-none">
+            Fans, Künstler, Veranstalter, Verleiher, Techniker, Locations, Catering und viele mehr ...
+          </h2>
+          <p className="text-slate-500 text-xl font-sans leading-relaxed">
+            „Gigsda“ schafft einfache Wege, um die Planung für eine Veranstaltung zu vollziehen. 
+          </p>  
+          <p className="text-slate-500 text-xl font-sans leading-relaxed">
+            Du musst nicht zwingend ein Veranstalter sein, um ein Projekt zu starten.
+          </p>
+        </div>
+      </section>
+
+
+
+      {/* ================================================================ */}
+      {/* DAS GIGSDA NETZWERK */}
+      {/* ================================================================ */}
+
+      <section className="mt-12 max-w-6xl mx-auto pt-6 px-4 md:px-8 space-y-10">
+        <div className="relative overflow-hidden rounded-3xl border border-purple-500/20 bg-slate-950/60 backdrop-blur-sm p-8 md:p-12">
+
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-transparent to-cyan-500/5 pointer-events-none" />
+
+          <div className="relative z-10 max-w-4xl">
+            <div className="text-xs font-mono uppercase tracking-[0.3em] text-purple-400 mb-4">
+              // Das GIGSDA Netzwerk
+            </div>
+
+            <h2 className="text-4xl md:text-4xl font-black text-white uppercase leading-tight">
+              Werde Teil der Event-Community.
+            </h2>
+
+            <p className="text-slate-500 text-grey text-xd font-sans leading-relaxed max-w-3xl mt-6">
+              Mit einem kostenlosen GIGSDA-Profil wirst du Teil eines
+              wachsenden Netzwerks aus Künstlern, Bands, DJs,
+              Technikern, Dienstleistern, Veranstaltern und Event-Crews.
+              Vernetze dich mit anderen Mitgliedern, entdecke neue
+              Möglichkeiten und baue deine Präsenz in der Live-Event-Szene aus.
+            </p>
+
+{/*             <div className="grid md:grid-cols-2 gap-3 mt-8">
+ */}
+{/*               <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+                🎤 Künstler & Bands finden
+              </div>
+
+              <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+                🤝 Neue Kontakte knüpfen
+              </div>
+
+              <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+                🚀 Für Projekte angefragt werden
+              </div>
+
+              <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+                📍 Regional sichtbar werden
+              </div>
+
+              <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+                💬 Community nutzen
+              </div>
+
+              <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
+                🎪 Teil echter Event-Crews werden
+              </div> */}
+              <div class="gigsda-grid pt-6 md:pt-8 gap-4 md:gap-6">
+                <div class="gigsda-box">
+                <svg class="gigsda-icon" viewBox="0 0 24 24">
+                <path d="M2 12h3l3-9 4 18 3-9h3" />
+                </svg>
+                    Künstler & Bands finden
+                </div>
                 
-                {/* Block 1: Die Bühne für Künstler */}
-                <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 space-y-4 flex flex-col justify-between hover:border-slate-800 transition-all shadow-xl">
-                  <div className="space-y-3">
-                    <div className="text-xl font-black text-cyan-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-950 pb-2">
-                      <Award className="w-4 h-4" /> 
-                      Die Bühne für Künstler!
-                    </div>
-                    <p className="text-slate-400 text-xm font-sans leading-relaxed">
-                      In erster Linie wollen wir Brücken erstellen, um Bands oder Künstler zu unterstützen, damit Ihr Mehrwert wieder ansteigt. Einmal das Profil informativ ausgefüllt, und jeder Veranstalter sieht auf einen Blick, welche Anforderungen ihr habt (Technical Rider).
-                    </p>
-                  </div>
-                  <p className="text-xs text-slate-500 italic font-sans leading-relaxed pt-2">
-                    „Durch gigsda bekommen semiprofessionelle Künstler schneller die Chance auf bessere Gigs, mehr Gage und mehr Fans.“
-                  </p>
+                <div class="gigsda-box">
+                <svg class="gigsda-icon" viewBox="0 0 24 24">
+                <circle cx="5" cy="6" r="2" />
+                <circle cx="19" cy="8" r="2" />
+                <circle cx="12" cy="18" r="2" />
+                <line x1="6.5" y1="7.2" x2="10.5" y2="16.5" />
+                <line x1="17.5" y1="9" x2="13.5" y2="16.5" />
+                <line x1="7" y1="6" x2="17" y2="8" />
+                </svg>
+                    Neue Kontakte knüpfen
                 </div>
-        
-                {/* Block 2: Eventplanung */}
-                <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 space-y-4 flex flex-col justify-between hover:border-slate-800 transition-all shadow-xl">
-                  <div className="space-y-3">
-                    <div className="text-xl font-black text-purple-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-950 pb-2">
-                      <Layers className="w-4 h-4" /> 
-                      Eventplanung!
-                    </div>
-                    <p className="text-slate-400 text-xm font-sans leading-relaxed">
-                      Durch einige Tools schaffen wir neue Wege, um einem Künstler dabei zu helfen, sein Ziel schneller durch vereinfachte Planung zu erreichen. All dies mit geringstem Zeitaufwand, damit er sich wieder auf seine eigentliche Kunst konzentrieren kann.
-                    </p>
-                  </div>
-                  <div className="bg-slate-950/80 border border-slate-900 rounded-xl p-3 text-xs text-emerald-400 flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
-                    <span>
-                      Organisiere deine Projekte mit dem Schritt-für-Schritt-System.
-                    </span>
-                  </div>
+                
+                <div class="gigsda-box">
+                <svg class="gigsda-icon" viewBox="0 0 24 24">
+                <polyline points="9 18 15 12 9 6" />
+                <line x1="16" y1="18" x2="20" y2="18" />
+                </svg>
+                    Für Projekte angefragt werden
                 </div>
-              </section>
+                
+                <div class="gigsda-box">
+                <svg class="gigsda-icon" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="8" />
+                <line x1="12" y1="2" x2="12" y2="6" />
+                <line x1="12" y1="18" x2="12" y2="22" />
+                <line x1="2" y1="12" x2="6" y2="12" />
+                <line x1="18" y1="12" x2="22" y2="12" />
+                <circle cx="12" cy="12" r="1" fill="#00e5ff" />
+                </svg>
+                    Regional sichtbar werden
+                </div>
+                
+                <div class="gigsda-box">
+                <svg class="gigsda-icon" viewBox="0 0 24 24">
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <line x1="8.5" y1="10.5" x2="15.5" y2="6.8" />
+                <line x1="8.5" y1="13.5" x2="15.5" y2="17.2" />
+                </svg>
+                    Community nutzen
+                </div>
+                
+                <div class="gigsda-box">
+                <svg class="gigsda-icon" viewBox="0 0 24 24">
+                <rect x="2" y="6" width="20" height="12" rx="2" />
+                <line x1="6" y1="12" x2="8" y2="12" />
+                <circle cx="18" cy="12" r="1" fill="#00e5ff" />
+                </svg>
+                    Teil echter Event-Crews werden
+                </div>
               
-              {/* ========================================================================= */}
-              {/* SEKTION 3: DAS MANIFEST FÜR MITGLIEDER (DAS CORE-ÖKOSYSTEM)               */}
-              {/* ========================================================================= */}
-              <section className="max-w-6xl mx-auto space-y-10">
-                <div className="text-center max-w-4xl mx-auto space-y-3 mt-12">
-                  <span className="text-4x1 text-cyan-400 font-bold uppercase tracking-widest bg-cyan-950/40 border border-cyan-500/20 px-3 py-1 rounded-full inline-block">// Das Gigsda Netzwerk</span>
-                  <h2 className="text-4xl font-black text-white uppercase tracking-tight leading-none">
-                    Fans, Künstler, Veranstalter, Verleiher, Techniker, Locations, Catering und viele mehr ...
-                  </h2>
-                  <p className="text-slate-500 text-xl font-sans leading-relaxed">
-                    „Gigsda“ schafft einfache Wege, um die Planung für eine Veranstaltung zu vollziehen. 
-                  </p>  
-                  <p className="text-slate-500 text-xl font-sans leading-relaxed">
-                    Du musst nicht zwingend ein Veranstalter sein, um ein Projekt zu starten.
-                  </p>
-                </div>
+              </div>
+{/*             </div>
+ */}
+            <div className="mt-10 flex items-center gap-4">
+              <div className="h-px w-20 bg-gradient-to-r from-purple-400 to-cyan-400" />
+              <span className="text-white font-bold uppercase tracking-widest">
+                Verbinden. Zusammenarbeiten. Wachsen.
+              </span>
+            </div>
 
-                {/* Das 3-Spalten-Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  
-                  {/* Card A */}
-                  <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:border-slate-800 transition-all">
-                    <div className="space-y-2">
-                      <div className="text-cyan-400 font-bold text-xl uppercase border-b border-slate-950/40 pb-1.5">
-                      // EIGENSTÄNDIGKEIT
-                      </div>
-                      <h4 className="text-sm font-black text-white uppercase tracking-tight">
-                        Wähle Deine Bühne
-                      </h4>
-                      <p className="text-slate-400 text-xm font-sans leading-relaxed">
-                        Hier bist du in der Lage, dein Event selbst zu organisieren. Suche einen Künstler, finde Veranstalter, Techniker oder Locations. Alle, die du auf, hinter und vor der Bühne brauchst, um durchzustarten.
-                      </p>
-                    </div>
-                    <span className="text-[12px] text-slate-600 font-mono tracking-widest mt-4 block">#NETZWERK</span>
-                  </div>
+            <p className="mt-4 text-sm text-slate-500">
+              Kostenlos registrieren und Netzwerk aufbauen.
+            </p>
+          </div>
+        </div>
+      </section>
 
-                  {/* Card B */}
-                  <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:border-slate-800 transition-all">
-                    <div className="space-y-2">
-                      <div className="text-purple-400 font-bold text-xl uppercase border-b border-slate-950/40 pb-1.5">
-                      // OPTIMIERUNG
-                      </div>
-                      <h4 className="text-sm font-black text-white uppercase tracking-tight">
-                        Mit wenigen Klicks zum Gig
-                      </h4>
-                      <p className="text-slate-400 text-xm font-sans leading-relaxed">
-                        Minimiere lange Wartezeiten mit unseren Tools, zugeschnitten auf beste Erfolgschancen und Effizienz. Hier wirst du gefunden und machst dich sichtbar für Veranstalter und Fans.
-                      </p>
-                    </div>
-                    <span className="text-[12px] text-slate-600 font-mono tracking-widest mt-4 block">#EFFIZIENZ</span>
-                  </div>
 
-                  {/* Card C */}
-                  <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:border-slate-800 transition-all">
-                    <div className="space-y-2">
-                      <div className="text-emerald-400 font-bold text-xl uppercase border-b border-slate-950/40 pb-1.5">
-                      // ZUSAGE-DEAL
-                      </div>
-                      <h4 className="text-sm font-black text-white uppercase tracking-tight">
-                        Bring deinen Gig zum Abschluss
-                      </h4>
-                      <p className="text-slate-400 text-xm font-sans leading-relaxed">
-                        Durch interaktive Vernetzung und Kommunikation von Künstlern, Veranstaltern, Locations, Technikern und Fans ist gigsda die Lösung, um eigenständige Gigs schnellstmöglich zum Abschluss zu bringen.
-                      </p>
-                    </div>
-                    <span className="text-[12px] text-slate-600 font-mono tracking-widest mt-4 block">#ZUSAGE_DEAL</span>
-                  </div>
 
-                </div>
-              </section>
-              
-        </div>        
+
+      {/* 🛠️ SPERREN-SEKTION: "SO FUNKTIONIERT ES" */}
+      <div className="max-w-6xl mx-auto px-4 md:px-8 pt-6 border-t border-slate-900/60 text-left font-mono z-10 relative">
+        <A3bildernetzwerk onEnterCenter={onEnterCenter} />
+      </div>
+
+
+
+
+
+      {/* ========================================================================= */}
+      {/* SEKTION 4: DAS KÜNSTLER- & PLANER-VERSPRECHEN                             */}
+      {/* ========================================================================= */}
+      <section className="mt-12 max-w-6xl mx-auto pt-6 px-4 md:px-8 space-y-10">
         
+        {/* Block 1: Die Bühne für Künstler */}
+        <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 space-y-4 flex flex-col justify-between hover:border-slate-800 transition-all shadow-xl">
+          <div className="space-y-3">
+            <div className="text-xl font-black text-cyan-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-950 pb-2">
+              <Award className="w-4 h-4" /> 
+              Die Bühne für Künstler!
+            </div>
+            <p className="text-slate-400 text-xm font-sans leading-relaxed">
+              In erster Linie wollen wir Brücken erstellen, um Bands oder Künstler zu unterstützen, damit Ihr Mehrwert wieder ansteigt. Einmal das Profil informativ ausgefüllt, und jeder Veranstalter sieht auf einen Blick, welche Anforderungen ihr habt (Technical Rider).
+            </p>
+          </div>
+          <p className="text-xs text-slate-500 italic font-sans leading-relaxed pt-2">
+            „Durch gigsda bekommen semiprofessionelle Künstler schneller die Chance auf bessere Gigs, mehr Gage und mehr Fans.“
+          </p>
+        </div>
+
+        {/* Block 2: Eventplanung */}
+        <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 space-y-4 flex flex-col justify-between hover:border-slate-800 transition-all shadow-xl">
+          <div className="space-y-3">
+            <div className="text-xl font-black text-purple-400 uppercase tracking-wider flex items-center gap-1.5 border-b border-slate-950 pb-2">
+              <Layers className="w-4 h-4" /> 
+              Eventplanung!
+            </div>
+            <p className="text-slate-400 text-xm font-sans leading-relaxed">
+              Durch einige Tools schaffen wir neue Wege, um einem Künstler dabei zu helfen, sein Ziel schneller durch vereinfachte Planung zu erreichen. All dies mit geringstem Zeitaufwand, damit er sich wieder auf seine eigentliche Kunst konzentrieren kann.
+            </p>
+          </div>
+          <div className="bg-slate-950/80 border border-slate-900 rounded-xl p-3 text-xs text-emerald-400 flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
+            <span>
+              Organisiere deine Projekte mit dem Schritt-für-Schritt-System.
+            </span>
+          </div>
+        </div>
+      </section>
+      
+      {/* ========================================================================= */}
+      {/* SEKTION 3: DAS MANIFEST FÜR MITGLIEDER (DAS CORE-ÖKOSYSTEM)               */}
+      {/* ========================================================================= */}
+      <section className="max-w-6xl mx-auto space-y-10 p-8 md:p-8">
+            
+
+        {/* Das 3-Spalten-Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          {/* Card A */}
+          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:border-slate-800 transition-all">
+            <div className="space-y-2">
+              <div className="text-cyan-400 font-bold text-xl uppercase border-b border-slate-950/40 pb-1.5">
+              // EIGENSTÄNDIGKEIT
+              </div>
+              <h4 className="text-sm font-black text-white uppercase tracking-tight">
+                Wähle Deine Bühne
+              </h4>
+              <p className="text-slate-400 text-xm font-sans leading-relaxed">
+                Hier bist du in der Lage, dein Event selbst zu organisieren. Suche einen Künstler, finde Veranstalter, Techniker oder Locations. Alle, die du auf, hinter und vor der Bühne brauchst, um durchzustarten.
+              </p>
+            </div>
+            <span className="text-[12px] text-slate-600 font-mono tracking-widest mt-4 block">#NETZWERK</span>
+          </div>
+
+          {/* Card B */}
+          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:border-slate-800 transition-all">
+            <div className="space-y-2">
+              <div className="text-purple-400 font-bold text-xl uppercase border-b border-slate-950/40 pb-1.5">
+              // OPTIMIERUNG
+              </div>
+              <h4 className="text-sm font-black text-white uppercase tracking-tight">
+                Mit wenigen Klicks zum Gig
+              </h4>
+              <p className="text-slate-400 text-xm font-sans leading-relaxed">
+                Minimiere lange Wartezeiten mit unseren Tools, zugeschnitten auf beste Erfolgschancen und Effizienz. Hier wirst du gefunden und machst dich sichtbar für Veranstalter und Fans.
+              </p>
+            </div>
+            <span className="text-[12px] text-slate-600 font-mono tracking-widest mt-4 block">#EFFIZIENZ</span>
+          </div>
+
+          {/* Card C */}
+          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:border-slate-800 transition-all">
+            <div className="space-y-2">
+              <div className="text-emerald-400 font-bold text-xl uppercase border-b border-slate-950/40 pb-1.5">
+              // ZUSAGE-DEAL
+              </div>
+              <h4 className="text-sm font-black text-white uppercase tracking-tight">
+                Bring deinen Gig zum Abschluss
+              </h4>
+              <p className="text-slate-400 text-xm font-sans leading-relaxed">
+                Durch interaktive Vernetzung und Kommunikation von Künstlern, Veranstaltern, Locations, Technikern und Fans ist gigsda die Lösung, um eigenständige Gigs schnellstmöglich zum Abschluss zu bringen.
+              </p>
+            </div>
+            <span className="text-[12px] text-slate-600 font-mono tracking-widest mt-4 block">#ZUSAGE_DEAL</span>
+          </div>
+
+        </div>
+      </section>
+      
+      
 
 
         {/* 🎫 DEIN NEUER GAST-PASS (PERFEKT WEITER UNTEN PLATZIERT) */}
+        {/*         
         <GuestPass onEnterCenter={onEnterCenter} />
-
+        */}
 
 
         {/* ========================================================================= */}
