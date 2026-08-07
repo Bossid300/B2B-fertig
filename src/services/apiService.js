@@ -18,6 +18,8 @@ export async function getEvents() {
 
 export async function createProfile(profile) {
 
+  console.log("API PROFILE SEND", profile);
+
   const response = await fetch(
     '/2026/api/createProfile.php',
     {
@@ -29,7 +31,13 @@ export async function createProfile(profile) {
     }
   );
 
-  return await response.json();
+  console.log("HTTP STATUS", response.status);
+
+  const text = await response.text();
+
+  console.log("RAW RESPONSE", text);
+
+  return JSON.parse(text);
 }
 
 export async function createAuthUser(user) {

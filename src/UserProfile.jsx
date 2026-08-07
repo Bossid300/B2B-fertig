@@ -206,6 +206,7 @@ console.log(
             currentProfileName={targetUser}
             profileId={profileData?.id || 'GIGS-XXXX'}
             onBackToDashboard={onBack}
+            setView={setView}
           />
 
         ) : (

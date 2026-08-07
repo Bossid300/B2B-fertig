@@ -1,11 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, FileText, ArrowLeft } from 'lucide-react';
 import ArtistPortfolio from "./ArtistPortfolio";
+import { getProfiles } from '../services/apiService';
 
-export default function ProfilePassBox({ currentProfileName, profileId, onBackToDashboard, sliderImages = [] }) {
+export default function ProfilePassBox({ currentProfileName, profileId, onBackToDashboard, setView, sliderImages = [] }) {
+  
+  const [referrals, setReferrals] = useState([]);
+  useEffect(() => {
+    getProfiles().then(allProfiles => {
+      const matches = allProfiles.filter(profile => {
+        const data =
+          profile.profile_json
+            ? JSON.parse(profile.profile_json)
+            : {};
+        return data.referred_by === profileId;
+      });
+      setReferrals(matches);
+    });
+  }, [profileId]);
+
   // Generiert den passenden reaktiven Reflink aus dem Künstlernamen
   const slug = currentProfileName ? currentProfileName.toLowerCase().replace(/\s+/g, '-') : '';
-  const refLink = `https://gigsda.com{slug}`;
+  const refLink =
+  `https://www.gigsda.com/2026/?portfolio=${profileId}&ref=${profileId}`;
 
   // Holt das erste Bild aus dem übergebenen Slider-Array (oder nutzt ein Fallback)
   const firstSliderImage = sliderImages && sliderImages.length > 0 ? sliderImages[0] : '';
@@ -73,23 +90,56 @@ export default function ProfilePassBox({ currentProfileName, profileId, onBackTo
           <p className="text-xs text-slate-400 leading-relaxed max-w-md">
             Nutze deine verifizierte Mitgliedskarte, um dich via QR-Code oder Direktlink bei Agenturen zu bewerben.
           </p>
-          <div className="flex items-center gap-2 pt-1">
-            <Link size={12} className="text-slate-400" />
-            <span className="text-xs text-slate-500 font-medium">Link: </span>
-            <a 
-              href={refLink} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-xs text-cyan-400 font-semibold hover:underline font-mono"
+          <div className="flex items-center gap-2 pt-1 text-yellow-400 hover:text-yellow-300 transition-colors">
+            <button
+              className="
+                text-yellow-400
+                hover:text-yellow-300
+                transition-colors
+                font-semibold
+              "
+              onClick={() => {
+                navigator.clipboard.writeText(refLink);
+                alert('✅ Referral-Link kopiert');
+              }}
             >
-              {refLink}
-            </a>
+              🔗 Reflink kopieren
+            </button>
           </div>
+
+          <div className="mt-6">
+            <p className="text-cyan-400 text-xs font-black uppercase tracking-widest">
+              // Referral Center
+            </p>
+
+            <p className="text-slate-400 text-xs mt-2">
+              Geworbene Mitglieder: {referrals.length}
+            </p>
+
+            <div className="mt-3 space-y-2">
+              {referrals.map(member => {
+
+                const data = member.profile_json
+                  ? JSON.parse(member.profile_json)
+                  : member;
+
+                return (
+                  <div
+                    key={data.id}
+                    className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2"
+                  >
+                    ✅ {data.name}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
         </div>
 
         {/* Rechte Seite: Der physische Gigsda Pass */}
         <div className="w-full md:w-auto flex-shrink-0">
-          <div className="w-[280px] h-[130px] bg-gradient-to-br from-[#131b2e] via-[#0f1626] to-[#250d3a] border border-slate-800 rounded-2xl p-4 flex justify-between relative shadow-inner overflow-hidden">
+          <div className="w-[280px] h-[140px] bg-gradient-to-br from-[#131b2e] via-[#0f1626] to-[#250d3a] border border-slate-800 rounded-2xl p-4 flex justify-between relative shadow-inner overflow-hidden">
             
             <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-purple-600/10 rounded-full blur-2xl pointer-events-none"></div>
             
@@ -163,6 +213,13 @@ export default function ProfilePassBox({ currentProfileName, profileId, onBackTo
           🎤 Portfolio öffnen
         </button>
 
+        <button
+          onClick={() => {
+            setView('gigsdaPass');
+          }}
+        >
+        🎟 Gigsda Pass öffnen
+        </button>
 
         <button
           onClick={onBackToDashboard}

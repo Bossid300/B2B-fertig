@@ -92,13 +92,3 @@
   background: rgba(0, 229, 255, 0.05);
 }
  
-.gigsda-icon {
-  width: 24px;
-  height: 24px;
-  stroke: #00e5ff; /* Neon-Cyan für die Linien */
-  stroke-width: 2;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  flex-shrink: 0;
-}

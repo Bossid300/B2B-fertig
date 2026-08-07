@@ -34,11 +34,6 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
       loginPass
     );
 
-    console.log(
-      "LOGIN TEST ✅",
-      result
-    );
-
     if (!inputName) {
       if (typeof setErrorMsg === 'function') setErrorMsg('Bitte gib deine Künstler-ID oder deinen Namen ein! 💡');
       return;
@@ -116,11 +111,6 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
     }
   };
 
-
-
-
-
-
   // 💥 FUNKTION 2: DIE REGISTRIERUNG
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
@@ -129,6 +119,7 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
       alert("Bitte wähle zuerst einen Kontotyp aus! ⚙️");
       return;
     }
+
     if (!regName.trim() || !regPass.trim()) return;
 
     // 1️⃣ Die eindeutige ID generieren (für beide Tabellen identisch)
@@ -140,6 +131,11 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
       name: regName,
       role: regRole
     };
+
+    const referrer =
+    localStorage.getItem(
+      'gigsda_referrer'
+    ) || '';
 
     await createProfile({
       id: generatedId,
@@ -154,7 +150,8 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
         bio: '',
         avatarUrl: '',
         skills: [],
-        equipment: []
+        equipment: [],
+        referred_by: referrer
       })
     });
 

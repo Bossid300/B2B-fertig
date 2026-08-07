@@ -32,7 +32,6 @@ import SecurityProfile from './SecurityProfile';   // 🛡️ Schaltet das Siche
 import DesignProfile from './DesignProfile';       // 🎭 Schaltet das Stage-Design- & Deko-Cockpit frei
 import FanProfile from './FanProfile'; // 👈 Schaltet die Fan-Zentrale im System frei!
 
-
 import CrewRequestCenter from './CrewRequestCenter'; // 👈 Das B2B-Uhrwerk laden
 import CrewFavoritenListe from './CrewFavoritenListe'; // ⭐ Schaltet die Favoriten-Matrix frei!
 import RiderZentrale from './RiderZentrale'; // 🎛️ Schaltet das geteilte B2B-Rider-Uhrwerk plattformweit frei!
@@ -40,6 +39,7 @@ import CommunityChat from './CommunityChat';
 
 import { initialUsers, initialProfiles } from './data/mockData';
 import ArtistPortfolio from "./components/ArtistPortfolio";
+import GigsdaPass from "./components/GigsdaPass";
 
 import { eventService } from './services/eventService';
 import { progressService } from './services/progressService';
@@ -52,9 +52,12 @@ import {
 
 import PricingPage from './PricingPage';
 import BillingCenter from './components/BillingCenter';
-
+import { getProfiles } from './services/apiService';
 
 export default function App() {
+
+
+
 
 
     // 📡 REAKTIVER CREW-ALARM EMPFÄNGER
@@ -318,6 +321,54 @@ export default function App() {
   const [activeGuestArtist, setActiveGuestArtist] = useState(
     () => localStorage.getItem('gigsda_active_guest_artist') || ''
   );
+
+
+useEffect(() => {
+  const loadProfileFromQr = async () => {
+    const params = new URLSearchParams(
+      window.location.search
+    );
+    const portfolioId =
+      params.get('portfolio');
+
+    const refId =
+      params.get('ref');
+
+    if (refId) {
+      localStorage.setItem(
+        'gigsda_referrer',
+        refId
+      );
+    }
+
+    if (!portfolioId) return;
+    const profiles =
+      await getProfiles();
+    const found = profiles.find(
+      p => p && p.id === portfolioId
+    );
+    if (found) {
+      setActiveGuestArtist(found.name);
+      localStorage.setItem(
+        'gigsda_active_guest_artist',
+        found.name
+      );
+      localStorage.setItem(
+        'gigsda_portfolio_profile',
+        found.id
+      );
+      setView('artistPortfolio');
+    }
+  };
+  loadProfileFromQr();
+}, []);
+
+
+
+
+
+
+
 
   const [ticketName, setTicketName] = useState(() => {
     return localStorage.getItem('gigsda_user_name') || 'Gast';
@@ -672,7 +723,7 @@ useEffect(() => {
                 localStorage.setItem('gigsda_logged_in', 'true');
                 
                 setIsLoggedIn(true);
-                setView('projects'); // ➔ Direkt ab auf euer echtes Projekt-Dashboard!
+                setView('userProfile'); // ➔ Direkt ab auf euer echtes Projekt-Dashboard!
               }} 
             />
 
@@ -935,11 +986,17 @@ useEffect(() => {
             />
           )}
 
-
           {view === "artistPortfolio" && (
-            <ArtistPortfolio />
+            <ArtistPortfolio
+              setView={setView}
+            />
           )}
 
+          {view === "gigsdaPass" && (
+            <GigsdaPass 
+            />
+
+          )}
 
           {view === 'pricing' && (
             <PricingPage

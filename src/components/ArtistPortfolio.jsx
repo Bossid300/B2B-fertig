@@ -3,33 +3,38 @@ import GigsdaPass from "../components/GigsdaPass";
 import { getProfilesDb } from "../services/apiService";
 import { eventService } from '../services/eventService';
 
+
 export default function ArtistPortfolio() {
-  const [profile, setProfile] = useState(null);
-  const activeProfileId =
+    
+    const [profile, setProfile] = useState(null);
+    const handlePrintPdf = () => {
+    window.print();
+    };
+    const activeProfileId =
     localStorage.getItem(
-      "gigsda_portfolio_profile"
+        'gigsda_portfolio_profile'
     );
-const events =
-  eventService.getEvents();
 
-  useEffect(() => {
-    getProfilesDb()
-      .then(allProfiles => {
-        const found = allProfiles.find(p => {
-          const profileData =
-            p.profile_json
-              ? JSON.parse(p.profile_json)
-              : p;
-          return (
-            profileData.id === activeProfileId
-          );
-        });
-        if (!found) return;
-        const loadedProfile =
-          found.profile_json
-            ? JSON.parse(found.profile_json)
-            : found;
+    const events =
+    eventService.getEvents();
 
+    useEffect(() => {
+        getProfilesDb()
+        .then(allProfiles => {
+            const found = allProfiles.find(p => {
+            const profileData =
+                p.profile_json
+                ? JSON.parse(p.profile_json)
+                : p;
+            return (
+                profileData.id === activeProfileId
+            );
+            });
+            if (!found) return;
+            const loadedProfile =
+            found.profile_json
+                ? JSON.parse(found.profile_json)
+                : found;
         setProfile(loadedProfile);
       })
       .catch(console.error);
@@ -454,8 +459,8 @@ const events =
         </section>
 
 
-        {/* PASS */}
-        <GigsdaPass profile={profile} />
+        {/* GIGSDAPASS */}
+        <GigsdaPass />
 
     </div>
   );

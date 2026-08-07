@@ -14,14 +14,16 @@ try {
             name,
             role,
             city,
-            bio
+            bio,
+            profile_json
         )
         VALUES (
             :id,
             :name,
             :role,
             :city,
-            :bio
+            :bio,
+            :profile_json
         )
     ");
 
@@ -30,7 +32,8 @@ try {
         ':name' => $data['name'],
         ':role' => $data['role'],
         ':city' => $data['city'] ?? '',
-        ':bio' => $data['bio'] ?? ''
+        ':bio' => $data['bio'] ?? '',
+        ':profile_json' => $data['profile_json'] ?? null
     ]);
 
     echo json_encode([
