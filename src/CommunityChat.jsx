@@ -30,10 +30,6 @@ export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
       const result =
         await getMessages(activeEvent.id);
 
-      console.log(
-        'CHAT LOAD DB ✅',
-        result
-      );
 
       const dbMessages =
         (result.messages || []).map(msg => ({
@@ -92,10 +88,7 @@ export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
               .toLowerCase()
         );
 
-        console.log(
-          "COMMUNITYCHAT PROFILE DB ✅",
-          found
-        );
+
 
         setCurrentProfileData(found || null);
       })

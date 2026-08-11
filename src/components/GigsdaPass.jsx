@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { getProfilesDb } from '../services/apiService';
 import QRCode from "react-qr-code";
 
-export default function GigsdaPass() {
-
+export default function GigsdaPass({
+  setView
+}) {
     const [profile, setProfile] = useState(null);
 
     const targetUser =
@@ -51,13 +52,10 @@ export default function GigsdaPass() {
 
   return (
     <section className="rounded-3xl bg-slate-950 border border-cyan-500/20 p-8">
-
       <h2 className="text-2xl font-bold mb-8">
         Gigsda Pass
       </h2>
-
       <div className="space-y-8">
-
         {/* VORDERSEITE */}
         <div
         className="w-full max-w-[700px] md:aspect-[1.586/1]
@@ -123,7 +121,7 @@ export default function GigsdaPass() {
         {/* PASSPRINT */}
         <div className="flex justify-center py-4">
         <button
-            onClick={() => window.print()}
+            onClick={() => setView('passPrint')}
             className="
             w-5 h-5
             rounded-full
@@ -210,7 +208,6 @@ export default function GigsdaPass() {
             </div>
         </div>
         </div>
-
       </div>
 
     </section>

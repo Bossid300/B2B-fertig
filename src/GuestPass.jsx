@@ -29,7 +29,7 @@ export default function GuestPass({ onEnterCenter }) {
           type="text"
           value={passValue}
           onChange={(e) => setPassValue(e.target.value)}
-          placeholder="z.B. WINSTON-JUD-2026"
+          placeholder="z.B. WINSTON-XXX-2026"
           className="w-full bg-slate-900 border border-slate-800 focus:border-cyan-500/40 text-white rounded-xl px-3 py-2 text-xs outline-none transition-colors uppercase tracking-wider font-bold"
         />
         

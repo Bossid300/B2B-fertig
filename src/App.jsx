@@ -40,6 +40,7 @@ import CommunityChat from './CommunityChat';
 import { initialUsers, initialProfiles } from './data/mockData';
 import ArtistPortfolio from "./components/ArtistPortfolio";
 import GigsdaPass from "./components/GigsdaPass";
+import PassPrintPage from './components/prints/PassPrintPage';
 
 import { eventService } from './services/eventService';
 import { progressService } from './services/progressService';
@@ -624,7 +625,8 @@ useEffect(() => {
 
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 selection:text-slate-950 antialiased overflow-x-hidden flex flex-col justify-between font-mono">
+    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-cyan-500 
+      selection:text-slate-950 antialiased overflow-x-hidden flex flex-col justify-between font-mono">
  
       {/* BACKGROUND GLOW */}
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none z-0 overflow-hidden">
@@ -696,7 +698,7 @@ useEffect(() => {
         {/* ========================================================================= */}
         {/* MAIN ROUTER PORT                                                          */}
         {/* ========================================================================= */}
-        <main className="w-full pt-24 min-h-screen bg-[#070913] text-white">
+        <main className="w-full pt-13 min-h-screen bg-[#070913] text-white">
  
           {view === 'landing' && (
             <LandingPage 
@@ -994,8 +996,12 @@ useEffect(() => {
 
           {view === "gigsdaPass" && (
             <GigsdaPass 
+              setView={setView}
             />
+          )}
 
+          {view === "passPrint" && (
+            <PassPrintPage />
           )}
 
           {view === 'pricing' && (

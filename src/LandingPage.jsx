@@ -208,9 +208,7 @@ const [videoMuted, setVideoMuted] = useState(true);
 
 
       {/* 🛠️ SPERREN-SEKTION: "SO FUNKTIONIERT ES" */}
-      <div className="max-w-6xl mx-auto px-4 md:px-8 pt-6 border-t border-slate-900/60 text-left font-mono z-10 relative">
-        <ASoFunktioniertEs onEnterCenter={onEnterCenter} />
-      </div>  
+       <ASoFunktioniertEs onEnterCenter={onEnterCenter} />
 
 
       {/* ================================================================ */}
@@ -387,7 +385,7 @@ const [videoMuted, setVideoMuted] = useState(true);
                 <svg class="gigsda-icon" viewBox="0 0 24 24">
                 <path d="M2 12h3l3-9 4 18 3-9h3" />
                 </svg>
-                    Künstler & Bands finden
+                    Crew & Bühne finden
                 </div>
                 
                 <div class="gigsda-box">
@@ -463,12 +461,68 @@ const [videoMuted, setVideoMuted] = useState(true);
 
 
       {/* 🛠️ SPERREN-SEKTION: "SO FUNKTIONIERT ES" */}
-      <div className="max-w-6xl mx-auto px-4 md:px-8 pt-6 border-t border-slate-900/60 text-left font-mono z-10 relative">
-        <A3bildernetzwerk onEnterCenter={onEnterCenter} />
-      </div>
+      <A3bildernetzwerk onEnterCenter={onEnterCenter} />
 
 
+      {/* ========================================================================= */}
+      {/* SEKTION 3: DAS MANIFEST FÜR MITGLIEDER (DAS CORE-ÖKOSYSTEM)               */}
+      {/* ========================================================================= */}
+      <section className="max-w-6xl mx-auto space-y-10 p-8 md:p-8">
+            
 
+        {/* Das 3-Spalten-Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          {/* Card A */}
+          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:border-slate-800 transition-all">
+            <div className="space-y-2">
+              <div className="text-cyan-400 font-bold text-mx uppercase border-b border-slate-950/40 pb-1.5">
+              // EIGENSTÄNDIGKEIT
+              </div>
+              <h4 className="text-sm font-black text-white uppercase tracking-tight">
+                Wähle Deine Bühne
+              </h4>
+              <p className="text-slate-400 text-xm font-sans leading-relaxed">
+                Hier bist du in der Lage, dein Event selbst zu organisieren. Suche einen Künstler, finde Veranstalter, Techniker oder Locations. Alle, die du auf, hinter und vor der Bühne brauchst, um durchzustarten.
+              </p>
+            </div>
+            <span className="text-[12px] text-slate-600 font-mono tracking-widest mt-4 block">#NETZWERK</span>
+          </div>
+
+          {/* Card B */}
+          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:border-slate-800 transition-all">
+            <div className="space-y-2">
+              <div className="text-purple-400 font-bold text-mx uppercase border-b border-slate-950/40 pb-1.5">
+              // OPTIMIERUNG
+              </div>
+              <h4 className="text-sm font-black text-white uppercase tracking-tight">
+                Mit wenigen Klicks zum Gig
+              </h4>
+              <p className="text-slate-400 text-xm font-sans leading-relaxed">
+                Minimiere lange Wartezeiten mit unseren Tools, zugeschnitten auf beste Erfolgschancen und Effizienz. Hier wirst du gefunden und machst dich sichtbar für Veranstalter und Fans.
+              </p>
+            </div>
+            <span className="text-[12px] text-slate-600 font-mono tracking-widest mt-4 block">#EFFIZIENZ</span>
+          </div>
+
+          {/* Card C */}
+          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:border-slate-800 transition-all">
+            <div className="space-y-2">
+              <div className="text-emerald-400 font-bold text-mx uppercase border-b border-slate-950/40 pb-1.5">
+              // ZUSAGE-DEAL
+              </div>
+              <h4 className="text-sm font-black text-white uppercase tracking-tight">
+                Bring deinen Gig zum Abschluss
+              </h4>
+              <p className="text-slate-400 text-xm font-sans leading-relaxed">
+                Durch interaktive Vernetzung und Kommunikation von Künstlern, Veranstaltern, Locations, Technikern und Fans ist gigsda die Lösung, um eigenständige Gigs schnellstmöglich zum Abschluss zu bringen.
+              </p>
+            </div>
+            <span className="text-[12px] text-slate-600 font-mono tracking-widest mt-4 block">#ZUSAGE_DEAL</span>
+          </div>
+
+        </div>
+      </section>
 
 
       {/* ========================================================================= */}
@@ -512,73 +566,64 @@ const [videoMuted, setVideoMuted] = useState(true);
         </div>
       </section>
       
-      {/* ========================================================================= */}
-      {/* SEKTION 3: DAS MANIFEST FÜR MITGLIEDER (DAS CORE-ÖKOSYSTEM)               */}
-      {/* ========================================================================= */}
-      <section className="max-w-6xl mx-auto space-y-10 p-8 md:p-8">
-            
+      
+      {/* ================================================================ */}
+      {/* // DEINE REGION. DEINE SZENE. */}
+      {/* ================================================================ */}
 
-        {/* Das 3-Spalten-Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          
-          {/* Card A */}
-          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:border-slate-800 transition-all">
-            <div className="space-y-2">
-              <div className="text-cyan-400 font-bold text-xl uppercase border-b border-slate-950/40 pb-1.5">
-              // EIGENSTÄNDIGKEIT
-              </div>
-              <h4 className="text-sm font-black text-white uppercase tracking-tight">
-                Wähle Deine Bühne
-              </h4>
-              <p className="text-slate-400 text-xm font-sans leading-relaxed">
-                Hier bist du in der Lage, dein Event selbst zu organisieren. Suche einen Künstler, finde Veranstalter, Techniker oder Locations. Alle, die du auf, hinter und vor der Bühne brauchst, um durchzustarten.
-              </p>
+      <section className="mt-12 max-w-6xl mx-auto pt-6 px-4 md:px-8 space-y-10 mb-10">
+        <div className="relative overflow-hidden rounded-3xl border border-purple-500/20 bg-slate-950/60 backdrop-blur-sm p-8 md:p-12">
+
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-transparent to-cyan-500/5 pointer-events-none" />
+
+          <div className="relative z-10 max-w-4xl">
+            <div className="text-xs font-mono uppercase tracking-[0.3em] text-purple-400 mb-4">
+              // DEINE REGION. DEINE SZENE.
             </div>
-            <span className="text-[12px] text-slate-600 font-mono tracking-widest mt-4 block">#NETZWERK</span>
+
+            <h2 className="text-3xl md:text-3xl font-black text-white uppercase leading-tight">
+              Erlebe die Eventwelt vor dem ersten Song.
+            </h2>
+            <h2 className="text-3xl md:text-3xl font-black text-white uppercase leading-tight">
+              Finde Freie Locations in Deriner Nähe.
+            </h2>
+
+            <p className="text-slate-500 text-grey text-xd font-sans leading-relaxed max-w-3xl mt-6">
+              Finde Konzerte, Festivals und Veranstaltungen in deiner Nähe. 
+              Entdecke die Menschen hinter den Events und verfolge die Entwicklung von 
+              Projekten von der Idee bis zur Veranstaltung und dem Tag danach.
+            </p>
+
+
+
+            {/* 🎫 DEIN NEUER GAST-PASS (PERFEKT WEITER UNTEN PLATZIERT) */}
+                    
+            <GuestPass onEnterCenter={onEnterCenter} />
+
+
+            <div className="mt-10 flex items-center gap-4">
+              <div className="h-px w-20 bg-gradient-to-r from-purple-400 to-cyan-400" />
+              <span className="text-white font-bold uppercase tracking-widest">
+                Live. Lokal. Vernetzt.
+              </span>
+            </div>
+
+            <p className="mb-4 mt-4 text-sm text-slate-500">
+              EVENTS KÜNSTLER CREWS VENUES
+            </p>
           </div>
 
-          {/* Card B */}
-          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:border-slate-800 transition-all">
-            <div className="space-y-2">
-              <div className="text-purple-400 font-bold text-xl uppercase border-b border-slate-950/40 pb-1.5">
-              // OPTIMIERUNG
-              </div>
-              <h4 className="text-sm font-black text-white uppercase tracking-tight">
-                Mit wenigen Klicks zum Gig
-              </h4>
-              <p className="text-slate-400 text-xm font-sans leading-relaxed">
-                Minimiere lange Wartezeiten mit unseren Tools, zugeschnitten auf beste Erfolgschancen und Effizienz. Hier wirst du gefunden und machst dich sichtbar für Veranstalter und Fans.
-              </p>
-            </div>
-            <span className="text-[12px] text-slate-600 font-mono tracking-widest mt-4 block">#EFFIZIENZ</span>
-          </div>
-
-          {/* Card C */}
-          <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-5 space-y-3 flex flex-col justify-between hover:border-slate-800 transition-all">
-            <div className="space-y-2">
-              <div className="text-emerald-400 font-bold text-xl uppercase border-b border-slate-950/40 pb-1.5">
-              // ZUSAGE-DEAL
-              </div>
-              <h4 className="text-sm font-black text-white uppercase tracking-tight">
-                Bring deinen Gig zum Abschluss
-              </h4>
-              <p className="text-slate-400 text-xm font-sans leading-relaxed">
-                Durch interaktive Vernetzung und Kommunikation von Künstlern, Veranstaltern, Locations, Technikern und Fans ist gigsda die Lösung, um eigenständige Gigs schnellstmöglich zum Abschluss zu bringen.
-              </p>
-            </div>
-            <span className="text-[12px] text-slate-600 font-mono tracking-widest mt-4 block">#ZUSAGE_DEAL</span>
-          </div>
-
+        <div className="flex justify-center w-full">
+          <button className="mb-4 px-8 py-3.5 rounded-full bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-[length:300%_100%] text-white font-semibold tracking-wide text-sm shadow-[0_0_25px_rgba(236,72,153,0.7)] hover:shadow-[0_0_40px_rgba(236,72,153,1)] hover:scale-105 transition-all duration-300 animate-[gradientMove_3.5s_linear_infinite]">
+            „Starte jetzt! Registriere dich, beobachte und wachse mit!“
+          </button>
+        </div>
         </div>
       </section>
-      
-      
 
 
-        {/* 🎫 DEIN NEUER GAST-PASS (PERFEKT WEITER UNTEN PLATZIERT) */}
-        {/*         
-        <GuestPass onEnterCenter={onEnterCenter} />
-        */}
+
+        
 
 
         {/* ========================================================================= */}
