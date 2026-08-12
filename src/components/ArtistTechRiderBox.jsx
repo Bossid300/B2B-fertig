@@ -115,7 +115,7 @@ export default function ArtistTechRiderBox({ currentProfileName, isOwner }) {
 
   // 2. SPEICHERN: Schreibt die Werte exakt flach (ch1_signal, etc.) zurück
   const handleSave = async () => {
-    console.log('RIDER SAVE CLICK ✅');
+ 
     if (!profileId || !profileData) return;
     const updatedProfile = {
       ...profileData,
@@ -145,10 +145,6 @@ export default function ArtistTechRiderBox({ currentProfileName, isOwner }) {
 
   });
 
-console.log(
-  'RIDER PROFILE BEFORE SAVE ✅',
-  updatedProfile
-);
 
 const result =
   await saveProfile(
@@ -156,10 +152,6 @@ const result =
     updatedProfile
   );
 
-console.log(
-  'RIDER SAVE DB ✅',
-  result
-);
 
 setProfileData(updatedProfile);
 

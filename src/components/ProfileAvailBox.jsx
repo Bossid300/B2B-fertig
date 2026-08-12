@@ -28,10 +28,7 @@ export default function ProfileAvailBox({ currentProfileName, isOwner }) {
               .toLowerCase() ===
             targetUser.trim().toLowerCase()
         );
-        console.log(
-          'PROFILEAVAIL DB ✅',
-          found
-        );
+
         if (!found) return;
         const profileData =
           found?.profile_json
@@ -74,10 +71,7 @@ export default function ProfileAvailBox({ currentProfileName, isOwner }) {
             updatedProfile.id,
             updatedProfile
           );
-        console.log(
-          'AVAIL SAVE DB ✅',
-          result
-        );
+
       }
       alert(
         "B2B Verfügbarkeits-Protokoll erfolgreich eingebrannt! 📅⚡"

@@ -4,6 +4,8 @@ header('Content-Type: application/json');
 
 require_once 'db.php';
 
+require_once("cors.php");
+
 $stmt = $pdo->query(
     "SELECT * FROM profiles"
 );

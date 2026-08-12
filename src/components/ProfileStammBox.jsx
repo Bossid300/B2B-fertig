@@ -70,7 +70,9 @@ export default function ProfileStammBox({ currentProfileName, isOwner }) {
           show_website: mergedProfile.show_website !== false,
           show_genre: mergedProfile.show_genre !== false,
           show_description: mergedProfile.show_description !== false,
-          show_avatarUrl: mergedProfile.show_avatarUrl !== false
+          show_avatarUrl: mergedProfile.show_avatarUrl !== false,
+
+          is_demo: mergedProfile.is_demo === true
       });
 
     })
@@ -101,10 +103,7 @@ export default function ProfileStammBox({ currentProfileName, isOwner }) {
             updatedProfile.id,
             updatedProfile
           );
-        console.log(
-          'STAMM SAVE DB ✅',
-          result
-        );
+
         setProfile(updatedProfile);
         alert(
           "Stammdaten & Sichtbarkeiten erfolgreich eingeregelt! 💾"
@@ -262,6 +261,7 @@ export default function ProfileStammBox({ currentProfileName, isOwner }) {
                 </div>
               </div>
             )}
+
             <div className="flex justify-between items-center py-1 border-b border-slate-900/50"><span className="text-slate-500">GIGSDA-ID:</span> <span className="text-slate-600 text-[10px] font-mono">{id || 'SYS-NEW'}</span></div>
           </div>
           {description && (
@@ -348,6 +348,35 @@ export default function ProfileStammBox({ currentProfileName, isOwner }) {
                 </div>
               </div>
               <div className="flex flex-col gap-1">
+                <span className="text-[10px] text-slate-500 font-bold">
+                  PROFILMODUS
+                </span>
+
+                <div className="flex gap-2">
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData(prev => ({
+                        ...prev,
+                        is_demo: !prev.is_demo
+                      }))
+                    }
+                    title={formData.is_demo ? 'DEMO' : 'LIVE'}
+                    className="flex items-center"
+                  >
+                    <span
+                      className={
+                        formData.is_demo
+                          ? 'w-4 h-4 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.8)]'
+                          : 'w-4 h-4 rounded-full bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.8)]'
+                      }
+                    />
+                  </button>
+
+                </div>
+              </div>
+              <div className="flex flex-col gap-1">
                 <span className="text-[10px] text-slate-600 font-bold">AVATAR-BILD (URL-STREAM)</span>
                 <div className="flex gap-2">
                   <input type="text" name="avatarUrl" value={avatarUrl || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-slate-500 text-[10px] focus:outline-none focus:border-slate-700 font-mono" />
@@ -369,8 +398,12 @@ export default function ProfileStammBox({ currentProfileName, isOwner }) {
 
           {/* CONTROL STRIP */}
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-900">
-            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
-            <button type="submit" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(147,51,234,0.3)]"><Save size={12} /> Speichern ✓</button>
+            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">
+              Abbrechen
+            </button>
+            <button type="submit" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(147,51,234,0.3)]"><Save size={12} /> 
+              Speichern ✓
+            </button>
           </div>
         </form>
       )}

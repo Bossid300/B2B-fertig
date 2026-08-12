@@ -87,10 +87,7 @@ export default function ProfileSocialBox({ currentProfileName, isOwner }) {
           updatedProfile.id,
           updatedProfile
         );
-      console.log(
-        'SOCIAL SAVE DB ✅',
-        result
-      );
+
       setProfile(updatedProfile);
       setProfileData(updatedProfile);
       alert(
@@ -145,10 +142,7 @@ export default function ProfileSocialBox({ currentProfileName, isOwner }) {
                       updatedProfile.id,
                       updatedProfile
                     );
-                  console.log(
-                    'SOCIAL VISIBILITY DB ✅',
-                    result
-                  );
+
                   setProfile(updatedProfile);
                   setProfileData(updatedProfile);
                   setShowSocials(updatedShow);

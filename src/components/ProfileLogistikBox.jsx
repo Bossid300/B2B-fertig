@@ -89,11 +89,6 @@ export default function ProfileLogistikBox({ currentProfileName, isOwner }) {
           updatedProfile
         );
 
-      console.log(
-        'LOGISTIK SAVE DB ✅',
-        result
-      );
-
       setProfile(updatedProfile);
       setProfileData(updatedProfile);
 

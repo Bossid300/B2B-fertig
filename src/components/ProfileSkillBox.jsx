@@ -107,21 +107,11 @@ export default function ProfileSkillBox({ currentProfileName, isOwner }) {
         show_certificates: showCertificates
       };
 
-      console.log(
-        'SKILL PROFILE BEFORE SAVE ✅',
-        updatedProfile
-      );
-      
       const result =
         await saveProfile(
           updatedProfile.id,
           updatedProfile
         );
-
-      console.log(
-        'SKILL SAVE DB ✅',
-        result
-      );
 
       setProfile(updatedProfile);
       setProfileData(updatedProfile);

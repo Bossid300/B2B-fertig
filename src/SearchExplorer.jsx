@@ -21,6 +21,8 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
   const [formationFilter, setFormationFilter] = useState('');
   const [eventTypeFilter, setEventTypeFilter] = useState('');
 
+  const [profileView, setProfileView] = useState('live');
+
   // 🏟️ ECHTZEIT-PROJEKTLISTE FÜR DIE EXPLORER-DIREKTANFRAGE
   const [events, setEvents] = useState([]);
   const [showProjectSelect, setShowProjectSelect] = useState(false);
@@ -29,17 +31,6 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
 
 
   useEffect(() => {
-    console.log("USEEFFECT LÄUFT ✅");
-
-    fetch('/2026/api/getProfiles.php')
-      .then(res => res.json())
-      .then(data => {
-        console.log('PROFILE AUS DB ✅', data);
-      })
-      .catch(err => {
-        console.error('DB FEHLER ❌', err);
-      });
-
     try {
       const savedEvents = eventService.getEvents();
 
@@ -125,11 +116,6 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
 
       const saveResult =
         await saveCrewRequest(newRequest);
-
-      console.log(
-        'CREW REQUEST SAVE DB ✅',
-        saveResult
-      );
 
       let eventIndex = savedEvents.findIndex(ev => ev && (
         (eventId && (ev.id === eventId || ev.eventId === eventId || ev._id === eventId)) ||
@@ -298,6 +284,16 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Verleiher', 'Location', 'Ve
 
   // ⚡ DIE ERWEITERTE FILTER-SCHLEIFE (Filtert nach Name, Rolle UND Radius!)
   const filteredUsers = allUsers.filter(user => {
+
+    const matchesDemoMode =
+      profileView === 'demo'
+        ? user.is_demo === true
+        : user.is_demo !== true;
+
+    if (!matchesDemoMode) {
+      return false;
+    }
+
   const searchValue = searchTerm.toLowerCase();
   const matchesName =
     user.name?.toLowerCase().includes(searchValue);
@@ -565,7 +561,29 @@ return (
         ">
           {filteredUsers.length} TREFFER GEFUNDEN
         </span>
+
+        <button
+          onClick={() =>
+            setProfileView(
+              profileView === 'live'
+                ? 'demo'
+                : 'live'
+            )
+          }
+          className="flex items-center gap-2"
+        >
+          <span
+            className={
+              profileView === 'live'
+                ? 'w-3 h-3 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]'
+                : 'w-3 h-3 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]'
+            }
+          />
+        </button>
+
       </div>
+
+
 
 
       {/* 💳 VISITENKARTEN-GRID */}

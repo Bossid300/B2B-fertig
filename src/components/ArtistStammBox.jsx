@@ -96,10 +96,6 @@ export default function ArtistStammBox({ profileOwnerName, isOwner }) {
           updatedProfile
         );
 
-      console.log(
-        'ARTIST STAMM SAVE DB ✅',
-        result
-      );
 
       setProfileData(updatedProfile);
 

@@ -124,10 +124,7 @@ export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
           updatedProfile.id,
           updatedProfile
         );
-      console.log(
-        'REVIEWS SAVE DB ✅',
-        result
-      );
+
       setProfile(updatedProfile);
       setProfileData(updatedProfile);
       setReviewsList(updatedProfile.reviews);
@@ -157,10 +154,7 @@ export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
           updatedProfile.id,
           updatedProfile
         );
-      console.log(
-        'REVIEWS PRIVACY DB ✅',
-        result
-      );
+
       setProfile(updatedProfile);
       setProfileData(updatedProfile);
       setShowReviews(updatedShow);

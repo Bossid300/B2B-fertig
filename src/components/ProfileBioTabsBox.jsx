@@ -79,10 +79,6 @@ export default function ProfileBioTabsBox({ currentProfileName, isOwner }) {
           updatedProfile
         );
 
-      console.log(
-        'BIO SAVE DB ✅',
-        result
-      );
       setProfile(updatedProfile);
     }
 

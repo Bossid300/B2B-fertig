@@ -29,10 +29,7 @@ export default function DesignProfile({ onBack, ticketName, isOwner }) {
             .toLowerCase() ===
           targetUser.trim().toLowerCase()
       );
-      console.log(
-        'USERPROFILE DB ✅',
-        found
-      );
+
       if (found) {
         if (found?.profile_json) {
           const dbProfile =

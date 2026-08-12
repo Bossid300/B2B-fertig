@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import Footer from "../../Footer";
+
 import { CheckCircle2, Circle, ArrowRight, Award, Sparkles, Sliders, MapPin, User } from 'lucide-react';
 
-export default function OnboardingTutorial({ onGoToView }) {
+export default function OnboardingTutorial({ onGoToView, setView }) {
   const [completedSteps, setCompletedSteps] = useState({
     profile: false,
     rider: false,
@@ -15,6 +17,7 @@ export default function OnboardingTutorial({ onGoToView }) {
   const isAllDone = completedSteps.profile && completedSteps.rider && completedSteps.radar;
 
   return (
+    <div>
     <div className="bg-gradient-to-r from-slate-900 via-slate-950 to-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-6 relative overflow-hidden my-4">
       <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-400 via-cyan-400 to-purple-500 animate-pulse" />
       
@@ -84,7 +87,8 @@ export default function OnboardingTutorial({ onGoToView }) {
         </div>
 
       </div>
-
+    </div>
+      <Footer setView={setView} />
     </div>
   );
 }

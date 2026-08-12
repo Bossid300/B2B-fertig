@@ -38,11 +38,6 @@ export default function GlobalNavigation({ view, setView, onLogout }) {
             userName.toLowerCase()
         );
 
-        console.log(
-          'GLOBALNAV DB ✅',
-          found
-        );
-
         if (!found) return;
 
         const profile =
@@ -75,11 +70,6 @@ useEffect(() => {
 
       const dbRequests =
         await getCrewRequests();
-
-      console.log(
-        'GLOBALNAV BADGE REQUESTS DB ✅',
-        dbRequests
-      );
 
       const open = dbRequests.filter(r =>
         r &&

@@ -106,10 +106,6 @@ if (updatedProfile?.id) {
       updatedProfile
     );
 
-  console.log(
-    'DOCS SAVE DB ✅',
-    result
-  );
 }
 
       localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));

@@ -7,6 +7,8 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 require_once 'db.php';
 
+require_once("cors.php");
+
 try {
 
     $input = json_decode(

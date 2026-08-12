@@ -29,6 +29,48 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
         ? loginField.trim()
         : "";
 
+
+
+
+    // DEV LOGIN
+    if (
+      window.location.hostname === "localhost" &&
+      inputName === "admin" &&
+      loginPass === "admin"
+    ) {
+
+      localStorage.setItem("gigsda_logged_in", "true");
+      localStorage.setItem("gigsda_user_name", "Winston Jud");
+      localStorage.setItem("gigsda_reg_role", "Admin");
+
+      // ECHTES PROFIL
+      localStorage.setItem(
+        "gigsda_profile_id",
+        "GIGS-3582"
+      );
+
+      localStorage.setItem(
+        "gigsda_session",
+        JSON.stringify({
+          authUserId: "AUTH-1785166313588",
+          profileId: "GIGS-3582",
+          loginAt: Date.now()
+        })
+      );
+
+      if (typeof onLoginSuccess === "function") {
+        onLoginSuccess(
+          "Winston Jud",
+          "Admin"
+        );
+      }
+
+      return;
+    }
+
+
+
+
     const result = await getLoginUser(
       inputName,
       loginPass

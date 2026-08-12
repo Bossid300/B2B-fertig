@@ -33,10 +33,7 @@ export default function FanProfile({ onBack, ticketName, isOwner }) {
             .toLowerCase() ===
           targetUser.trim().toLowerCase()
       );
-      console.log(
-        'FAN-RPROFILE DB ✅',
-        found
-      );
+
       if (found) {
         if (found?.profile_json) {
           const dbProfile =

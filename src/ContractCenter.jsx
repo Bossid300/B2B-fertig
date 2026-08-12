@@ -204,10 +204,6 @@ useEffect(() => {
       const saveResult =
         await saveCrewRequest(dealRequest);
 
-      console.log(
-        'CONTRACT DEAL REQUEST SAVE DB ✅',
-        saveResult
-      );
     }
     setDealSent(true);
     window.dispatchEvent(

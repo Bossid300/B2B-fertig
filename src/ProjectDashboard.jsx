@@ -31,10 +31,6 @@ export default function ProjectDashboard({ onNavigateToStep, progress, onSelectE
         const dbEvents =
           await eventService.syncFromDb();
 
-        console.log(
-          'PROJECTDASHBOARD EVENTS SYNC DB ✅',
-          dbEvents
-        );
 
         skipNextEventSave.current = true;
         setEvents(dbEvents);
@@ -118,11 +114,6 @@ const handleDelete = (eventId, e) => {
         const data =
           await getCrewRequests();
 
-        console.log(
-          'PROJECTDASHBOARD REQUESTS DB ✅',
-          data
-        );
-
         setRequests(data);
       } catch (e) {
         console.error(
@@ -173,10 +164,6 @@ useEffect(() => {
           currentUserName.trim().toLowerCase()
       );
 
-      console.log(
-        'PROJECTDASHBOARD PROFILE DB ✅',
-        found
-      );
 
       if (!found) return;
 

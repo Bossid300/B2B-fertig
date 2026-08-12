@@ -46,10 +46,7 @@ export default function CaterProfile({ onBack, ticketName, isOwner }) {
             .toLowerCase() ===
           targetUser.trim().toLowerCase()
       );
-      console.log(
-        'CATERPROFILE DB ✅',
-        found
-      );
+
       if (found) {
         if (found?.profile_json) {
           const dbProfile =

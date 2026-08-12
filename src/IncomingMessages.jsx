@@ -22,11 +22,6 @@ const handleUpdateStatus = async (requestId, newStatus) => {
       }
     );
 
-    console.log(
-      'INCOMING REQUEST UPDATE DB ✅',
-      result
-    );
-
     const request =
       incomingRequests.find(r => r.requestId === requestId) ||
       result?.request;
@@ -130,11 +125,6 @@ const handleUpdateStatus = async (requestId, newStatus) => {
             currentUserName.trim().toLowerCase()
         );
 
-        console.log(
-          'INCOMINGMESSAGES PROFILE DB ✅',
-          found
-        );
-
         setCurrentProfileData(found || null);
       })
       .catch(console.error);
@@ -159,11 +149,6 @@ useEffect(() => {
       const filtered = dbRequests.filter(r =>
         r &&
         r.requestedProfileId === currentUserId
-      );
-
-      console.log(
-        'INCOMING REQUESTS DB ✅',
-        dbRequests
       );
 
       setIncomingRequests(filtered);
@@ -291,10 +276,6 @@ const handleCounterOffer = async (
     const saveResult =
       await saveCrewRequest(newCounterRequest);
 
-    console.log(
-      'INCOMING COUNTER REQUEST SAVE DB ✅',
-      saveResult
-    );
 
     await handleUpdateStatus(
       req.requestId,

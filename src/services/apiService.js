@@ -1,6 +1,12 @@
+const API_BASE =
+  window.location.hostname === 'localhost'
+    ? 'https://gigsda.com/2026/api'
+    : '/2026/api';
+
+
 export async function getProfiles() {
   const response = await fetch(
-    '/2026/api/getProfiles.php'
+    `${API_BASE}/getProfiles.php`
   );
 
   const data = await response.json();
@@ -10,7 +16,7 @@ export async function getProfiles() {
 
 export async function getEvents() {
   const response = await fetch(
-    '/2026/api/getEvents.php'
+    `${API_BASE}/getEvents.php`
   );
   const data = await response.json();
   return data.events || [];
@@ -18,10 +24,8 @@ export async function getEvents() {
 
 export async function createProfile(profile) {
 
-  console.log("API PROFILE SEND", profile);
-
   const response = await fetch(
-    '/2026/api/createProfile.php',
+    `${API_BASE}/createProfile.php`,
     {
       method: 'POST',
       headers: {
@@ -31,11 +35,7 @@ export async function createProfile(profile) {
     }
   );
 
-  console.log("HTTP STATUS", response.status);
-
   const text = await response.text();
-
-  console.log("RAW RESPONSE", text);
 
   return JSON.parse(text);
 }
@@ -43,7 +43,7 @@ export async function createProfile(profile) {
 export async function createAuthUser(user) {
 
   const response = await fetch(
-    '/2026/api/createAuthUser.php',
+    `${API_BASE}/createAuthUser.php`,
     {
       method: 'POST',
       headers: {
@@ -59,7 +59,7 @@ export async function createAuthUser(user) {
 export async function getLoginUser(email, password) {
 
   const response = await fetch(
-    '/2026/api/getLoginUser.php',
+    `${API_BASE}/getLoginUser.php`,
     {
       method: 'POST',
       headers: {
@@ -72,13 +72,14 @@ export async function getLoginUser(email, password) {
     }
   );
 
-  return await response.json();
+  const text = await response.text();
+  return JSON.parse(text);
 }
 
 export async function getProfileById(id) {
 
   const response = await fetch(
-    '/2026/api/getProfileById.php',
+    `${API_BASE}/getProfileById.php`,
     {
       method: 'POST',
       headers: {
@@ -97,7 +98,7 @@ export async function saveProfile(
 ) {
 
   const response = await fetch(
-    '/2026/api/saveProfile.php',
+    `${API_BASE}/saveProfile.php`,
     {
       method: 'POST',
       headers: {
@@ -116,7 +117,7 @@ export async function saveProfile(
 export async function getProfilesDb() {
 
   const response = await fetch(
-    '/2026/api/getProfiles.php'
+    `${API_BASE}/getProfiles.php`
   );
 
   const data = await response.json();
@@ -126,7 +127,7 @@ export async function getProfilesDb() {
 
 export async function getCrewRequests() {
   const response = await fetch(
-    '/2026/api/getCrewRequests.php'
+    `${API_BASE}/getCrewRequests.php`
   );
 
   const data = await response.json();
@@ -137,7 +138,7 @@ export async function getCrewRequests() {
 
 export async function saveCrewRequest(request) {
   const response = await fetch(
-    '/2026/api/saveCrewRequest.php',
+    `${API_BASE}/saveCrewRequest.php`,
     {
       method: 'POST',
       headers: {
@@ -156,7 +157,7 @@ export async function updateCrewRequest(
   updates
 ) {
   const response = await fetch(
-    '/2026/api/updateCrewRequest.php',
+    `${API_BASE}/updateCrewRequest.php`,
     {
       method: 'POST',
       headers: {
@@ -174,7 +175,7 @@ export async function updateCrewRequest(
 
 export async function saveEvent(event) {
   const response = await fetch(
-    '/2026/api/saveEvent.php',
+    `${API_BASE}/saveEvent.php`,
     {
       method: 'POST',
       headers: {
@@ -189,7 +190,7 @@ export async function saveEvent(event) {
 
 export async function saveMessage(message) {
   const response = await fetch(
-    '/2026/api/saveMessage.php',
+    `${API_BASE}/saveMessage.php`,
     {
       method: 'POST',
       headers: {
@@ -204,7 +205,7 @@ export async function saveMessage(message) {
 
 export async function getMessages(eventId) {
   const response = await fetch(
-    `/2026/api/getMessages.php?eventId=${eventId}`
+    `${API_BASE}/getMessages.php?eventId=${eventId}`
   );
 
   return await response.json();
@@ -216,7 +217,7 @@ export async function updateSubscriptionPlan(
 ) {
 
   const response = await fetch(
-    '/2026/api/updateSubscriptionPlan.php',
+    `${API_BASE}/updateSubscriptionPlan.php`,
     {
       method: 'POST',
       headers: {
@@ -239,7 +240,7 @@ export async function updateSubscriptionOrderStatus(
 ) {
 
   const response = await fetch(
-    '/2026/api/updateSubscriptionOrderStatus.php',
+    `${API_BASE}/updateSubscriptionOrderStatus.php`,
     {
       method: 'POST',
       headers: {
@@ -260,7 +261,7 @@ export async function getInvoices(
 ) {
 
   const response = await fetch(
-    `/2026/api/getInvoices.php?profileId=${profileId}`
+    `${API_BASE}/getInvoices.php?profileId=${profileId}`
   );
 
   return await response.json();
@@ -272,7 +273,7 @@ export async function getPendingOrders(
 ) {
 
   const response = await fetch(
-    `/2026/api/getPendingOrders.php?profileId=${profileId}`
+    `${API_BASE}/getPendingOrders.php?profileId=${profileId}`
   );
 
   return await response.json();

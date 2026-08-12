@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Footer from "./Footer";
 import { Search, MapPin, Ticket, Shield, Sliders, Calendar, ArrowRight, CheckCircle2, ChevronDown, Users, Layers, Award } from 'lucide-react';
 import GuestPass from './GuestPass';
 import Roadmap from "./components/Roadmap";
@@ -13,7 +14,7 @@ const initialGigs = [
   { id: 3, title: "Band", date: "27.08.2026", location: "Exrnwkug", img: "/2026/profiles/Jud-Herbert/banner.jpg" }
 ];
 
-export default function LandingPage({ onEnterCenter, onCreateAccount }) {
+export default function LandingPage({ onEnterCenter, onCreateAccount, setView }) {
   // Zustand für den interaktiven Gast-Pass auf der rechten Seite
   const [guestName, setGuestName] = useState('');
 
@@ -614,7 +615,12 @@ const [videoMuted, setVideoMuted] = useState(true);
           </div>
 
         <div className="flex justify-center w-full">
-          <button className="mb-4 px-8 py-3.5 rounded-full bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-[length:300%_100%] text-white font-semibold tracking-wide text-sm shadow-[0_0_25px_rgba(236,72,153,0.7)] hover:shadow-[0_0_40px_rgba(236,72,153,1)] hover:scale-105 transition-all duration-300 animate-[gradientMove_3.5s_linear_infinite]">
+          <button className="
+          mb-4 px-8 py-3.5 rounded-full bg-gradient-to-r from-pink-500 
+          via-fuchsia-500 to-purple-500 bg-[length:300%_100%] text-white 
+          font-semibold tracking-wide text-sm shadow-[0_0_25px_rgba(236,72,153,0.7)] 
+          hover:shadow-[0_0_40px_rgba(236,72,153,1)] hover:scale-105 transition-all 
+          duration-300 animate-[gradientMove_3.5s_linear_infinite]">
             „Starte jetzt! Registriere dich, beobachte und wachse mit!“
           </button>
         </div>
@@ -623,69 +629,7 @@ const [videoMuted, setVideoMuted] = useState(true);
 
 
 
-        
-
-
-        {/* ========================================================================= */}
-        {/* SEKTION 5: DAS VIERTEILIGE PROFI-FOOTER LAYOUT                            */}
-        {/* ========================================================================= */}
-        <footer className="w-full border-t border-slate-900 bg-slate-950 pt-12 pb-6 px-4">
-          <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 text-sm font-sans text-slate-500">
-            
-            {/* Spalte 1 */}
-            <div className="space-y-2.5">
-              <h5 className="font-mono text-sm font-bold text-slate-400 uppercase tracking-widest">
-                // RECHTLICHES
-              </h5>
-              <ul className="space-y-1.5">
-                <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Nutzungsbedingungen</a></li>
-                <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Datenschutzerklärung</a></li>
-                <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Impressum</a></li>
-                <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">AGB</a></li>
-              </ul>
-            </div>
-
-            {/* Spalte 2 */}
-            <div className="space-y-2.5">
-              <h5 className="font-mono text-sm font-bold text-slate-400 uppercase tracking-widest">
-                // NETZWERK & INFOS
-              </h5>
-              <ul className="space-y-1.5">
-                <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Was ist gigsda?</a></li>
-                <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Events & Locations</a></li>
-                <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Sucher-Protokoll</a></li>
-                <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Tutorials</a></li>
-              </ul>
-            </div>
-
-            {/* Spalte 3 */}
-            <div className="space-y-2.5">
-              <h5 className="font-mono text-sm font-bold text-slate-400 uppercase tracking-widest">
-                // SICHERHEIT
-              </h5>
-              <ul className="space-y-1.5">
-                <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Richtlinien & Sicherheit</a></li>
-                <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Zahlungsarten</a></li>
-                <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Treuhand-Schutz</a></li>
-                <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">FAQ</a></li>
-              </ul>
-            </div>
-
-            {/* Spalte 4 */}
-            <div className="space-y-2.5">
-              <h5 className="font-mono text-sm font-bold text-slate-400 uppercase tracking-widest">
-                // GIGDATA GMBH
-              </h5>
-              <ul className="space-y-1.5">
-                <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Über uns</a></li>
-                <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Kontakt</a></li>
-                <li><a href="#" onClick={(e) => e.preventDefault()} className="hover:text-cyan-400 transition-colors">Karriere</a></li>
-                <li className="text-[11px] font-mono text-slate-700 pt-2">© 2026 GIGDATA GmbH</li>
-              </ul>
-            </div>
-          </div>
-        </footer>
-
+      <Footer setView={setView} />
 
     </div>
   );

@@ -103,10 +103,7 @@ const toggleProjectPrivacy = async () => {
         updatedProfile.id,
         updatedProfile
       );
-    console.log(
-      'PROJECT PRIVACY DB ✅',
-      result
-    );
+
     setProfile(updatedProfile);
     setProfileData(updatedProfile);
     setShowProjects(updatedShow);

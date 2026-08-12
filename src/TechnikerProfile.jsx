@@ -47,10 +47,7 @@ export default function TechnikerProfile({ onBack, ticketName, isOwner }) {
             .toLowerCase() ===
           targetUser.trim().toLowerCase()
       );
-      console.log(
-        'TECHNIKERPROFILE DB ✅',
-        found
-      );
+
       if (found) {
         if (found?.profile_json) {
           const dbProfile =

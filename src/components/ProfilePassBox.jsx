@@ -2,9 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link, FileText, ArrowLeft } from 'lucide-react';
 import ArtistPortfolio from "./ArtistPortfolio";
 import { getProfiles } from '../services/apiService';
+import { ArrowUp } from 'lucide-react';
 
-export default function ProfilePassBox({ currentProfileName, profileId, onBackToDashboard, setView, sliderImages = [] }) {
-  
+export default function ProfilePassBox({ currentProfileName, profileId, setView, sliderImages = [] }) {
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
   const [referrals, setReferrals] = useState([]);
   useEffect(() => {
     getProfiles().then(allProfiles => {
@@ -179,18 +182,25 @@ export default function ProfilePassBox({ currentProfileName, profileId, onBackTo
         
         <button
           onClick={handlePrintPdf}
-          className="w-full sm:flex-1 h-12 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:opacity-90 text-slate-900 font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.99]"
+          className="w-full sm:flex-1 h-12 bg-gradient-to-r from-cyan-500 
+          via-indigo-500 to-purple-600 hover:opacity-90 text-slate-900 
+          font-black text-xs uppercase tracking-widest rounded-xl flex items-center 
+          justify-center gap-2 transition-all shadow-lg active:scale-[0.99]
+          "
         >
-          <FileText size={14} className="text-slate-900" />
-          ✅Profil drucken (PDF)
+          Profil druck (PDF)
         </button>
 
         <button
           onClick={handlePrintPdf}
-          className="w-full sm:flex-1 h-12 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:opacity-90 text-slate-900 font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.99]"
+          className="
+          w-full sm:flex-1 h-12 bg-gradient-to-r from-cyan-500 
+          via-indigo-500 to-purple-600 hover:opacity-90 text-slate-900 
+          font-black text-xs uppercase tracking-widest rounded-xl flex items-center 
+          justify-center gap-2 transition-all shadow-lg active:scale-[0.99]
+          "
         >
-          <FileText size={14} className="text-slate-900" />
-          ✅ Portfolio drucken (PDF)
+          Portfolio druck (PDF)
         </button>
 
         <button
@@ -199,37 +209,54 @@ export default function ProfilePassBox({ currentProfileName, profileId, onBackTo
               'gigsda_portfolio_profile',
               profileId
             );
-            
             localStorage.setItem(
               'gigsda_current_view',
               'artistPortfolio'
             );
-
             window.location.reload();
           }}
-          className="no-print w-full sm:flex-1 h-12 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:opacity-90 text-slate-900 font-black text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.99]"
+          className="
+          no-print w-full sm:flex-1 h-12 bg-gradient-to-r from-cyan-500 
+          via-indigo-500 to-purple-600 hover:opacity-90 text-slate-900 
+          font-black text-xs uppercase tracking-widest rounded-xl flex items-center 
+          justify-center gap-2 transition-all shadow-lg active:scale-[0.99]
+          "
         >
-          <FileText size={14} className="text-slate-900" />
-          🎤 Portfolio öffnen
+          Portfolio öffnen
         </button>
 
         <button
           onClick={() => {
             setView('gigsdaPass');
           }}
+          className="
+          no-print w-full sm:flex-1 h-12 bg-gradient-to-r from-cyan-500 
+          via-indigo-500 to-purple-600 hover:opacity-90 text-slate-900 
+          font-black text-xs uppercase tracking-widest rounded-xl flex items-center 
+          justify-center gap-2 transition-all shadow-lg active:scale-[0.99]
+          "
         >
-        🎟 Gigsda Pass öffnen
+          Gigsda Pass öffnen
         </button>
 
-        <button
-          onClick={onBackToDashboard}
-          className="w-full sm:w-auto h-12 px-6 bg-[#0f1626] hover:bg-[#151f36] text-slate-300 border border-slate-800 font-bold text-xs uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.99]"
-        >
-          <ArrowLeft size={14} />
-          Zurück zum Dashboard
-        </button>
-
-
+        {/* TOP BUTON */}
+        <div className="flex justify-center py-4">
+          <button 
+            type="button" 
+            onClick={scrollToTop}
+            className="
+              p-2 bg-slate-900 border border-slate-800 
+              hover:border-emerald-400 rounded-xl text-slate-400 
+              hover:text-white transition-all shadow-md 
+              group flex items-center gap-1.5 font-mono text-[10px] uppercase font-bold
+              "
+            >
+            <span>
+              Top
+            </span>
+            <ArrowUp className="w-3.5 h-3.5 group-hover:-translate-y-0.5 transition-transform" />
+          </button>
+        </div>
       </div>
     </div>
   );

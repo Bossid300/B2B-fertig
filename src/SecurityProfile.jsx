@@ -46,10 +46,7 @@ export default function SecurityProfile({ onBack, ticketName, isOwner }) {
             .toLowerCase() ===
           targetUser.trim().toLowerCase()
       );
-      console.log(
-        'SECURITYPROFILE DB ✅',
-        found
-      );
+
       if (found) {
         if (found?.profile_json) {
           const dbProfile =

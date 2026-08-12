@@ -1,3 +1,8 @@
+const API_BASE =
+  window.location.hostname === 'localhost'
+    ? 'https://gigsda.com/2026/api'
+    : '/2026/api';
+
 import {
   saveEvent as saveEventDb
 } from './apiService';
@@ -104,11 +109,6 @@ export const eventService = {
           prepareEventForDb(event)
         );
 
-      console.log(
-        'EVENTSERVICE SAVE SINGLE EVENT DB ✅',
-        result
-      );
-
       return result;
     } catch (e) {
       console.error(
@@ -125,19 +125,17 @@ export const eventService = {
 
   async syncFromDb() {
     try {
-      const response =
-        await fetch('/2026/api/getEvents.php');
 
-      const data =
-        await response.json();
+      const response = await fetch(
+        `${API_BASE}/getEvents.php`
+      );
+
+      const text = await response.text();
+
+      const data = JSON.parse(text);
 
       const dbEvents =
         data.events || [];
-
-      console.log(
-        'EVENTSERVICE EVENTS DB ✅',
-        dbEvents
-      );
 
       localStorage.setItem(
         EVENTS_KEY,
@@ -145,6 +143,7 @@ export const eventService = {
       );
 
       return dbEvents;
+
     } catch (e) {
       console.error(
         'EVENTSERVICE SYNC DB FEHLER ❌',

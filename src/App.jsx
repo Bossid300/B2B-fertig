@@ -14,11 +14,32 @@ import ProfileSettings from './ProfileSettings';
 import GuestNavigation from './GuestNavigation';
 import GlobalNavigation from './GlobalNavigation';
 
-import WhatIsGigsda from './WhatIsGigsda';
 import GuestEvents from './GuestEvents';
 import SearchExplorer from './SearchExplorer.jsx';
 import ArtistSearchPage from './components/ArtistSearchPage'; // Pfad anpassen, falls im Unterordner
 import UniversalSearchPage from './components/UniversalSearchPage'; // Pfad anpassen, falls im Unterordner
+
+
+import TermsPage from './pages/info/TermsPage.jsx';
+import PrivacyPage from './pages/info/PrivacyPage.jsx';
+import ImpressumPage from './pages/info/ImpressumPage.jsx';
+import AGBPage from './pages/info/AGBPage.jsx';
+
+import WhatIsGigsda from './pages/info/WhatIsGigsda.jsx';
+import EventsLocationsPage from './pages/info/EventsLocationsPage.jsx';
+import SearchProtocolPage from './pages/info/SearchProtocolPage.jsx';
+import OnboardingTutorial from './pages/info/OnboardingTutorial.jsx';
+
+import SecurityPage from './pages/info/SecurityPage.jsx';
+import PaymentMethodsPage from './pages/info/PaymentMethodsPage.jsx';
+import EscrowProtectionPage from './pages/info/EscrowProtectionPage.jsx';
+import FAQPage from './pages/info/FAQPage.jsx';
+
+import AboutGigsda from './pages/info/AboutGigsda.jsx';
+import ContactPage from './pages/info/ContactPage.jsx';
+import CareerPage from './pages/info/CareerPage.jsx';
+
+
 
 // 👈 Lade Profile
 import UserProfile from './UserProfile'; // 👈 Temporärer Import zum Anschauen
@@ -423,34 +444,6 @@ useEffect(() => {
 
 
 
-
-
-
-
-
-
-useEffect(() => {
-
-  console.log("APP DB TEST ✅");
-
-  fetch('/2026/api/getProfiles.php')
-    .then(res => res.json())
-    .then(data => {
-      console.log("PROFILE AUS DB ✅", data);
-    })
-    .catch(err => {
-      console.error("DB FEHLER ❌", err);
-    });
-
-}, []);
-
-
-
-
-
-
-
-
   useEffect(() => {
     
     const countdownReady =
@@ -712,6 +705,7 @@ useEffect(() => {
                 setIsRegInitial(true);
                 setView('login');
               }} 
+              setView={setView}
             />
           )}
  
@@ -732,8 +726,10 @@ useEffect(() => {
           )}
  
           {/* 📑 GAST-WEICHE 1: WAS IST GIGSDA? */}
-          {view === 'whatIsGigsda' && <WhatIsGigsda />}
-
+          {view === 'whatIsGigsda' && (
+            <WhatIsGigsda setView={setView} />
+          )}
+          
           {/* 🎫 GAST-EVENTS ROUTE: SCHALTET DIE ÖFFENTLICHE EVENT-LISTE FREI */}
           {view === 'guestEvents' && (
             <GuestEvents 
@@ -999,7 +995,6 @@ useEffect(() => {
               setView={setView}
             />
           )}
-
           {view === "passPrint" && (
             <PassPrintPage />
           )}
@@ -1015,8 +1010,62 @@ useEffect(() => {
             <BillingCenter />
           )}
 
+          {/* ========================================================================= */}
+          {/* FOOTER UNTERSEITEN                                                        */}
+          {/* ========================================================================= */}
 
+          {view === 'terms' && (
+            <TermsPage setView={setView} />
+          )}
+          {view === 'privacy' && (
+            <PrivacyPage setView={setView} />
+          )}
+          {view === 'impressum' && (
+            <ImpressumPage setView={setView} />
+          )}
+          {view === 'agb' && (
+            <AGBPage setView={setView} />
+          )}
+          {/* ========================================================================= */}
+          {view === 'eventlocation' && (
+            <EventsLocationsPage setView={setView} />
+          )}
+          {view === 'searchprotocol' && (
+            <SearchProtocolPage setView={setView} />
+          )}
+          {view === 'tutorial' && (
+            <OnboardingTutorial setView={setView} />
+          )}
+          {/* ========================================================================= */}
+          {view === 'security' && (
+            <SecurityPage setView={setView} />
+          )}
+          {view === 'payment' && (
+            <PaymentMethodsPage setView={setView} />
+          )}
+          {view === 'escrowprotection' && (
+            <EscrowProtectionPage setView={setView} />
+          )}
+          {view === 'faq' && (
+            <FAQPage setView={setView} />
+          )}
+          
+
+          {view === 'about' && (
+            <AboutGigsda setView={setView} />
+          )}
+
+          {view === 'contact' && (
+            <ContactPage setView={setView} />
+          )}
  
+          {view === 'career' && (
+            <CareerPage setView={setView} />
+          )}
+ 
+
+
+
         </main>
  
         {/* ========================================================================= */}

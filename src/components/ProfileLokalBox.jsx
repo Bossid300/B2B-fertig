@@ -69,10 +69,7 @@ export default function ProfileLokalBox({ currentProfileName, isOwner }) {
             importedData.id || profile.id,
             importedData
           );
-        console.log(
-          'LOCAL IMPORT DB ✅',
-          result
-        );
+
         setProfile(importedData);
         alert(
           "B2B Profil-Sicherung erfolgreich wiederhergestellt! 💾⚡"
@@ -112,10 +109,7 @@ export default function ProfileLokalBox({ currentProfileName, isOwner }) {
       );
       const result =
         await response.json();
-      console.log(
-        'PROFILE DELETE DB ✅',
-        result
-      );
+
       alert(
         'Profil erfolgreich gelöscht.'
       );

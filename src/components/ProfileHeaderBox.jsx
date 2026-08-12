@@ -170,11 +170,6 @@ const myEvents = savedEvents.filter(
           updatedProfile
         );
 
-        console.log(
-          'HEADER SAVE DB ✅',
-          result
-        );
-
         setProfileData(updatedProfile);
 
         alert(
@@ -274,11 +269,6 @@ const submitB2BRequest = async (project) => {
 
     const saveResult =
       await saveCrewRequest(newRequest);
-
-    console.log(
-      'PROFILE HEADER REQUEST SAVE DB ✅',
-      saveResult
-    );
 
     const savedEvents = eventService.getEvents();
 

@@ -88,10 +88,7 @@ export default function ProfileEquipmentBox({ currentProfileName, isOwner }) {
           updatedProfile.id,
           updatedProfile
         );
-      console.log(
-        'EQUIPMENT SAVE DB ✅',
-        result
-      );
+
       setProfile(updatedProfile);
       setProfileData(updatedProfile);
       alert(

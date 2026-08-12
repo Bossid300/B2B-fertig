@@ -88,10 +88,7 @@ export default function ProfileHilfeBox({ currentProfileName, isOwner }) {
           updatedProfile.id,
           updatedProfile
         );
-      console.log(
-        'HILFE SAVE DB ✅',
-        result
-      );
+
       setProfile(updatedProfile);
       setProfileData(updatedProfile);
 

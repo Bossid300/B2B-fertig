@@ -37,11 +37,6 @@ useEffect(() => {
           targetUser.trim().toLowerCase()
       );
 
-      console.log(
-        "LOCATIONRAEUME DB ✅",
-        found
-      );
-
       if (!found) return;
 
       const profileData =
@@ -163,10 +158,7 @@ useEffect(() => {
         profileId,
         updatedProfile
       );
-      console.log(
-        'ROOM SAVE DB ✅',
-        result
-      );
+
 
       // Event-Markierung bleibt
       try {

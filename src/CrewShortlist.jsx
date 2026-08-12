@@ -144,10 +144,6 @@ window.dispatchEvent(
               .toLowerCase()
         );
 
-        console.log(
-          'CREWSHORTLIST PROFILE DB ✅',
-          found
-        );
 
         setCurrentProfileData(found || null);
       })

@@ -4,6 +4,8 @@ header('Content-Type: application/json');
 
 require_once 'db.php';
 
+require_once("cors.php");
+
 $data = json_decode(file_get_contents("php://input"), true);
 
 $email = $data['email'] ?? '';

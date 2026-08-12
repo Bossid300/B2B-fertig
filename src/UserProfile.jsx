@@ -56,10 +56,7 @@ export default function UserProfile({ onBack, ticketName, isOwner, setView }) {
             .toLowerCase() ===
           targetUser.trim().toLowerCase()
       );
-      console.log(
-        'USERPROFILE DB ✅',
-        found
-      );
+
       if (found) {
         if (found?.profile_json) {
           const dbProfile =
@@ -70,7 +67,9 @@ export default function UserProfile({ onBack, ticketName, isOwner, setView }) {
         }
       }
     })
-    .catch(console.error);
+.catch(error => {
+  console.error("DB LOAD FEHLER", error);
+});
       
     // Prüft, ob der User in deiner Favoritenliste steht
     const savedFavs =
@@ -110,33 +109,6 @@ export default function UserProfile({ onBack, ticketName, isOwner, setView }) {
         </div>
       );
   }
-
-
-
-
-
-console.log(
-  'PLAN:',
-  subscriptionService.getPlan()
-);
-
-console.log(
-  'FEATURE:',
-  FEATURES.PREMIUM_PORTFOLIO
-);
-
-console.log(
-  'HAS PORTFOLIO:',
-  subscriptionService.hasFeature(
-    FEATURES.PREMIUM_PORTFOLIO
-  )
-);
-
-
-
-
-
-
 
 
 

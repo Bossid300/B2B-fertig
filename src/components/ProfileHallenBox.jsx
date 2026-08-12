@@ -41,11 +41,6 @@ useEffect(() => {
           targetUser.trim().toLowerCase()
       );
 
-      console.log(
-        'PROFILEHALLEN DB ✅',
-        found
-      );
-
       if (!found) return;
 
       const profileData =

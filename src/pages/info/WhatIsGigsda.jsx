@@ -1,8 +1,10 @@
 import React from 'react';
+import Footer from "../../Footer";
+
 import { Award, Layers, CheckCircle2, Eye, ShieldAlert, ArrowRight } from 'lucide-react';
 import { Search, MapPin, Star, Briefcase, Calendar, ChevronRight, X, Sparkles, Filter, ShieldCheck, Heart, User, Clock } from 'lucide-react';
 
-export default function WhatIsGigsda() {
+export default function WhatIsGigsda({ setView }) {
   
   return (
     <div className="relative min-h-screen bg-[#05050a] text-slate-200 font-sans overflow-x-hidden">
@@ -105,7 +107,7 @@ export default function WhatIsGigsda() {
                     <div className="absolute -inset-[2px] bg-gradient-to-br from-cyan-400 via-pink-500 to-purple-500 rounded-2xl blur-[2px] opacity-75 animate-[borderGlow_5s_linear_infinite] bg-[length:300%_300%]" />
                     <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
                       <img
-                        src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=900&q=80"
+                        src="/2026/profiles/die_mission.jpg"
                         alt="Live Stage"
                         className="w-full h-72 md:h-80 object-cover"
                       />
@@ -212,7 +214,7 @@ export default function WhatIsGigsda() {
                     <div className="absolute -inset-[2px] bg-gradient-to-br from-cyan-400 via-pink-500 to-purple-500 rounded-2xl blur-[2px] opacity-75 animate-[borderGlow_5s_linear_infinite] bg-[length:300%_300%]" />
                     <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
                       <img
-                        src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=900&q=80"
+                        src="/2026/profiles/die_vision.jpg"
                         alt="Live Stage"
                         className="w-full h-72 md:h-80 object-cover"
                       />
@@ -322,7 +324,7 @@ export default function WhatIsGigsda() {
                     <div className="absolute -inset-[2px] bg-gradient-to-br from-cyan-400 via-pink-500 to-purple-500 rounded-2xl blur-[2px] opacity-75 animate-[borderGlow_5s_linear_infinite] bg-[length:300%_300%]" />
                     <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
                       <img
-                        src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=900&q=80"
+                        src="/2026/profiles/fuer_wen_ist_gigsda.jpg"
                         alt="Live Stage"
                         className="w-full h-72 md:h-80 object-cover"
                       />
@@ -502,7 +504,7 @@ export default function WhatIsGigsda() {
                     <div className="absolute -inset-[2px] bg-gradient-to-br from-cyan-400 via-pink-500 to-purple-500 rounded-2xl blur-[2px] opacity-75 animate-[borderGlow_5s_linear_infinite] bg-[length:300%_300%]" />
                     <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
                       <img
-                        src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=900&q=80"
+                        src="/2026/profiles/tausend_moeglichkeiten.jpg"
                         alt="Live Stage"
                         className="w-full h-72 md:h-80 object-cover"
                       />
@@ -596,20 +598,40 @@ export default function WhatIsGigsda() {
                       Öffne deine Türen. Entdecke neue Möglichkeiten. Werde Teil des GIGSDA-Netzwerks. 🚀
                     </p>
 
-                    <button className="px-8 py-3.5 rounded-full bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-[length:300%_100%] text-white font-semibold tracking-wide text-sm shadow-[0_0_25px_rgba(236,72,153,0.7)] hover:shadow-[0_0_40px_rgba(236,72,153,1)] hover:scale-105 transition-all duration-300 animate-[gradientMove_3.5s_linear_infinite]">
-                      Freie Locations zeigen!
-                    </button>
+
+                    <div className="relative">
+                      <div className="absolute -inset-[2px] bg-gradient-to-br from-cyan-400 via-pink-500 to-purple-500 rounded-2xl blur-[2px] opacity-75 animate-[borderGlow_5s_linear_infinite] bg-[length:300%_300%]" />
+                      <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+                        <img
+                          src="/2026/profiles/location_aufruf.png"
+                          alt="Live Stage"
+                          className="w-full max-w-full h-auto"
+                        />
+                      </div>
+                      
+                    </div>
+                    <div className="pt-8 relative">
+                      <button className="px-8 py-3.5 rounded-full bg-gradient-to-r from-pink-500 via-fuchsia-500 to-purple-500 bg-[length:300%_100%] text-white font-semibold tracking-wide text-sm shadow-[0_0_25px_rgba(236,72,153,0.7)] hover:shadow-[0_0_40px_rgba(236,72,153,1)] hover:scale-105 transition-all duration-300 animate-[gradientMove_3.5s_linear_infinite]">
+                        Freie Locations zeigen!
+                      </button>
+                    </div>
+
                   </div>
-
-
                 </div>
               </div>
             </section>
-
-
             
             </div>
+
+
+
         </main>
+
+      <Footer setView={setView} />
+
+
+
+
       </div>
 
       {/* Custom Animations */}

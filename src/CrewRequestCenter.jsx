@@ -28,11 +28,6 @@ useEffect(() => {
           currentProfileName.trim().toLowerCase()
       );
 
-      console.log(
-        'CREWREQUESTCENTER PROFILE DB ✅',
-        found
-      );
-
       if (!found) return;
 
       const profileData =
@@ -51,11 +46,6 @@ useEffect(() => {
     try {
       const dbRequests =
         await getCrewRequests();
-
-      console.log(
-        'CREWREQUESTCENTER REQUESTS DB ✅',
-        dbRequests
-      );
 
       const myRequests = dbRequests.filter(req => {
         if (!req) return false;
@@ -117,11 +107,6 @@ const handleResponse = async (requestId, newStatus) => {
         status: newStatus,
         updatedAt
       }
-    );
-
-    console.log(
-      'CREWREQUESTCENTER UPDATE DB ✅',
-      result
     );
 
     const targetReq =
@@ -228,11 +213,6 @@ const handleCounterOfferSubmit = async (reqId) => {
         note,
         updatedAt
       }
-    );
-
-    console.log(
-      'CREWREQUESTCENTER COUNTER DB ✅',
-      result
     );
 
     setRequests(prev =>

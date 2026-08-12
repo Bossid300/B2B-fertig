@@ -7,6 +7,7 @@ import { eventService } from './services/eventService';
 
 export default function GuestEvents({ onNavigate }) {
   const [events, setEvents] = useState([]);
+  const [eventView, setEventView] = useState('live');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Alle');
   const [searchRadius, setSearchRadius] = useState(500); // 📡 Live-Suchumkreis
@@ -57,6 +58,20 @@ export default function GuestEvents({ onNavigate }) {
 
   // ⚡ DIE ZWILLINGS-FILTER-SCHLEIFE (Filtert nach Name, Kategorie UND Radius!)
   const filteredEvents = events.filter(event => {
+
+
+    const isDemoEvent =
+      event.promotionData?.is_demo === true;
+
+    const matchesDemoMode =
+      eventView === 'demo'
+        ? isDemoEvent
+        : !isDemoEvent;
+
+    if (!matchesDemoMode) {
+      return false;
+    }
+
 
     const searchValue =
       searchTerm.toLowerCase();
@@ -225,11 +240,31 @@ return (
         ">
           {filteredEvents.length} TREFFER GEFUNDEN
         </span>
+
+        <button
+          onClick={() =>
+            setEventView(
+              eventView === 'live'
+                ? 'demo'
+                : 'live'
+            )
+          }
+          className="flex items-center justify-center"
+          title={
+            eventView === 'live'
+              ? 'LIVE Events'
+              : 'DEMO Events'
+          }
+        >
+          <span
+            className={
+              eventView === 'live'
+                ? 'w-3 h-3 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]'
+                : 'w-3 h-3 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]'
+            }
+          />
+        </button>
       </div>
-
-
-
-
 
       {/* 💳 EVENT-KARTEN-GRID (Zwillings-Struktur) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

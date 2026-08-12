@@ -163,11 +163,6 @@ const toggleNetworkPrivacy = async () => {
         updatedProfile
       );
 
-    console.log(
-      'NETWORK SAVE DB ✅',
-      result
-    );
-
     setProfile(updatedProfile);
     setProfileData(updatedProfile);
     setShowNetwork(!showNetwork);

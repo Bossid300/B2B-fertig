@@ -58,7 +58,8 @@ const [promoData, setPromoData] = useState(
     ticketStatus: '',
     fsk: '',
     lineup: '',
-    amenities: ''
+    amenities: '',
+    is_demo: false
   }
 );
 
@@ -342,8 +343,31 @@ return (
 
       <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 space-y-5">
 
-        <div>
+        <div className="mt-3 flex gap-2">
 
+          <button
+            type="button"
+            onClick={() =>
+              setPromoData({
+                ...promoData,
+                is_demo: !promoData.is_demo
+              })
+            }
+            title={promoData.is_demo ? 'DEMO' : 'LIVE'}
+            className="flex items-center"
+          >
+            <span
+              className={
+                promoData.is_demo
+                  ? 'w-4 h-4 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.8)]'
+                  : 'w-4 h-4 rounded-full bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.8)]'
+              }
+            />
+          </button>
+
+        </div>
+
+        <div>
           <label className="block text-xs uppercase text-slate-500 mb-2">
             Eventtitel
           </label>
@@ -360,7 +384,6 @@ return (
             }
             className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white"
           />
-
         </div>
 
 

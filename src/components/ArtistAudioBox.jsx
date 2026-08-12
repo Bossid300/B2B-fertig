@@ -274,10 +274,6 @@ export default function ArtistAudioBox({ currentProfileName, isOwner }) {
         }
       });
 
-      console.log(
-        'AUDIO PROFILE BEFORE SAVE ✅',
-        updatedProfile
-      );
 
       const result =
         await saveProfile(
@@ -285,10 +281,6 @@ export default function ArtistAudioBox({ currentProfileName, isOwner }) {
           updatedProfile
         );
 
-      console.log(
-        'AUDIO SAVE DB ✅',
-        result
-      );
 
       setProfileId(updatedProfile.id);
 

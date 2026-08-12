@@ -103,10 +103,7 @@ export default function ProfileFinanzBox({ currentProfileName, isOwner }) {
           updatedProfile.id,
           updatedProfile
         );
-      console.log(
-        'FINANCE SAVE DB ✅',
-        result
-      );
+
       setProfile(updatedProfile);
       setProfileData(updatedProfile);
       alert(
@@ -174,10 +171,7 @@ const { company_uid, steuernummer, tax_type, rate_hour, rate_day, payment_terms,
                       updatedProfile.id,
                       updatedProfile
                     );
-                  console.log(
-                    'FINANCE VISIBILITY DB ✅',
-                    result
-                  );
+
                   setProfile(updatedProfile);
                   setProfileData(updatedProfile);
                   setShowFinance(updatedShow);

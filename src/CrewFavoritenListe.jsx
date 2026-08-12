@@ -74,11 +74,6 @@ export default function CrewFavoritenListe({ onNavigate }) {
             currentUserName.trim().toLowerCase()
         );
 
-        console.log(
-          'CREWFAVORITEN PROFILE DB ✅',
-          found
-        );
-
         setCurrentProfileData(found || null);
       })
       .catch(console.error);
@@ -136,13 +131,6 @@ export default function CrewFavoritenListe({ onNavigate }) {
   const handleAddFavToProject = async (eventId, fav) => {
     try {
 
-    console.log(
-      'CREWFAVORITEN HANDLE START ✅',
-      {
-        eventId,
-        fav
-      }
-    );
         const savedEvents = eventService.getEvents();
         
         // 📡 Sucht das Event über die ID heraus
@@ -176,17 +164,6 @@ export default function CrewFavoritenListe({ onNavigate }) {
         // Doppelbuchungen im selben Event verhindern
         const alreadyInCrew = savedEvents[eventIndex].crew.some(member =>
           member && member.id === fav.id
-        );
-
-        console.log(
-          'CREWFAVORITEN ALREADY CHECK ✅',
-          {
-            alreadyInCrew,
-            eventIndex,
-            eventId,
-            favId: fav.id,
-            crew: savedEvents[eventIndex].crew
-          }
         );
 
         if (alreadyInCrew) {
@@ -286,18 +263,8 @@ export default function CrewFavoritenListe({ onNavigate }) {
             "Automatisch über Crew-Favoritenliste hinzugefügt."
         };
 
-        console.log(
-          'CREWFAVORITEN BEFORE DB SAVE ✅',
-          newRequest
-        );
-
         const saveResult =
           await saveCrewRequest(newRequest);
-
-        console.log(
-          'CREWFAVORITEN REQUEST SAVE DB ✅',
-          saveResult
-        );
 
         window.dispatchEvent(new CustomEvent('request-sent'));
 

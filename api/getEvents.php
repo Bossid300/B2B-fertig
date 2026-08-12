@@ -3,6 +3,8 @@ header('Content-Type: application/json; charset=utf-8');
 
 require_once 'db.php';
 
+require_once("cors.php");
+
 try {
 
     $stmt = $pdo->query("

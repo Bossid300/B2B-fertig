@@ -48,11 +48,6 @@ export default function LocationProfile({ onBack, ticketName, isOwner }) {
             targetUser.trim().toLowerCase()
         );
 
-        console.log(
-          'LOCATIONPROFILE DB ✅',
-          found
-        );
-
         if (found) {
           if (found?.profile_json) {
             const dbProfile =
