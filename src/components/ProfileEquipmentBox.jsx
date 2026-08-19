@@ -83,12 +83,17 @@ export default function ProfileEquipmentBox({ currentProfileName, isOwner }) {
         equipment: equipmentList,
         show_equipment: showEquipment
       };
-      const result =
-        await saveProfile(
-          updatedProfile.id,
-          updatedProfile
+      const profileId =
+        updatedProfile.id ||
+        updatedProfile.profileId ||
+        localStorage.getItem(
+          'gigsda_profile_id'
         );
 
+      await saveProfile({
+        profileId,
+        profile: updatedProfile
+      });
       setProfile(updatedProfile);
       setProfileData(updatedProfile);
       alert(

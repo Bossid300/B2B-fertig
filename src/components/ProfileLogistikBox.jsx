@@ -83,11 +83,17 @@ export default function ProfileLogistikBox({ currentProfileName, isOwner }) {
         show_logistik: showLogistik
       };
 
-      const result =
-        await saveProfile(
-          updatedProfile.id,
-          updatedProfile
+      const profileId =
+        updatedProfile.id ||
+        updatedProfile.profileId ||
+        localStorage.getItem(
+          'gigsda_profile_id'
         );
+
+      await saveProfile({
+        profileId,
+        profile: updatedProfile
+      });
 
       setProfile(updatedProfile);
       setProfileData(updatedProfile);

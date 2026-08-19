@@ -46,7 +46,7 @@ export default function ProfileProjekteBox({ currentProfileName, isOwner }) {
             (found.Klarname || '').trim().toLowerCase(),
             (found.project_name || '').trim().toLowerCase()
           ].filter(v => v !== '');
-          const allEvents = JSON.parse(savedEvents);
+          const allEvents = eventService.getEvents();
           const joinedProjects = [];
           const counts = {};
           if (Array.isArray(allEvents)) {
@@ -98,11 +98,17 @@ const toggleProjectPrivacy = async () => {
       ...profileData,
       show_projects: updatedShow
     };
-    const result =
-      await saveProfile(
-        updatedProfile.id,
-        updatedProfile
+    const profileId =
+      updatedProfile.id ||
+      updatedProfile.profileId ||
+      localStorage.getItem(
+        'gigsda_profile_id'
       );
+
+    await saveProfile({
+      profileId,
+      profile: updatedProfile
+    });
 
     setProfile(updatedProfile);
     setProfileData(updatedProfile);

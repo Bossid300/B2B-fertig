@@ -17,7 +17,7 @@ export default function ArtistStammBox({ profileOwnerName, isOwner }) {
     event_types: ''
   });
 
-  // 1. Profildaten aus gigsda_profiles laden anhand des Namens
+  // 1. Profildaten aud DB laden
   useEffect(() => {
     if (!profileOwnerName) return;
 
@@ -68,7 +68,7 @@ export default function ArtistStammBox({ profileOwnerName, isOwner }) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // 2. Speicher-Pipeline: Schreibt alle B2B-Felder direkt in gigsda_profiles
+  // 2. Speicher-Pipeline: Schreibt alle B2B-Felder
   const handleSave = async (e) => {
     e.preventDefault();
 
@@ -90,13 +90,18 @@ export default function ArtistStammBox({ profileOwnerName, isOwner }) {
         event_types: formData.event_types
       };
 
-      const result =
-        await saveProfile(
-          updatedProfile.id,
-          updatedProfile
+      const profileId =
+        updatedProfile.id ||
+        updatedProfile.profileId ||
+        localStorage.getItem(
+          'gigsda_profile_id'
         );
 
-
+      await saveProfile({
+        profileId,
+        profile: updatedProfile
+      });
+      
       setProfileData(updatedProfile);
 
       setIsEditing(false);

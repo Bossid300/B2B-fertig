@@ -82,11 +82,17 @@ export default function ProfileSocialBox({ currentProfileName, isOwner }) {
         show_socials:
           showSocials
       };
-      const result =
-        await saveProfile(
-          updatedProfile.id,
-          updatedProfile
+      const profileId =
+        updatedProfile.id ||
+        updatedProfile.profileId ||
+        localStorage.getItem(
+          'gigsda_profile_id'
         );
+
+      await saveProfile({
+        profileId,
+        profile: updatedProfile
+      });
 
       setProfile(updatedProfile);
       setProfileData(updatedProfile);
@@ -137,11 +143,17 @@ export default function ProfileSocialBox({ currentProfileName, isOwner }) {
                     ...profileData,
                     show_socials: updatedShow
                   };
-                  const result =
-                    await saveProfile(
-                      updatedProfile.id,
-                      updatedProfile
+                  const profileId =
+                    updatedProfile.id ||
+                    updatedProfile.profileId ||
+                    localStorage.getItem(
+                      'gigsda_profile_id'
                     );
+
+                  await saveProfile({
+                    profileId,
+                    profile: updatedProfile
+                  });
 
                   setProfile(updatedProfile);
                   setProfileData(updatedProfile);

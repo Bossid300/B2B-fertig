@@ -145,15 +145,18 @@ export default function ArtistTechRiderBox({ currentProfileName, isOwner }) {
 
   });
 
+  const profileId =
+    updatedProfile.id ||
+    updatedProfile.profileId ||
+    localStorage.getItem(
+      'gigsda_profile_id'
+    );
 
-const result =
-  await saveProfile(
-    updatedProfile.id,
-    updatedProfile
-  );
-
-
-setProfileData(updatedProfile);
+  await saveProfile({
+    profileId,
+    profile: updatedProfile
+  });
+  setProfileData(updatedProfile);
 
 try {
 

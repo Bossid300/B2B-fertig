@@ -18,7 +18,7 @@ export default function ProfileBioTabsBox({ currentProfileName, isOwner }) {
   const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
   const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
 
-  // 1. DATABASE PIPELINE: Lädt die geteilten Texte live aus gigsda_profiles
+  // 1. DATABASE PIPELINE: Lädt die geteilten Texte live aus DB
   useEffect(() => {
     getProfilesDb()
       .then(profiles => {
@@ -61,30 +61,30 @@ export default function ProfileBioTabsBox({ currentProfileName, isOwner }) {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-    const updatedProfile = {
-      ...profile,
-
-      bio_einleitung: textMatrix.einleitung,
-      bio_karriere: textMatrix.karriere,
-      bio_privates: textMatrix.privates,
-
-      show_bio: showBio
-    };
-
-    if (updatedProfile?.id) {
-
-      const result =
-        await saveProfile(
-          updatedProfile.id,
-          updatedProfile
+      const updatedProfile = {
+        ...profile,
+        bio_einleitung: textMatrix.einleitung,
+        bio_karriere: textMatrix.karriere,
+        bio_privates: textMatrix.privates,
+        show_bio: showBio
+      };
+      const profileId =
+        updatedProfile.id ||
+        updatedProfile.profileId ||
+        localStorage.getItem(
+          'gigsda_profile_id'
         );
-
+      await saveProfile({
+        profileId,
+        profile: updatedProfile
+      });
       setProfile(updatedProfile);
-    }
-
       setIsEditing(false);
     } catch (e) {
-      console.error("Fehler beim Speichern der Biografie:", e);
+      console.error(
+        "Fehler beim Speichern der Biografie:",
+        e
+      );
     }
   };
 

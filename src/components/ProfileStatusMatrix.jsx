@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, ShieldCheck, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ProfileStatusMatrix({ currentProfileName }) {
   const [score, setScore] = useState(0);
@@ -9,61 +10,63 @@ export default function ProfileStatusMatrix({ currentProfileName }) {
 
   // 1. ANALYTICS ENGINE: Durchleuchtet das Profil live im LocalStorage
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles) || [];
-        const found = allProfiles.find(
-          p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
+    getProfilesDb()
+      .then(profiles => {
+        const found = profiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name)
+              ?.trim()
+              .toLowerCase() ===
+            targetUser.trim().toLowerCase()
         );
-
-        if (found) {
-          let currentScore = 0;
-          const activeToDos = [];
-
-          // AUDIT 1: Stammdaten-Check (Gewichtung: 20%)
-          if (found.city && found.phone || found.category) {
-            currentScore += 20;
-          } else {
-            activeToDos.push("Stammdaten: Kontaktdaten unvollständig");
-          }
-
-          // AUDIT 2: Core-Skills & Zertifikate (Gewichtung: 20%)
-          if (Array.isArray(found.skills) && found.skills.length > 0) {
-            currentScore += 20;
-          } else {
-            activeToDos.push("Skills: Keine Kernkompetenzen hinterlegt");
-          }
-
-          // AUDIT 3: B2B-Finanzdaten (Gewichtung: 20%)
-          if (found.company_uid || found.steuernummer) {
-            currentScore += 20;
-          } else {
-            activeToDos.push("Finanzen: Keine Steuernummer / UID-Zulassung");
-          }
-
-          // AUDIT 4: Equipment & Packlisten (Gewichtung: 20%)
-          if (Array.isArray(found.equipment) && found.equipment.length > 0) {
-            currentScore += 20;
-          } else {
-            activeToDos.push("Inventar: Packliste für Dry-Hire / Einsatz leer");
-          }
-
-          // AUDIT 5: Web-Radar & Socials (Gewichtung: 20%)
-          if (found.social_instagram || found.social_linkedin || found.social_spotify) {
-            currentScore += 20;
-          } else {
-            activeToDos.push("Socials: Keine B2B-Netzwerkkanäle verknüpft");
-          }
-
-          setScore(currentScore);
-          setTodos(activeToDos);
-        }
-      } catch (e) {
-        console.error("Fehler im Gigsda Audit-Protokoll:", e);
-      }
-    }
-  }, [targetUser]); // Horcht reaktiv auf Profilwechsel
+        if (!found) return;
+        const profile =
+          found.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+        let currentScore = 0;
+        const activeToDos = [];
+            // AUDIT 1: Stammdaten-Check (Gewichtung: 20%)
+            if (profile.city && profile.phone || profile.category) {
+              currentScore += 20;
+            } else {
+              activeToDos.push("Stammdaten: Kontaktdaten unvollständig");
+            }
+            // AUDIT 2: Core-Skills & Zertifikate (Gewichtung: 20%)
+            if (Array.isArray(profile.skills) && profile.skills.length > 0) {
+              currentScore += 20;
+            } else {
+              activeToDos.push("Skills: Keine Kernkompetenzen hinterlegt");
+            }
+            // AUDIT 3: B2B-Finanzdaten (Gewichtung: 20%)
+            if (profile.company_uid || profile.steuernummer) {
+              currentScore += 20;
+            } else {
+              activeToDos.push("Finanzen: Keine Steuernummer / UID-Zulassung");
+            }
+            // AUDIT 4: Equipment & Packlisten (Gewichtung: 20%)
+            if (Array.isArray(profile.equipment) && profile.equipment.length > 0) {
+              currentScore += 20;
+            } else {
+              activeToDos.push("Inventar: Packliste für Dry-Hire / Einsatz leer");
+            }
+            // AUDIT 5: Web-Radar & Socials (Gewichtung: 20%)
+            if (profile.social_instagram || profile.social_linkedin || profile.social_spotify) {
+              currentScore += 20;
+            } else {
+              activeToDos.push("Socials: Keine B2B-Netzwerkkanäle verknüpft");
+            }
+            setScore(currentScore);
+            setTodos(activeToDos);
+        })
+        .catch(e => {
+          console.error(
+            "Fehler im Gigsda Audit-Protokoll:",
+            e
+          );
+        });
+  }, [targetUser]);
 
   return (
     <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-5 rounded-3xl shadow-xl font-mono text-white select-none mt-4">

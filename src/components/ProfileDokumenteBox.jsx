@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { FileText, Plus, X, Save, Eye, EyeOff } from 'lucide-react';
 import { eventService } from '../services/eventService';
+import {
+  getProfilesDb,
+  saveProfile
+} from '../services/apiService';
 
 export default function ProfileDokumenteBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -20,38 +24,63 @@ export default function ProfileDokumenteBox({ currentProfileName, isOwner }) {
 
   // 1. DATABASE & SECURITY PIPELINE: Lädt Dokumente & prüft Crew-Status des Besuchers
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    const savedEvents = eventService.getEvents();
-
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles) || [];
-        const found = allProfiles.find(
-          p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-        );
-
-        if (found) {
-          setProfile(found);
-          setShowDocs(found.show_docs !== false);
-          setDocsList(Array.isArray(found.documents) ? found.documents : []);
-
-          // Crew-Check: Ist der Betrachter in irgendeinem Event dieses Profils als "accepted" eingetragen?
-          if (loggedInUser && targetUser.toLowerCase() !== loggedInUser.toLowerCase()) {
-            const allEvts = savedEvents;
-            const commonEvent = allEvts.find(evt => {
-              if (!evt || !Array.isArray(evt.crew)) return false;
-              return evt.crew.some(m => 
-                m && m.name && m.name.trim().toLowerCase() === loggedInUser.trim().toLowerCase() && 
-                (m.status === 'accepted' || m.status === 'confirmed')
-              );
-            });
-            if (commonEvent) setIsCrewMember(true);
-          }
+  const savedEvents = eventService.getEvents();
+  getProfilesDb()
+    .then(profiles => {
+      const found = profiles.find(
+        p =>
+          p &&
+          (p.name || p.user_name || p.display_name)
+            ?.trim()
+            .toLowerCase() ===
+          targetUser.trim().toLowerCase()
+      );
+      if (!found) return;
+      const profile =
+        found.profile_json
+          ? JSON.parse(found.profile_json)
+          : found;
+      setProfile(profile);
+      setShowDocs(
+        profile.show_docs !== false
+      );
+      setDocsList(
+        Array.isArray(profile.documents)
+          ? profile.documents
+          : []
+      );
+      if (
+        loggedInUser &&
+        targetUser.toLowerCase() !==
+        loggedInUser.toLowerCase()
+      ) {
+        const commonEvent =
+          savedEvents.find(evt => {
+            if (!evt || !Array.isArray(evt.crew))
+              return false;
+            return evt.crew.some(
+              m =>
+                m &&
+                m.name &&
+                m.name.trim().toLowerCase() ===
+                loggedInUser.trim().toLowerCase() &&
+                (
+                  m.status === 'accepted' ||
+                  m.status === 'confirmed'
+                )
+            );
+          });
+        if (commonEvent) {
+          setIsCrewMember(true);
         }
-      } catch (e) {
-        console.error("Fehler in der Gigsda Dokumenten-Pipeline:", e);
       }
-    }
+    })
+    .catch(e => {
+      console.error(
+        "Fehler in der Gigsda Dokumenten-Pipeline:",
+        e
+      );
+    });
   }, [targetUser, isEditing, loggedInUser]);
 
   const addDocument = () => {
@@ -75,45 +104,32 @@ export default function ProfileDokumenteBox({ currentProfileName, isOwner }) {
   // 2. SAVE PIPELINE: Brennt die Dokumenten-Matrix permanent in die DB
   const handleSave = async (e) => {
     e.preventDefault();
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
-
     try {
-      let allProfiles = JSON.parse(savedProfiles);
-      if (!Array.isArray(allProfiles)) return;
-
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          return { ...p, documents: docsList, show_docs: showDocs };
-        }
-        return p;
+      const updatedProfile = {
+        ...profile,
+        documents: docsList,
+        show_docs: showDocs
+      };
+      const profileId =
+        profile.id ||
+        profile.profileId ||
+        localStorage.getItem(
+          'gigsda_profile_id'
+        );
+      await saveProfile({
+        profileId,
+        profile: updatedProfile
       });
-
-const updatedProfile = allProfiles.find(
-  p =>
-    p &&
-    (p.name || p.user_name || p.display_name)
-      ?.trim()
-      .toLowerCase() ===
-    targetUser.trim().toLowerCase()
-);
-
-if (updatedProfile?.id) {
-
-  const result =
-    await saveProfile(
-      updatedProfile.id,
-      updatedProfile
-    );
-
-}
-
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      alert("B2B Dokumenten- & Rider-Protokoll erfolgreich eingebrannt! 💾📄");
+      setProfile(updatedProfile);
+      alert(
+        "B2B Dokumenten- & Rider-Protokoll erfolgreich gespeichert! 💾📄"
+      );
       setIsEditing(false);
-      window.dispatchEvent(new Event('storage'));
     } catch (e) {
-      console.error("Fehler beim Sichern der Dokumente:", e);
+      console.error(
+        "Fehler beim Sichern der Dokumente:",
+        e
+      );
     }
   };
 

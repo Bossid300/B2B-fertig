@@ -98,11 +98,17 @@ export default function ProfileFinanzBox({ currentProfileName, isOwner }) {
 
         show_finance: showFinance
       };
-      const result =
-        await saveProfile(
-          updatedProfile.id,
-          updatedProfile
+      const profileId =
+        updatedProfile.id ||
+        updatedProfile.profileId ||
+        localStorage.getItem(
+          'gigsda_profile_id'
         );
+
+      await saveProfile({
+        profileId,
+        profile: updatedProfile
+      });
 
       setProfile(updatedProfile);
       setProfileData(updatedProfile);
@@ -166,11 +172,17 @@ const { company_uid, steuernummer, tax_type, rate_hour, rate_day, payment_terms,
                     ...profileData,
                     show_finance: updatedShow
                   };
-                  const result =
-                    await saveProfile(
-                      updatedProfile.id,
-                      updatedProfile
+                  const profileId =
+                    updatedProfile.id ||
+                    updatedProfile.profileId ||
+                    localStorage.getItem(
+                      'gigsda_profile_id'
                     );
+
+                  await saveProfile({
+                    profileId,
+                    profile: updatedProfile
+                  });
 
                   setProfile(updatedProfile);
                   setProfileData(updatedProfile);

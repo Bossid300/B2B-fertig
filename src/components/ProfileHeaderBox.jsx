@@ -165,10 +165,17 @@ const myEvents = savedEvents.filter(
           ...tickerFields
         };
 
-        const result = await saveProfile(
-          updatedProfile.id,
-          updatedProfile
-        );
+        const profileId =
+          updatedProfile.id ||
+          updatedProfile.profileId ||
+          localStorage.getItem(
+            'gigsda_profile_id'
+          );
+
+        await saveProfile({
+          profileId,
+          profile: updatedProfile
+        });
 
         setProfileData(updatedProfile);
 
@@ -336,20 +343,48 @@ const submitB2BRequest = async (project) => {
 
   const getRoleBadge = (role) => {
     const cleanRole = role ? role.trim().toLowerCase() : 'künstler';
-    if (cleanRole.includes('security')) return { text: 'SECURITY SERVICE', icon: <Shield size={12} className="text-rose-400" />, style: 'border-rose-900/50 bg-rose-950/20 text-rose-400' };
-    if (cleanRole.includes('location') || cleanRole.includes('ort')) return { text: 'EVENT LOCATION', icon: <Landmark size={12} className="text-cyan-400" />, style: 'border-cyan-900/50 bg-cyan-950/20 text-cyan-400' };
-    if (cleanRole.includes('veranstalter') || cleanRole.includes('business')) return { text: 'PROMOTER SERVICE', icon: <Briefcase size={12} className="text-amber-400" />, style: 'border-amber-900/50 bg-amber-950/20 text-amber-400' };
-    if (cleanRole.includes('techniker') || cleanRole.includes('technik')) { return { text: 'TECHNICIAN SERVICE', icon: <Briefcase size={12} className="text-purple-400" />, style: 'border-purple-900/50 bg-purple-950/20 text-purple-400'};}
-    if (cleanRole.includes('logistik')) {
-    return {
+    if (
+      cleanRole.includes('security')) 
+      return { 
+      text: 'SECURITY SERVICE', 
+      icon: <Shield size={12} className="text-rose-400" />, 
+      style: 
+        'border-rose-900/50 bg-rose-950/20 text-rose-400' };
+    if (
+      cleanRole.includes('location') || 
+      cleanRole.includes('ort')) 
+      return { 
+      text: 'EVENT LOCATION', 
+      icon: <Landmark size={12} className="text-cyan-400" />, 
+      style: 
+        'border-cyan-900/50 bg-cyan-950/20 text-cyan-400' };
+    if (
+      cleanRole.includes('veranstalter') || 
+      cleanRole.includes('business')) 
+      return { 
+      text: 'PROMOTER SERVICE', 
+      icon: <Briefcase size={12} className="text-amber-400" />, 
+      style: 
+        'border-amber-900/50 bg-amber-950/20 text-amber-400' };
+    if (
+      cleanRole.includes('techniker') || 
+      cleanRole.includes('technik')) { 
+      return { 
+      text: 'TECHNICIAN SERVICE', 
+      icon: <Briefcase size={12} className="text-purple-400" />, 
+      style: 
+        'border-purple-900/50 bg-purple-950/20 text-purple-400'};}
+    if (
+      cleanRole.includes('logistik')) {
+      return {
         text: 'LOGISTICS SERVICE',
         icon: <Briefcase size={12} className="text-blue-400" />,
         style:
           'border-blue-900/50 bg-blue-950/20 text-blue-400'
       };
     }
-
-    if (cleanRole.includes('design')) {
+    if (
+      cleanRole.includes('design')) {
       return {
         text: 'DESIGN SERVICE',
         icon: <Briefcase size={12} className="text-violet-400" />,
@@ -357,8 +392,8 @@ const submitB2BRequest = async (project) => {
           'border-violet-900/50 bg-violet-950/20 text-violet-400'
       };
     }
-
-    if (cleanRole.includes('catering')) {
+    if (
+      cleanRole.includes('catering')) {
       return {
         text: 'CATERING SERVICE',
         icon: <Briefcase size={12} className="text-amber-400" />,
@@ -366,7 +401,29 @@ const submitB2BRequest = async (project) => {
           'border-amber-900/50 bg-amber-950/20 text-amber-400'
       };
     }
-    return { text: 'ARTIST MEMBERSHIP', icon: <Music size={12} className="text-emerald-400" />, style: 'border-emerald-900/50 bg-emerald-950/20 text-emerald-400' };
+    if (
+      cleanRole.includes('verleiher') ||
+      cleanRole.includes('material')
+    ) {
+      return {
+        text: 'RENTAL PARTNER',
+        icon: <Briefcase size={12} className="text-yellow-400" />,
+        style:
+          'border-yellow-900/50 bg-yellow-950/20 text-yellow-400'
+      };
+    }
+    if (cleanRole.includes('fan')) {
+      return {
+        text: 'FAN COMMUNITY MEMBER',
+        icon: <Music size={12} className="text-slate-300" />,
+        style:
+          'border-slate-700/50 bg-slate-900/20 text-slate-300'
+      };
+    }
+    return { 
+      text: 'ARTIST MEMBERSHIP', 
+      icon: <Music size={12} className="text-emerald-400" />, 
+      style: 'border-emerald-900/50 bg-emerald-950/20 text-emerald-400' };
   };
 
   const badge = getRoleBadge(activeFields.role || activeFields.user_type);

@@ -274,13 +274,17 @@ export default function ArtistAudioBox({ currentProfileName, isOwner }) {
         }
       });
 
-
-      const result =
-        await saveProfile(
-          updatedProfile.id,
-          updatedProfile
+      const profileId =
+        updatedProfile.id ||
+        updatedProfile.profileId ||
+        localStorage.getItem(
+          'gigsda_profile_id'
         );
 
+      await saveProfile({
+        profileId,
+        profile: updatedProfile
+      });
 
       setProfileId(updatedProfile.id);
 

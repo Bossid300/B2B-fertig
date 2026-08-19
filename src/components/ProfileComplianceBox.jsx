@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Plus, X, Save, Eye, EyeOff, FileCheck, ShieldAlert } from 'lucide-react';
-
 import { eventService } from '../services/eventService';
+import { getProfilesDb, saveProfile } from '../services/apiService';
 
 export default function ProfileComplianceBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -21,39 +21,76 @@ export default function ProfileComplianceBox({ currentProfileName, isOwner }) {
 
   // 1. DATABASE & VERIFICATION PIPELINE
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    const savedEvents = eventService.getEvents();
+  const savedEvents = eventService.getEvents();
 
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles) || [];
-        const found = allProfiles.find(
-          p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
+  getProfilesDb()
+    .then(profiles => {
+      const found = profiles.find(
+        p =>
+          p &&
+          (p.name || p.user_name || p.display_name)
+            ?.trim()
+            .toLowerCase() ===
+          targetUser.trim().toLowerCase()
+      );
+      if (!found) return;
+      const profile =
+        found.profile_json
+          ? JSON.parse(found.profile_json)
+          : found;
+      setProfile(profile);
+      setShowCompliance(
+        profile.show_compliance === true
+      );
+      setComplianceList(
+        Array.isArray(profile.compliance)
+          ? profile.compliance
+          : []
+      );
+      if (
+        loggedInUser &&
+        targetUser.toLowerCase() !==
+        loggedInUser.toLowerCase()
+      ) {
+        const isContractPartner =
+          savedEvents.some(ev => {
+            if (!ev || !Array.isArray(ev.crew))
+              return false;
+            const namesInCrew =
+              ev.crew.map(
+                m => m && m.name
+                  ? m.name.trim().toLowerCase()
+                  : ''
+              );
+            const memberStatus =
+              ev.crew.find(
+                m =>
+                  m &&
+                  m.name &&
+                  m.name.trim().toLowerCase() ===
+                  targetUser.trim().toLowerCase()
+              )?.status;
+            return (
+              namesInCrew.includes(
+                loggedInUser.trim().toLowerCase()
+              ) &&
+              (
+                memberStatus === 'accepted' ||
+                memberStatus === 'confirmed'
+              )
+            );
+          });
+        setIsVerifiedPartner(
+          isContractPartner
         );
-
-        if (found) {
-          setProfile(found);
-          setShowCompliance(found.show_compliance === true); // Standardmäßig false
-          setComplianceList(Array.isArray(found.compliance) ? found.compliance : []);
-
-          // 📐 ERHÖHTER B2B-SECURITY CHECK: Hat der Betrachter ein bestätigtes Event mit dem Inhaber?
-          if (loggedInUser && targetUser.toLowerCase() !== loggedInUser.toLowerCase()) {
-            const allEvts = savedEvents;
-            const isContractPartner = allEvts.some(evt => {
-              if (!evt || !Array.isArray(evt.crew)) return false;
-              const namesInCrew = evt.crew.map(m => m && m.name ? m.name.trim().toLowerCase() : '');
-              const memberStatus = evt.crew.find(m => m && m.name && m.name.trim().toLowerCase() === targetUser.trim().toLowerCase())?.status;
-              
-              return namesInCrew.includes(loggedInUser.trim().toLowerCase()) && 
-                     (memberStatus === 'accepted' || memberStatus === 'confirmed');
-            });
-            setIsVerifiedPartner(isContractPartner);
-          }
-        }
-      } catch (e) {
-        console.error("Fehler in der Gigsda Compliance-Pipeline:", e);
       }
-    }
+    })
+    .catch(e => {
+      console.error(
+        "Fehler in der Gigsda Compliance-Pipeline:",
+        e
+      );
+    });
   }, [targetUser, isEditing, loggedInUser]);
 
   const addComplianceItem = () => {
@@ -75,28 +112,33 @@ export default function ProfileComplianceBox({ currentProfileName, isOwner }) {
   };
 
   // 2. SAVE PIPELINE: Sichert die Compliance-Daten permanent
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
-
     try {
-      let allProfiles = JSON.parse(savedProfiles);
-      if (!Array.isArray(allProfiles)) return;
-
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          return { ...p, compliance: complianceList, show_compliance: showCompliance };
-        }
-        return p;
+      const updatedProfile = {
+        ...profile,
+        compliance: complianceList,
+        show_compliance: showCompliance
+      };
+      const profileId =
+        profile.id ||
+        profile.profileId ||
+        localStorage.getItem('gigsda_profile_id');
+      await saveProfile({
+        profileId,
+        profile: updatedProfile
       });
-
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      alert("B2B Compliance- & Versicherungsnachweis erfolgreich verschlüsselt eingebrannt! 💾🛡️");
+      setProfile(updatedProfile);
+      alert(
+        "B2B Compliance- & Versicherungsnachweis erfolgreich gespeichert! 💾🛡️"
+      );
       setIsEditing(false);
-      window.dispatchEvent(new Event('storage'));
     } catch (e) {
-      console.error("Fehler beim Sichern der Compliance-Daten:", e);
+      console.error(
+        "Fehler beim Sichern der Compliance-Daten:",
+        e
+      );
+
     }
   };
 
@@ -126,16 +168,32 @@ export default function ProfileComplianceBox({ currentProfileName, isOwner }) {
           {canEdit && (
             <button 
               type="button" 
-              onClick={() => {
+              onClick={async () => {
                 const nextShow = !showCompliance;
                 setShowCompliance(nextShow);
-                const saved = localStorage.getItem('gigsda_profiles');
-                if (saved) {
-                  let all = JSON.parse(saved);
-                  all = all.map(p => p && (p.name || p.user_name || p.display_name)?.toLowerCase() === targetUser.toLowerCase() ? { ...p, show_compliance: nextShow } : p);
-                  localStorage.setItem('gigsda_profiles', JSON.stringify(all));
+                try {
+                  const updatedProfile = {
+                    ...profile,
+                    show_compliance: nextShow
+                  };
+                  const profileId =
+                    profile.id ||
+                    profile.profileId ||
+                    localStorage.getItem(
+                      'gigsda_profile_id'
+                    );
+                  await saveProfile({
+                    profileId,
+                    profile: updatedProfile
+                  });
+                  setProfile(updatedProfile);
+                } catch (e) {
+                  console.error(
+                    'Fehler beim Speichern der Compliance-Sichtbarkeit:',
+                    e
+                  );
                 }
-              }} 
+              }}
               className={`p-1.5 rounded-lg border transition-all cursor-pointer ${showCompliance ? 'text-rose-400 border-rose-500/30 bg-rose-950/10' : 'text-slate-600 border-slate-800 bg-slate-900'}`}
               title={showCompliance ? "Compliance öffentlich" : "Compliance streng vertraulich"}
             >

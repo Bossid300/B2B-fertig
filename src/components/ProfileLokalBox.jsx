@@ -64,11 +64,18 @@ export default function ProfileLokalBox({ currentProfileName, isOwner }) {
       try {
         const importedData =
           JSON.parse(event.target.result);
-        const result =
-          await saveProfile(
-            importedData.id || profile.id,
-            importedData
+
+        const profileId =
+          importedData.id ||
+          importedData.profileId ||
+          localStorage.getItem(
+            'gigsda_profile_id'
           );
+
+        await saveProfile({
+          profileId,
+          profile: importedData
+        });
 
         setProfile(importedData);
         alert(

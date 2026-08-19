@@ -154,10 +154,18 @@ useEffect(() => {
         updatedProfile[`room${i}_konditionen`] = room.konditionen;
         updatedProfile[`room${i}_visibility`] = room.isPublic;
       });
-      const result = await saveProfile(
+      
+      const profileId =
+        updatedProfile.id ||
+        updatedProfile.profileId ||
+        localStorage.getItem(
+          'gigsda_profile_id'
+        );
+
+      await saveProfile({
         profileId,
-        updatedProfile
-      );
+        profile: updatedProfile
+      });
 
 
       // Event-Markierung bleibt

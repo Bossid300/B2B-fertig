@@ -284,6 +284,8 @@ currentEvents >= maxEvents;
                   : 'Clubshow',
             text: "Event frisch angelegt. Starte die Crew-Suche im Radar.",
             venue: newEvent.venue || "Stadtpark Wiese, Braunau",
+            lat: newEvent.lat || null,
+            lng: newEvent.lng || null,
             doneProgress: 0,
             ownerId: currentUserId,
             ownerName:

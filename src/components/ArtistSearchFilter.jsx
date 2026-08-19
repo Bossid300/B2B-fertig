@@ -3,6 +3,7 @@ import {
   Search, SlidersHorizontal, Users, DollarSign, 
   MapPin, ShieldCheck, Check, RotateCcw, Music 
 } from 'lucide-react';
+import { getProfilesDb } from '../services/apiService';
 
 export default function ArtistSearchFilter({ onFilterResult }) {
   // Such- und Filter-States
@@ -18,13 +19,24 @@ export default function ArtistSearchFilter({ onFilterResult }) {
 
   // 1. DATEN-PIPELINE: Alle Profile laden, die Musiker/Bands sind
   useEffect(() => {
-    const storedProfiles = localStorage.getItem('gigsda_profiles');
-    if (storedProfiles) {
-      const profiles = JSON.parse(storedProfiles);
-      // Filtert Profile heraus, die z.B. Audio-Keys besitzen (Künstler)
-      const artists = profiles.filter(p => p && (p.audio1_url || p.album1_title || p.rider_backline || p.type === 'artist'));
-      setAllArtists(artists);
-    }
+    getProfilesDb()
+      .then(profiles => {
+        const artists = profiles.filter(
+          p => p && (
+            p.audio1_url ||
+            p.album1_title ||
+            p.rider_backline ||
+            p.type === 'artist'
+          )
+        );
+        setAllArtists(artists);
+      })
+      .catch(e => {
+        console.error(
+          'ArtistSearchFilter DB Fehler:',
+          e
+        );
+      });
   }, []);
 
   // 2. REAKTIVE FILTER-LOGIK: Filtert die Liste bei jeder Änderung in Echtzeit

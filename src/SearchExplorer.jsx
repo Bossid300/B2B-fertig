@@ -4,9 +4,10 @@ import { Search, MapPin, Star, Briefcase, Calendar, ChevronRight, X, Sparkles, F
 
 import ProfileCard from './components/cards/ProfileCard';
 
-import { eventService } from './services/eventService';
 import { getProfiles } from './services/apiService';
 import { saveCrewRequest } from './services/apiService';
+import { eventService } from './services/eventService';
+import { distanceKm, geocodeAddress } from './services/geoService';
 
 
 export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat }) {
@@ -17,17 +18,51 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
   const [activeRequestUser, setActiveRequestUser] = useState(null); // Sichert das Anfrage-Popup!
   const [requestText, setRequestText] = useState(''); // Speichert euren eingetippten Text
   const [baseLocation, setBaseLocation] = useState('Braunau');
+
+const [baseCoordinates, setBaseCoordinates] = useState(null);
+
+
   const [genreFilter, setGenreFilter] = useState('');
   const [formationFilter, setFormationFilter] = useState('');
   const [eventTypeFilter, setEventTypeFilter] = useState('');
 
   const [profileView, setProfileView] = useState('live');
 
+
+
+
   // 🏟️ ECHTZEIT-PROJEKTLISTE FÜR DIE EXPLORER-DIREKTANFRAGE
   const [events, setEvents] = useState([]);
   const [showProjectSelect, setShowProjectSelect] = useState(false);
   const [currentProfileData, setCurrentProfileData] = useState(null);
   const isLoggedIn = localStorage.getItem('gigsda_logged_in') === 'true';
+
+  useEffect(() => {
+
+    const loadBaseCoordinates = async () => {
+
+      if (!baseLocation?.trim()) return;
+
+      try {
+
+        const geo =
+          await geocodeAddress(
+            baseLocation
+          );
+
+        setBaseCoordinates(
+          geo
+        );
+
+      } catch (e) {
+        console.error(e);
+      }
+
+    };
+
+    loadBaseCoordinates();
+
+  }, [baseLocation]);
 
 
   useEffect(() => {
@@ -248,39 +283,7 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
 const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Verleiher', 'Location', 'Veranstalter', 'Techniker', 'Logistik', 'Security', 'Design'];
 
   // 🗺️ DIE LIVE-ENTFERNUNGSMATRIX (Gemessen von eurer Heimatbasis Braunau)
-  const getDistanceTo = (base, city) => {
-    const from = (base || '').toLowerCase().trim();
-    const target = (city || '').toLowerCase().trim();
 
-    if (from.includes('braunau')) {
-      if (target.includes('braunau')) return 0;
-      if (target.includes('altötting')) return 28;
-      if (target.includes('linz')) return 120;
-      if (target.includes('wien')) return 290;
-    }
-
-    if (from.includes('linz')) {
-      if (target.includes('linz')) return 0;
-      if (target.includes('braunau')) return 120;
-      if (target.includes('wien')) return 185;
-      if (target.includes('passau')) return 95;
-    }
-
-    if (from.includes('wien')) {
-      if (target.includes('wien')) return 0;
-      if (target.includes('linz')) return 185;
-      if (target.includes('braunau')) return 290;
-    }
-
-
-    if (from.includes('passau')) {
-      if (target.includes('passau')) return 0;
-      if (target.includes('braunau')) return 65;
-      if (target.includes('linz')) return 95;
-    }
-
-    return 45;
-  };
 
   // ⚡ DIE ERWEITERTE FILTER-SCHLEIFE (Filtert nach Name, Rolle UND Radius!)
   const filteredUsers = allUsers.filter(user => {
@@ -343,10 +346,19 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Verleiher', 'Location', 'Ve
 
     // 2. 🛰️ DER REAKTIVE RADIUS-FILTER: Prüft die km-Distanz gegen den Schieberegler!
     const userDistance =
-      getDistanceTo(
-        baseLocation,
-        user.location || user.city
-      );
+      baseCoordinates?.lat &&
+      baseCoordinates?.lng &&
+      user?.lat &&
+      user?.lng
+        ? distanceKm(
+            baseCoordinates.lat,
+            baseCoordinates.lng,
+            user.lat,
+            user.lng
+          )
+        : Number.MAX_VALUE;
+
+
     const matchesRadius = userDistance <= searchRadius;
 
     return (matchesName || matchesId) &&
@@ -596,6 +608,11 @@ return (
               user={user}
               isGuest={!isLoggedIn}
               onProfile={() => {
+                localStorage.setItem(
+                  'gigsda_active_guest_profile_id',
+                  user.id
+                );
+
                 if (typeof setFavorites === 'function') {
                   setFavorites(user.name);
                 }

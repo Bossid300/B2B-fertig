@@ -1,60 +1,115 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Star, Briefcase, Calendar, ChevronRight, X, Sparkles, Filter, ShieldCheck, Heart, User, Clock, ArrowRight } from 'lucide-react';
-
 import EventCard from './components/cards/EventCard';
-
 import { eventService } from './services/eventService';
+import { distanceKm, geocodeAddress } from './services/geoService';
+import { getProfilesDb } from './services/apiService';
+
 
 export default function GuestEvents({ onNavigate }) {
+
+const [currentProfile, setCurrentProfile] = useState(null);
+
+useEffect(() => {
+
+  const currentUserName =
+    localStorage.getItem(
+      'gigsda_user_name'
+    );
+
+  if (!currentUserName) return;
+
+  getProfilesDb()
+    .then(profiles => {
+
+      const found =
+        profiles.find(
+          p =>
+            p &&
+            (
+              p.name ||
+              p.user_name ||
+              ''
+            )
+            .toLowerCase()
+            .trim() ===
+            currentUserName
+              .toLowerCase()
+              .trim()
+        );
+
+      if (!found) return;
+
+      const profileData =
+        found.profile_json
+          ? JSON.parse(
+              found.profile_json
+            )
+          : found;
+
+      setCurrentProfile(
+        profileData
+      );
+
+    })
+    .catch(console.error);
+
+}, []);
+
+
   const [events, setEvents] = useState([]);
   const [eventView, setEventView] = useState('live');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Alle');
   const [searchRadius, setSearchRadius] = useState(500); // 📡 Live-Suchumkreis
   const [baseLocation, setBaseLocation] = useState('Braunau');
+  const [baseCoordinates, setBaseCoordinates] = useState(null);
+
 
   useEffect(() => {
-    const localEvents = eventService.getEvents();
-    setEvents(localEvents.filter(evt => evt && evt.title));
+    const loadBaseCoordinates = async () => {
+      if (!baseLocation?.trim()) return;
+      try {
+        const geo =
+          await geocodeAddress(
+            baseLocation
+          );
+        setBaseCoordinates(geo);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    loadBaseCoordinates();
+  }, [baseLocation]);
+
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        const dbEvents =
+          await eventService.syncFromDb();
+        setEvents(
+          dbEvents.filter(
+            evt => evt && evt.title
+          )
+        );
+      } catch (e) {
+        console.error(
+          'EVENT RADAR DB SYNC FEHLER',
+          e
+        );
+      }
+    };
+    loadEvents();
   }, []);
+
+
 
 
   const CATEGORIES_LIST = ['Alle', 'Konzerte', 'Festivals', 'Club-Gigs', 'B2B-Messen'];
 
   // 🗺️ DIE LIVE-ENTFERNUNGSMATRIX (Exakt identisch zum SearchExplorer von eurer Heimatbasis Braunau)
-  const getDistanceTo = (base, city) => {
-    const from = (base || '').toLowerCase().trim();
-    const target = (city || '').toLowerCase().trim();
 
-    if (from.includes('braunau')) {
-      if (target.includes('braunau')) return 0;
-      if (target.includes('altötting')) return 28;
-      if (target.includes('linz')) return 120;
-      if (target.includes('wien')) return 290;
-    }
-
-    if (from.includes('linz')) {
-      if (target.includes('linz')) return 0;
-      if (target.includes('braunau')) return 120;
-      if (target.includes('wien')) return 185;
-      if (target.includes('passau')) return 95;
-    }
-
-    if (from.includes('wien')) {
-      if (target.includes('wien')) return 0;
-      if (target.includes('linz')) return 185;
-      if (target.includes('braunau')) return 290;
-    }
-
-
-    if (from.includes('passau')) {
-      if (target.includes('passau')) return 0;
-      if (target.includes('braunau')) return 65;
-      if (target.includes('linz')) return 95;
-    }
-
-    return 45;
-  };
 
   // ⚡ DIE ZWILLINGS-FILTER-SCHLEIFE (Filtert nach Name, Kategorie UND Radius!)
   const filteredEvents = events.filter(event => {
@@ -89,10 +144,18 @@ export default function GuestEvents({ onNavigate }) {
       event.category === selectedCategory;
 
     const eventDistance =
-      getDistanceTo(
-        baseLocation,
-        event.city
-      );
+      baseCoordinates?.lat &&
+      baseCoordinates?.lng &&
+      event?.lat &&
+      event?.lng
+        ? distanceKm(
+            baseCoordinates.lat,
+            baseCoordinates.lng,
+            event.lat,
+            event.lng
+          )
+        : Number.MAX_VALUE;
+
 
     const matchesRadius =
       eventDistance <= searchRadius;

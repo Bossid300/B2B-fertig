@@ -69,7 +69,8 @@ import { progressService } from './services/progressService';
 import CommunityAlertModal from './components/modals/CommunityAlertModal';
 import {
   createProfile,
-  getCrewRequests
+  getCrewRequests,
+  getProfileById
 } from './services/apiService';
 
 import PricingPage from './PricingPage';
@@ -77,10 +78,6 @@ import BillingCenter from './components/BillingCenter';
 import { getProfiles } from './services/apiService';
 
 export default function App() {
-
-
-
-
 
     // 📡 REAKTIVER CREW-ALARM EMPFÄNGER
   const [hasPendingRequests, setHasPendingRequests] = useState(false);
@@ -290,11 +287,6 @@ export default function App() {
   useEffect(() => {
     checkPendingRequests(); // Einmal direkt beim Start prüfen
 
-      // === GIGSDA CORE AUTO-INITIALISIERUNG AUS VS CODE ===
-    const storedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!storedProfiles || JSON.parse(storedProfiles).length === 0) {
-      localStorage.setItem('gigsda_profiles', JSON.stringify(initialProfiles));
-    }
     window.addEventListener('request-sent', checkPendingRequests);
     window.addEventListener('route-change', checkPendingRequests);
     return () => {
@@ -307,43 +299,89 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return localStorage.getItem('gigsda_logged_in') === 'true';
   });
-
+  const [currentProfile, setCurrentProfile] = useState(null);
   useEffect(() => {
     const session = JSON.parse(
       localStorage.getItem("gigsda_session") || "null"
     );
-
     if (!session?.profileId) return;
+    const loadSessionProfile = async () => {
+      try {
+        const profileResult = await getProfileById(
+          session.profileId
+        );
+        const loadedProfile =
+          profileResult?.profile;
 
-    const profiles = JSON.parse(
-      localStorage.getItem("gigsda_profiles") || "[]"
-    );
+        if (!loadedProfile) return;
+        setCurrentProfile(
+          loadedProfile
+        );
+        setTicketName(
+          loadedProfile.name
+        );
+        setIsLoggedIn(true);
+        localStorage.setItem(
+          "gigsda_user_name",
+          loadedProfile.name
+        );
+        localStorage.setItem(
+          "gigsda_logged_in",
+          "true"
+        );
+      } catch (e) {
+        console.error(
+          "SESSION PROFILE LOAD ERROR",
+          e
+        );
+      }
+    };
 
-    const currentProfile = profiles.find(
-      p => p.id === session.profileId
-    );
-
-    if (!currentProfile) return;
-
-    setTicketName(currentProfile.name);
-    setIsLoggedIn(true);
-
-    localStorage.setItem(
-      "gigsda_user_name",
-      currentProfile.name
-    );
-
-    localStorage.setItem(
-      "gigsda_logged_in",
-      "true"
-    );
+    loadSessionProfile();
   }, []);
   
   // 🛰️ EIGENE LEITUNG FÜR DEN GAST-SUCHER (VERGISS JEDE ANDERE VARIABLE!)
   const [activeGuestArtist, setActiveGuestArtist] = useState(
     () => localStorage.getItem('gigsda_active_guest_artist') || ''
   );
+  const [guestProfile, setGuestProfile] = useState(null);
+  useEffect(() => {
 
+    const loadGuestProfile = async () => {
+
+      const guestProfileId =
+        localStorage.getItem(
+          'gigsda_active_guest_profile_id'
+        );
+
+      if (!guestProfileId) return;
+
+      try {
+
+        const result =
+          await getProfileById(
+            guestProfileId
+          );
+
+        if (result?.profile) {
+          setGuestProfile(
+            result.profile
+          );
+        }
+
+      } catch (e) {
+
+        console.error(
+          'GUEST PROFILE LOAD ERROR',
+          e
+        );
+
+      }
+    };
+
+    loadGuestProfile();
+
+  }, [activeGuestArtist]);
 
 useEffect(() => {
   const loadProfileFromQr = async () => {
@@ -712,15 +750,22 @@ useEffect(() => {
           {view === 'login' && !isLoggedIn && (
             <LoginRegisterMask 
               isRegisteringInitial={view === 'register'}
-              onLoginSuccess={(name) => {
-                // 🔐 DER UNZERSTÖRBARE BEFREIUNGSSCHLAG:
-                // Brennt deinen echten Login-Namen (Winston) in den Speicher und fegt den "Gast" vom Platz!
-                localStorage.setItem('gigsda_user_name', name);
-                localStorage.setItem('gigsda_logged_in', 'true');
-                
+              onLoginSuccess={(profile) => {
+                setCurrentProfile(profile);
+                localStorage.setItem(
+                  'gigsda_user_name',
+                  profile.name
+                );
+                localStorage.setItem(
+                  'gigsda_logged_in',
+                  'true'
+                );
                 setIsLoggedIn(true);
-                setView('userProfile'); // ➔ Direkt ab auf euer echtes Projekt-Dashboard!
-              }} 
+                setTicketName(
+                  profile.name
+                );
+                setView('userProfile');
+              }}
             />
 
           )}
@@ -764,43 +809,227 @@ useEffect(() => {
             />
           )}
 
-          {/* ========================================================================= */}
-          {/* 🏟️ INTERAKTIVE 10-WEGE ROLLER-WEICHE: DAS KOMPLETTE GIGSDA-B2B-UNIVERSUM */}
-          {view === 'profile' && activeGuestArtist && (
-            (() => {
-              const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
-              const currentProfile = savedProfiles.find(p => p && p.name && p.name.trim().toLowerCase() === activeGuestArtist.trim().toLowerCase());
-              
-              if (currentProfile?.role === 'Location') { return <LocationProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
-              else if (currentProfile?.role === 'Fan') { return <FanProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
-              else if (currentProfile?.role === 'Material' || currentProfile?.role === 'Verleiher') { return <VerleiherProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
-              else if (currentProfile?.role === 'Techniker') { return <TechnikerProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
-              else if (currentProfile?.role === 'Catering') { return <CaterProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
-              else if (currentProfile?.role === 'Veranstalter') { return <VeranstalterProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
-              else if (currentProfile?.role === 'Logistik') { return <LogistikProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
-              else if (currentProfile?.role === 'Security') { return <SecurityProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
-              else if (currentProfile?.role === 'Design' || currentProfile?.role === 'Deko') { return <DesignProfile ticketName={activeGuestArtist} onNavigate={setView} />; }
-              else { return <UserProfile ticketName={activeGuestArtist} onBack={() => setView('radar')} isOwner={false} setView={setView}/>; }
-            })()
-          )}
+{/* ========================================================================= */}
+{/* 🏟️ INTERAKTIVE 10-WEGE ROLLER-WEICHE: DAS KOMPLETTE GIGSDA-B2B-UNIVERSUM */}
+{view === 'profile' && activeGuestArtist && (
+  (() => {
 
-          {view === 'userProfile' && isLoggedIn && (
-            (() => {
-              const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
-              const currentProfile = savedProfiles.find(p => p && p.name && p.name.trim().toLowerCase() === ticketName.trim().toLowerCase());
-              
-              if (currentProfile?.role === 'Location') { return <LocationProfile ticketName={ticketName} onNavigate={setView} />; }
-              else if (currentProfile?.role === 'Fan') { return <FanProfile ticketName={ticketName} onNavigate={setView} />; }
-              else if (currentProfile?.role === 'Material' || currentProfile?.role === 'Verleiher') { return <VerleiherProfile ticketName={ticketName} onNavigate={setView} />; }
-              else if (currentProfile?.role === 'Techniker') { return <TechnikerProfile ticketName={ticketName} onNavigate={setView} />; }
-              else if (currentProfile?.role === 'Catering') { return <CaterProfile ticketName={ticketName} onNavigate={setView} />; }
-              else if (currentProfile?.role === 'Veranstalter') { return <VeranstalterProfile ticketName={ticketName} onNavigate={setView} />; }
-              else if (currentProfile?.role === 'Logistik') { return <LogistikProfile ticketName={ticketName} onNavigate={setView} />; }
-              else if (currentProfile?.role === 'Security') { return <SecurityProfile ticketName={ticketName} onNavigate={setView} />; }
-              else if (currentProfile?.role === 'Design' || currentProfile?.role === 'Deko') { return <DesignProfile ticketName={ticketName} onNavigate={setView} />; }
-              else { return <UserProfile ticketName={ticketName} onBack={() => setView('projects')} isOwner={true} setView={setView}/>; }
-            })()
-          )}
+    if (!guestProfile) {
+      return (
+        <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
+          // GIGSDA CORE INITIALISIERT PROFILMATRIX...
+        </div>
+      );
+    }
+
+    if (guestProfile?.role === 'Location') {
+      return (
+        <LocationProfile
+          ticketName={activeGuestArtist}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    else if (guestProfile?.role === 'Fan') {
+      return (
+        <FanProfile
+          ticketName={activeGuestArtist}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    else if (
+      guestProfile?.role === 'Material' ||
+      guestProfile?.role === 'Verleiher'
+    ) {
+      return (
+        <VerleiherProfile
+          ticketName={activeGuestArtist}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    else if (guestProfile?.role === 'Techniker') {
+      return (
+        <TechnikerProfile
+          ticketName={activeGuestArtist}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    else if (guestProfile?.role === 'Catering') {
+      return (
+        <CaterProfile
+          ticketName={activeGuestArtist}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    else if (guestProfile?.role === 'Veranstalter') {
+      return (
+        <VeranstalterProfile
+          ticketName={activeGuestArtist}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    else if (guestProfile?.role === 'Logistik') {
+      return (
+        <LogistikProfile
+          ticketName={activeGuestArtist}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    else if (guestProfile?.role === 'Security') {
+      return (
+        <SecurityProfile
+          ticketName={activeGuestArtist}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    else if (
+      guestProfile?.role === 'Design' ||
+      guestProfile?.role === 'Deko'
+    ) {
+      return (
+        <DesignProfile
+          ticketName={activeGuestArtist}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    return (
+      <UserProfile
+        ticketName={activeGuestArtist}
+        onBack={() => setView('radar')}
+        isOwner={false}
+        setView={setView}
+      />
+    );
+
+  })()
+)}
+
+{view === 'userProfile' && isLoggedIn && (
+  (() => {
+
+    if (!currentProfile) {
+      return (
+        <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
+          // GIGSDA CORE INITIALISIERT PROFILMATRIX...
+        </div>
+      );
+    }
+
+    if (currentProfile.role === 'Location') {
+      return (
+        <LocationProfile
+          ticketName={ticketName}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    else if (currentProfile.role === 'Fan') {
+      return (
+        <FanProfile
+          ticketName={ticketName}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    else if (
+      currentProfile.role === 'Material' ||
+      currentProfile.role === 'Verleiher'
+    ) {
+      return (
+        <VerleiherProfile
+          ticketName={ticketName}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    else if (currentProfile.role === 'Techniker') {
+      return (
+        <TechnikerProfile
+          ticketName={ticketName}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    else if (currentProfile.role === 'Catering') {
+      return (
+        <CaterProfile
+          ticketName={ticketName}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    else if (currentProfile.role === 'Veranstalter') {
+      return (
+        <VeranstalterProfile
+          ticketName={ticketName}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    else if (currentProfile.role === 'Logistik') {
+      return (
+        <LogistikProfile
+          ticketName={ticketName}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    else if (currentProfile.role === 'Security') {
+      return (
+        <SecurityProfile
+          ticketName={ticketName}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    else if (
+      currentProfile.role === 'Design' ||
+      currentProfile.role === 'Deko'
+    ) {
+      return (
+        <DesignProfile
+          ticketName={ticketName}
+          onNavigate={setView}
+        />
+      );
+    }
+
+    return (
+      <UserProfile
+        ticketName={ticketName}
+        onBack={() => setView('projects')}
+        isOwner={true}
+        setView={setView}
+      />
+    );
+
+  })()
+)}
 
 
           {/* ⚡ DIE ECHTE DIREKTLEITUNG ZU DEINEN PROFILE-SETTINGS */}

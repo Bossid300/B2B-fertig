@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Pencil, Save, User, Eye, EyeOff } from 'lucide-react';
 import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
+import { geocodeAddress } from '../services/geoService';
 
 export default function ProfileStammBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -33,8 +34,8 @@ export default function ProfileStammBox({ currentProfileName, isOwner }) {
             : {};
 
         const mergedProfile = {
-          ...profileData,
           ...found,
+          ...profileData,
           role: found.role,
           type: found.type
         };
@@ -98,11 +99,26 @@ export default function ProfileStammBox({ currentProfileName, isOwner }) {
         };
         delete updatedProfile.project_name;
 
-        const result =
-          await saveProfile(
-            updatedProfile.id,
-            updatedProfile
+        const geo =
+          await geocodeAddress(
+            `${formData.street || ''} ${formData.plz || ''} ${formData.city || ''}`
           );
+        if (geo) {
+          updatedProfile.lat = geo.lat;
+          updatedProfile.lng = geo.lng;
+        }
+
+        const profileId =
+          updatedProfile.id ||
+          updatedProfile.profileId ||
+          localStorage.getItem(
+            'gigsda_profile_id'
+          );
+
+        await saveProfile({
+          profileId,
+          profile: updatedProfile
+        });
 
         setProfile(updatedProfile);
         alert(

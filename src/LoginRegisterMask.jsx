@@ -147,8 +147,7 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
 
     if (typeof onLoginSuccess === "function") {
       onLoginSuccess(
-        matchedProfile.name,
-        matchedProfile.role
+        matchedProfile
       );
     }
   };
@@ -167,7 +166,7 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
     // 1️⃣ Die eindeutige ID generieren (für beide Tabellen identisch)
     const generatedId = "GIGS-" + Math.floor(Math.random() * 9000 + 1000);
 
-    // 2️⃣ ERSTER BLOCK: Das neutrale Basis-Profil für 'gigsda_profiles'
+    // 2️⃣ ERSTER BLOCK: Das neutrale Basis-Profil
     const newProfile = {
       id: generatedId,
       name: regName,
@@ -204,33 +203,8 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
       profileId: generatedId
     });
 
-
-    // 📁 Speichern in Tabelle 1 (gigsda_profiles)
-    const savedProfiles = JSON.parse(localStorage.getItem('gigsda_profiles') || '[]');
-    savedProfiles.push(newProfile);
-
-const authUsers = JSON.parse(
-  localStorage.getItem("gigsda_auth_users") || "[]"
-);
-
-authUsers.push({
-  id: "AUTH-" + Date.now(),
-  email: regEmail,
-  password: regPass,
-  profileId: generatedId,
-  createdAt: Date.now()
-});
-
-localStorage.setItem(
-  "gigsda_auth_users",
-  JSON.stringify(authUsers)
-);
-
-localStorage.setItem('gigsda_profiles', JSON.stringify(savedProfiles));
-
-
     // 🚀 Erfolg an Daniels Hauptrouter funken
-    onLoginSuccess(regName, regRole);
+    onLoginSuccess(newProfile);
   };
 
 
@@ -365,6 +339,7 @@ localStorage.setItem('gigsda_profiles', JSON.stringify(savedProfiles));
             </form>
           )}
 
+{/*
           <div className="text-center pt-4 border-t border-slate-950 mt-4">
             <button 
               type="button" 
@@ -374,6 +349,7 @@ localStorage.setItem('gigsda_profiles', JSON.stringify(savedProfiles));
               {isRegistering ? "Bereits registriert? Hier anmelden" : "Noch kein Konto? Jetzt registrieren"}
             </button>
           </div>
+*/}
           {/* 🚪 DANIELS ORIGINALER FORMULAR-WECHSLER (Bereinigt und optimiert) */}
           <div className="mt-6 pt-4 border-t border-slate-800/60 text-center">
             {isRegistering ? (

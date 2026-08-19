@@ -119,11 +119,17 @@ export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
           ...existing
         ]
       };
-      const result =
-        await saveProfile(
-          updatedProfile.id,
-          updatedProfile
+      const profileId =
+        updatedProfile.id ||
+        updatedProfile.profileId ||
+        localStorage.getItem(
+          'gigsda_profile_id'
         );
+
+      await saveProfile({
+        profileId,
+        profile: updatedProfile
+      });
 
       setProfile(updatedProfile);
       setProfileData(updatedProfile);
@@ -149,11 +155,17 @@ export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
         ...profileData,
         show_reviews: updatedShow
       };
-      const result =
-        await saveProfile(
-          updatedProfile.id,
-          updatedProfile
+      const profileId =
+        updatedProfile.id ||
+        updatedProfile.profileId ||
+        localStorage.getItem(
+          'gigsda_profile_id'
         );
+
+      await saveProfile({
+        profileId,
+        profile: updatedProfile
+      });
 
       setProfile(updatedProfile);
       setProfileData(updatedProfile);

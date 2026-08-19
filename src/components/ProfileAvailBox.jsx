@@ -66,11 +66,17 @@ export default function ProfileAvailBox({ currentProfileName, isOwner }) {
         show_avail: showAvail
       };
       if (updatedProfile?.id) {
-        const result =
-          await saveProfile(
-            updatedProfile.id,
-            updatedProfile
+        const profileId =
+          updatedProfile.id ||
+          updatedProfile.profileId ||
+          localStorage.getItem(
+            'gigsda_profile_id'
           );
+
+        await saveProfile({
+          profileId,
+          profile: updatedProfile
+        });
 
       }
       alert(

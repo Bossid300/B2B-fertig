@@ -92,10 +92,10 @@ export async function getProfileById(id) {
   return await response.json();
 }
 
-export async function saveProfile(
+export async function saveProfile({
   profileId,
   profile
-) {
+}) {
 
   const response = await fetch(
     `${API_BASE}/saveProfile.php`,

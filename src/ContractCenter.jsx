@@ -312,7 +312,36 @@ const handleSaveDealWithPopup = async () => {
     const eventDate = activeEvent.date || "2026";
     const eventVenue = activeEvent.venue || "Stadtpark Wiese, Braunau";
     const invoiceNumber = "INV-" + activeEvent.id;
+    const dealRows = dealPartners
+      .map(member => `
+        <tr>
+          <td>
+            ${member.name}
+            <br/>
+            <span
+              style="
+                font-size:10px;
+                color:#64748b;
+              "
+            >
+              ${member.role}
+            </span>
+          </td>
 
+          <td style="text-align:right;">
+            ${(
+              dealAmounts[member.id] || 0
+            ).toLocaleString(
+              "de-DE",
+              {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              }
+            )} EUR
+          </td>
+        </tr>
+      `)
+      .join('');
     // Erstellt ein virtuelles Druckfenster mit sauberem CSS-Styling
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
@@ -351,14 +380,14 @@ const handleSaveDealWithPopup = async () => {
               </div>
               <div class="meta" style="text-align: right;">
                 <strong>Rechnungs-Nr:</strong> ${invoiceNumber}<br/>
-                <strong>Datum:</strong> 04. Juni 2026<br/>
+                <strong>Datum:</strong> ${new Date().toLocaleDateString('de-AT')}<br/>
                 <strong>Status:</strong> TREUHAND-VERRIEGELT 🔒
               </div>
             </div>
 
             <div class="details">
               <strong style="color: #22d3ee;">// VERTRAGSPARTNER:</strong><br/>
-              Gigsda Protocol Operator (Winston Jud)<br/>
+              Gigsda Protocol Operator (${ownerName})<br/>
               Location: ${eventVenue}
             </div>
 
@@ -370,19 +399,23 @@ const handleSaveDealWithPopup = async () => {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>Live-Performance & Booking-Gage: <strong>${eventTitle}</strong><br/><span style="font-size: 10px; color: #64748b;">Veranstaltungsdatum: ${eventDate}</span></td>
-                  <td style="text-align: right;">1.500,00 EUR</td>
-                </tr>
-                <tr>
-                  <td>Systemtechnik-Pauschale (FOH Licht & Ton Daniel K.)</td>
-                  <td style="text-align: right;">350,00 EUR</td>
-                </tr>
+
+              ${dealRows}
+
               </tbody>
             </table>
 
             <div class="total-section">
-              GESAMTSUMME: <span class="highlight">1.850,00 EUR</span>
+              GESAMTSUMME:
+              <span class="highlight">
+                ${totalDealAmount.toLocaleString(
+                  "de-DE",
+                  {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                  }
+                )} EUR
+              </span>
             </div>
 
             <div class="footer">

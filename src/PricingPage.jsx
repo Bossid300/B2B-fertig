@@ -29,7 +29,7 @@ export default function PricingPage({
   
   return (
     
-    <div className="max-w-7xl mx-auto px-6 py-12 ">
+    <div className="max-w-6xl mx-auto px-6 py-12 ">
       <div className="mb-12">
         <h1 className="text-cyan-400 text-3xl font-black uppercase tracking-wider font-mono flex items-center gap-4">
           💎 GIGSDA MODEL

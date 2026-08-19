@@ -39,8 +39,8 @@ export default function Roadmap() {
 <p>✅ Winston Referenzen repariert</p>
 <p>✅ Requests repariert</p>
 <p>✅ Favorites repariert</p>
-<p>✅ Login → gigsda_profiles</p>
-<p>✅ Registrierung → gigsda_profiles</p>
+<p>✅ Login → DB</p>
+<p>✅ Registrierung → DB</p>
 <p>✅ Profil löschen getestet</p>
 <p>✅ gigsda_users entfernt</p>
 <p></p>

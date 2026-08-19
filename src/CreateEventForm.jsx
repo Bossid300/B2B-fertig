@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { geocodeAddress } from './services/geoService';
 
 export default function CreateEventForm({ onBack, onCreateEvent }) {
   // Alle Zustände für deine strukturierte Eingabemaske
@@ -17,11 +18,13 @@ export default function CreateEventForm({ onBack, onCreateEvent }) {
     return `${day}.${month}.${year}`;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!title.trim() || !venue.trim() || !calendarDate) return;
 
+  const geo =
+    await geocodeAddress(venue);
     if (onCreateEvent) {
       onCreateEvent({
         id: "EVT-" + Date.now().toString().slice(-4),
@@ -31,6 +34,8 @@ export default function CreateEventForm({ onBack, onCreateEvent }) {
         time,
         category,
         venue,
+        lat: geo?.lat || null,
+        lng: geo?.lng || null,
         doneProgress: 0
       });
     }

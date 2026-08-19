@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Save, Eye, EyeOff, UserCheck, Mail, Phone } from 'lucide-react';
+import {
+  getProfilesDb,
+  saveProfile
+} from '../services/apiService';
 
 export default function ProfileVertretungBox({ currentProfileName, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -15,31 +19,46 @@ export default function ProfileVertretungBox({ currentProfileName, isOwner }) {
   const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
   const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
 
-  // 1. DATABASE PIPELINE: Lädt Vertretungs-Daten live aus gigsda_profiles
+  // 1. DATABASE PIPELINE: Lädt Vertretungs-Daten live aus DB
   useEffect(() => {
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (savedProfiles) {
-      try {
-        const allProfiles = JSON.parse(savedProfiles);
-        if (Array.isArray(allProfiles)) {
-          const found = allProfiles.find(
-            p => p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()
-          );
-          if (found) {
-            setProfile(found);
-            setShowRepresentation(found.show_representation !== false);
-            setFormData({
-              representation_type: found.representation_type || 'self',
-              agent_name: found.agent_name || '',
-              agent_email: found.agent_email || '',
-              agent_phone: found.agent_phone || ''
-            });
-          }
-        }
-      } catch (e) {
-        console.error("Fehler in der Gigsda Vertretungs-Pipeline:", e);
-      }
-    }
+
+    getProfilesDb()
+      .then(profiles => {
+        const found = profiles.find(
+          p =>
+            p &&
+            (p.name || p.user_name || p.display_name)
+              ?.trim()
+              .toLowerCase() ===
+            targetUser.trim().toLowerCase()
+        );
+        if (!found) return;
+        const profile =
+          found.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+
+        setProfile(profile);
+        setShowRepresentation(
+          profile.show_representation !== false
+        );
+        setFormData({
+          representation_type:
+            profile.representation_type || 'self',
+          agent_name:
+            profile.agent_name || '',
+          agent_email:
+            profile.agent_email || '',
+          agent_phone:
+            profile.agent_phone || ''
+        });
+      })
+      .catch(e => {
+        console.error(
+          'Fehler in der Gigsda Vertretungs-Pipeline:',
+          e
+        );
+      });
   }, [targetUser, isEditing]);
 
   const handleChange = (e) => {
@@ -48,32 +67,35 @@ export default function ProfileVertretungBox({ currentProfileName, isOwner }) {
   };
 
   // 2. SAVE PIPELINE: Sichert die Vertretungs-Matrix permanent
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
-    const savedProfiles = localStorage.getItem('gigsda_profiles');
-    if (!savedProfiles) return;
-
     try {
-      let allProfiles = JSON.parse(savedProfiles);
-      if (!Array.isArray(allProfiles)) return;
-
-      allProfiles = allProfiles.map(p => {
-        if (p && (p.name || p.user_name || p.display_name)?.trim().toLowerCase() === targetUser.trim().toLowerCase()) {
-          return { 
-            ...p, 
-            ...formData, 
-            show_representation: showRepresentation 
-          };
-        }
-        return p;
+      const updatedProfile = {
+        ...profile,
+        ...formData,
+        show_representation:
+          showRepresentation
+      };
+      const profileId =
+        profile.id ||
+        profile.profileId ||
+        localStorage.getItem(
+          'gigsda_profile_id'
+        );
+      await saveProfile({
+        profileId,
+        profile: updatedProfile
       });
-
-      localStorage.setItem('gigsda_profiles', JSON.stringify(allProfiles));
-      alert("B2B Vertretungs- & Booking-Protokoll erfolgreich eingebrannt! 💾🤝");
+      setProfile(updatedProfile);
+      alert(
+        "B2B Vertretungs- & Booking-Protokoll erfolgreich gespeichert! 💾🤝"
+      );
       setIsEditing(false);
-      window.dispatchEvent(new Event('storage'));
     } catch (e) {
-      console.error("Fehler beim Sichern der Vertretungs-Daten:", e);
+      console.error(
+        "Fehler beim Sichern der Vertretungs-Daten:",
+        e
+      );
     }
   };
 
