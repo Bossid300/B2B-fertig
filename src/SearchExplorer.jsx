@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Star, Briefcase, Calendar, ChevronRight, X, Sparkles, Filter, ShieldCheck, Heart, User, Clock, ArrowRight } from 'lucide-react';
-
-
 import ProfileCard from './components/cards/ProfileCard';
-
 import { getProfiles } from './services/apiService';
 import { saveCrewRequest } from './services/apiService';
 import { eventService } from './services/eventService';
 import { distanceKm, geocodeAddress } from './services/geoService';
-
+import SearchMap from './components/maps/SearchMap';
 
 export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat }) {
   const [allUsers, setAllUsers] = useState([]);
@@ -18,16 +15,12 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
   const [activeRequestUser, setActiveRequestUser] = useState(null); // Sichert das Anfrage-Popup!
   const [requestText, setRequestText] = useState(''); // Speichert euren eingetippten Text
   const [baseLocation, setBaseLocation] = useState('Braunau');
-
-const [baseCoordinates, setBaseCoordinates] = useState(null);
-
-
+  const [baseCoordinates, setBaseCoordinates] = useState(null);
   const [genreFilter, setGenreFilter] = useState('');
   const [formationFilter, setFormationFilter] = useState('');
   const [eventTypeFilter, setEventTypeFilter] = useState('');
-
   const [profileView, setProfileView] = useState('live');
-
+  const [viewMode, setViewMode] = useState('list');
 
 
 
@@ -38,30 +31,21 @@ const [baseCoordinates, setBaseCoordinates] = useState(null);
   const isLoggedIn = localStorage.getItem('gigsda_logged_in') === 'true';
 
   useEffect(() => {
-
     const loadBaseCoordinates = async () => {
-
       if (!baseLocation?.trim()) return;
-
       try {
-
         const geo =
           await geocodeAddress(
             baseLocation
           );
-
         setBaseCoordinates(
           geo
         );
-
       } catch (e) {
         console.error(e);
       }
-
     };
-
     loadBaseCoordinates();
-
   }, [baseLocation]);
 
 
@@ -574,6 +558,34 @@ return (
           {filteredUsers.length} TREFFER GEFUNDEN
         </span>
 
+
+        <div className="flex items-center gap-2">
+
+          <button
+            onClick={() => setViewMode('list')}
+            className={
+              viewMode === 'list'
+                ? 'px-3 py-1 rounded-lg bg-cyan-500/20 border border-cyan-500 text-cyan-400 text-[10px]'
+                : 'px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 text-[10px]'
+            }
+          >
+            🗂️ LISTE
+          </button>
+
+          <button
+            onClick={() => setViewMode('map')}
+            className={
+              viewMode === 'map'
+                ? 'px-3 py-1 rounded-lg bg-cyan-500/20 border border-cyan-500 text-cyan-400 text-[10px]'
+                : 'px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 text-[10px]'
+            }
+          >
+            🗺️ KARTE
+          </button>
+
+        </div>
+
+
         <button
           onClick={() =>
             setProfileView(
@@ -597,41 +609,41 @@ return (
 
 
 
-
-      {/* 💳 VISITENKARTEN-GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredUsers.length > 0 ? (
-
-          filteredUsers.map((user, index) => (
-            <ProfileCard
-              key={`${user.id || 'user'}-${index}`}
-              user={user}
-              isGuest={!isLoggedIn}
-              onProfile={() => {
-                localStorage.setItem(
-                  'gigsda_active_guest_profile_id',
-                  user.id
-                );
-
-                if (typeof setFavorites === 'function') {
-                  setFavorites(user.name);
-                }
-              }}
-              onRequest={() => {
-                setActiveRequestUser(user);
-                setRequestText(
-                  `Hallo ${user.name}, wir hätten Interesse an einer B2B-Zusammenarbeit für ein anstehendes Event in Region Gigsda!`
-                );
-              }}
-            />
-          ))
-
-        ) : (
-          <div className="col-span-full bg-slate-900/10 border border-dashed border-slate-900 rounded-2xl p-12 text-center text-sm text-slate-600 font-mono">
-            // KEINE PASSENDEN B2B-PARTNER GEFUNDEN 🧹
-          </div>
-        )}
-      </div>
+      {/* 💳 VISITENKARTEN-GRID / KARTEN-ANSICHT */}
+      {viewMode === 'list' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredUsers.length > 0 ? (
+            filteredUsers.map((user, index) => (
+              <ProfileCard
+                key={`${user.id || 'user'}-${index}`}
+                user={user}
+                isGuest={!isLoggedIn}
+                onProfile={() => {
+                  localStorage.setItem(
+                    'gigsda_active_guest_profile_id',
+                    user.id
+                  );
+                  if (typeof setFavorites === 'function') {
+                    setFavorites(user.name);
+                  }
+                }}
+                onRequest={() => {
+                  setActiveRequestUser(user);
+                  setRequestText(
+                    `Hallo ${user.name}, wir hätten Interesse an einer B2B-Zusammenarbeit für ein anstehendes Event in Region Gigsda!`
+                  );
+                }}
+              />
+            ))
+          ) : (
+            <div className="col-span-full bg-slate-900/10 border border-dashed border-slate-900 rounded-2xl p-12 text-center text-sm text-slate-600 font-mono">
+              // KEINE PASSENDEN B2B-PARTNER GEFUNDEN 🧹
+            </div>
+          )}
+        </div>
+      ) : (
+      <SearchMap />
+      )}
       
       {/* 🌌 DAS ECHTE NEON-ANFRAGETERMINAL (OVERLAY POPUP) */}
       {activeRequestUser && (
