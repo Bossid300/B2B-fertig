@@ -4,9 +4,15 @@ import EventCard from './components/cards/EventCard';
 import { eventService } from './services/eventService';
 import { distanceKm, geocodeAddress } from './services/geoService';
 import { getProfilesDb } from './services/apiService';
-
+import SearchMap from './components/maps/SearchMap';
 
 export default function GuestEvents({ onNavigate }) {
+
+const [viewMode, setViewMode] =
+  useState('list');
+
+const [selectedEvent, setSelectedEvent] =
+  useState(null);
 
 const [currentProfile, setCurrentProfile] = useState(null);
 
@@ -304,6 +310,32 @@ return (
           {filteredEvents.length} TREFFER GEFUNDEN
         </span>
 
+        <div className="flex items-center gap-2">
+
+          <button
+            onClick={() => setViewMode('list')}
+            className={
+              viewMode === 'list'
+                ? 'px-3 py-1 rounded-lg bg-cyan-500/20 border border-cyan-500 text-cyan-400 text-[10px]'
+                : 'px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 text-[10px]'
+            }
+          >
+            🗂️ LISTE
+          </button>
+
+          <button
+            onClick={() => setViewMode('map')}
+            className={
+              viewMode === 'map'
+                ? 'px-3 py-1 rounded-lg bg-cyan-500/20 border border-cyan-500 text-cyan-400 text-[10px]'
+                : 'px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 text-[10px]'
+            }
+          >
+            🗺️ KARTE
+          </button>
+
+        </div>
+
         <button
           onClick={() =>
             setEventView(
@@ -330,66 +362,117 @@ return (
       </div>
 
       {/* 💳 EVENT-KARTEN-GRID (Zwillings-Struktur) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredEvents.length > 0 ? (
-          filteredEvents.map((event, index) => (
-            
+      {viewMode === 'list' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredEvents.length > 0 ? (
+            filteredEvents.map((event, index) => (
+
             <EventCard
               key={`${event.id || 'event'}-${index}`}
               event={{
                 ...event,
 
-                  title:
-                    event.promotionData?.title ||
-                    event.title,
+                title:
+                  event.promotionData?.title ||
+                  event.title,
 
-                  category:
-                    event.promotionData?.category ||
-                    event.category,
+                category:
+                  event.promotionData?.category ||
+                  event.category,
 
-                  shortDescription:
-                    event.promotionData?.shortDescription,
+                shortDescription:
+                  event.promotionData?.shortDescription,
 
-                  slide1_url:
-                    event.promotionData?.promoImage ||
-                    event.slide1_url,
+                slide1_url:
+                  event.promotionData?.promoImage ||
+                  event.slide1_url,
 
-                  entryTime:
-                    event.promotionData?.entryTime,
-
-                  startTime:
-                    event.promotionData?.startTime,
-
-                  ticketPrice:
-                    event.promotionData?.ticketPrice,
-
-                  ticketStatus:
-                    event.promotionData?.ticketStatus,
-
-                  fsk:
-                    event.promotionData?.fsk,
-
-                  lineup:
-                    event.promotionData?.lineup,
-
-                  amenities:
-                    event.promotionData?.amenities,
-
-                  city:
-                    event.venue ||
-                    event.city
-
+                city:
+                  event.venue ||
+                  event.city
               }}
             />
-          ))
+            ))
 
-        ) : (
-          <div className="col-span-full bg-slate-900/10 border border-dashed border-slate-900 rounded-2xl p-12 text-center text-xs text-slate-600 font-mono">
-            // KEINE EVENTS IM GEWÄHLTEN UMKREIS GEFUNDEN 🧹
+          ) : (
+
+            <div className="col-span-full bg-slate-900/10 border border-dashed border-slate-900 rounded-2xl p-12 text-center text-xs text-slate-600 font-mono">
+              // KEINE EVENTS IM GEWÄHLTEN UMKREIS GEFUNDEN 🧹
+            </div>
+          )}
+        </div>
+
+      ) : (
+
+      <div className="relative">
+        <SearchMap
+          users={filteredEvents}
+          center={baseCoordinates}
+          onUserSelect={setSelectedEvent}
+        />
+
+        {selectedEvent && (
+          <div
+            className="
+              absolute
+              left-1/2
+              top-6
+              -translate-x-1/2
+              z-50
+              w-full
+              max-w-xl
+              px-4
+            "
+          >
+            <div className="relative">
+              <button
+                onClick={() => setSelectedEvent(null)}
+                className="
+                  absolute
+                  -top-3
+                  -right-3
+                  z-[60]
+                  w-8
+                  h-8
+                  rounded-full
+                  bg-slate-950
+                  border
+                  border-cyan-500/30
+                  text-cyan-400
+                  font-bold
+                "
+              >
+                ✕
+              </button>
+                <EventCard
+                  event={{
+                    ...selectedEvent,
+
+                    title:
+                      selectedEvent?.promotionData?.title ||
+                      selectedEvent?.title,
+
+                    category:
+                      selectedEvent?.promotionData?.category ||
+                      selectedEvent?.category,
+
+                    shortDescription:
+                      selectedEvent?.promotionData?.shortDescription,
+
+                    slide1_url:
+                      selectedEvent?.promotionData?.promoImage ||
+                      selectedEvent?.slide1_url,
+
+                    city:
+                      selectedEvent?.venue ||
+                      selectedEvent?.city
+                  }}
+                />
+            </div>
           </div>
         )}
       </div>
-
+      )}
     </div>
   );
 }

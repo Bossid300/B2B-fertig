@@ -21,8 +21,9 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
   const [eventTypeFilter, setEventTypeFilter] = useState('');
   const [profileView, setProfileView] = useState('live');
   const [viewMode, setViewMode] = useState('list');
-
-
+  const [selectedUser, setSelectedUser] = useState(null);
+  useEffect(() => {
+  }, [selectedUser]);
 
   // 🏟️ ECHTZEIT-PROJEKTLISTE FÜR DIE EXPLORER-DIREKTANFRAGE
   const [events, setEvents] = useState([]);
@@ -641,9 +642,91 @@ return (
             </div>
           )}
         </div>
-      ) : (
-      <SearchMap />
+
+) : (
+
+  <>
+    <div className="relative">
+
+      <SearchMap
+        users={filteredUsers}
+        center={baseCoordinates}
+        onUserSelect={setSelectedUser}
+      />
+
+      {selectedUser && (
+
+        <div
+          className="
+            absolute
+            left-1/2
+            top-6
+            -translate-x-1/2
+            z-50
+            w-full
+            max-w-lg
+            px-4
+          "
+        >
+
+          <div className="relative">
+
+            <button
+              onClick={() => setSelectedUser(null)}
+              className="
+                absolute
+                -top-3
+                -right-3
+                z-[60]
+                w-8
+                h-8
+                rounded-full
+                bg-slate-950
+                border
+                border-cyan-500/30
+                text-cyan-400
+                hover:text-white
+                hover:border-cyan-500
+                font-bold
+              "
+            >
+              ✕
+            </button>
+
+            <ProfileCard
+              user={selectedUser}
+              isGuest={!isLoggedIn}
+              onProfile={() => {
+                localStorage.setItem(
+                  'gigsda_active_guest_profile_id',
+                  selectedUser.id
+                );
+
+                if (typeof setFavorites === 'function') {
+                  setFavorites(selectedUser.name);
+                }
+              }}
+              onRequest={() => {
+                setActiveRequestUser(selectedUser);
+
+                setRequestText(
+                  `Hallo ${selectedUser.name}, wir hätten Interesse an einer B2B-Zusammenarbeit für ein anstehendes Event in Region Gigsda!`
+                );
+              }}
+            />
+
+          </div>
+
+        </div>
+
       )}
+
+    </div>
+  </>
+
+)}
+
+      
       
       {/* 🌌 DAS ECHTE NEON-ANFRAGETERMINAL (OVERLAY POPUP) */}
       {activeRequestUser && (
