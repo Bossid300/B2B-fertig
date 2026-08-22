@@ -7,14 +7,11 @@ import { getProfilesDb } from '../services/apiService';
 import { saveProfile } from '../services/apiService';
 import { eventService } from '../services/eventService';
 
-export default function LocationRaeumeBox({ currentProfileName, isOwner, selectedRoom }) {
+export default function LocationRaeumeBox({ currentProfileId, isOwner, selectedRoom }) {
   const [isEditing, setIsEditing] = useState(false);
-  const [profileId, setProfileId] = useState(null);
   const [rooms, setRooms] = useState([]);
 
-  // 1. PIPELINE & PIPELINE-FLAGS AUS DEINER STAMMBOX ÜBERNEHMEN
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+  const canEdit = isOwner || currentProfileId === localStorage.getItem('gigsda_profile_id');
   
   // Hilfsfunktion zum Prüfen, ob ein Link ein Bild ist
   const isImageUrl = (url) => {
@@ -24,17 +21,10 @@ export default function LocationRaeumeBox({ currentProfileName, isOwner, selecte
 
   // 2. DATEN-PIPELINE: Lädt Räume passend zur Arena Braunau Struktur
 useEffect(() => {
-  if (!targetUser) return;
-
   getProfilesDb()
     .then(profiles => {
       const found = profiles.find(
-        p =>
-          p &&
-          (p.name || p.user_name || p.display_name)
-            ?.trim()
-            .toLowerCase() ===
-          targetUser.trim().toLowerCase()
+        p => p?.id === currentProfileId
       );
 
       if (!found) return;
@@ -43,8 +33,6 @@ useEffect(() => {
         found?.profile_json
           ? JSON.parse(found.profile_json)
           : found;
-
-      setProfileId(profileData.id);
 
       const loadedRooms = [];
       let index = 1;
@@ -93,7 +81,7 @@ useEffect(() => {
       setRooms(loadedRooms);
     })
     .catch(console.error);
-}, [targetUser, isEditing]);
+}, [currentProfileId, isEditing]);
 
 
   // Input Handler
@@ -132,7 +120,7 @@ useEffect(() => {
 
   // SPEICHERN: Schreibt flache Keys zurück
   const handleSave = async () => {
-    if (!profileId) return;
+    if (!currentProfileId) return;
     try {
       const updatedProfile = {
         id: profileId
@@ -155,18 +143,15 @@ useEffect(() => {
         updatedProfile[`room${i}_visibility`] = room.isPublic;
       });
       
-      const profileId =
+      const saveProfileId =
         updatedProfile.id ||
         updatedProfile.profileId ||
-        localStorage.getItem(
-          'gigsda_profile_id'
-        );
+        currentProfileId;
 
       await saveProfile({
-        profileId,
+        profileId: saveProfileId,
         profile: updatedProfile
       });
-
 
       // Event-Markierung bleibt
       try {
@@ -174,15 +159,15 @@ const events =
   eventService.getEvents();
         const updatedEvents = events.map((event) => {
 
-            if (!event.riderCenter?.[profileId]) {
+            if (!event.riderCenter?.[saveProfileId]) {
               return event;
             }
             return {
               ...event,
               riderCenter: {
                 ...event.riderCenter,
-                [profileId]: {
-                  ...event.riderCenter[profileId],
+                [saveProfileId]: {
+                  ...event.riderCenter[saveProfileId],
                   confirmed: false,
                   changed: true,
                   changedAt: Date.now()
@@ -194,7 +179,7 @@ eventService.saveEvents(updatedEvents);
 
 const changedEvent =
   updatedEvents.find(event =>
-    event.riderCenter?.[profileId]
+    event.riderCenter?.[saveProfileId]
   );
 
 if (changedEvent) {

@@ -4,7 +4,7 @@ import { eventService } from '../services/eventService';
 import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
 
-export default function ProfileHilfeBox({ currentProfileName, isOwner }) {
+export default function ProfileHilfeBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
   const [profileData, setProfileData] = useState(null);
@@ -21,20 +21,14 @@ export default function ProfileHilfeBox({ currentProfileName, isOwner }) {
     abbau: false
   });
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+  const canEdit = isOwner || currentProfileId === localStorage.getItem( 'gigsda_profile_id' );
 
   // 1. DATABASE PIPELINE: Lädt die Hilfs-Daten live
   useEffect(() => {
     getProfilesDb()
       .then(allProfiles => {
         const found = allProfiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-              ?.trim()
-              .toLowerCase() ===
-            targetUser.trim().toLowerCase()
+          p => p?.id === currentProfileId
         );
         if (!found) return;
         const profile =
@@ -65,7 +59,7 @@ export default function ProfileHilfeBox({ currentProfileName, isOwner }) {
           e
         );
       });
-  }, [targetUser, isEditing]);
+  }, [currentProfileId, isEditing]);
 
 
   const toggleCategory = (key) => {
@@ -83,29 +77,25 @@ export default function ProfileHilfeBox({ currentProfileName, isOwner }) {
         hilfe_categories: categories,
         show_hilfe: showHilfe
       };
-      const profileId =
+
+      const saveProfileId =
         updatedProfile.id ||
         updatedProfile.profileId ||
-        localStorage.getItem(
-          'gigsda_profile_id'
-        );
+        currentProfileId;
 
       await saveProfile({
-        profileId,
+        profileId: saveProfileId,
         profile: updatedProfile
       });
 
       setProfile(updatedProfile);
       setProfileData(updatedProfile);
 
-      const currentProfileId =
-        localStorage.getItem('gigsda_profile_id');
-      const events =
-        eventService.getEvents();
-      const updatedEvents =
-        events.map((event) => {
+      const riderProfileId = saveProfileId;
+      const events = eventService.getEvents();
+      const updatedEvents = events.map((event) => {
 
-          if (!event.riderCenter?.[currentProfileId]) {
+          if (!event.riderCenter?.[riderProfileId]) {
             return event;
           }
 
@@ -115,8 +105,8 @@ export default function ProfileHilfeBox({ currentProfileName, isOwner }) {
             riderCenter: {
               ...event.riderCenter,
 
-              [currentProfileId]: {
-                ...event.riderCenter[currentProfileId],
+              [riderProfileId]: {
+                ...event.riderCenter[riderProfileId],
                 confirmed: false,
                 changed: true,
                 changedAt: Date.now()

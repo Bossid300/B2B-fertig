@@ -92,12 +92,10 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
       const now = Date.now();
       const requesterProfileId =
         currentProfileData?.id ||
-        localStorage.getItem('gigsda_profile_id') ||
-        '';
+        localStorage.getItem('gigsda_profile_id') || '';
       const requesterProfileName =
         currentProfileData?.name ||
-        localStorage.getItem('gigsda_user_name') ||
-        "Veranstalter";
+        localStorage.getItem('gigsda_user_name') || "Veranstalter";
       const newRequest = {
         requestId:
           "REQ-" + Math.floor(Math.random() * 9000 + 1000),
@@ -313,8 +311,8 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Verleiher', 'Location', 'Ve
     // 1. Rollen-Filter (original von Daniel)
     const userRole = (user.role || user.type || 'Künstler').toLowerCase();
     let matchesRole = false;
-    if (selectedRole === 'Alle') {
-      matchesRole = true;
+    if (selectedRole === 'Alle') { matchesRole = true;
+
     } else if (selectedRole === 'Caterer') {
       matchesRole = userRole.includes('cater');
     } else if (selectedRole === 'Verleiher') {
@@ -325,6 +323,12 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Verleiher', 'Location', 'Ve
       matchesRole = userRole.includes('veranstalter');
     } else if (selectedRole === 'Techniker') {
       matchesRole = userRole.includes('technik');
+    } else if (selectedRole === 'Logistik') {
+      matchesRole = userRole.includes('logistik');
+    } else if (selectedRole === 'Security') {
+      matchesRole = userRole.includes('security');
+    } else if (selectedRole === 'Design') {
+      matchesRole = userRole.includes('design');
     } else {
       matchesRole = userRole.includes(selectedRole.toLowerCase());
     }
@@ -625,7 +629,7 @@ return (
                     user.id
                   );
                   if (typeof setFavorites === 'function') {
-                    setFavorites(user.name);
+                    setFavorites(user);
                   }
                 }}
                 onRequest={() => {
@@ -703,7 +707,7 @@ return (
                 );
 
                 if (typeof setFavorites === 'function') {
-                  setFavorites(selectedUser.name);
+                  setFavorites(selectedUser);
                 }
               }}
               onRequest={() => {

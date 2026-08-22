@@ -2,23 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Activity, ShieldCheck, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { getProfilesDb } from '../services/apiService';
 
-export default function ProfileStatusMatrix({ currentProfileName }) {
+export default function ProfileStatusMatrix({ currentProfileId }) {
   const [score, setScore] = useState(0);
   const [todos, setTodos] = useState([]);
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
 
   // 1. ANALYTICS ENGINE: Durchleuchtet das Profil live im LocalStorage
   useEffect(() => {
     getProfilesDb()
       .then(profiles => {
         const found = profiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-              ?.trim()
-              .toLowerCase() ===
-            targetUser.trim().toLowerCase()
+          p => p?.id === currentProfileId
         );
         if (!found) return;
         const profile =
@@ -66,7 +60,7 @@ export default function ProfileStatusMatrix({ currentProfileName }) {
             e
           );
         });
-  }, [targetUser]);
+  }, [currentProfileId]);
 
   return (
     <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-5 rounded-3xl shadow-xl font-mono text-white select-none mt-4">

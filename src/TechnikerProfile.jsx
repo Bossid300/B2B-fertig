@@ -25,27 +25,19 @@ import ProfileCard from './components/cards/ProfileCard';
 
 import { getProfilesDb } from './services/apiService';
 
-export default function TechnikerProfile({ onBack, ticketName, isOwner }) {
+export default function TechnikerProfile({ onBack, currentProfileId, isOwner }) {
   const [profileData, setProfileData] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
-  const targetUser = ticketName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const currentProfileId =
-    localStorage.getItem('gigsda_profile_id');
-  const favoriteKey =
-    `gigsda_favorites_${currentProfileId}`;
+
+  const favoriteKey = `gigsda_favorites_${currentProfileId}`;
 
 
   // 1. DATABASE PIPELINE: Lädt die Profildaten, um Favoriten-Status zu prüfen
   useEffect(() => {
   getProfilesDb()
     .then(profiles => {
-      const found = profiles.find(
-        p =>
-          p &&
-          (p.name || p.user_name || p.display_name)
-            ?.trim()
-            .toLowerCase() ===
-          targetUser.trim().toLowerCase()
+        const found = profiles.find(
+        p => p?.id === currentProfileId
       );
 
       if (found) {
@@ -66,7 +58,7 @@ export default function TechnikerProfile({ onBack, ticketName, isOwner }) {
         localStorage.getItem(favoriteKey) || '[]'
       );
         setIsFavorite(savedFavs.includes(profileData?.id));
-    }, [targetUser]);
+    }, [currentProfileId]);
 
     // 2. FAVORITEN PIPELINE: Schaltet den Stern live im LocalStorage um
     const handleToggleFavorite = () => {
@@ -94,7 +86,7 @@ export default function TechnikerProfile({ onBack, ticketName, isOwner }) {
     if (!profileData) {
       return (
         <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
-          // GIGSDA CORE CORE PROFILE REDIRECT...
+          // GIGSDA CORE TECHNIKER PROFILE REDIRECT...
         </div>
       );
   }
@@ -111,19 +103,19 @@ export default function TechnikerProfile({ onBack, ticketName, isOwner }) {
       )}
 
       {/* BOX 0: Deine Crew-Zentrale (Anfragen) */}
-      <CrewRequestCenter currentProfileName={targetUser} />
+      <CrewRequestCenter currentProfileId={currentProfileId} />
 
       {/* BOX 1: Deine Master-HeaderBox für den Slider */}
       <ProfileHeaderBox
-        currentProfileName={targetUser}
+        currentProfileId={currentProfileId}
         localFields={profileData} 
         isFavorite={isFavorite}
         handleToggleFavorite={handleToggleFavorite}
         // 🚨 HIER FEHLEN DIE BEIDEN KABEL FÜR DEN SLIDER!
       />
 
-      <ProfileStammBox currentProfileName={targetUser} isOwner={isOwner} />
-      <ProfileStatusMatrix currentProfileName={targetUser} />
+      <ProfileStammBox currentProfileId={currentProfileId} isOwner={isOwner}/>
+      <ProfileStatusMatrix currentProfileId={currentProfileId} />
 
       <div className="bg-slate-900/40 border border-cyan-500/20 rounded-2xl p-4 mb-4">
         <h3 className="text-xs font-black uppercase text-cyan-400 tracking-wider">
@@ -140,21 +132,21 @@ export default function TechnikerProfile({ onBack, ticketName, isOwner }) {
 
       <ProfileCard user={profileData} />
 
-      <ProfileBioTabsBox currentProfileName={targetUser} isOwner={isOwner} />
-      <ProfileSkillBox currentProfileName={targetUser} isOwner={isOwner} />
-      <ProfileComplianceBox currentProfileName={targetUser} isOwner={isOwner} />
-      <ArtistAudioBox currentProfileName={targetUser} isOwner={isOwner} />
-      <ProfileGalleryBox currentProfileName={targetUser} isOwner={isOwner} />
-      <ProfileNetworkBox currentProfileName={targetUser} isOwner={isOwner} />
-      <ProfileProjekteBox currentProfileName={targetUser} isOwner={isOwner} />
-      <ProfileEquipmentBox currentProfileName={targetUser} isOwner={isOwner} />
-      <ProfileVertretungBox currentProfileName={targetUser} isOwner={isOwner} />
-      <ProfileBewertungsBox currentProfileName={targetUser} isOwner={isOwner} />
-      <ProfileFinanzBox currentProfileName={targetUser} isOwner={isOwner} />
-      <ProfileLokalBox currentProfileName={targetUser} isOwner={isOwner} />
+      <ProfileBioTabsBox currentProfileId={currentProfileId} isOwner={isOwner} />
+      <ProfileSkillBox currentProfileId={currentProfileId} isOwner={isOwner} />
+      <ProfileComplianceBox currentProfileId={currentProfileId} isOwner={isOwner} />
+      <ArtistAudioBox currentProfileId={currentProfileId} isOwner={isOwner} />
+      <ProfileGalleryBox currentProfileId={currentProfileId} isOwner={isOwner} />
+      <ProfileNetworkBox currentProfileId={currentProfileId} isOwner={isOwner} />
+      <ProfileProjekteBox currentProfileId={currentProfileId} isOwner={isOwner} />
+      <ProfileEquipmentBox currentProfileId={currentProfileId} isOwner={isOwner} />
+      <ProfileVertretungBox currentProfileId={currentProfileId} isOwner={isOwner} />
+      <ProfileBewertungsBox currentProfileId={currentProfileId} isOwner={isOwner} />
+      <ProfileFinanzBox currentProfileId={currentProfileId} isOwner={isOwner} />
+      <ProfileLokalBox currentProfileId={currentProfileId} isOwner={isOwner} />
       
       <ProfilePassBox 
-        currentProfileName={targetUser}
+        currentProfileId={currentProfileId}
         profileId={profileData?.id || 'GIGS-XXXX'}
         onBackToDashboard={onBack}
       />

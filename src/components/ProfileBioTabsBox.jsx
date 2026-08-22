@@ -3,7 +3,7 @@ import { FileText, Save, Eye, EyeOff, BookOpen, Briefcase, User } from 'lucide-r
 import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
 
-export default function ProfileBioTabsBox({ currentProfileName, isOwner }) {
+export default function ProfileBioTabsBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
   const [showBio, setShowBio] = useState(true);
@@ -15,8 +15,7 @@ export default function ProfileBioTabsBox({ currentProfileName, isOwner }) {
     privates: ''
   });
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+  const canEdit = isOwner || currentProfileId === localStorage.getItem('gigsda_profile_id');
 
   // 1. DATABASE PIPELINE: Lädt die geteilten Texte live aus DB
   useEffect(() => {
@@ -24,13 +23,9 @@ export default function ProfileBioTabsBox({ currentProfileName, isOwner }) {
       .then(profiles => {
 
         const found = profiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-              ?.trim()
-              .toLowerCase() ===
-            targetUser.trim().toLowerCase()
+          p => p?.id === currentProfileId
         );
+
         if (!found) return;
         const profileData =
           found.profile_json
@@ -51,7 +46,7 @@ export default function ProfileBioTabsBox({ currentProfileName, isOwner }) {
       })
       .catch(console.error);
     
-  }, [targetUser, isEditing]);
+  }, [currentProfileId, isEditing]);
 
   const handleTextChange = (tabKey, value) => {
     setTextMatrix(prev => ({ ...prev, [tabKey]: value }));
@@ -93,7 +88,7 @@ export default function ProfileBioTabsBox({ currentProfileName, isOwner }) {
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6 border-b border-slate-800/60 pb-3">
         <h2 className="text-xs font-bold text-white tracking-widest uppercase flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-amber-400" /> // Profile Encyclopedia Record
+          <BookOpen className="w-4 h-4 text-amber-400" /> // Biografie
         </h2>
         {!isEditing && canEdit && (
           <button

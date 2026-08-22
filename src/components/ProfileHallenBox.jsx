@@ -3,7 +3,7 @@ import { Layers, Plus, X, Save, Eye, EyeOff, Home, Users, Music, Lightbulb, Tv }
 import { getProfilesDb } from '../services/apiService';
 import { saveProfile } from '../services/apiService';
 
-export default function ProfileHallenBox({ currentProfileName, isOwner }) {
+export default function ProfileHallenBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
   const [showHallen, setShowHallen] = useState(true);
@@ -25,48 +25,43 @@ export default function ProfileHallenBox({ currentProfileName, isOwner }) {
     }
   ]);
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+  const canEdit = isOwner || currentProfileId === localStorage.getItem('gigsda_profile_id');
 
   // 1. DATABASE PIPELINE: Lädt das Hallenregister reaktiv
-useEffect(() => {
-  getProfilesDb()
-    .then(profiles => {
-      const found = profiles.find(
-        p =>
-          p &&
-          (p.name || p.user_name || p.display_name)
-            ?.trim()
-            .toLowerCase() ===
-          targetUser.trim().toLowerCase()
-      );
+  useEffect(() => {
+    getProfilesDb()
+      .then(profiles => {
 
-      if (!found) return;
-
-      const profileData =
-        found?.profile_json
-          ? JSON.parse(found.profile_json)
-          : found;
-
-      setProfile(profileData);
-
-      setShowHallen(
-        profileData.show_hallen !== false
-      );
-
-      if (
-        Array.isArray(
-          profileData.location_rooms
-        ) &&
-        profileData.location_rooms.length > 0
-      ) {
-        setRooms(
-          profileData.location_rooms
+        const found = profiles.find(
+          p => p?.id === currentProfileId
         );
-      }
-    })
-    .catch(console.error);
-}, [targetUser, isEditing]);
+
+        if (!found) return;
+
+        const profileData =
+          found?.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
+
+        setProfile(profileData);
+
+        setShowHallen(
+          profileData.show_hallen !== false
+        );
+
+        if (
+          Array.isArray(
+            profileData.location_rooms
+          ) &&
+          profileData.location_rooms.length > 0
+        ) {
+          setRooms(
+            profileData.location_rooms
+          );
+        }
+      })
+      .catch(console.error);
+  }, [currentProfileId, isEditing]);
 
   const handleRoomChange = (idx, field, value) => {
     const updatedRooms = [...rooms];
@@ -108,11 +103,15 @@ useEffect(() => {
         location_rooms: rooms,
         show_hallen: showHallen
       };
-
-      await saveProfile(
-        profile.id,
-        updatedProfile
-      );
+      const saveProfileId =
+        updatedProfile.id ||
+        updatedProfile.profileId ||
+        currentProfileId;
+        
+      await saveProfile({
+        profileId: saveProfileId,
+        profile: updatedProfile
+      });
 
       setProfile(updatedProfile);
       setIsEditing(false);
@@ -133,7 +132,7 @@ useEffect(() => {
   if (!profile) {
     return (
       <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
-        // CAPACITY & TECH ARCHITECTURE INITIALIZING...
+        // HALLEN CAPACITY & TECH ARCHITECTURE INITIALIZING...
       </div>
     );
   }

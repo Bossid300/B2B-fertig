@@ -11,14 +11,12 @@ import {
 
 export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
 
-  const currentUserName =
-    localStorage.getItem('gigsda_user_name');
+  const currentUserName = localStorage.getItem('gigsda_user_name');
 
   const [allProfiles, setAllProfiles] = useState([]);
   const [currentProfileData, setCurrentProfileData] = useState(null);
   const [chatHistory, setChatHistory] = useState([]);
-  const currentUserId =
-    currentProfileData?.id || "";
+  const currentUserId = currentProfileData?.id || "";
   const activeStub = JSON.parse(localStorage.getItem('gigsda_active_event') || 'null');
   const events = eventService.getEvents();
   const activeEvent = events.find(e => e.id === activeStub?.id);

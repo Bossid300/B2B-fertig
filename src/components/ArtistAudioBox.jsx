@@ -6,9 +6,8 @@ import {
 import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
 
-export default function ArtistAudioBox({ currentProfileName, isOwner }) {
+export default function ArtistAudioBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
-  const [profileId, setProfileId] = useState(null);
   const [albums, setAlbums] = useState([]);
   const [profileData, setProfileData] = useState(null); 
   // Audio-Engine Status
@@ -19,8 +18,7 @@ export default function ArtistAudioBox({ currentProfileName, isOwner }) {
   const timerRef = useRef(null);
   const fadeRef = useRef(null);
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+  const canEdit = isOwner || currentProfileId === localStorage.getItem('gigsda_profile_id');
 
   // Hilfsfunktion: Extrahiert einen lesbaren Songtitel aus einer URL
   const getTrackNameFromUrl = (url, fallback) => {
@@ -39,18 +37,11 @@ export default function ArtistAudioBox({ currentProfileName, isOwner }) {
 
   // 1. DATEN-PIPELINE: Lädt deine bestehende DevTools-Struktur
   useEffect(() => {
-    if (!targetUser) return;
-    
     getProfilesDb()
       .then(profiles => {
 
         const found = profiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-              ?.trim()
-              .toLowerCase() ===
-            targetUser.trim().toLowerCase()
+          p => p?.id === currentProfileId
         );
 
         if (!found) return;
@@ -61,10 +52,6 @@ export default function ArtistAudioBox({ currentProfileName, isOwner }) {
             : found;
 
         setProfileData(currentProfile);
-
-        setProfileId(
-          currentProfile.id
-        );
 
         const loadedAlbums = [];
         let index = 1;
@@ -125,7 +112,7 @@ export default function ArtistAudioBox({ currentProfileName, isOwner }) {
     })
     .catch(console.error);
 
-  }, [targetUser, isEditing]);
+  }, [currentProfileId, isEditing]);
 
   // 2. PLAYER LOGIK (30s / 45s Countdown & Fade-out)
   const handlePlayPause = (albumIdx, trackIdx, url) => {
@@ -229,7 +216,7 @@ export default function ArtistAudioBox({ currentProfileName, isOwner }) {
 
   // 4. SPEICHERN: Synchronisiert sauber flach zurück
   const handleSave = async () => {
-    if (!profileId) return;
+    if (!currentProfileId) return;
 
     const updatedProfile = {
       ...profileData
@@ -274,19 +261,12 @@ export default function ArtistAudioBox({ currentProfileName, isOwner }) {
         }
       });
 
-      const profileId =
-        updatedProfile.id ||
-        updatedProfile.profileId ||
-        localStorage.getItem(
-          'gigsda_profile_id'
-        );
+      const saveProfileId = updatedProfile.id || updatedProfile.profileId || currentProfileId;
 
       await saveProfile({
-        profileId,
+        profileId: saveProfileId,
         profile: updatedProfile
       });
-
-      setProfileId(updatedProfile.id);
 
       setIsEditing(false);
   };

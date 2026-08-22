@@ -4,13 +4,34 @@ import ArtistPortfolio from "./ArtistPortfolio";
 import { getProfiles } from '../services/apiService';
 import { ArrowUp } from 'lucide-react';
 
-export default function ProfilePassBox({ currentProfileName, profileId, setView, sliderImages = [] }) {
+export default function ProfilePassBox({ currentProfileId, profileId, setView, sliderImages = [] }) {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+  const [profile, setProfile] = useState(null);
+
+  const displayName =
+  profile?.display_name ||
+  profile?.name ||
+  'Artist';
+
   const [referrals, setReferrals] = useState([]);
   useEffect(() => {
     getProfiles().then(allProfiles => {
+
+      const currentProfile = allProfiles.find(
+        p => p.id === currentProfileId
+      );
+
+      if (currentProfile) {
+        const data =
+          currentProfile.profile_json
+            ? JSON.parse(currentProfile.profile_json)
+            : currentProfile;
+
+        setProfile(data);
+      }
+
       const matches = allProfiles.filter(profile => {
         const data =
           profile.profile_json
@@ -20,12 +41,13 @@ export default function ProfilePassBox({ currentProfileName, profileId, setView,
       });
       setReferrals(matches);
     });
-  }, [profileId]);
+
+
+
+  }, [currentProfileId]);
 
   // Generiert den passenden reaktiven Reflink aus dem Künstlernamen
-  const slug = currentProfileName ? currentProfileName.toLowerCase().replace(/\s+/g, '-') : '';
-  const refLink =
-  `https://www.gigsda.com/2026/?portfolio=${profileId}&ref=${profileId}`;
+  const refLink = `https://www.gigsda.com/2026/?portfolio=${profileId}&ref=${profileId}`;
 
   // Holt das erste Bild aus dem übergebenen Slider-Array (oder nutzt ein Fallback)
   const firstSliderImage = sliderImages && sliderImages.length > 0 ? sliderImages[0] : '';
@@ -148,8 +170,12 @@ export default function ProfilePassBox({ currentProfileName, profileId, setView,
             
             <div className="flex flex-col justify-between h-full z-10">
               <div>
-                <div className="text-[8px] text-cyan-400 font-bold uppercase tracking-widest font-mono">// Gigsda Pass</div>
-                <div className="text-sm font-bold text-white tracking-wide mt-1">{currentProfileName || 'Artist'}</div>
+                <div className="text-[8px] text-cyan-400 font-bold uppercase tracking-widest font-mono">
+                  // Gigsda Pass
+                </div>
+                  <div className="text-sm font-bold text-white tracking-wide mt-1">
+                    {displayName}
+                  </div>
               </div>
               <div className="text-[9px] text-slate-500 font-mono font-semibold tracking-wider">
                 ID: #{profileId || 'GIGS-0000'}

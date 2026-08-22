@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { Mail, Lock, User, CheckCircle2 } from 'lucide-react';
 import { createProfile, createAuthUser, getLoginUser, getProfileById } from './services/apiService';
 
-
-
 export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess }) {
   const [isRegistering, setIsRegistering] = useState(isRegisteringInitial);
   
@@ -11,7 +9,6 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
   const [loginField, setLoginField] = useState('');
   const [loginPass, setLoginPass] = useState('');
 
-  const [regName, setRegName] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPass, setRegPass] = useState('');
   const [regRole, setRegRole] = useState('');
@@ -28,9 +25,6 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
       loginField
         ? loginField.trim()
         : "";
-
-
-
 
     // DEV LOGIN
     if (
@@ -57,7 +51,11 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
           loginAt: Date.now()
         })
       );
-
+/* 
+      if (!profile.name?.trim()) {
+        // Profil-Assistent öffnen
+      }
+ */
       if (typeof onLoginSuccess === "function") {
         onLoginSuccess(
           "Winston Jud",
@@ -68,16 +66,13 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
       return;
     }
 
-
-
-
     const result = await getLoginUser(
       inputName,
       loginPass
     );
 
     if (!inputName) {
-      if (typeof setErrorMsg === 'function') setErrorMsg('Bitte gib deine Künstler-ID oder deinen Namen ein! 💡');
+      if (typeof setErrorMsg === 'function') setErrorMsg('Bitte gib deine E-Mail-Adresse ein! 💡');
       return;
     }
 
@@ -161,17 +156,18 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
       return;
     }
 
-    if (!regName.trim() || !regPass.trim()) return;
+    if (!regEmail.trim()) return;
+    if (!regPass.trim()) return;
 
     // 1️⃣ Die eindeutige ID generieren (für beide Tabellen identisch)
     const generatedId = "GIGS-" + Math.floor(Math.random() * 9000 + 1000);
 
     // 2️⃣ ERSTER BLOCK: Das neutrale Basis-Profil
-    const newProfile = {
-      id: generatedId,
-      name: regName,
-      role: regRole
-    };
+const newProfile = {
+  id: generatedId,
+  name: 'Neues Mitglied',
+  role: regRole
+};
 
     const referrer =
     localStorage.getItem(
@@ -180,12 +176,11 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
 
     await createProfile({
       id: generatedId,
-      name: regName,
+      name: '',
       role: regRole,
-
       profile_json: JSON.stringify({
         id: generatedId,
-        name: regName,
+        name: '',
         role: regRole,
         city: '',
         bio: '',
@@ -202,6 +197,38 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
       password: regPass,
       profileId: generatedId
     });
+
+
+localStorage.setItem(
+  "gigsda_profile_id",
+  generatedId
+);
+
+localStorage.setItem(
+  "gigsda_logged_in",
+  "true"
+);
+
+localStorage.setItem(
+  "gigsda_reg_role",
+  regRole
+);
+
+localStorage.setItem(
+  "gigsda_user_name",
+  "Neues Mitglied"
+);
+
+localStorage.setItem(
+  "gigsda_session",
+  JSON.stringify({
+    authUserId: "AUTH-" + Date.now(),
+    profileId: generatedId,
+    loginAt: Date.now()
+  })
+);
+
+
 
     // 🚀 Erfolg an Daniels Hauptrouter funken
     onLoginSuccess(newProfile);
@@ -269,10 +296,6 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
 
               <div className="space-y-2.5 pt-2">
                 <div className="relative">
-                  <User className="absolute left-3 top-2.5 w-4 h-4 text-slate-600" />
-                  <input type="text" placeholder="Dein Name / Bandname" value={regName} onChange={(e) => setRegName(e.target.value)} className="w-full bg-slate-950 border border-slate-900 rounded-xl pl-9 pr-4 py-2 text-white text-xs focus:outline-none focus:border-cyan-400" />
-                </div>
-                <div className="relative">
                   <Mail className="absolute left-3 top-2.5 w-4 h-4 text-slate-600" />
                   <input type="email" placeholder="E-Mail-Adresse" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} className="w-full bg-slate-950 border border-slate-900 rounded-xl pl-9 pr-4 py-2 text-white text-xs focus:outline-none focus:border-cyan-400" />
                 </div>
@@ -339,17 +362,7 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
             </form>
           )}
 
-{/*
-          <div className="text-center pt-4 border-t border-slate-950 mt-4">
-            <button 
-              type="button" 
-              onClick={() => { setErrorMsg(''); setIsRegistering(!isRegistering); }} 
-              className="text-[10px] text-slate-500 hover:text-cyan-400 transition-colors cursor-pointer font-mono"
-            >
-              {isRegistering ? "Bereits registriert? Hier anmelden" : "Noch kein Konto? Jetzt registrieren"}
-            </button>
-          </div>
-*/}
+
           {/* 🚪 DANIELS ORIGINALER FORMULAR-WECHSLER (Bereinigt und optimiert) */}
           <div className="mt-6 pt-4 border-t border-slate-800/60 text-center">
             {isRegistering ? (
@@ -412,31 +425,6 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
         </div>
 
         {/* RECHTSEITE: SOCIAL MEDIA NETZWERK */}
-{/*         <div className="w-full md:w-64 bg-slate-900/60 border border-slate-900 rounded-3xl p-6 flex flex-col justify-between gap-4 shrink-0">
-          <div className="space-y-3">
-            <div>
-              <span className="text-[9px] text-slate-600 uppercase block tracking-wider font-mono">// External Ports</span>
-              <h4 className="text-xs font-black text-slate-400 uppercase tracking-tight font-mono">Schnellzugriff</h4>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-2 font-mono">
-              <button type="button" onClick={() => onLoginSuccess('FB-User', 'Fan')} className="bg-blue-900/20 border border-blue-900/30 hover:bg-blue-900/40 text-blue-400 p-2 rounded-xl text-[10px] font-bold transition-all cursor-pointer text-center">Facebook</button>
-              <button type="button" onClick={() => onLoginSuccess('Google-User', 'Fan')} className="bg-red-900/20 border border-red-900/30 hover:bg-red-900/40 text-red-400 p-2 rounded-xl text-[10px] font-bold transition-all cursor-pointer text-center">Google</button>
-              <button type="button" onClick={() => onLoginSuccess('X-User', 'Fan')} className="bg-slate-950 border border-slate-800 hover:bg-slate-900 text-slate-400 p-2 rounded-xl text-[10px] font-bold transition-all cursor-pointer text-center">Twitter</button>
-              <button type="button" onClick={() => onLoginSuccess('LN-User', 'Techniker')} className="bg-blue-950 border border-blue-900/40 hover:bg-blue-900/20 text-blue-300 p-2 rounded-xl text-[10px] font-bold transition-all cursor-pointer text-center">LinkedIn</button>
-              <button type="button" onClick={() => onLoginSuccess('Y!-User', 'Fan')} className="bg-purple-900/10 border border-purple-900/20 hover:bg-purple-900/30 text-purple-400 p-2 rounded-xl text-[10px] font-bold transition-all cursor-pointer text-center">Yahoo</button>
-              <button type="button" onClick={() => onLoginSuccess('MS-User', 'Veranstalter')} className="bg-sky-900/10 border border-sky-900/20 hover:bg-sky-900/30 text-sky-400 p-2 rounded-xl text-[10px] font-bold transition-all cursor-pointer text-center">Windows</button>
-            </div>
-          </div>
-
-          <button 
-            type="button" 
-            onClick={() => onLoginSuccess('Facebook Agent', 'Veranstalter')}
-            className="w-full bg-[#1877f2] hover:bg-[#166fe5] text-white font-black h-9 rounded-xl text-[9px] uppercase tracking-wider transition-all active:scale-[0.97] flex items-center justify-center gap-1.5 cursor-pointer mt-4 font-mono"
-          >
-            Mit Facebook anmelden
-          </button>
-        </div> */}
 
       </div>
 

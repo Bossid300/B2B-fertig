@@ -3,7 +3,7 @@ import { Sliders, Music, Zap, Radio, Clock, Save, Edit2, X } from 'lucide-react'
 import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
 
-export default function ArtistStammBox({ profileOwnerName, isOwner }) {
+export default function ArtistStammBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [formData, setFormData] = useState({
@@ -19,18 +19,11 @@ export default function ArtistStammBox({ profileOwnerName, isOwner }) {
 
   // 1. Profildaten aud DB laden
   useEffect(() => {
-    if (!profileOwnerName) return;
-
     getProfilesDb()
       .then(profiles => {
 
         const found = profiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-              ?.trim()
-              .toLowerCase() ===
-            profileOwnerName.trim().toLowerCase()
+          p => p?.id === currentProfileId
         );
 
         if (!found) return;
@@ -61,7 +54,7 @@ export default function ArtistStammBox({ profileOwnerName, isOwner }) {
         );
       });
 
-  }, [profileOwnerName]);
+  }, [currentProfileId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

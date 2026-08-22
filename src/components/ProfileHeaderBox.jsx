@@ -1,19 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Pencil, X, Shield, Music, Landmark, Briefcase, MessageSquare, Eye, EyeOff } from 'lucide-react';
 import { eventService } from '../services/eventService';
-import {
-  saveProfile,
-  getProfilesDb,
-  saveCrewRequest
-} from '../services/apiService';
-import { subscriptionService }
-from '../../moduls/subscriptions/subscriptionService';
-import { achievementService }
-from '../../moduls/achievements/achievementService';
-
+import { saveProfile, getProfilesDb, saveCrewRequest} from '../services/apiService';
+import { subscriptionService } from '../../moduls/subscriptions/subscriptionService';
+import { achievementService } from '../../moduls/achievements/achievementService';
 
 export default function ProfileHeaderBox({ 
-  currentProfileName, 
+  currentProfileId, 
   localFields, 
   isFavorite,
   handleToggleFavorite,
@@ -35,19 +28,11 @@ export default function ProfileHeaderBox({
     slide4_url: '', slide4_line1: '', slide4_line2: '',
   });
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const isMyOwnProfile = targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+  const displayName = localStorage.getItem('gigsda_user_name') || '';
+  const isMyOwnProfile = currentProfileId === localStorage.getItem('gigsda_profile_id');
   const canEditSlider = isMyOwnProfile;
-
-  const activeFields = profileData || localFields || { name: targetUser, role: "Künstler" };
- 
-  const allEvents =
-  eventService.getEvents();
-
-  const currentProfileId =
-    profileData?.id ||
-    localStorage.getItem('gigsda_profile_id');
-
+  const activeFields = profileData || localFields || { name: displayName, role: "Künstler" };
+  const allEvents =  eventService.getEvents();
   const myCompletedEvents =
     allEvents.filter(
       ev =>
@@ -56,10 +41,7 @@ export default function ProfileHeaderBox({
         ev.ownerId === currentProfileId
     );
 
-const currentAchievement =
-  achievementService.getCurrentAchievement(
-    myCompletedEvents
-  );
+  const currentAchievement =  achievementService.getCurrentAchievement(myCompletedEvents);
 
 
   // 1. DATABASE PIPELINE: Lädt die Profildaten für Fremdprofile & befüllt die Inputs
@@ -68,12 +50,7 @@ const currentAchievement =
       .then(profiles => {
 
         const found = profiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-              ?.trim()
-              .toLowerCase() ===
-            targetUser.trim().toLowerCase()
+          p => p?.id === currentProfileId
         );
 
         if (!found) return;
@@ -98,8 +75,7 @@ const currentAchievement =
       })
       .catch(console.error);
       
-    
-  }, [targetUser, isSliderMaskOpen]);
+  }, [currentProfileId, isSliderMaskOpen]);
 
   // Synchronisiert die Eingabefelder, sobald die Maske geöffnet wird
   useEffect(() => {
@@ -241,7 +217,7 @@ const submitB2BRequest = async (project) => {
       requestedProfileName:
         activeFields.display_name ||
         activeFields.name ||
-        targetUser,
+        displayName,
 
       requestedProfileRole:
         activeFields.role ||
@@ -271,7 +247,11 @@ const submitB2BRequest = async (project) => {
       updatedAt: now,
 
       note:
-        `Direktanfrage über Profil von ${activeFields.display_name || activeFields.name || targetUser}.`
+      `Direktanfrage über Profil von ${
+        activeFields.display_name ||
+        activeFields.name ||
+        displayName
+      }`
     };
 
     const saveResult =

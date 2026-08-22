@@ -344,7 +344,15 @@ export default function App() {
   const [activeGuestArtist, setActiveGuestArtist] = useState(
     () => localStorage.getItem('gigsda_active_guest_artist') || ''
   );
+  const [activeGuestProfileId, setActiveGuestProfileId] =
+  useState(
+    () =>
+      localStorage.getItem(
+        'gigsda_active_guest_profile_id'
+      ) || ''
+  );
   const [guestProfile, setGuestProfile] = useState(null);
+
   useEffect(() => {
 
     const loadGuestProfile = async () => {
@@ -381,7 +389,7 @@ export default function App() {
 
     loadGuestProfile();
 
-  }, [activeGuestArtist]);
+  }, [activeGuestProfileId]);
 
 useEffect(() => {
   const loadProfileFromQr = async () => {
@@ -409,10 +417,19 @@ useEffect(() => {
     );
     if (found) {
       setActiveGuestArtist(found.name);
+
+      setActiveGuestProfileId(found.id);
+
       localStorage.setItem(
         'gigsda_active_guest_artist',
         found.name
       );
+
+      localStorage.setItem(
+        'gigsda_active_guest_profile_id',
+        found.id
+      );
+
       localStorage.setItem(
         'gigsda_portfolio_profile',
         found.id
@@ -723,7 +740,9 @@ useEffect(() => {
        {/* 📡 AUTOMATISCHES CREW-REQUEST-CENTER (BLITZT BEI NEUEN ANFRAGEN & GEGENANGEBOTEN GANZ OBEN AUF) */}
       {view === 'projects' && isLoggedIn && (
         <div className="max-w-4xl mx-auto px-6 pt-4">
-          <CrewRequestCenter currentProfileName={ticketName} />
+          <CrewRequestCenter 
+           currentProfileId={currentProfile?.id}
+          />
         </div>
       )}
         {/* ========================================================================= */}
@@ -788,9 +807,20 @@ useEffect(() => {
             <SearchExplorer 
               onBack={() => setView('landing')} 
               setFavorites={(artistView) => {
-                // ⚡ DIE RETTUNG: Schreibt den Namen in die Variable, die das Profilboard hören kann!
-                setActiveGuestArtist(artistView);
-                localStorage.setItem('gigsda_active_guest_artist', artistView);
+                setActiveGuestArtist(
+                  artistView.name
+                );
+                setActiveGuestProfileId(
+                  artistView.id
+                );
+                localStorage.setItem(
+                  'gigsda_active_guest_artist',
+                  artistView.name
+                );
+                localStorage.setItem(
+                  'gigsda_active_guest_profile_id',
+                  artistView.id
+                );
                 setView('profile');
               }}
             />
@@ -801,235 +831,250 @@ useEffect(() => {
             <SearchExplorer 
               onBack={() => setView('projects')} 
               setFavorites={(artistView) => {
-                // ⚡ DIE RETTUNG: Schreibt den Namen in die Variable, die das Profilboard hören kann!
-                setActiveGuestArtist(artistView);
-                localStorage.setItem('gigsda_active_guest_artist', artistView);
+                setActiveGuestArtist(
+                  artistView.name
+                );
+                setActiveGuestProfileId(
+                  artistView.id
+                );
+                localStorage.setItem(
+                  'gigsda_active_guest_artist',
+                  artistView.name
+                );
+                localStorage.setItem(
+                  'gigsda_active_guest_profile_id',
+                  artistView.id
+                );
                 setView('profile');
               }}
             />
           )}
 
-{/* ========================================================================= */}
-{/* 🏟️ INTERAKTIVE 10-WEGE ROLLER-WEICHE: DAS KOMPLETTE GIGSDA-B2B-UNIVERSUM */}
-{view === 'profile' && activeGuestArtist && (
-  (() => {
+          {/* ========================================================================= */}
+          {/* 🏟️ INTERAKTIVE 10-WEGE ROLLER-WEICHE: GAST                               */}
+          {/* ========================================================================= */}
+          {view === 'profile' && activeGuestArtist && (
+            (() => {
 
-    if (!guestProfile) {
-      return (
-        <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
-          // GIGSDA CORE INITIALISIERT PROFILMATRIX...
-        </div>
-      );
-    }
+              if (!guestProfile) {
+                return (
+                  <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
+                    // GIGSDA CORE INITIALISIERT PROFILMATRIX...
+                  </div>
+                );
+              }
 
-    if (guestProfile?.role === 'Location') {
-      return (
-        <LocationProfile
-          ticketName={activeGuestArtist}
-          onNavigate={setView}
-        />
-      );
-    }
+              if (guestProfile?.role === 'Location') {
+                return (
+                  <LocationProfile
+                    currentProfileId={activeGuestProfileId}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    else if (guestProfile?.role === 'Fan') {
-      return (
-        <FanProfile
-          ticketName={activeGuestArtist}
-          onNavigate={setView}
-        />
-      );
-    }
+              else if (guestProfile?.role === 'Fan') {
+                return (
+                  <FanProfile
+                    currentProfileId={activeGuestProfileId}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    else if (
-      guestProfile?.role === 'Material' ||
-      guestProfile?.role === 'Verleiher'
-    ) {
-      return (
-        <VerleiherProfile
-          ticketName={activeGuestArtist}
-          onNavigate={setView}
-        />
-      );
-    }
+              else if (
+                guestProfile?.role === 'Material' ||
+                guestProfile?.role === 'Verleiher'
+              ) {
+                return (
+                  <VerleiherProfile
+                    currentProfileId={activeGuestProfileId}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    else if (guestProfile?.role === 'Techniker') {
-      return (
-        <TechnikerProfile
-          ticketName={activeGuestArtist}
-          onNavigate={setView}
-        />
-      );
-    }
+              else if (guestProfile?.role === 'Techniker') {
+                return (
+                  <TechnikerProfile
+                    currentProfileId={activeGuestProfileId}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    else if (guestProfile?.role === 'Catering') {
-      return (
-        <CaterProfile
-          ticketName={activeGuestArtist}
-          onNavigate={setView}
-        />
-      );
-    }
+              else if (guestProfile?.role === 'Catering') {
+                return (
+                  <CaterProfile
+                    currentProfileId={activeGuestProfileId}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    else if (guestProfile?.role === 'Veranstalter') {
-      return (
-        <VeranstalterProfile
-          ticketName={activeGuestArtist}
-          onNavigate={setView}
-        />
-      );
-    }
+              else if (guestProfile?.role === 'Veranstalter') {
+                return (
+                  <VeranstalterProfile
+                    currentProfileId={activeGuestProfileId}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    else if (guestProfile?.role === 'Logistik') {
-      return (
-        <LogistikProfile
-          ticketName={activeGuestArtist}
-          onNavigate={setView}
-        />
-      );
-    }
+              else if (guestProfile?.role === 'Logistik') {
+                return (
+                  <LogistikProfile
+                    currentProfileId={activeGuestProfileId}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    else if (guestProfile?.role === 'Security') {
-      return (
-        <SecurityProfile
-          ticketName={activeGuestArtist}
-          onNavigate={setView}
-        />
-      );
-    }
+              else if (guestProfile?.role === 'Security') {
+                return (
+                  <SecurityProfile
+                    currentProfileId={activeGuestProfileId}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    else if (
-      guestProfile?.role === 'Design' ||
-      guestProfile?.role === 'Deko'
-    ) {
-      return (
-        <DesignProfile
-          ticketName={activeGuestArtist}
-          onNavigate={setView}
-        />
-      );
-    }
+              else if (
+                guestProfile?.role === 'Design' ||
+                guestProfile?.role === 'Deko'
+              ) {
+                return (
+                  <DesignProfile
+                    currentProfileId={activeGuestProfileId}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    return (
-      <UserProfile
-        ticketName={activeGuestArtist}
-        onBack={() => setView('radar')}
-        isOwner={false}
-        setView={setView}
-      />
-    );
+              return (
+                <UserProfile
+                  currentProfileId={activeGuestProfileId}
+                  onBack={() => setView('radar')}
+                  isOwner={false}
+                  setView={setView}
+                />
+              );
 
-  })()
-)}
+            })()
+          )}
 
-{view === 'userProfile' && isLoggedIn && (
-  (() => {
+          {/* ========================================================================= */}
+          {/* 🏟️ INTERAKTIVE 10-WEGE ROLLER-WEICHE: ROLLEN                             */}
+          {/* ========================================================================= */}
+          {view === 'userProfile' && isLoggedIn && (
+            (() => {
 
-    if (!currentProfile) {
-      return (
-        <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
-          // GIGSDA CORE INITIALISIERT PROFILMATRIX...
-        </div>
-      );
-    }
+              if (!currentProfile) {
+                return (
+                  <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
+                    // GIGSDA CORE INITIALISIERT PROFILMATRIX...
+                  </div>
+                );
+              }
 
-    if (currentProfile.role === 'Location') {
-      return (
-        <LocationProfile
-          ticketName={ticketName}
-          onNavigate={setView}
-        />
-      );
-    }
+              if (currentProfile.role === 'Location') {
+                return (
+                  <LocationProfile
+                    currentProfileId={currentProfile?.id}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    else if (currentProfile.role === 'Fan') {
-      return (
-        <FanProfile
-          ticketName={ticketName}
-          onNavigate={setView}
-        />
-      );
-    }
+              else if (currentProfile.role === 'Fan') {
+                return (
+                  <FanProfile
+                    currentProfileId={currentProfile?.id}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    else if (
-      currentProfile.role === 'Material' ||
-      currentProfile.role === 'Verleiher'
-    ) {
-      return (
-        <VerleiherProfile
-          ticketName={ticketName}
-          onNavigate={setView}
-        />
-      );
-    }
+              else if (
+                currentProfile.role === 'Material' ||
+                currentProfile.role === 'Verleiher'
+              ) {
+                return (
+                  <VerleiherProfile
+                    currentProfileId={currentProfile?.id}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    else if (currentProfile.role === 'Techniker') {
-      return (
-        <TechnikerProfile
-          ticketName={ticketName}
-          onNavigate={setView}
-        />
-      );
-    }
+              else if (currentProfile.role === 'Techniker') {
+                return (
+                  <TechnikerProfile
+                    currentProfileId={currentProfile?.id}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    else if (currentProfile.role === 'Catering') {
-      return (
-        <CaterProfile
-          ticketName={ticketName}
-          onNavigate={setView}
-        />
-      );
-    }
+              else if (currentProfile.role === 'Catering') {
+                return (
+                  <CaterProfile
+                    currentProfileId={currentProfile?.id}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    else if (currentProfile.role === 'Veranstalter') {
-      return (
-        <VeranstalterProfile
-          ticketName={ticketName}
-          onNavigate={setView}
-        />
-      );
-    }
+              else if (currentProfile.role === 'Veranstalter') {
+                return (
+                  <VeranstalterProfile
+                    currentProfileId={currentProfile?.id}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    else if (currentProfile.role === 'Logistik') {
-      return (
-        <LogistikProfile
-          ticketName={ticketName}
-          onNavigate={setView}
-        />
-      );
-    }
+              else if (currentProfile.role === 'Logistik') {
+                return (
+                  <LogistikProfile
+                    currentProfileId={currentProfile?.id}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    else if (currentProfile.role === 'Security') {
-      return (
-        <SecurityProfile
-          ticketName={ticketName}
-          onNavigate={setView}
-        />
-      );
-    }
+              else if (currentProfile.role === 'Security') {
+                return (
+                  <SecurityProfile
+                    currentProfileId={currentProfile?.id}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    else if (
-      currentProfile.role === 'Design' ||
-      currentProfile.role === 'Deko'
-    ) {
-      return (
-        <DesignProfile
-          ticketName={ticketName}
-          onNavigate={setView}
-        />
-      );
-    }
+              else if (
+                currentProfile.role === 'Design' ||
+                currentProfile.role === 'Deko'
+              ) {
+                return (
+                  <DesignProfile
+                    currentProfileId={currentProfile?.id}
+                    onNavigate={setView}
+                  />
+                );
+              }
 
-    return (
-      <UserProfile
-        ticketName={ticketName}
-        onBack={() => setView('projects')}
-        isOwner={true}
-        setView={setView}
-      />
-    );
+              return (
+                <UserProfile
+                  currentProfileId={currentProfile?.id}
+                  onBack={() => setView('projects')}
+                  isOwner={true}
+                  setView={setView}
+                />
+              );
 
-  })()
-)}
+            })()
+          )}
 
 
           {/* ⚡ DIE ECHTE DIREKTLEITUNG ZU DEINEN PROFILE-SETTINGS */}
@@ -1042,10 +1087,8 @@ useEffect(() => {
  
           {view === 'projects' && isLoggedIn && (
             <ProjectDashboard
-              ticketName={ticketName}
               onNavigateToStep={setView}
               progress={progress}
-              currentProfileName={ticketName}
               onSelectEvent={setActiveEvent}
             />
           )}
@@ -1191,8 +1234,20 @@ useEffect(() => {
               // ⚡ DIE RETTUNG: Wenn im Sucher handleProfileClick feuert, 
               // beamen wir den User direkt auf das schreibgeschützte Portfolio!
               setFavorites={(artistView) => {
-                setActiveGuestArtist(artistView);
-                localStorage.setItem('gigsda_active_guest_artist', artistView);
+                setActiveGuestArtist(
+                  artistView.name
+                );
+                setActiveGuestProfileId(
+                  artistView.id
+                );
+                localStorage.setItem(
+                  'gigsda_active_guest_artist',
+                  artistView.name
+                );
+                localStorage.setItem(
+                  'gigsda_active_guest_profile_id',
+                  artistView.id
+                );
                 setView('profile');
               }}
             />

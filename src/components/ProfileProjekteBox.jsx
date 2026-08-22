@@ -4,28 +4,24 @@ import { eventService } from '../services/eventService';
 import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
 
-export default function ProfileProjekteBox({ currentProfileName, isOwner }) {
+export default function ProfileProjekteBox({ currentProfileId, isOwner }) {
   const [profile, setProfile] = useState(null);
   const [profileData, setProfileData] = useState(null);
   const [projects, setProjects] = useState([]);
   const [showProjects, setShowProjects] = useState(true);
   const [crewCounts, setCrewCounts] = useState({});
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const canEditPrivacy = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+const canEditPrivacy = isOwner || currentProfileId === localStorage.getItem( 'gigsda_profile_id' );
 
   // 1. NESTED CREW PIPELINE: Filtert die Einsätze direkt aus den Event-Objekten!
   useEffect(() => {
     getProfilesDb()
       .then(allProfiles => {
+
         const found = allProfiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-              ?.trim()
-              .toLowerCase() ===
-            targetUser.trim().toLowerCase()
+          p => p?.id === currentProfileId
         );
+
         if (!found) return;
         const profile =
           found.profile_json
@@ -39,13 +35,14 @@ export default function ProfileProjekteBox({ currentProfileName, isOwner }) {
         if (found) {
           setProfile(found);
           setShowProjects(found.show_projects !== false);
+
           // Alle denkbaren Namensvariationen des aktuellen Profils sammeln
           const nameVariations = [
-            targetUser.trim().toLowerCase(),
             (found.name || '').trim().toLowerCase(),
             (found.Klarname || '').trim().toLowerCase(),
             (found.project_name || '').trim().toLowerCase()
           ].filter(v => v !== '');
+
           const allEvents = eventService.getEvents();
           const joinedProjects = [];
           const counts = {};
@@ -88,7 +85,7 @@ export default function ProfileProjekteBox({ currentProfileName, isOwner }) {
         );
       });
 
-}, [targetUser]);
+}, [currentProfileId]);
 
 const toggleProjectPrivacy = async () => {
   try {
@@ -98,15 +95,13 @@ const toggleProjectPrivacy = async () => {
       ...profileData,
       show_projects: updatedShow
     };
-    const profileId =
+    const saveProfileId =
       updatedProfile.id ||
       updatedProfile.profileId ||
-      localStorage.getItem(
-        'gigsda_profile_id'
-      );
+      currentProfileId;
 
     await saveProfile({
-      profileId,
+      profileId: saveProfileId,
       profile: updatedProfile
     });
 

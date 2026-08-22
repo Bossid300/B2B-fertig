@@ -3,7 +3,7 @@ import { Share2, Save, Eye, EyeOff, Globe } from 'lucide-react';
 import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
 
-export default function ProfileSocialBox({ currentProfileName, isOwner }) {
+export default function ProfileSocialBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
   const [profileData, setProfileData] = useState(null);
@@ -15,21 +15,17 @@ export default function ProfileSocialBox({ currentProfileName, isOwner }) {
     social_youtube: ''
   });
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+  const canEdit = isOwner || currentProfileId === localStorage.getItem( 'gigsda_profile_id' );
 
   // 1. DATABASE PIPELINE: Lädt die Social-Links live
   useEffect(() => {
     getProfilesDb()
       .then(allProfiles => {
+
         const found = allProfiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-              ?.trim()
-              .toLowerCase() ===
-            targetUser.trim().toLowerCase()
+          p => p?.id === currentProfileId
         );
+
         if (!found) return;
         const profile =
           found.profile_json
@@ -57,7 +53,7 @@ export default function ProfileSocialBox({ currentProfileName, isOwner }) {
           e
         );
       });
-  }, [targetUser, isEditing]);
+  }, [currentProfileId, isEditing]);
 
 
   const handleChange = (e) => {
@@ -82,15 +78,14 @@ export default function ProfileSocialBox({ currentProfileName, isOwner }) {
         show_socials:
           showSocials
       };
-      const profileId =
+      
+      const saveProfileId =
         updatedProfile.id ||
         updatedProfile.profileId ||
-        localStorage.getItem(
-          'gigsda_profile_id'
-        );
+        currentProfileId;
 
       await saveProfile({
-        profileId,
+        profileId: saveProfileId,
         profile: updatedProfile
       });
 

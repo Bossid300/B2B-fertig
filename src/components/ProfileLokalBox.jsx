@@ -2,25 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Database, Download, Upload, Trash2, ShieldAlert } from 'lucide-react';
 import { getProfilesDb, saveProfile } from '../services/apiService';
 
-export default function ProfileLokalBox({ currentProfileName, isOwner }) {
+export default function ProfileLokalBox({ currentProfileId, isOwner }) {
   const [profile, setProfile] = useState(null);
   const [dataSize, setDataSize] = useState('0.00 KB');
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const canManage = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+  const canManage = isOwner || currentProfileId === localStorage.getItem('gigsda_profile_id');
 
   // 1. DATABASE PIPELINE: Berechnet reaktiv die Profil-Größe
   useEffect(() => {
     getProfilesDb()
       .then(allProfiles => {
         const found = allProfiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-              ?.trim()
-              .toLowerCase() ===
-            targetUser.trim().toLowerCase()
+          p => p?.id === currentProfileId
         );
         if (!found) return;
         const profile =
@@ -41,17 +35,45 @@ export default function ProfileLokalBox({ currentProfileName, isOwner }) {
           e
         );
       });
-  }, [targetUser]);
+  }, [currentProfileId]);
 
   // 2. BACKUP ENGINE: Lädt das Profil als JSON-Datei herunter
   const handleExport = () => {
     if (!profile) return;
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(profile, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `gigsda_protocol_${targetUser.toLowerCase().replace(/\s+/g, '_')}.json`);
-    document.body.appendChild(downloadAnchor);
+
+    const exportName =
+      profile?.name ||
+      profile?.display_name ||
+      currentProfileId ||
+      'profil';
+
+    const dataStr =
+      "data:text/json;charset=utf-8," +
+      encodeURIComponent(
+        JSON.stringify(profile, null, 2)
+      );
+
+    const downloadAnchor =
+      document.createElement('a');
+
+    downloadAnchor.setAttribute(
+      "href",
+      dataStr
+    );
+
+    downloadAnchor.setAttribute(
+      "download",
+      `gigsda_protocol_${exportName
+        .toLowerCase()
+        .replace(/\s+/g, '_')}.json`
+    );
+
+    document.body.appendChild(
+      downloadAnchor
+    );
+
     downloadAnchor.click();
+
     downloadAnchor.remove();
   };
 
@@ -65,15 +87,13 @@ export default function ProfileLokalBox({ currentProfileName, isOwner }) {
         const importedData =
           JSON.parse(event.target.result);
 
-        const profileId =
+        const saveProfileId =
           importedData.id ||
           importedData.profileId ||
-          localStorage.getItem(
-            'gigsda_profile_id'
-          );
+          currentProfileId;
 
         await saveProfile({
-          profileId,
+          profileId: saveProfileId,
           profile: importedData
         });
 
@@ -137,6 +157,14 @@ export default function ProfileLokalBox({ currentProfileName, isOwner }) {
       );
     }
   };
+
+  if (!profile) {
+    return (
+      <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
+        // LOCAL SYSTEM CONTROL & PROTOCOL BACKUP INITIALISIERT...
+      </div>
+    );
+  }
 
   if (!canManage) return null; // Nur der Inhaber oder Admin sieht das lokale Backup-System!
 

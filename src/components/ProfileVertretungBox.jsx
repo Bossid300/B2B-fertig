@@ -5,7 +5,7 @@ import {
   saveProfile
 } from '../services/apiService';
 
-export default function ProfileVertretungBox({ currentProfileName, isOwner }) {
+export default function ProfileVertretungBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
   const [showRepresentation, setShowRepresentation] = useState(true);
@@ -16,8 +16,7 @@ export default function ProfileVertretungBox({ currentProfileName, isOwner }) {
     agent_phone: ''
   });
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+  const canEdit = isOwner || currentProfileId === localStorage.getItem('gigsda_profile_id');
 
   // 1. DATABASE PIPELINE: Lädt Vertretungs-Daten live aus DB
   useEffect(() => {
@@ -25,12 +24,7 @@ export default function ProfileVertretungBox({ currentProfileName, isOwner }) {
     getProfilesDb()
       .then(profiles => {
         const found = profiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-              ?.trim()
-              .toLowerCase() ===
-            targetUser.trim().toLowerCase()
+          p => p?.id === currentProfileId
         );
         if (!found) return;
         const profile =
@@ -59,7 +53,7 @@ export default function ProfileVertretungBox({ currentProfileName, isOwner }) {
           e
         );
       });
-  }, [targetUser, isEditing]);
+  }, [currentProfileId, isEditing]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -76,14 +70,12 @@ export default function ProfileVertretungBox({ currentProfileName, isOwner }) {
         show_representation:
           showRepresentation
       };
-      const profileId =
+      const saveProfileId =
         profile.id ||
         profile.profileId ||
-        localStorage.getItem(
-          'gigsda_profile_id'
-        );
+        currentProfileId;
       await saveProfile({
-        profileId,
+        profileId: saveProfileId,
         profile: updatedProfile
       });
       setProfile(updatedProfile);

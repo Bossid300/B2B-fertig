@@ -6,7 +6,7 @@ import {
   saveProfile
 } from '../services/apiService';
 
-export default function ProfileDokumenteBox({ currentProfileName, isOwner }) {
+export default function ProfileDokumenteBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
   const [showDocs, setShowDocs] = useState(true);
@@ -18,9 +18,8 @@ export default function ProfileDokumenteBox({ currentProfileName, isOwner }) {
   const [securityLevel, setSecurityLevel] = useState('public');
   const [isCrewMember, setIsCrewMember] = useState(false);
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
   const loggedInUser = localStorage.getItem('gigsda_user_name') || '';
-  const canEdit = isOwner || targetUser.toLowerCase() === loggedInUser.toLowerCase();
+  const canEdit = isOwner || currentProfileId === localStorage.getItem('gigsda_profile_id');
 
   // 1. DATABASE & SECURITY PIPELINE: Lädt Dokumente & prüft Crew-Status des Besuchers
   useEffect(() => {
@@ -28,18 +27,20 @@ export default function ProfileDokumenteBox({ currentProfileName, isOwner }) {
   getProfilesDb()
     .then(profiles => {
       const found = profiles.find(
-        p =>
-          p &&
-          (p.name || p.user_name || p.display_name)
-            ?.trim()
-            .toLowerCase() ===
-          targetUser.trim().toLowerCase()
+        p => p?.id === currentProfileId
       );
       if (!found) return;
       const profile =
         found.profile_json
           ? JSON.parse(found.profile_json)
           : found;
+
+const profileName =
+  (profile?.name || '')
+    .trim()
+    .toLowerCase();
+
+
       setProfile(profile);
       setShowDocs(
         profile.show_docs !== false
@@ -51,7 +52,7 @@ export default function ProfileDokumenteBox({ currentProfileName, isOwner }) {
       );
       if (
         loggedInUser &&
-        targetUser.toLowerCase() !==
+        profileName !==
         loggedInUser.toLowerCase()
       ) {
         const commonEvent =
@@ -81,7 +82,7 @@ export default function ProfileDokumenteBox({ currentProfileName, isOwner }) {
         e
       );
     });
-  }, [targetUser, isEditing, loggedInUser]);
+  }, [currentProfileId, isEditing, loggedInUser]);
 
   const addDocument = () => {
     if (!newDocName.trim() || !newDocUrl.trim()) return;
@@ -110,16 +111,17 @@ export default function ProfileDokumenteBox({ currentProfileName, isOwner }) {
         documents: docsList,
         show_docs: showDocs
       };
-      const profileId =
+
+      const saveProfileId =
         profile.id ||
         profile.profileId ||
-        localStorage.getItem(
-          'gigsda_profile_id'
-        );
+        currentProfileId;
+
       await saveProfile({
-        profileId,
+        profileId: saveProfileId,
         profile: updatedProfile
       });
+
       setProfile(updatedProfile);
       alert(
         "B2B Dokumenten- & Rider-Protokoll erfolgreich gespeichert! 💾📄"

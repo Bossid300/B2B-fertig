@@ -3,7 +3,7 @@ import { Calendar, Save, Eye, EyeOff, CheckCircle2, XCircle } from 'lucide-react
 import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
 
-export default function ProfileAvailBox({ currentProfileName, isOwner }) {
+export default function ProfileAvailBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
   const [showAvail, setShowAvail] = useState(true);
@@ -13,20 +13,14 @@ export default function ProfileAvailBox({ currentProfileName, isOwner }) {
     MO: true, DI: true, MI: true, DO: true, FR: true, SA: true, SO: true
   });
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+const canEdit = isOwner || currentProfileId === localStorage.getItem('gigsda_profile_id');
 
   // 1. DATABASE PIPELINE: Lädt Verfügbarkeiten live
   useEffect(() => {
     getProfilesDb()
       .then(profiles => {
         const found = profiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-              ?.trim()
-              .toLowerCase() ===
-            targetUser.trim().toLowerCase()
+          p => p?.id === currentProfileId
         );
 
         if (!found) return;
@@ -47,7 +41,7 @@ export default function ProfileAvailBox({ currentProfileName, isOwner }) {
         }
       })
       .catch(console.error);
-  }, [targetUser, isEditing]);
+  }, [currentProfileId, isEditing]);
 
 
   const toggleDay = (dayKey) => {
@@ -66,18 +60,16 @@ export default function ProfileAvailBox({ currentProfileName, isOwner }) {
         show_avail: showAvail
       };
       if (updatedProfile?.id) {
-        const profileId =
-          updatedProfile.id ||
-          updatedProfile.profileId ||
-          localStorage.getItem(
-            'gigsda_profile_id'
-          );
 
-        await saveProfile({
-          profileId,
-          profile: updatedProfile
-        });
+      const saveProfileId =
+        updatedProfile.id ||
+        updatedProfile.profileId ||
+        currentProfileId;
 
+      await saveProfile({
+        profileId: saveProfileId,
+        profile: updatedProfile
+      });
       }
       alert(
         "B2B Verfügbarkeits-Protokoll erfolgreich eingebrannt! 📅⚡"
@@ -99,7 +91,7 @@ export default function ProfileAvailBox({ currentProfileName, isOwner }) {
   if (!profile) {
     return (
       <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
-        // VERFÜGBARKEITS-MATRIZ INITIALISIERT...
+        // AVAIL VERFÜGBARKEITS-MATRIX INITIALISIERT...
       </div>
     );
   }
@@ -113,7 +105,7 @@ export default function ProfileAvailBox({ currentProfileName, isOwner }) {
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">
         <div className="flex items-center gap-2">
           <Calendar size={14} className="text-emerald-400" />
-          <span className="text-xs font-black tracking-widest uppercase">// B2B DISPONENTEN KALENDER</span>
+          <span className="text-xs font-black tracking-widest uppercase">// B2B AVAIL DISPONENTEN KALENDER</span>
         </div>
         
         <div className="flex items-center gap-2">

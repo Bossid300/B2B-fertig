@@ -7,148 +7,145 @@ import {
 } from '../services/apiService';
 
 
-export default function ProfileNetworkBox({ currentProfileName, isOwner }) {
+export default function ProfileNetworkBox({ currentProfileId, isOwner }) {
   const [profile, setProfile] = useState(null);
   const [profileData, setProfileData] = useState(null);
   const [networkUsers, setNetworkUsers] = useState([]);
   const [showNetwork, setShowNetwork] = useState(true);
   const [stats, setStats] = useState({ requestsCount: 0, favoritedByCount: 0 });
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
   const loggedInUser = localStorage.getItem('gigsda_user_name') || '';
 
-  const currentProfileId =
-    localStorage.getItem('gigsda_profile_id');
+  const favoriteKey = `gigsda_favorites_${currentProfileId}`;
 
-  const favoriteKey =
-    `gigsda_favorites_${currentProfileId}`;
-
-  const canEditPrivacy = isOwner || targetUser.toLowerCase() === loggedInUser.toLowerCase();
+  const canEditPrivacy = isOwner || currentProfileId === localStorage.getItem( 'gigsda_profile_id' );
 
   // 1. DYNAMIC B2B NETWORK & METRIC ENGINE
-useEffect(() => {
-  const loadNetworkData = async () => {
-    try {
-      const reqs =
-        await getCrewRequests();
+  useEffect(() => {
+    const loadNetworkData = async () => {
+      try {
+        const reqs =
+          await getCrewRequests();
 
-      const savedFavs =
-        localStorage.getItem(favoriteKey);
+        const savedFavs =
+          localStorage.getItem(favoriteKey);
 
-      getProfilesDb()
-        .then(allProfiles => {
-          const found = allProfiles.find(
-            p =>
-              p &&
-              (p.name || p.user_name || p.display_name)
-                ?.trim()
-                .toLowerCase() ===
-              targetUser.trim().toLowerCase()
-          );
+        getProfilesDb()
+          .then(allProfiles => {
 
-          if (!found) return;
-
-          const profile =
-            found.profile_json
-              ? JSON.parse(found.profile_json)
-              : found;
-
-          setProfile(profile);
-          setProfileData(profile);
-
-          setShowNetwork(
-            profile.show_network !== false
-          );
-
-          const partnerList =
-            allProfiles
-              .filter(p =>
-                p &&
-                p.name?.toLowerCase() !==
-                  targetUser.toLowerCase() &&
-                (
-                  p.role === profile.role ||
-                  p.city === profile.city ||
-                  profile.skills?.includes(p.role)
-                )
-              )
-              .slice(0, 3);
-
-          setNetworkUsers(partnerList);
-
-          const nameVariations = [
-            targetUser.trim().toLowerCase(),
-            (profile.name || '').trim().toLowerCase(),
-            (profile.klarname || '').trim().toLowerCase(),
-            (profile.project_name || '').trim().toLowerCase(),
-            (profile.category || '').trim().toLowerCase()
-          ].filter(v => v !== '');
-
-          const savedFavs =
-            localStorage.getItem(favoriteKey);
-
-          let myRequests = [];
-
-          if (
-            targetUser.toLowerCase() ===
-            loggedInUser.toLowerCase()
-          ) {
-            myRequests = reqs.filter(
-              r =>
-                r &&
-                r.requestedProfileName &&
-                nameVariations.includes(
-                  r.requestedProfileName.trim().toLowerCase()
-                )
+            const found = allProfiles.find(
+              p => p?.id === currentProfileId
             );
-          } else {
-            myRequests = reqs.filter(
-              r =>
-                r &&
-                r.requesterProfileName &&
-                nameVariations.includes(
-                  r.requesterProfileName.trim().toLowerCase()
-                )
+
+            if (!found) return;
+
+            const profile =
+              found.profile_json
+                ? JSON.parse(found.profile_json)
+                : found;
+
+const profileName =
+  (profile?.name || '')
+    .trim()
+    .toLowerCase();
+
+
+            setProfile(profile);
+            setProfileData(profile);
+
+            setShowNetwork(
+              profile.show_network !== false
             );
-          }
 
-          const favs =
-            JSON.parse(savedFavs || '[]');
+            const partnerList =
+              allProfiles
+                .filter(p =>
+                  p &&
+                  p.name?.toLowerCase() !==
+                    profileName &&
+                  (
+                    p.role === profile.role ||
+                    p.city === profile.city ||
+                    profile.skills?.includes(p.role)
+                  )
+                )
+                .slice(0, 3);
 
-          const isFavInLists =
-            favs.filter(f => {
-              if (!f) return false;
+            setNetworkUsers(partnerList);
 
-              const entryName =
-                typeof f === 'object' && f.name
-                  ? f.name
-                  : f;
+            const nameVariations = [
+              profileName,
+              (profile.name || '').trim().toLowerCase(),
+              (profile.klarname || '').trim().toLowerCase(),
+              (profile.project_name || '').trim().toLowerCase(),
+              (profile.category || '').trim().toLowerCase()
+            ].filter(v => v !== '');
 
-              return nameVariations.includes(
-                entryName.trim().toLowerCase()
+            const savedFavs =
+              localStorage.getItem(favoriteKey);
+
+            let myRequests = [];
+
+              if (
+                profileName ===
+                loggedInUser.toLowerCase()
+              ) {
+              myRequests = reqs.filter(
+                r =>
+                  r &&
+                  r.requestedProfileName &&
+                  nameVariations.includes(
+                    r.requestedProfileName.trim().toLowerCase()
+                  )
               );
+            } else {
+              myRequests = reqs.filter(
+                r =>
+                  r &&
+                  r.requesterProfileName &&
+                  nameVariations.includes(
+                    r.requesterProfileName.trim().toLowerCase()
+                  )
+              );
+            }
+
+            const favs =
+              JSON.parse(savedFavs || '[]');
+
+            const isFavInLists =
+              favs.filter(f => {
+                if (!f) return false;
+
+                const entryName =
+                  typeof f === 'object' && f.name
+                    ? f.name
+                    : f;
+
+                return nameVariations.includes(
+                  entryName.trim().toLowerCase()
+                );
+              });
+
+            setStats({
+              requestsCount: myRequests.length,
+              favoritedByCount: isFavInLists.length
             });
+          })
+          .catch(console.error);
 
-          setStats({
-            requestsCount: myRequests.length,
-            favoritedByCount: isFavInLists.length
-          });
-        })
-        .catch(console.error);
+      } catch (e) {
+        console.error(
+          'NETWORK REQUESTS DB FEHLER ❌',
+          e
+        );
+      }
+    };
 
-    } catch (e) {
-      console.error(
-        'NETWORK REQUESTS DB FEHLER ❌',
-        e
-      );
-    }
-  };
-
-  loadNetworkData();
-}, [targetUser, showNetwork, favoriteKey]);
+    loadNetworkData();
+  }, [currentProfileId, showNetwork, favoriteKey]);
 
 
-const toggleNetworkPrivacy = async () => {
+  const toggleNetworkPrivacy = async () => {
 
   try {
 
@@ -157,15 +154,13 @@ const toggleNetworkPrivacy = async () => {
       show_network: !showNetwork
     };
 
-    const profileId =
+    const saveProfileId =
       updatedProfile.id ||
       updatedProfile.profileId ||
-      localStorage.getItem(
-        'gigsda_profile_id'
-      );
+      currentProfileId;
 
     await saveProfile({
-      profileId,
+      profileId: saveProfileId,
       profile: updatedProfile
     });
 
@@ -179,15 +174,13 @@ const toggleNetworkPrivacy = async () => {
       'Fehler beim Speichern der Netzwerk-Sichtbarkeit:',
       e
     );
-
   }
-
 };
 
   if (!profile) {
     return (
       <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
-        // VERBINDUNGS REGISTER INITIALISIERT...
+        // VERBINDUNGS NETZWERK REGISTER INITIALISIERT...
       </div>
     );
   }

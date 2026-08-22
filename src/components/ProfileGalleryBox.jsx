@@ -3,15 +3,14 @@ import { Pencil, Save, Image, Eye, EyeOff, X, Maximize2 } from 'lucide-react';
 import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
 
-export default function ProfileGalleryBox({ currentProfileName, isOwner }) {
+export default function ProfileGalleryBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
   const [profileData, setProfileData] = useState(null);
   const [gallery, setGallery] = useState([]);
   const [activeLightbox, setActiveLightbox] = useState(null);
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+  const canEdit = isOwner || currentProfileId === localStorage.getItem( 'gigsda_profile_id' );
 
   // 1. DATABASE PIPELINE: Lädt die Galerie-Kacheln live 
   useEffect(() => {
@@ -19,12 +18,7 @@ export default function ProfileGalleryBox({ currentProfileName, isOwner }) {
     .then(profiles => {
 
       const found = profiles.find(
-        p =>
-          p &&
-          (p.name || p.user_name || p.display_name)
-            ?.trim()
-            .toLowerCase() ===
-          targetUser.trim().toLowerCase()
+        p => p?.id === currentProfileId
       );
 
       if (!found) return;
@@ -65,7 +59,7 @@ export default function ProfileGalleryBox({ currentProfileName, isOwner }) {
       })
       .catch(console.error);
 
-      }, [targetUser, isEditing]);
+  }, [currentProfileId, isEditing]);
 
   const handleInputChange = (index, field, value) => {
     setGallery(prev => prev.map((item, idx) => idx === index ? { ...item, [field]: value } : item));
@@ -101,10 +95,15 @@ export default function ProfileGalleryBox({ currentProfileName, isOwner }) {
         gallery_slot4_visible: gallery[3].visible
       };
 
-      await saveProfile(
-        updatedProfile.id,
-        updatedProfile
-      );
+      const saveProfileId =
+        updatedProfile.id ||
+        updatedProfile.profileId ||
+        currentProfileId;
+
+      await saveProfile({
+        profileId: saveProfileId,
+        profile: updatedProfile
+      });
 
       alert("B2B Medien-Portfolio erfolgreich eingebrannt! 🖼️🎞️");
 
@@ -122,7 +121,10 @@ export default function ProfileGalleryBox({ currentProfileName, isOwner }) {
 
   if (!profile) {
     return (
-      <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">// MEDIEN REGISTER INITIALISIERT...</div>
+      <div 
+        className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
+        // MEDIEN GALLERY REGISTER INITIALISIERT...
+      </div>
     );
   }
 

@@ -4,7 +4,7 @@ import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
 
 
-export default function ProfileSkillBox({ currentProfileName, isOwner }) {
+export default function ProfileSkillBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
   const [profileData, setProfileData] = useState(null);
@@ -16,8 +16,7 @@ export default function ProfileSkillBox({ currentProfileName, isOwner }) {
   const [newSkill, setNewSkill] = useState('');
   const [newCert, setNewCert] = useState('');
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+  const canEdit = isOwner || currentProfileId === localStorage.getItem( 'gigsda_profile_id' );
 
   // 1. DATABASE PIPELINE: Lädt Skills & Zertifikate live aus der DB
   useEffect(() => {
@@ -25,12 +24,7 @@ export default function ProfileSkillBox({ currentProfileName, isOwner }) {
       .then(profiles => {
 
         const found = profiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-              ?.trim()
-              .toLowerCase() ===
-            targetUser.trim().toLowerCase()
+          p => p?.id === currentProfileId
         );
 
         if (!found) return;
@@ -66,7 +60,7 @@ export default function ProfileSkillBox({ currentProfileName, isOwner }) {
     })
     .catch(console.error);
 
-    }, [targetUser, isEditing]);
+    }, [currentProfileId, isEditing]);
 
   const addSkill = () => {
     if (!newSkill.trim()) return;
@@ -107,15 +101,13 @@ export default function ProfileSkillBox({ currentProfileName, isOwner }) {
         show_certificates: showCertificates
       };
 
-      const profileId =
+      const saveProfileId =
         updatedProfile.id ||
         updatedProfile.profileId ||
-        localStorage.getItem(
-          'gigsda_profile_id'
-        );
+        currentProfileId;
 
       await saveProfile({
-        profileId,
+        profileId: saveProfileId,
         profile: updatedProfile
       });
 

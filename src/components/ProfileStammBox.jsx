@@ -4,13 +4,14 @@ import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
 import { geocodeAddress } from '../services/geoService';
 
-export default function ProfileStammBox({ currentProfileName, isOwner }) {
+export default function ProfileStammBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
+
   const [profile, setProfile] = useState(null);
+
   const [formData, setFormData] = useState({});
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+  const canEdit = isOwner || currentProfileId === localStorage.getItem( 'gigsda_profile_id' );
 
   // 1. DATABASE PIPELINE: Lädt Stammdaten & Sichtbarkeits-Flags (Default: true)
   useEffect(() => {
@@ -18,12 +19,7 @@ export default function ProfileStammBox({ currentProfileName, isOwner }) {
       .then(profiles => {
 
         const found = profiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-              ?.trim()
-              .toLowerCase() ===
-            targetUser.trim().toLowerCase()
+          p => p?.id === currentProfileId
         );
 
         if (!found) return;
@@ -47,7 +43,7 @@ export default function ProfileStammBox({ currentProfileName, isOwner }) {
           avatarUrl: mergedProfile.avatarUrl || '',
           category: mergedProfile.category || mergedProfile.project_name || '',
           Klarname: mergedProfile.Klarname || '',
-          name: mergedProfile.name || targetUser,
+          name: mergedProfile.name || '',
           vorname: mergedProfile.vorname || '',
           nachname: mergedProfile.nachname || '',
           plz: mergedProfile.plz || '',
@@ -58,7 +54,7 @@ export default function ProfileStammBox({ currentProfileName, isOwner }) {
           website: mergedProfile.website || '',
           genre: mergedProfile.genre || '',
           id: mergedProfile.id || '',
-          ticketName: mergedProfile.ticketName || targetUser,
+          ticketName: mergedProfile.ticketName || '',
           description: mergedProfile.description || '',
 
           show_category: mergedProfile.show_category !== false,
@@ -79,8 +75,8 @@ export default function ProfileStammBox({ currentProfileName, isOwner }) {
     })
     .catch(console.error);
 
+}, [currentProfileId, isEditing]);
 
-}, [targetUser, isEditing]);
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -227,7 +223,7 @@ export default function ProfileStammBox({ currentProfileName, isOwner }) {
               </div>
             </div>
             <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
-              <span className="text-slate-500">SYSTEM-NAME:</span> 
+              <span className="text-slate-500">PROFILNAME:</span> 
               <div className="flex items-center gap-2">
                 <span className="text-white font-bold">{name}</span>
                 {canEdit && (show_name ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
@@ -297,27 +293,39 @@ export default function ProfileStammBox({ currentProfileName, isOwner }) {
             {/* LINKER BLOCK */}
             <div className="space-y-3">
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-bold">KATEGORIE / B2B-BERUFSBEZEICHNUNG</span>
+                <span className="text-[10px] text-slate-500 font-bold">KATEGORIE / BERUFSBEZEICHNUNG</span>
                 <div className="flex gap-2">
-                  <input type="text" name="category" value={category || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono" placeholder="e.g. Musiker/Songwriter" />
-                  <EyeToggle active={show_category} flagName="show_category" />
+                  <input type="text" name="category" value={category || ''} onChange={handleChange} 
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono" 
+                  placeholder="e.g. Musiker/Songwriter" />
+                  <EyeToggle active={show_category} flagName="show_category" 
+                  />
                 </div>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-bold">KLARNAME (INTERN)</span>
+                <span className="text-[10px] text-slate-500 font-bold">FIRMEN / KÜNSTLERNAME:</span>
                 <div className="flex gap-2">
-                  <input type="text" name="Klarname" value={Klarname || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono" placeholder="e.g. Bruce Wayne" />
+                  <input type="text" name="Klarname" value={Klarname || ''} onChange={handleChange} 
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono" 
+                  placeholder="e.g. Bruce Wayne" 
+                  />
                   <EyeToggle active={show_Klarname} flagName="show_Klarname" />
                 </div>
               </div>
               <div className="flex flex-col gap-1">
                 <div className="flex justify-between items-center">
-                  <span className="text-[10px] text-slate-500 font-bold">REALNAME (VOR- / NACHNAME)</span>
+                  <span className="text-[10px] text-slate-500 font-bold">VORNAME / NACHNAME:</span>
                   <EyeToggle active={show_name_real} flagName="show_name_real" />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <input type="text" name="vorname" placeholder="Vorname" value={vorname || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono" />
-                  <input type="text" name="nachname" placeholder="Nachname" value={nachname || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono" />
+                  <input type="text" name="vorname" 
+                  placeholder="Vorname" value={vorname || ''} onChange={handleChange} 
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono" 
+                  />
+                  <input type="text" name="nachname" 
+                  placeholder="Nachname" value={nachname || ''} onChange={handleChange} 
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono" 
+                  />
                 </div>
               </div>
               <div className="flex flex-col gap-1">
@@ -325,10 +333,19 @@ export default function ProfileStammBox({ currentProfileName, isOwner }) {
                   <span className="text-[10px] text-slate-500 font-bold">STANDORT-ADRESSE</span>
                   <EyeToggle active={show_address} flagName="show_address" />
                 </div>
-                <input type="text" name="street" placeholder="Straße / Hausnr." value={street || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono mb-2" />
+                <input type="text" name="street" 
+                placeholder="Straße / Hausnr." value={street || ''} onChange={handleChange} 
+                className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono mb-2" 
+                />
                 <div className="grid grid-cols-3 gap-2">
-                  <input type="text" name="plz" placeholder="PLZ" value={plz || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono" />
-                  <input type="text" name="city" placeholder="Stadt" value={city || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono col-span-2" />
+                  <input type="text" name="plz" 
+                  placeholder="PLZ" value={plz || ''} onChange={handleChange} 
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono" 
+                  />
+                  <input type="text" name="city" 
+                  placeholder="Stadt" value={city || ''} onChange={handleChange} 
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono col-span-2" 
+                  />
                 </div>
               </div>
             </div>

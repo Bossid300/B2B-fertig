@@ -387,6 +387,27 @@ return (
                   event.promotionData?.promoImage ||
                   event.slide1_url,
 
+                entryTime:
+                  event.promotionData?.entryTime,
+
+                startTime:
+                  event.promotionData?.startTime,
+
+                ticketPrice:
+                  event.promotionData?.ticketPrice,
+
+                ticketStatus:
+                  event.promotionData?.ticketStatus,
+
+                fsk:
+                  event.promotionData?.fsk,
+
+                lineup:
+                  event.promotionData?.lineup,
+
+                amenities:
+                  event.promotionData?.amenities,
+
                 city:
                   event.venue ||
                   event.city
@@ -462,6 +483,27 @@ return (
                     slide1_url:
                       selectedEvent?.promotionData?.promoImage ||
                       selectedEvent?.slide1_url,
+
+                    entryTime:
+                      selectedEvent?.promotionData?.entryTime,
+
+                    startTime:
+                      selectedEvent?.promotionData?.startTime,
+
+                    ticketPrice:
+                      selectedEvent?.promotionData?.ticketPrice,
+
+                    ticketStatus:
+                      selectedEvent?.promotionData?.ticketStatus,
+
+                    fsk:
+                      selectedEvent?.promotionData?.fsk,
+
+                    lineup:
+                      selectedEvent?.promotionData?.lineup,
+
+                    amenities:
+                      selectedEvent?.promotionData?.amenities,
 
                     city:
                       selectedEvent?.venue ||

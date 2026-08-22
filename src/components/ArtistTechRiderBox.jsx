@@ -7,9 +7,8 @@ import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
 import { eventService } from '../services/eventService';
 
-export default function ArtistTechRiderBox({ currentProfileName, isOwner }) {
+export default function ArtistTechRiderBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
-  const [profileId, setProfileId] = useState(null);
   const [profileData, setProfileData] = useState(null);
   const [channels, setChannels] = useState([]);
   
@@ -21,8 +20,7 @@ export default function ArtistTechRiderBox({ currentProfileName, isOwner }) {
     rider_backline: ''
   });
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+  const canEdit = isOwner || currentProfileId === localStorage.getItem( 'gigsda_profile_id' );
 
   const isImageUrl = (url) => {
     if (!url) return false;
@@ -31,24 +29,19 @@ export default function ArtistTechRiderBox({ currentProfileName, isOwner }) {
 
   // 1. DATEN-PIPELINE: Lädt flache Keys inklusive deinem korrekten stageplot_url
   useEffect(() => {
-    if (!targetUser) return;
     getProfilesDb()
       .then(profiles => {
+
         const found = profiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-              ?.trim()
-              .toLowerCase() ===
-            targetUser.trim().toLowerCase()
+          p => p?.id === currentProfileId
         );
+
         if (!found) return;
         const currentProfile =
           found.profile_json
             ? JSON.parse(found.profile_json)
             : found;
         setProfileData(currentProfile);
-        setProfileId(currentProfile.id);
         setTechData({
           rider_pdf_url:
             currentProfile.rider_pdf_url || '',
@@ -83,7 +76,7 @@ export default function ArtistTechRiderBox({ currentProfileName, isOwner }) {
         setChannels(loadedChannels);
       })
       .catch(console.error);
-  }, [targetUser, isEditing]);
+  }, [currentProfileId, isEditing]);
 
   // Handler für allgemeine Felder
   const handleTechChange = (field, value) => {
@@ -116,7 +109,7 @@ export default function ArtistTechRiderBox({ currentProfileName, isOwner }) {
   // 2. SPEICHERN: Schreibt die Werte exakt flach (ch1_signal, etc.) zurück
   const handleSave = async () => {
  
-    if (!profileId || !profileData) return;
+    if (!currentProfileId || !profileData) return;
     const updatedProfile = {
       ...profileData,
       rider_pdf_url: techData.rider_pdf_url,
@@ -145,17 +138,16 @@ export default function ArtistTechRiderBox({ currentProfileName, isOwner }) {
 
   });
 
-  const profileId =
+  const saveProfileId =
     updatedProfile.id ||
     updatedProfile.profileId ||
-    localStorage.getItem(
-      'gigsda_profile_id'
-    );
+    currentProfileId;
 
-  await saveProfile({
-    profileId,
-    profile: updatedProfile
-  });
+    await saveProfile({
+      profileId: saveProfileId,
+      profile: updatedProfile
+    });
+
   setProfileData(updatedProfile);
 
 try {
@@ -165,7 +157,7 @@ const events =
 
   const updatedEvents = events.map(event => {
 
-    if (!event.riderCenter?.[profileId]) {
+    if (!event.riderCenter?.[saveProfileId]) {
       return event;
     }
 
@@ -175,8 +167,8 @@ const events =
         riderCenter: {
           ...event.riderCenter,
 
-          [profileId]: {
-            ...event.riderCenter[profileId],
+          [saveProfileId]: {
+            ...event.riderCenter[saveProfileId],
 
             confirmed: false,
             changed: true,
@@ -187,26 +179,35 @@ const events =
 
   });
 
-const changedEvent =
-  updatedEvents.find(event =>
-    event.id === activeEvent?.id
-  );
+  const changedEvent =
+    updatedEvents.find(event =>
+      event.id === activeEvent?.id
+    );
 
-  eventService.saveEvents(updatedEvents);
+    eventService.saveEvents(updatedEvents);
 
-if (changedEvent) {
-  await eventService.saveEvent(changedEvent);
-}
+  if (changedEvent) {
+    await eventService.saveEvent(changedEvent);
+  }
 
-  window.dispatchEvent(
-    new CustomEvent('rider-updated')
-  );
+    window.dispatchEvent(
+      new CustomEvent('rider-updated')
+    );
 
-} catch (err) {
+  } catch (err) {
 
-  console.error(err);
+    console.error(err);
 
-}
+  }
+
+  if (!profile) {
+    return (
+      <div 
+        className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
+        // ARTIST TECH-RIDER REGISTER INITIALISIERT...
+      </div>
+    );
+  }
 
 setIsEditing(false);
 };

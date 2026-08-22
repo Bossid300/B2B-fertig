@@ -4,7 +4,7 @@ import { eventService } from '../services/eventService';
 import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
 
-export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
+export default function ProfileBewertungsBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
   const [profileData, setProfileData] = useState(null);
@@ -17,9 +17,9 @@ export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
   const [newStars, setNewStars] = useState(5);
   const [newText, setNewText] = useState('');
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
   const loggedInUser = localStorage.getItem('gigsda_user_name') || '';
-  const canEditPrivacy = isOwner || targetUser.toLowerCase() === loggedInUser.toLowerCase();
+
+  const canEditPrivacy = isOwner || currentProfileId === localStorage.getItem('gigsda_profile_id');
 
   // 1. DATABASE & SECURITY PIPELINE: Prüft Zusammenarbeit & verhindert Doppel-Bewertungen
   useEffect(() => {
@@ -31,12 +31,7 @@ export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
 
           const found =
             allProfiles.find(
-              p =>
-                p &&
-                (p.name || p.user_name || p.display_name)
-                  ?.trim()
-                  .toLowerCase() ===
-                targetUser.trim().toLowerCase()
+              p => p?.id === currentProfileId
             );
 
           if (!found) return;
@@ -45,6 +40,12 @@ export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
             found.profile_json
               ? JSON.parse(found.profile_json)
               : found;
+
+const profileName =
+  (profile?.name || '')
+    .trim()
+    .toLowerCase();
+
 
           setProfile(profile);
           setProfileData(profile);
@@ -60,15 +61,15 @@ export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
 
           setReviewsList(existingReviews);
 
-          // SECURITY CHECK: Haben loggedInUser und targetUser zusammen gearbeitet?
-          if (loggedInUser && targetUser.toLowerCase() !== loggedInUser.toLowerCase()) {
+          // SECURITY CHECK: Haben loggedInUser und profileName zusammen gearbeitet?
+          if (loggedInUser && profileName !== loggedInUser.toLowerCase()) {
             const allEvts = savedEvents;
             
             // Findet ein gemeinsames Event
             const commonEvent = allEvts.find(evt => {
               if (!evt || !Array.isArray(evt.crew)) return false;
               const namesInCrew = evt.crew.map(m => m && m.name ? m.name.trim().toLowerCase() : '');
-              return namesInCrew.includes(loggedInUser.trim().toLowerCase()) && namesInCrew.includes(targetUser.trim().toLowerCase());
+              return namesInCrew.includes(loggedInUser.trim().toLowerCase()) && namesInCrew.includes(profileName);
             });
 
             if (commonEvent) {
@@ -94,7 +95,7 @@ export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
             e
           );
         });
-  }, [targetUser, isEditing, loggedInUser]);
+  }, [currentProfileId, isEditing, loggedInUser]);
 
   // 2. SAVE PIPELINE: Brennt die Bewertung permanent ein
   const handleSubmitReview = async (e) => {
@@ -119,15 +120,14 @@ export default function ProfileBewertungsBox({ currentProfileName, isOwner }) {
           ...existing
         ]
       };
-      const profileId =
+      
+      const saveProfileId =
         updatedProfile.id ||
         updatedProfile.profileId ||
-        localStorage.getItem(
-          'gigsda_profile_id'
-        );
+        currentProfileId;
 
       await saveProfile({
-        profileId,
+        profileId: saveProfileId,
         profile: updatedProfile
       });
 

@@ -3,7 +3,7 @@ import { Truck, Plus, X, Save, Eye, EyeOff, Wrench } from 'lucide-react';
 import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
 
-export default function ProfileEquipmentBox({ currentProfileName, isOwner }) {
+export default function ProfileEquipmentBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
   const [profileData, setProfileData] = useState(null);
@@ -15,20 +15,14 @@ export default function ProfileEquipmentBox({ currentProfileName, isOwner }) {
   const [newDetail, setNewDetail] = useState('');
   const [isForRental, setIsForRental] = useState('false');
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
-  const canEdit = isOwner || targetUser.toLowerCase() === (localStorage.getItem('gigsda_user_name') || '').toLowerCase();
+  const canEdit = isOwner || currentProfileId === localStorage.getItem( 'gigsda_profile_id' );
 
   // 1. DATABASE PIPELINE: Lädt das Inventar live
   useEffect(() => {
     getProfilesDb()
       .then(allProfiles => {
         const found = allProfiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-              ?.trim()
-              .toLowerCase() ===
-            targetUser.trim().toLowerCase()
+          p => p?.id === currentProfileId
         );
         if (!found) return;
         const profile =
@@ -53,7 +47,7 @@ export default function ProfileEquipmentBox({ currentProfileName, isOwner }) {
         );
       });
 
-  }, [targetUser, isEditing]);
+  }, [currentProfileId, isEditing]);
 
 
   const addItem = () => {
@@ -83,17 +77,16 @@ export default function ProfileEquipmentBox({ currentProfileName, isOwner }) {
         equipment: equipmentList,
         show_equipment: showEquipment
       };
-      const profileId =
+      const saveProfileId =
         updatedProfile.id ||
         updatedProfile.profileId ||
-        localStorage.getItem(
-          'gigsda_profile_id'
-        );
+        currentProfileId;
 
       await saveProfile({
-        profileId,
+        profileId: saveProfileId,
         profile: updatedProfile
       });
+      
       setProfile(updatedProfile);
       setProfileData(updatedProfile);
       alert(
@@ -111,7 +104,7 @@ export default function ProfileEquipmentBox({ currentProfileName, isOwner }) {
   if (!profile) {
     return (
       <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
-        // INVENTAR ENGINE DATENSTREAM INITIALISIERT...
+        // INVENTAR EQUIPMENT ENGINE DATENSTREAM INITIALISIERT...
       </div>
     );
   }

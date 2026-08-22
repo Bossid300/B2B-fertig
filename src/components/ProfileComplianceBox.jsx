@@ -3,7 +3,7 @@ import { Shield, Plus, X, Save, Eye, EyeOff, FileCheck, ShieldAlert } from 'luci
 import { eventService } from '../services/eventService';
 import { getProfilesDb, saveProfile } from '../services/apiService';
 
-export default function ProfileComplianceBox({ currentProfileName, isOwner }) {
+export default function ProfileComplianceBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
   const [showCompliance, setShowCompliance] = useState(false); // Standardmäßig STRENG GEHEIM!
@@ -15,9 +15,8 @@ export default function ProfileComplianceBox({ currentProfileName, isOwner }) {
   const [newDetail, setNewDetail] = useState('');
   const [newValidity, setNewValidity] = useState('');
 
-  const targetUser = currentProfileName || localStorage.getItem('gigsda_user_name') || 'grober lackl';
   const loggedInUser = localStorage.getItem('gigsda_user_name') || '';
-  const canEdit = isOwner || targetUser.toLowerCase() === loggedInUser.toLowerCase();
+  const canEdit = isOwner || currentProfileId === localStorage.getItem('gigsda_profile_id');
 
   // 1. DATABASE & VERIFICATION PIPELINE
   useEffect(() => {
@@ -26,18 +25,20 @@ export default function ProfileComplianceBox({ currentProfileName, isOwner }) {
   getProfilesDb()
     .then(profiles => {
       const found = profiles.find(
-        p =>
-          p &&
-          (p.name || p.user_name || p.display_name)
-            ?.trim()
-            .toLowerCase() ===
-          targetUser.trim().toLowerCase()
+        p => p?.id === currentProfileId
       );
       if (!found) return;
       const profile =
         found.profile_json
           ? JSON.parse(found.profile_json)
           : found;
+
+const profileName =
+  (profile?.name || '')
+    .trim()
+    .toLowerCase();
+
+
       setProfile(profile);
       setShowCompliance(
         profile.show_compliance === true
@@ -49,7 +50,7 @@ export default function ProfileComplianceBox({ currentProfileName, isOwner }) {
       );
       if (
         loggedInUser &&
-        targetUser.toLowerCase() !==
+        profileName !==
         loggedInUser.toLowerCase()
       ) {
         const isContractPartner =
@@ -68,7 +69,7 @@ export default function ProfileComplianceBox({ currentProfileName, isOwner }) {
                   m &&
                   m.name &&
                   m.name.trim().toLowerCase() ===
-                  targetUser.trim().toLowerCase()
+                  profileName
               )?.status;
             return (
               namesInCrew.includes(
@@ -91,7 +92,7 @@ export default function ProfileComplianceBox({ currentProfileName, isOwner }) {
         e
       );
     });
-  }, [targetUser, isEditing, loggedInUser]);
+  }, [currentProfileId, isEditing, loggedInUser]);
 
   const addComplianceItem = () => {
     if (!newDetail.trim()) return;
@@ -120,12 +121,12 @@ export default function ProfileComplianceBox({ currentProfileName, isOwner }) {
         compliance: complianceList,
         show_compliance: showCompliance
       };
-      const profileId =
+      const saveProfileId =
         profile.id ||
         profile.profileId ||
-        localStorage.getItem('gigsda_profile_id');
+        currentProfileId;
       await saveProfile({
-        profileId,
+        profileId: saveProfileId,
         profile: updatedProfile
       });
       setProfile(updatedProfile);
@@ -176,16 +177,14 @@ export default function ProfileComplianceBox({ currentProfileName, isOwner }) {
                     ...profile,
                     show_compliance: nextShow
                   };
-                  const profileId =
+                  const saveProfileId =
                     profile.id ||
                     profile.profileId ||
-                    localStorage.getItem(
-                      'gigsda_profile_id'
-                    );
-                  await saveProfile({
-                    profileId,
-                    profile: updatedProfile
-                  });
+                    currentProfileId;
+                await saveProfile({
+                  profileId: saveProfileId,
+                  profile: updatedProfile
+                });
                   setProfile(updatedProfile);
                 } catch (e) {
                   console.error(

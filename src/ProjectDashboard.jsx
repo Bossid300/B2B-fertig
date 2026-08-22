@@ -15,7 +15,11 @@ import { subscriptionService }
 from '../moduls/subscriptions/subscriptionService';
 
 
-export default function ProjectDashboard({ onNavigateToStep, progress, onSelectEvent, events: propsEvents, onCreateEvent, ticketName }) {
+export default function ProjectDashboard({ 
+  onNavigateToStep, progress, onSelectEvent, 
+  events: propsEvents, onCreateEvent }) {
+
+
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
 
   const skipNextEventSave = useRef(false);

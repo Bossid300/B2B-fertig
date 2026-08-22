@@ -7,38 +7,10 @@ import {
 } from './services/apiService';
 
 
-export default function CrewRequestCenter({ currentProfileName }) {
+export default function CrewRequestCenter({ currentProfileId }) {
   const [requests, setRequests] = useState([]);
   const [counterText, setCounterText] = useState('');
   const [activeCounterId, setActiveCounterId] = useState(null);
-  const [currentProfileId, setCurrentProfileId] = useState('');
-
-
-useEffect(() => {
-  if (!currentProfileName) return;
-
-  getProfilesDb()
-    .then(profiles => {
-      const found = profiles.find(
-        p =>
-          p &&
-          (p.name || p.user_name || p.display_name || '')
-            .trim()
-            .toLowerCase() ===
-          currentProfileName.trim().toLowerCase()
-      );
-
-      if (!found) return;
-
-      const profileData =
-        found?.profile_json
-          ? JSON.parse(found.profile_json)
-          : found;
-
-      setCurrentProfileId(profileData?.id || '');
-    })
-    .catch(console.error);
-}, [currentProfileName]);
 
 
 useEffect(() => {
@@ -50,16 +22,6 @@ useEffect(() => {
       const myRequests = dbRequests.filter(req => {
         if (!req) return false;
 
-        const reqName =
-          (req.requestedProfile || req.requestedProfileName || '')
-            .trim()
-            .toLowerCase();
-
-        const me =
-          (currentProfileName || '')
-            .trim()
-            .toLowerCase();
-
         const reqId =
           (req.requestedProfileId || '')
             .toLowerCase();
@@ -68,7 +30,7 @@ useEffect(() => {
           (currentProfileId || '')
             .toLowerCase();
 
-        return reqId === myId || reqName === me;
+        return reqId === myId;
       });
 
       setRequests(myRequests);
@@ -94,7 +56,7 @@ useEffect(() => {
       loadRequests
     );
   };
-}, [currentProfileName, currentProfileId]);
+}, [currentProfileId]);
 
 
 const handleResponse = async (requestId, newStatus) => {

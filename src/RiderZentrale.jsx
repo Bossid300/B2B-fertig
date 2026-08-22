@@ -284,7 +284,7 @@ eventService.saveEvents(updatedEvents);
       case "Venue":
         return (
           <LocationRaeumeBox
-            currentProfileName={selectedMember.name}
+            currentProfileId={selectedMember.id}
             isOwner={selectedMember?.id === currentProfileId}
             selectedRoom={selectedRoom}
           />
@@ -294,12 +294,12 @@ eventService.saveEvents(updatedEvents);
         return (
           <div className="space-y-6">
             <ProfileSkillBox
-              currentProfileName={selectedMember.name}
+              currentProfileId={selectedMember.id}
               isOwner={selectedMember?.id === currentProfileId}
             />
 
             <ProfileEquipmentBox
-              currentProfileName={selectedMember.name}
+              currentProfileId={selectedMember.id}
               isOwner={selectedMember?.id === currentProfileId}
             />
           </div>
@@ -311,12 +311,12 @@ eventService.saveEvents(updatedEvents);
         <div className="space-y-6">
 
           <ProfileEquipmentBox
-            currentProfileName={selectedMember.name}
+            currentProfileId={selectedMember.id}
             isOwner={selectedMember?.id === currentProfileId}
           />
 
           <ProfileGalleryBox
-            currentProfileName={selectedMember.name}
+            currentProfileId={selectedMember.id}
             isOwner={selectedMember?.id === currentProfileId}
           />
 
@@ -326,7 +326,7 @@ eventService.saveEvents(updatedEvents);
     case "Fan":
       return (
         <ProfileHilfeBox
-          currentProfileName={selectedMember.name}
+          currentProfileId={selectedMember.id}
           isOwner={selectedMember?.id === currentProfileId}
         />
       );
