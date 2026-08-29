@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Mail, Lock, User, CheckCircle2 } from 'lucide-react';
 import { createProfile, createAuthUser, getLoginUser, getProfileById } from './services/apiService';
+import { Turnstile } from "@marsidev/react-turnstile";
 
 export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess }) {
+  const [turnstileToken, setTurnstileToken] = useState('');
+
   const [isRegistering, setIsRegistering] = useState(isRegisteringInitial);
   
   // ⚡ FEHLERFREIE SPEICHER-ZUSTÄNDE (Exakt an die Inputs gekoppelt)
@@ -15,6 +18,15 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
 
   const [captchaAnswer, setCaptchaAnswer] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [captchaA] = useState(
+    Math.floor(Math.random() * 14) + 1
+  );
+
+  const [captchaB] = useState(
+    Math.floor(Math.random() * 14) + 1
+  );
+
+  const [honeypot, setHoneypot] = useState('');
 
   // 💥 FUNKTION 1: DAS INTELLIGENTE LOGIN (Durchsucht die Festplatte)
   // 🛠️ REAKTIVES LOGIN-UHRWERK (BOMBENFEST UND IMMUN GEGEN VARIABLEN-CRASHES)
@@ -150,6 +162,35 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
   // 💥 FUNKTION 2: DIE REGISTRIERUNG
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
+
+    // Honeypot
+    if (honeypot.trim() !== '')
+    {
+      return;
+    }
+
+    // Captcha
+    if (
+      Number(captchaAnswer) !==
+      (captchaA + captchaB)
+    )
+    {
+      alert(
+        'Die Sicherheitsprüfung wurde nicht korrekt gelöst.'
+      );
+
+      return;
+    }
+
+    if (!turnstileToken)
+    {
+      setErrorMsg(
+        'Bitte die Cloudflare-Sicherheitsprüfung abschließen.'
+      );
+
+      return;
+    }
+
     // 🔒 RIEGEL: Wenn keine Rolle ausgewählt wurde, bricht das Abschicken sofort ab!
     if (!regRole) {
       alert("Bitte wähle zuerst einen Kontotyp aus! ⚙️");
@@ -163,18 +204,21 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
     const generatedId = "GIGS-" + Math.floor(Math.random() * 9000 + 1000);
 
     // 2️⃣ ERSTER BLOCK: Das neutrale Basis-Profil
-const newProfile = {
-  id: generatedId,
-  name: 'Neues Mitglied',
-  role: regRole
-};
+    const newProfile = {
+      id: generatedId,
+      name: 'Neues Mitglied',
+      role: regRole
+    };
 
     const referrer =
     localStorage.getItem(
       'gigsda_referrer'
     ) || '';
 
-    await createProfile({
+    const profileResult = await createProfile({
+
+      turnstileToken,
+
       id: generatedId,
       name: '',
       role: regRole,
@@ -189,44 +233,104 @@ const newProfile = {
         equipment: [],
         referred_by: referrer
       })
+ 
     });
 
-    await createAuthUser({
-      id: "AUTH-" + Date.now(),
-      email: regEmail,
-      password: regPass,
-      profileId: generatedId
-    });
+    if (!profileResult.success)
+    {
+      if (profileResult.error === 'turnstile_failed')
+      {
+        setErrorMsg(
+          'Cloudflare Sicherheitsprüfung fehlgeschlagen.'
+        );
+      }
+      else if (profileResult.error === 'registration_limit')
+      {
+        setErrorMsg(
+          'Zu viele Registrierungen von dieser IP. Bitte später erneut versuchen.'
+        );
+      }
+      else if (profileResult.error === 'profile_exists')
+      {
+        setErrorMsg(
+          'Interner ID-Konflikt. Bitte erneut versuchen.'
+        );
+      }
+      else if (profileResult.error === 'turnstile_missing')
+      {
+        setErrorMsg(
+          'Cloudflare Sicherheitsprüfung fehlt.'
+        );
+      }
+      else
+      {
+        setErrorMsg(
+          'Registrierung momentan nicht möglich.'
+        );
+      }
+
+      return;
+    }
 
 
-localStorage.setItem(
-  "gigsda_profile_id",
-  generatedId
-);
+    const authResult =
+      await createAuthUser({
+        id: "AUTH-" + Date.now(),
+        email: regEmail,
+        password: regPass,
+        profileId: generatedId
+      });
 
-localStorage.setItem(
-  "gigsda_logged_in",
-  "true"
-);
+    if (!authResult.success)
+    {
+      if (
+        authResult.error ===
+        'email_exists'
+      )
+      {
+        setErrorMsg(
+          'Diese E-Mail-Adresse ist bereits registriert.'
+        );
+      }
+      else
+      {
+        setErrorMsg(
+          'Account konnte nicht erstellt werden.'
+        );
+      }
 
-localStorage.setItem(
-  "gigsda_reg_role",
-  regRole
-);
+      return;
+    }
 
-localStorage.setItem(
-  "gigsda_user_name",
-  "Neues Mitglied"
-);
 
-localStorage.setItem(
-  "gigsda_session",
-  JSON.stringify({
-    authUserId: "AUTH-" + Date.now(),
-    profileId: generatedId,
-    loginAt: Date.now()
-  })
-);
+    localStorage.setItem(
+      "gigsda_profile_id",
+      generatedId
+    );
+
+    localStorage.setItem(
+      "gigsda_logged_in",
+      "true"
+    );
+
+    localStorage.setItem(
+      "gigsda_reg_role",
+      regRole
+    );
+
+    localStorage.setItem(
+      "gigsda_user_name",
+      "Neues Mitglied"
+    );
+
+    localStorage.setItem(
+      "gigsda_session",
+      JSON.stringify({
+        authUserId: "AUTH-" + Date.now(),
+        profileId: generatedId,
+        loginAt: Date.now()
+      })
+    );
 
 
 
@@ -305,23 +409,50 @@ localStorage.setItem(
                 </div>
               </div>
 
-              <div className="bg-slate-950 p-3 rounded-xl border border-slate-900 flex justify-between items-center gap-4 pt-2">
+              <div className="bg-slate-950 p-3 rounded-xl border border-slate-900 flex justify-between items-center gap-4">
                 <div>
-                  <span className="text-[9px] text-slate-500 uppercase block font-bold">// Security Verification</span>
-                  <span className="text-white text-xs">Bitte ausrechnen: <span className="text-cyan-400 font-bold">5 + 3</span></span>
+                  <span className="text-[9px] text-slate-500 uppercase block font-bold">
+                    // Security Verification
+                  </span>
+
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-white text-xs">
+                      Bitte ausrechnen:
+                    </span>
+
+                    <div className="px-3 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+                      <span className="text-cyan-400 font-black text-sm">
+                        {captchaA} + {captchaB}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <input 
-                  type="text" 
-                  placeholder="Ergebnis" 
+
+                <input
+                  type="text"
+                  placeholder="Ergebnis"
                   value={captchaAnswer}
                   onChange={(e) => setCaptchaAnswer(e.target.value)}
-                  className="w-20 bg-slate-900 border border-slate-800 rounded-lg px-2 py-1 text-center text-white text-xs focus:outline-none focus:border-cyan-400 font-mono" 
+                  className="px-3 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/20"
                 />
+
+                <div className="flex justify-center py-2">
+                  <Turnstile
+                    siteKey="0x4AAAAAAEZ82UJTgdRg2lFW"
+                    onSuccess={(token) => {
+                      setTurnstileToken(token);
+                    }}
+                  />
+                </div>
               </div>
 
-              <button type="submit" className="w-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black h-11 rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer mt-2 shadow-lg font-mono">
+              <button 
+              type="submit" 
+              className="w-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black h-11 rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer mt-2 shadow-lg font-mono
+              ">
                 Konto erstellen & Einloggen ✨
               </button>
+
             </form>
           ) : (
             /* LOGIN-VIEW */
@@ -419,6 +550,7 @@ localStorage.setItem(
               >
                 JETZT REGISTRIEREN ⚡
               </button>
+
             </div>
           )}
 

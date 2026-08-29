@@ -24,12 +24,15 @@ import ProfilePassBox from './components/ProfilePassBox';
 import ProfileCard from './components/cards/ProfileCard';
 
 import { getProfilesDb } from './services/apiService';
+import { saveFavorite, deleteFavorite, getFavorites } from './services/apiService';
 
 export default function TechnikerProfile({ onBack, currentProfileId, isOwner }) {
   const [profileData, setProfileData] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const favoriteKey = `gigsda_favorites_${currentProfileId}`;
+  const ownerProfileId = localStorage.getItem('gigsda_profile_id');
+
+  const favoriteKey = `gigsda_favorites_${ownerProfileId}`;
 
 
   // 1. DATABASE PIPELINE: Lädt die Profildaten, um Favoriten-Status zu prüfen
@@ -62,25 +65,43 @@ export default function TechnikerProfile({ onBack, currentProfileId, isOwner }) 
 
     // 2. FAVORITEN PIPELINE: Schaltet den Stern live im LocalStorage um
     const handleToggleFavorite = () => {
-      let savedFavs =
-        JSON.parse(
-          localStorage.getItem(favoriteKey) || '[]'
-        );
+      let savedFavs = JSON.parse(
+        localStorage.getItem(favoriteKey) || '[]'
+      );
       if (savedFavs.includes(profileData?.id)) {
-          savedFavs = savedFavs.filter(
-          f => f !== profileData?.id
-        );
+
+        savedFavs =
+          savedFavs.filter(
+            f => f !== profileData?.id
+          );
+
+        deleteFavorite(
+          ownerProfileId,
+          profileData.id
+        ).catch(console.error);
+
         setIsFavorite(false);
+
       } else {
         savedFavs.push(profileData?.id);
+
+        saveFavorite(
+        ownerProfileId,
+        profileData.id
+        ).catch(console.error);
+
         setIsFavorite(true);
       }
       localStorage.setItem(
         favoriteKey,
         JSON.stringify(savedFavs)
       );
-      window.dispatchEvent(new Event('storage')); // UI-Schubs für reaktive Listen
+
+      window.dispatchEvent(
+        new Event('storage')
+      );
     };
+
 
     // Verhindert Flackern während die Daten laden
     if (!profileData) {

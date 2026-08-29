@@ -7,14 +7,12 @@ export default function SearchMap({ users = [], center, onUserSelect }) {
   const markersRef = useRef([]);
 
   useEffect(() => {
-
     if (!window.google) {
       console.error('Google Maps nicht geladen');
       return;
     }
-
     mapInstance.current =
-      new window.google.maps.Map(
+/*       new window.google.maps.Map(
         mapRef.current,
         {
           center: center || {
@@ -26,24 +24,62 @@ export default function SearchMap({ users = [], center, onUserSelect }) {
           streetViewControl: false,
           fullscreenControl: true
         }
-      );
+      ); */
 
-  }, []);
+new window.google.maps.Map(
+  mapRef.current,
+  {
+    center: center || {
+      lat: 48.30639,
+      lng: 14.28611
+    },
+    zoom: 8,
+
+    styles: [
+      {
+        elementType: "geometry",
+        stylers: [{ color: "#0b1020" }]
+      },
+      {
+        elementType: "labels.text.fill",
+        stylers: [{ color: "#7dd3fc" }]
+      },
+      {
+        elementType: "labels.text.stroke",
+        stylers: [{ color: "#0b1020" }]
+      },
+      {
+        featureType: "road",
+        elementType: "geometry",
+        stylers: [{ color: "#1e293b" }]
+      },
+      {
+        featureType: "water",
+        elementType: "geometry",
+        stylers: [{ color: "#020617" }]
+      },
+      {
+        featureType: "poi",
+        stylers: [{ visibility: "off" }]
+      }
+    ],
+
+    mapTypeControl: false,
+    streetViewControl: false,
+    fullscreenControl: true
+  }
+);
+
+}, []);
 
   useEffect(() => {
-
     if (!mapInstance.current) return;
-
     markersRef.current.forEach(marker =>
       marker.setMap(null)
     );
-
     markersRef.current = [];
-
     users.forEach(user => {
-
       if (!user?.lat || !user?.lng) return;
-
         const marker =
         new window.google.maps.Marker({
             position: {

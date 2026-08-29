@@ -2,10 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ShieldCheck, FileText, CheckCircle2, ArrowRight, Download } from 'lucide-react';
 import FahrplanMetrics from './FahrplanMetrics';
 import EventHeaderBox from "./components/EventHeaderBox";
-import {
-  getCrewRequests,
-  saveCrewRequest
-} from './services/apiService';
+import { getCrewRequests, saveCrewRequest } from './services/apiService';
 import { eventService } from './services/eventService';
 import { getProfilesDb } from './services/apiService';
 

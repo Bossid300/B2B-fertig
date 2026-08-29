@@ -265,9 +265,6 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
 
 const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Verleiher', 'Location', 'Veranstalter', 'Techniker', 'Logistik', 'Security', 'Design'];
 
-  // 🗺️ DIE LIVE-ENTFERNUNGSMATRIX (Gemessen von eurer Heimatbasis Braunau)
-
-
   // ⚡ DIE ERWEITERTE FILTER-SCHLEIFE (Filtert nach Name, Rolle UND Radius!)
   const filteredUsers = allUsers.filter(user => {
 
@@ -647,88 +644,77 @@ return (
           )}
         </div>
 
-) : (
+        ) : (
 
-  <>
-    <div className="relative">
+          <>
+            <div className="relative">
+              <SearchMap
+                users={filteredUsers}
+                center={baseCoordinates}
+                onUserSelect={setSelectedUser}
+              />
+              {selectedUser && (
+                <div
+                  className="
+                    absolute
+                    left-1/2
+                    top-6
+                    -translate-x-1/2
+                    z-50
+                    w-full
+                    max-w-lg
+                    px-4
+                  "
+                >
+                  <div className="relative">
+                    <button
+                      onClick={() => setSelectedUser(null)}
+                      className="
+                        absolute
+                        -top-3
+                        -right-3
+                        z-[60]
+                        w-8
+                        h-8
+                        rounded-full
+                        bg-slate-950
+                        border
+                        border-cyan-500/30
+                        text-cyan-400
+                        hover:text-white
+                        hover:border-cyan-500
+                        font-bold
+                      "
+                    >
+                      ✕
+                    </button>
+                    <ProfileCard
+                      user={selectedUser}
+                      isGuest={!isLoggedIn}
+                      onProfile={() => {
+                        localStorage.setItem(
+                          'gigsda_active_guest_profile_id',
+                          selectedUser.id
+                        );
 
-      <SearchMap
-        users={filteredUsers}
-        center={baseCoordinates}
-        onUserSelect={setSelectedUser}
-      />
+                        if (typeof setFavorites === 'function') {
+                          setFavorites(selectedUser);
+                        }
+                      }}
+                      onRequest={() => {
+                        setActiveRequestUser(selectedUser);
 
-      {selectedUser && (
-
-        <div
-          className="
-            absolute
-            left-1/2
-            top-6
-            -translate-x-1/2
-            z-50
-            w-full
-            max-w-lg
-            px-4
-          "
-        >
-
-          <div className="relative">
-
-            <button
-              onClick={() => setSelectedUser(null)}
-              className="
-                absolute
-                -top-3
-                -right-3
-                z-[60]
-                w-8
-                h-8
-                rounded-full
-                bg-slate-950
-                border
-                border-cyan-500/30
-                text-cyan-400
-                hover:text-white
-                hover:border-cyan-500
-                font-bold
-              "
-            >
-              ✕
-            </button>
-
-            <ProfileCard
-              user={selectedUser}
-              isGuest={!isLoggedIn}
-              onProfile={() => {
-                localStorage.setItem(
-                  'gigsda_active_guest_profile_id',
-                  selectedUser.id
-                );
-
-                if (typeof setFavorites === 'function') {
-                  setFavorites(selectedUser);
-                }
-              }}
-              onRequest={() => {
-                setActiveRequestUser(selectedUser);
-
-                setRequestText(
-                  `Hallo ${selectedUser.name}, wir hätten Interesse an einer B2B-Zusammenarbeit für ein anstehendes Event in Region Gigsda!`
-                );
-              }}
-            />
-
-          </div>
-
-        </div>
-
-      )}
-
-    </div>
-  </>
-
-)}
+                        setRequestText(
+                          `Hallo ${selectedUser.name}, wir hätten Interesse an einer B2B-Zusammenarbeit für ein anstehendes Event in Region Gigsda!`
+                        );
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
 
       
       

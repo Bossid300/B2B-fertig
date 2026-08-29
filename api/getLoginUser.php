@@ -3,14 +3,32 @@
 header('Content-Type: application/json');
 
 require_once 'db.php';
-
 require_once("cors.php");
+require_once 'SecurityService.php';
 
 $data = json_decode(file_get_contents("php://input"), true);
 
 $email = $data['email'] ?? '';
 $password = $data['password'] ?? '';
+$ip = SecurityService::getClientIp();
 
+if (SecurityService::isIpLocked($ip))
+{
+    echo json_encode([
+        'success' => false,
+        'user' => null
+    ]);
+    exit;
+}
+
+if (SecurityService::isAccountLocked($email))
+{
+    echo json_encode([
+        'success' => false,
+        'user' => null
+    ]);
+    exit;
+}
 try {
 
     $stmt = $pdo->prepare("
@@ -27,6 +45,27 @@ try {
     ]);
 
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($user)
+    {
+        SecurityService::recordLoginAttempt(
+            $email,
+            $ip,
+            true
+        );
+    }
+    else
+    {
+        SecurityService::recordLoginAttempt(
+            $email,
+            $ip,
+            false
+        );
+
+        SecurityService::evaluateLocks(
+            $email,
+            $ip
+        );
+    }
 
     echo json_encode([
         'success' => !!$user,

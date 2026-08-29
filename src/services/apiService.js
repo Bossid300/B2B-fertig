@@ -279,3 +279,109 @@ export async function getPendingOrders(
   return await response.json();
 }
 
+export async function saveBudgetPlan(plan) {
+
+  const response = await fetch(
+    `${API_BASE}/saveBudgetPlan.php`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(plan)
+    }
+  );
+
+  return await response.json();
+}
+
+export async function getBudgetPlans(ownerId) {
+
+  const response = await fetch(
+    `${API_BASE}/getBudgetPlans.php`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        ownerId
+      })
+    }
+  );
+
+  return await response.json();
+}
+
+export async function deleteBudgetPlan(id) {
+
+  const response = await fetch(
+    `${API_BASE}/deleteBudgetPlan.php`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ id })
+    }
+  );
+
+  return await response.json();
+}
+
+export async function saveFavorite(
+  profileId,
+  favoriteProfileId
+) {
+
+  const response = await fetch(
+    `${API_BASE}/saveFavorite.php`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        profile_id: profileId,
+        favorite_profile_id: favoriteProfileId
+      })
+    }
+  );
+
+  return await response.json();
+}
+
+export async function getFavorites(
+  profileId
+) {
+
+  const response = await fetch(
+    `${API_BASE}/getFavorites.php?profile_id=${profileId}`
+  );
+
+  const data = await response.json();
+
+  return data.favorites || [];
+}
+
+export async function deleteFavorite(
+  profileId,
+  favoriteProfileId
+) {
+
+  const response = await fetch(
+    `${API_BASE}/deleteFavorite.php`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        profile_id: profileId,
+        favorite_profile_id: favoriteProfileId
+      })
+    }
+  );
+
+  return await response.json();
+}

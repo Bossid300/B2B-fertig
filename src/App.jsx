@@ -77,6 +77,8 @@ import PricingPage from './PricingPage';
 import BillingCenter from './components/BillingCenter';
 import { getProfiles } from './services/apiService';
 
+import BudgetPlanner from './components/BudgetPlanner';
+
 export default function App() {
 
     // 📡 REAKTIVER CREW-ALARM EMPFÄNGER
@@ -1090,6 +1092,7 @@ useEffect(() => {
               onNavigateToStep={setView}
               progress={progress}
               onSelectEvent={setActiveEvent}
+              setView={setView}
             />
           )}
 
@@ -1289,10 +1292,17 @@ useEffect(() => {
             />
           )}
 
-
           {view === 'billing' && (
             <BillingCenter />
           )}
+
+          {view === 'budgetplanner' && (
+            <BudgetPlanner
+              setView={setView}
+              currentProfileId={currentProfile?.id}
+            />
+          )}
+          
 
           {/* ========================================================================= */}
           {/* FOOTER UNTERSEITEN                                                        */}
@@ -1347,6 +1357,7 @@ useEffect(() => {
             <CareerPage setView={setView} />
           )}
  
+
 
 
 

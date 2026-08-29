@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import ManagerOverview from './ManagerOverview';
+import ManagerOverview from './components/ManagerOverview';
 import CreateEventForm from './CreateEventForm';
 import CommunityChat from './CommunityChat';
 import IncomingMessages from './IncomingMessages';
@@ -17,7 +17,7 @@ from '../moduls/subscriptions/subscriptionService';
 
 export default function ProjectDashboard({ 
   onNavigateToStep, progress, onSelectEvent, 
-  events: propsEvents, onCreateEvent }) {
+  events: propsEvents, onCreateEvent, setView }) {
 
 
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
@@ -255,8 +255,9 @@ currentEvents >= maxEvents;
     <div className="space-y-6 my-6 max-w-4xl mx-auto text-slate-300 text-xs font-mono animate-fade-in">
       
       {/* 📊 DIE NEUE MANAGER-KOMMANDOZENTRALE */}
-      <ManagerOverview />
-
+      <ManagerOverview
+        setView={setView}
+      />
 
       {/* Ab hier folgt eure originale Überschrift "Übersicht deiner Events" und die .map-Schleife ... */}
       <div className="flex justify-between items-center border-b border-slate-900 pb-1.5 mb-4">
@@ -337,6 +338,14 @@ currentEvents >= maxEvents;
                 {' / '}
                 {subscriptionService.getLimit('maxEvents')}
               </div>
+
+              <button
+                type="button"
+                onClick={() => setView('budgetplanner')}
+                className="bg-cyan-500 text-slate-950 font-black px-4 py-2 rounded-xl text-[11px] uppercase tracking-wider"
+              >
+                💰 Budget planen
+              </button>
 
               {
                 subscriptionService.canCreateEvent() &&

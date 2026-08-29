@@ -9,8 +9,9 @@ export default function UniversalSearchPage({ onNavigate, setView }) {
   const currentProfileId =
     localStorage.getItem('gigsda_profile_id');
 
-  const favoriteKey =
-    `gigsda_favorites_${currentProfileId}`;
+  const ownerProfileId = localStorage.getItem('gigsda_profile_id');
+
+  const favoriteKey = `gigsda_favorites_${ownerProfileId}`;    
 
   const {
     currentSector,

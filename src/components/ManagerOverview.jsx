@@ -1,7 +1,10 @@
 import React from 'react';
 import { DollarSign, AlertTriangle, Clock, TrendingUp } from 'lucide-react';
 
-export default function ManagerOverview() {
+export default function ManagerOverview({ setView }) {
+
+
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 animate-fade-in font-mono text-xs text-slate-300">
       
