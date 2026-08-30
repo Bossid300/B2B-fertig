@@ -148,69 +148,76 @@ export default function ArtistTechRiderBox({ currentProfileId, isOwner }) {
       profile: updatedProfile
     });
 
-  setProfileData(updatedProfile);
+    setProfileData(updatedProfile);
 
-try {
-
-const events =
-  eventService.getEvents();
-
-  const updatedEvents = events.map(event => {
-
-    if (!event.riderCenter?.[saveProfileId]) {
-      return event;
-    }
-
-      return {
-        ...event,
-
-        riderCenter: {
-          ...event.riderCenter,
-
-          [saveProfileId]: {
-            ...event.riderCenter[saveProfileId],
-
-            confirmed: false,
-            changed: true,
-            changedAt: Date.now()
-          }
-        }
-      };
-
-  });
-
-  const changedEvent =
-    updatedEvents.find(event =>
-      event.id === activeEvent?.id
-    );
-
-    eventService.saveEvents(updatedEvents);
-
-  if (changedEvent) {
-    await eventService.saveEvent(changedEvent);
-  }
-
+    alert("Artist Rider erfolgreich gespeichert! 🎵🎤");
     window.dispatchEvent(
-      new CustomEvent('rider-updated')
+      new CustomEvent("rider-updated")
     );
+    setIsEditing(false);
+    return;
 
-  } catch (err) {
+    try {
 
-    console.error(err);
+    const events =
+      eventService.getEvents();
 
-  }
+      const updatedEvents = events.map(event => {
 
-  if (!profile) {
-    return (
-      <div 
-        className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
-        // ARTIST TECH-RIDER REGISTER INITIALISIERT...
-      </div>
-    );
-  }
+        if (!event.riderCenter?.[saveProfileId]) {
+          return event;
+        }
 
-setIsEditing(false);
-};
+          return {
+            ...event,
+
+            riderCenter: {
+              ...event.riderCenter,
+
+              [saveProfileId]: {
+                ...event.riderCenter[saveProfileId],
+
+                confirmed: false,
+                changed: true,
+                changedAt: Date.now()
+              }
+            }
+          };
+
+      });
+
+      const changedEvent =
+        updatedEvents.find(event =>
+          event.id === activeEvent?.id
+        );
+
+        eventService.saveEvents(updatedEvents);
+
+      if (changedEvent) {
+        await eventService.saveEvent(changedEvent);
+      }
+
+        window.dispatchEvent(
+          new CustomEvent('rider-updated')
+        );
+
+      } catch (err) {
+
+        console.error(err);
+
+      }
+
+      if (!profile) {
+        return (
+          <div 
+            className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
+            // ARTIST TECH-RIDER REGISTER INITIALISIERT...
+          </div>
+        );
+      }
+
+    setIsEditing(false);
+    };
 
   return (
     <div className="bg-[#0b111e] rounded-xl border border-slate-800/50 shadow-xl p-3 mb-3 text-slate-200 font-sans">

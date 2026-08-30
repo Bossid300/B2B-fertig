@@ -17,28 +17,21 @@ export default function RiderZentrale({ onBack, activeEvent, setFavorites }) {
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedRoom, setSelectedRoom] = useState(1);
 
-  const currentProfileId =
-    localStorage.getItem("gigsda_profile_id");
+  const currentProfileId = localStorage.getItem("gigsda_profile_id");
+
   useEffect(() => {
-
-
     const refresh = () => {
-
-const events =
-  eventService.getEvents();
-
+    const events =
+      eventService.getEvents();
       const activeStored = JSON.parse(
         localStorage.getItem("gigsda_active_event") || "null"
       );
-
       const event = events.find(
         ev => ev.id === activeStored?.id
       );
-
       if (event) {
         setCurrentEvent(event);
       }
-
     };
 
 
@@ -177,19 +170,19 @@ setProfiles(allProfiles);
           },
         };
       });
-eventService.saveEvents(updatedEvents);
+      eventService.saveEvents(updatedEvents);
 
-const updatedEvent = updatedEvents.find(
-  (e) => e.id === currentEvent?.id
-);
+      const updatedEvent = updatedEvents.find(
+        (e) => e.id === currentEvent?.id
+      );
 
-setCurrentEvent(updatedEvent);
+      setCurrentEvent(updatedEvent);
 
-if (updatedEvent) {
-  await eventService.saveEvent(updatedEvent);
-}
+      if (updatedEvent) {
+        await eventService.saveEvent(updatedEvent);
+      }
 
-eventService.saveEvents(updatedEvents);
+      eventService.saveEvents(updatedEvents);
 
       window.dispatchEvent(
         new CustomEvent("active-event-updated")
@@ -275,7 +268,8 @@ eventService.saveEvents(updatedEvents);
       case "Künstler":
         return (
           <ArtistTechRiderBox
-            profile={selectedMember}
+            currentProfileId={selectedMember.id}
+            isOwner={selectedMember?.id === currentProfileId}
           />
         );
       
@@ -457,9 +451,8 @@ eventService.saveEvents(updatedEvents);
               setSelectedMember(member)
             }
               onProfileClick={() => {
-
                 if (typeof setFavorites === "function") {
-                  setFavorites(member.name);
+                  setFavorites(member.id);
                 }
               }}
             />

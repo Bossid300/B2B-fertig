@@ -343,9 +343,7 @@ export default function App() {
   }, []);
   
   // 🛰️ EIGENE LEITUNG FÜR DEN GAST-SUCHER (VERGISS JEDE ANDERE VARIABLE!)
-  const [activeGuestArtist, setActiveGuestArtist] = useState(
-    () => localStorage.getItem('gigsda_active_guest_artist') || ''
-  );
+
   const [activeGuestProfileId, setActiveGuestProfileId] =
   useState(
     () =>
@@ -418,7 +416,6 @@ useEffect(() => {
       p => p && p.id === portfolioId
     );
     if (found) {
-      setActiveGuestArtist(found.name);
 
       setActiveGuestProfileId(found.id);
 
@@ -808,21 +805,15 @@ useEffect(() => {
           {view === 'radar' && !isLoggedIn && (
             <SearchExplorer 
               onBack={() => setView('landing')} 
-              setFavorites={(artistView) => {
-                setActiveGuestArtist(
-                  artistView.name
-                );
-                setActiveGuestProfileId(
-                  artistView.id
-                );
-                localStorage.setItem(
-                  'gigsda_active_guest_artist',
-                  artistView.name
-                );
+              setFavorites={(profileId) => {
+
+                setActiveGuestProfileId(profileId);
+
                 localStorage.setItem(
                   'gigsda_active_guest_profile_id',
-                  artistView.id
+                  profileId
                 );
+
                 setView('profile');
               }}
             />
@@ -833,16 +824,11 @@ useEffect(() => {
             <SearchExplorer 
               onBack={() => setView('projects')} 
               setFavorites={(artistView) => {
-                setActiveGuestArtist(
-                  artistView.name
-                );
+
                 setActiveGuestProfileId(
                   artistView.id
                 );
-                localStorage.setItem(
-                  'gigsda_active_guest_artist',
-                  artistView.name
-                );
+
                 localStorage.setItem(
                   'gigsda_active_guest_profile_id',
                   artistView.id
@@ -855,7 +841,7 @@ useEffect(() => {
           {/* ========================================================================= */}
           {/* 🏟️ INTERAKTIVE 10-WEGE ROLLER-WEICHE: GAST                               */}
           {/* ========================================================================= */}
-          {view === 'profile' && activeGuestArtist && (
+          {view === 'profile' && activeGuestProfileId && (
             (() => {
 
               if (!guestProfile) {
@@ -1127,10 +1113,15 @@ useEffect(() => {
               onBack={() => setView('projects')}
               activeEvent={targetedEvent}
               onNavigateToStep={setView}
-              setFavorites={(artistView) => {
+              setFavorites={(profileId) => {
 
-                setActiveGuestArtist(artistView);
-                localStorage.setItem('gigsda_active_guest_artist', artistView);
+                setActiveGuestProfileId(profileId);
+
+                localStorage.setItem(
+                  'gigsda_active_guest_profile_id',
+                  profileId
+                );
+
                 setView('profile');
               }}
             />;
@@ -1237,15 +1228,8 @@ useEffect(() => {
               // ⚡ DIE RETTUNG: Wenn im Sucher handleProfileClick feuert, 
               // beamen wir den User direkt auf das schreibgeschützte Portfolio!
               setFavorites={(artistView) => {
-                setActiveGuestArtist(
-                  artistView.name
-                );
                 setActiveGuestProfileId(
                   artistView.id
-                );
-                localStorage.setItem(
-                  'gigsda_active_guest_artist',
-                  artistView.name
                 );
                 localStorage.setItem(
                   'gigsda_active_guest_profile_id',
@@ -1260,13 +1244,20 @@ useEffect(() => {
           {view === 'artists' && (
             <UniversalSearchPage
               onNavigate={(name) => {
+
+                // TODO:
+                // UniversalSearch auf Profile-ID migrieren
+
                 setActiveGuestArtist(name);
+
                 localStorage.setItem(
                   'gigsda_active_guest_artist',
                   name
                 );
+
                 setView('profile');
               }}
+
               setView={setView}
             />
           )}
