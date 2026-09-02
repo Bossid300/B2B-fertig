@@ -25,7 +25,7 @@ try {
         $price = 9.90;
     }
 
-    if ($plan === 'AGENCY') {
+    if ($plan === 'PREMIUM') {
         $price = 24.90;
     }
 

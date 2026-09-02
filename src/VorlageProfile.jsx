@@ -36,7 +36,7 @@ from '../moduls/subscriptions/featureGates';
 
 
 
-export default function VorlageProfile({ onBack, currentProfileId, isOwner }) {
+export default function UserProfile({ onBack, currentProfileId, isOwner, setView }) {
   const [profileData, setProfileData] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -144,6 +144,7 @@ export default function VorlageProfile({ onBack, currentProfileId, isOwner }) {
         localFields={profileData} 
         isFavorite={isFavorite}
         handleToggleFavorite={handleToggleFavorite}
+        setView={setView}
         // 🚨 HIER FEHLEN DIE BEIDEN KABEL FÜR DEN SLIDER!
       />
 

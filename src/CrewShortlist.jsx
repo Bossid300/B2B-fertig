@@ -434,7 +434,7 @@ const [showMatrixInfo, setShowMatrixInfo] =
                 🔮 MATRIX SEARCH
 
                 <span className="ml-2 text-[9px] text-amber-400">
-                  AGENCY
+                  PREMIUM
                 </span>
 
               </button>
@@ -448,7 +448,7 @@ const [showMatrixInfo, setShowMatrixInfo] =
                     <div className="text-slate-300 text-sm mb-6 space-y-3">
                       <p>
                         Die MATRIX SEARCH ist ein exklusives
-                        AGENCY Feature.
+                        PREMIUM Feature.
                       </p>
                       <div className="text-cyan-400">
                         ✓ Cross-Gewerke-Matching

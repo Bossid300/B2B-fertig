@@ -969,7 +969,7 @@ useEffect(() => {
                 return (
                   <LocationProfile
                     currentProfileId={currentProfile?.id}
-                    onNavigate={setView}
+                    setView={setView}
                   />
                 );
               }
@@ -978,7 +978,7 @@ useEffect(() => {
                 return (
                   <FanProfile
                     currentProfileId={currentProfile?.id}
-                    onNavigate={setView}
+                    setView={setView}
                   />
                 );
               }
@@ -990,7 +990,7 @@ useEffect(() => {
                 return (
                   <VerleiherProfile
                     currentProfileId={currentProfile?.id}
-                    onNavigate={setView}
+                    setView={setView}
                   />
                 );
               }
@@ -999,7 +999,7 @@ useEffect(() => {
                 return (
                   <TechnikerProfile
                     currentProfileId={currentProfile?.id}
-                    onNavigate={setView}
+                    setView={setView}
                   />
                 );
               }
@@ -1008,7 +1008,7 @@ useEffect(() => {
                 return (
                   <CaterProfile
                     currentProfileId={currentProfile?.id}
-                    onNavigate={setView}
+                    setView={setView}
                   />
                 );
               }
@@ -1017,7 +1017,7 @@ useEffect(() => {
                 return (
                   <VeranstalterProfile
                     currentProfileId={currentProfile?.id}
-                    onNavigate={setView}
+                    setView={setView}
                   />
                 );
               }
@@ -1026,7 +1026,7 @@ useEffect(() => {
                 return (
                   <LogistikProfile
                     currentProfileId={currentProfile?.id}
-                    onNavigate={setView}
+                    setView={setView}
                   />
                 );
               }
@@ -1035,7 +1035,7 @@ useEffect(() => {
                 return (
                   <SecurityProfile
                     currentProfileId={currentProfile?.id}
-                    onNavigate={setView}
+                    setView={setView}
                   />
                 );
               }
@@ -1047,7 +1047,7 @@ useEffect(() => {
                 return (
                   <DesignProfile
                     currentProfileId={currentProfile?.id}
-                    onNavigate={setView}
+                    setView={setView}
                   />
                 );
               }

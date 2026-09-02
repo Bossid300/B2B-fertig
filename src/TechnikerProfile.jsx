@@ -26,7 +26,7 @@ import ProfileCard from './components/cards/ProfileCard';
 import { getProfilesDb } from './services/apiService';
 import { saveFavorite, deleteFavorite, getFavorites } from './services/apiService';
 
-export default function TechnikerProfile({ onBack, currentProfileId, isOwner }) {
+export default function UserProfile({ onBack, currentProfileId, isOwner, setView }) {
   const [profileData, setProfileData] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -132,6 +132,7 @@ export default function TechnikerProfile({ onBack, currentProfileId, isOwner }) 
         localFields={profileData} 
         isFavorite={isFavorite}
         handleToggleFavorite={handleToggleFavorite}
+        setView={setView}
         // 🚨 HIER FEHLEN DIE BEIDEN KABEL FÜR DEN SLIDER!
       />
 

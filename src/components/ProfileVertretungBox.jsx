@@ -153,7 +153,7 @@ export default function ProfileVertretungBox({ currentProfileId, isOwner }) {
             <UserCheck size={16} className="text-cyan-400 animate-pulse" />
             <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">// AUTHORITY TYPE</span>
             <span className="text-white font-black text-[10px] uppercase tracking-wide px-2 py-0.5 bg-cyan-950/20 border border-cyan-500/20 rounded-md mt-1 truncate max-w-full">
-              {representation_type === 'self' ? 'DIRECT DEAL' : 'AGENCY CONTRACT'}
+              {representation_type === 'self' ? 'DIRECT DEAL' : 'PREMIUM CONTRACT'}
             </span>
           </div>
 
@@ -218,7 +218,7 @@ export default function ProfileVertretungBox({ currentProfileId, isOwner }) {
 
             {/* RECHTER BLOCK */}
             <div className="space-y-3 p-3 bg-slate-900/20 border border-slate-900 rounded-2xl">
-              <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest block">// AGENCY CONTACT CREDENTIALS</span>
+              <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest block">// PREMIUM CONTACT CREDENTIALS</span>
               <div className="flex flex-col gap-1.5">
                 <span className="text-[10px] text-slate-500 font-bold">// AGENTUR E-MAIL</span>
                 <input 
@@ -227,7 +227,7 @@ export default function ProfileVertretungBox({ currentProfileId, isOwner }) {
                   value={agent_email || ''} 
                   onChange={handleChange} 
                   className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-cyan-400 focus:outline-none focus:border-cyan-500 font-mono" 
-                  placeholder="e.g. booking@agency.com" 
+                  placeholder="e.g. support@gigsda.com" 
                   disabled={representation_type === 'self'}
                 />
               </div>

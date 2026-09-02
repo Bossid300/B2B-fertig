@@ -24,7 +24,6 @@ export const PLAN_CONFIG = {
     ]
   },
 
-
   PRO: {
     title: 'PRO',
     price: '9,90 €',
@@ -52,9 +51,8 @@ export const PLAN_CONFIG = {
     ]
   },
 
-
-  AGENCY: {
-    title: 'AGENCY',
+  PREMIUM: {
+    title: 'PREMIUM',
     price: '24,90 €',
     maxEvents: 100,
     
@@ -64,7 +62,7 @@ export const PLAN_CONFIG = {
       FEATURES.PREMIUM_PORTFOLIO,
       FEATURES.GIGSDA_PASS,
       FEATURES.PROMOTION,
-      FEATURES.AGENCY_DASHBOARD,
+      FEATURES.PREMIUM_DASHBOARD,
       FEATURES.DOCUMENTS,
       FEATURES.TEAM_MANAGEMENT,
       FEATURES.MATRIX_SEARCH
@@ -72,7 +70,7 @@ export const PLAN_CONFIG = {
 
     displayFeatures: [
       'Alles aus PRO',
-      'Agency Dashboard',
+      'Premium Dashboard',
       'Dokumente',
       'Statistiken',
       'Erweiterte Crewsuche',

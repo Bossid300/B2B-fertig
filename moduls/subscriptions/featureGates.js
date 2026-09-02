@@ -7,7 +7,7 @@ export const FEATURES = {
 
   MATRIX_SEARCH: 'matrix_search',
 
-  AGENCY_DASHBOARD: 'agency_dashboard',
+  PREMIUM_DASHBOARD: 'premium_dashboard',
   DOCUMENTS: 'documents',
   TEAM_MANAGEMENT: 'team_management',
 };

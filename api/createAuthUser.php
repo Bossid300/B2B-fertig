@@ -58,6 +58,16 @@ try {
         ':createdAt' => time()
     ]);
 
+    @mail(
+        'support@gigsda.com',
+        'Neue Registrierung auf GIGSDA',
+        "Neue Registrierung auf GIGSDA\n\n" .
+        "Profil-ID: " . $data['profileId'] . "\n" .
+        "E-Mail: " . $data['email'] . "\n" .
+        "Zeitpunkt: " . date('d.m.Y H:i:s') . "\n\n" .
+        "https://www.gigsda.com"
+    );
+
     echo json_encode([
         'success' => true
     ]);

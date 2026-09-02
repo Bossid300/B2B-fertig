@@ -85,13 +85,13 @@ export default function PricingPage({
                 </div>
               )}
               <h2
-                className={`${titleColor} text-3xl font-black uppercase mb-2 font-mono`}
+                className={`${titleColor} text-2xl font-black uppercase mb-2 font-mono`}
               >
                 {plan.title}
               </h2>
 
               <div
-                className={`${titleColor} text-5xl font-black mb-1 font-mono`}
+                className={`${titleColor} text-4xl font-black mb-1 font-mono`}
               >
                 {plan.price}
               </div>
@@ -100,7 +100,7 @@ export default function PricingPage({
                 pro Monat
               </div>
 
-              <div className="space-y-3 text-slate-300 font-mono">
+              <div className="space-y-3 text-slate-300 text-sm font-mono">
 
                 {plan.displayFeatures?.map((feature) => (
                   <div key={feature}>
@@ -147,6 +147,74 @@ export default function PricingPage({
           );
         })}
       </div>
+
+
+
+
+
+
+
+
+
+
+
+<div className="mt-8 rounded-2xl border border-cyan-500/20 bg-slate-950/50 p-6">
+
+  <div className="text-cyan-400 font-black text-lg mb-3 uppercase">
+    💙 GIGSDA ENTWICKLUNGS-PHASE
+  </div>
+
+  <p className="text-slate-300 leading-relaxed mb-4">
+    GIGSDA befindet sich aktuell in der aktiven Entwicklungs-
+    und Testphase.
+
+    Neue Mitglieder starten automatisch in der
+    COMMUNITY-Stufe.
+
+    Ausgewählte Tester erhalten vorübergehend Zugriff
+    auf TRIAL, PRO oder PREMIUM Funktionen, um neue
+    Werkzeuge und Systeme zu testen.
+  </p>
+
+  <p className="text-slate-400 text-sm leading-relaxed mb-5">
+    Wenn du die Weiterentwicklung von GIGSDA
+    freiwillig unterstützen möchtest, kannst du
+    eine Spende über PayPal senden.
+
+    Jede Unterstützung hilft bei Hosting,
+    Infrastruktur, Entwicklung und neuen Features
+    wie der MATRIX SEARCH.
+  </p>
+
+  <button
+    type="button"
+    onClick={() =>
+      window.open(
+        'https://paypal.me/HJud',
+        '_blank'
+      )
+    }
+    className="px-5 py-3 rounded-xl border border-cyan-500/40 text-cyan-400 font-bold hover:bg-cyan-500/10 transition-all"
+  >
+    💙 GIGSDA ÜBER PAYPAL UNTERSTÜTZEN
+  </button>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

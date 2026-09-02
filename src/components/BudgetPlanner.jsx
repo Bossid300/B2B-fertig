@@ -58,6 +58,11 @@ export default function BudgetPlanner({ currentProfileId, setView }) {
       0
     ) + customCostsTotal;
 
+  const buffer =
+    Number(capital || 0) -
+    totalCosts;
+
+
   const reserve = totalIncome - totalCosts;
 
   const breakEvenVisitors =
@@ -397,64 +402,114 @@ export default function BudgetPlanner({ currentProfileId, setView }) {
 
           {/*  RECHTE SEITE   [key]: Number(e.target.value)  */}
           <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5">
-              <h2 className="text-xl mb-4">
-                  Auswertung
-              </h2>
+
+              <div className="border-b border-slate-800 pb-4 mb-4">
+
+                <h3 className="text-cyan-400 font-bold mb-3">
+                  💰 Kapital & Finanzierung
+                </h3>
+
+                <div className="flex justify-between">
+                  <span>Startbudget</span>
+                  <span>{Number(capital || 0).toLocaleString('de-DE')} €</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Sponsoren</span>
+                  <span>{Number(sponsors || 0).toLocaleString('de-DE')} €</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Sonstige Einnahmen</span>
+                  <span>{Number(otherIncome || 0).toLocaleString('de-DE')} €</span>
+                </div>
+
+                <div className="flex justify-between font-bold pt-2">
+                  <span>Verfügbare Mittel</span>
+                  <span>
+                    {(
+                      Number(capital || 0) +
+                      Number(sponsors || 0) +
+                      Number(otherIncome || 0)
+                    ).toLocaleString('de-DE')} €
+                  </span>
+                </div>
+
+              </div>
+
+
+              <div className="border-b border-slate-800 pb-4 mb-4">
+
+                <h3 className="text-cyan-400 font-bold mb-3">
+                  🎟 Event-Ertrag
+                </h3>
+
+                <div className="flex justify-between">
+                  <span>Ticketumsatz</span>
+                  <span>{ticketRevenue.toLocaleString('de-DE')} €</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Break-Even Besucher</span>
+                  <span>{breakEvenVisitors}</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Geplant</span>
+                  <span>{Number(tickets || 0)}</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Besucherpuffer</span>
+                  <span>{visitorDifference}</span>
+                </div>
+
+              </div>
+
+
+              <div>
+
+                <h3 className="text-cyan-400 font-bold mb-3">
+                  📊 Ergebnis & Risiko
+                </h3>
+
+                <div className="flex justify-between">
+                  <span>Gesamtkosten</span>
+                  <span>{totalCosts.toLocaleString('de-DE')} €</span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span>Event-Ergebnis</span>
+                  <span>
+                    {(ticketRevenue - totalCosts).toLocaleString('de-DE')} €
+                  </span>
+                </div>
+
+                <div className="pt-2 font-bold">
+                  {rating}
+                </div>
+
+                <div className="flex justify-between text-xl font-bold border-t border-slate-800 mt-3 pt-3">
+                  <span>Sicherheits-Puffer</span>
+                  <span>{buffer.toLocaleString('de-DE')} €</span>
+                </div>
+
+                <div className="flex justify-between text-xl font-bold border-t border-slate-800 mt-3 pt-3">
+                  <span>Kapital nach Event</span>
+                  <span>{reserve.toLocaleString('de-DE')} €</span>
+                </div>
+
+              </div>
+
+
+
+
+
+
+
               <div className="space-y-4">
                 <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span>💰 Startbudget</span>
-                    <span>{Number(capital || 0).toLocaleString('de-DE')} €</span>
-                  </div>
 
-                  <div className="flex justify-between">
-                    <span>💸 Gesamtkosten</span>
-                    <span>{totalCosts.toLocaleString('de-DE')} €</span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span>🎟 Ticketumsatz</span>
-                    <span>{ticketRevenue.toLocaleString('de-DE')} €</span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span>🤝 Sponsoren</span>
-                    <span>{Number(sponsors || 0).toLocaleString('de-DE')} €</span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span>💵 Sonstige Einnahmen</span>
-                    <span>{Number(otherIncome || 0).toLocaleString('de-DE')} €</span>
-                  </div>
-
-                  <div className="flex justify-between border-t border-slate-800 pt-3">
-                    <span>📈 Gesamteinnahmen</span>
-                    <span>{totalIncome.toLocaleString('de-DE')} €</span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span>🎯 Break-Even Besucher</span>
-                    <span>{breakEvenVisitors}</span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span>👥 Geplant</span>
-                    <span>{Number(tickets || 0)}</span>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <span>📊 Besucherpuffer</span>
-                    <span>{visitorDifference}</span>
-                  </div>
-
-                  <div className="pt-2 font-bold">
-                    {rating}
-                  </div>
-
-                  <div className="flex justify-between text-xl font-bold border-t border-slate-800 pt-3">
-                    <span>✅ Reserve</span>
-                    <span>{reserve.toLocaleString('de-DE')} €</span>
-                  </div>
 
                   <div className="pt-2">
                     {reserve >= 0 ? (
