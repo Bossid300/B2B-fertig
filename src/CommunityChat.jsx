@@ -179,8 +179,6 @@ const [activeChannel, setActiveChannel] = useState('USR-8717');
       messageText: message
     });
 
-    console.log('CHAT SAVE DB ✅');
-
     const result =
       await getMessages(activeEvent.id);
 

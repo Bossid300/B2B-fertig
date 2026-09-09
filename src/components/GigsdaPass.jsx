@@ -196,7 +196,7 @@ export default function GigsdaPass({
                 ">
                 <div className="w-40 h-40 rounded-2xl border border-cyan-500/20 flex items-center justify-center">
                 <QRCode
-                    value={`https://www.gigsda.com/2026?portfolio=${profile.id}`}
+                    value={`https://www.gigsda.com?portfolio=${profile.id}`}
                     size={130}
                     bgColor="transparent"
                     fgColor="#ffffff"

@@ -1,7 +1,7 @@
 const API_BASE =
   window.location.hostname === 'localhost'
-    ? 'https://gigsda.com/2026/api'
-    : '/2026/api';
+    ? 'https://gigsda.com/api'
+    : '/api';
 
 export async function geocodeAddress(
   address

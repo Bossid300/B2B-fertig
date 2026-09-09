@@ -191,8 +191,6 @@ export default function BudgetPlanner({ currentProfileId, setView }) {
         budgetPlan
       );
 
-    console.log(result);
-
     if (result.success) {
       alert('Budgetplanung gespeichert');
 

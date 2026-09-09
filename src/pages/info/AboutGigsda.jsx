@@ -107,7 +107,7 @@ export default function AboutPage({ setView }) {
                 rounded-2xl blur-[2px] opacity-75 animate-[borderGlow_5s_linear_infinite] bg-[length:300%_300%]" />
               <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
                 <img
-                  src="/2026/profiles/die_architekten_der_musik.png"
+                  src="/profiles/die_architekten_der_musik.png"
                   alt="GIGSDA Event Revolution Vision"
                   className="w-full max-w-full h-auto"
                 />

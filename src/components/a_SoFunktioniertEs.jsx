@@ -4,19 +4,19 @@ export default function ASoFunktioniertEs() {
 
 const cards = [
   {
-    image: '/2026/landing/standort_waehlen.png',
+    image: '/landing/standort_waehlen.png',
     alt: 'Standort wählen',
     label: 'Standort wählen',
     color: 'cyan'
   },
   {
-    image: '/2026/landing/gig_finden.png',
+    image: '/landing/gig_finden.png',
     alt: 'Gig finden',
     label: 'Gig finden',
     color: 'purple'
   },
   {
-    image: '/2026/landing/dabei_sein.png',
+    image: '/landing/dabei_sein.png',
     alt: 'Dabei sein',
     label: 'Dabei sein',
     color: 'pink'

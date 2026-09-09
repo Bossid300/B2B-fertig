@@ -19,6 +19,7 @@ export default function ProjectDashboard({
   onNavigateToStep, progress, onSelectEvent, 
   events: propsEvents, onCreateEvent, setView }) {
 
+  const [showArchived, setShowArchived] = useState(false);
 
   const [isCreatingEvent, setIsCreatingEvent] = useState(false);
 
@@ -228,20 +229,25 @@ const getEventSortValue = (ev) => {
   return Number.MAX_SAFE_INTEGER;
 };
 
+
 const visibleEvents = events
-  .filter(ev =>
-    ev &&
-    ev.archived !== true &&
+.filter(ev => {
+
+  const archiveFilter =
+    showArchived
+      ? ev.archived === true
+      : ev.archived !== true;
+
+  return (
+    archiveFilter &&
     (
       !currentUserId ||
       !ev.ownerId ||
       ev.ownerId === currentUserId ||
       ev.crewIds?.includes(currentUserId)
     )
-  )
-  .sort((a, b) =>
-    getEventSortValue(a) - getEventSortValue(b)
   );
+});
 
 const currentEvents = visibleEvents.length;
 
@@ -255,9 +261,11 @@ currentEvents >= maxEvents;
     <div className="space-y-6 my-6 max-w-4xl mx-auto text-slate-300 text-xs font-mono animate-fade-in">
       
       {/* 📊 DIE NEUE MANAGER-KOMMANDOZENTRALE */}
+{/* 
       <ManagerOverview
         setView={setView}
       />
+       */}
 
       {/* Ab hier folgt eure originale Überschrift "Übersicht deiner Events" und die .map-Schleife ... */}
       <div className="flex justify-between items-center border-b border-slate-900 pb-1.5 mb-4">
@@ -338,6 +346,20 @@ currentEvents >= maxEvents;
                 {' / '}
                 {subscriptionService.getLimit('maxEvents')}
               </div>
+
+              <button
+                type="button"
+                onClick={() => setShowArchived(!showArchived)}
+                className={`px-4 py-2 rounded-xl text-[11px] uppercase tracking-wider font-mono border transition-all cursor-pointer ${
+                  showArchived
+                    ? 'bg-amber-500/20 border-amber-500/40 text-amber-300'
+                    : 'bg-slate-800 border-slate-700 text-slate-300'
+                }`}
+              >
+                {showArchived
+                  ? '🗂️ Archiv'
+                  : '📂 Aktive'}
+              </button>
 
               <button
                 type="button"

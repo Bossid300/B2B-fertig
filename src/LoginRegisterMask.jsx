@@ -7,7 +7,8 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
   const [turnstileToken, setTurnstileToken] = useState('');
 
   const [isRegistering, setIsRegistering] = useState(isRegisteringInitial);
-  
+
+  const [videoMuted, setVideoMuted] = useState(true);
   // ⚡ FEHLERFREIE SPEICHER-ZUSTÄNDE (Exakt an die Inputs gekoppelt)
   const [loginField, setLoginField] = useState('');
   const [loginPass, setLoginPass] = useState('');
@@ -361,12 +362,16 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
                 <h2 className="text-2xl font-extrabold text-white tracking-tight leading-none uppercase">
                   Erstelle dein <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 font-black">Konto</span>.
                 </h2>
-                <span className="text-[9px] text-slate-500 uppercase tracking-widest block mt-1">// MITGLIEDER ÖKOSYSTEM INITIALISIERUNG</span>
+                <span className="text-sx text-slate-500 uppercase tracking-widest block mt-1">
+                  MITGLIEDER ÖKOSYSTEM INITIALISIERUNG
+                </span>
               </div>
 
               {/* DIE 6 SYSTEM-ROLLEN */}
               <div className="space-y-1.5 pt-2">
-                <label className="text-[9px] text-slate-500 uppercase tracking-wider block">// Benutzerart festlegen</label>
+                <label className="text-sx text-slate-500 uppercase tracking-wider block">
+                  Benutzerart festlegen
+                </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {[
                     { id: 'Fan', icon: '🎫', label: 'Fan', code: '[FAN_ZONE]' },
@@ -411,8 +416,8 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
 
               <div className="bg-slate-950 p-3 rounded-xl border border-slate-900 flex justify-between items-center gap-4">
                 <div>
-                  <span className="text-[9px] text-slate-500 uppercase block font-bold">
-                    // Security Verification
+                  <span className="text-sx text-slate-500 uppercase block font-bold">
+                    Security Verification
                   </span>
 
                   <div className="flex items-center gap-2 mt-1">
@@ -424,17 +429,24 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
                       <span className="text-cyan-400 font-black text-sm">
                         {captchaA} + {captchaB}
                       </span>
+
+
                     </div>
+
+                    <input
+                      type="text"
+                      placeholder="Ergebnis"
+                      value={captchaAnswer}
+                      onChange={(e) => setCaptchaAnswer(e.target.value)}
+                      className="
+                      text-cyan-400 font-black text-sm 
+                      px-3 py-1 rounded-lg bg-cyan-500/10 
+                      border border-cyan-500/20"
+                    />
+
                   </div>
                 </div>
 
-                <input
-                  type="text"
-                  placeholder="Ergebnis"
-                  value={captchaAnswer}
-                  onChange={(e) => setCaptchaAnswer(e.target.value)}
-                  className="px-3 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/20"
-                />
 
                 <div className="flex justify-center py-2">
                   <Turnstile
@@ -459,9 +471,14 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
             <form onSubmit={handleLoginSubmit} className="space-y-5 my-auto py-4">
               <div>
                 <h2 className="text-2xl font-extrabold text-white tracking-tight leading-none uppercase">
-                  Control Center <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 font-black">Login</span>.
+                    Control Center 
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 font-black">
+                    Login
+                  </span>.
                 </h2>
-                <span className="text-[9px] text-slate-500 uppercase tracking-widest block mt-1">// PROFI-ZUGANG SEKTION_03</span>
+                <span className="text-sx text-slate-500 uppercase tracking-widest block mt-1">
+                  PROFIL-ZUGANG, DEIN AUFTRITT IM GIGSDA-ÖKOSYSTEM
+                </span>
               </div>
 
               <div className="space-y-3">
@@ -502,7 +519,7 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
                 onClick={() => setIsRegistering(false)}
                 className="text-xs text-slate-400 hover:text-cyan-400 transition-colors font-mono cursor-pointer"
               >
-                // BEREITS REGISTRIERT? HIER EINLOGGEN ⚡
+                BEREITS REGISTRIERT? HIER EINLOGGEN ⚡
               </button>
             ) : null}
           </div>
@@ -514,19 +531,19 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
               <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
               
               <div className="mb-4">
-                <h3 className="text-xs font-black uppercase tracking-wider text-cyan-400 font-mono mb-1">
-                  // NOCH KEIN GIGSDA-KONTO?
+                <h3 className="text-xl font-black uppercase tracking-wider text-cyan-400 font-mono mb-1">
+                  NOCH KEIN GIGSDA-KONTO?
                 </h3>
-                <p className="text-[11px] text-slate-400 leading-relaxed">
+                <p className="text-[12px] text-slate-400 leading-relaxed">
                   Tritt dem zweiseitigen B2B-Marktplatz bei und verbinde dich direkt mit der Industrie.
                 </p>
               </div>
 
               {/* ⚡ DIE SCHÄRFSTEN B2B-VORTEILE AUF EINEN BLICK */}
-              <ul className="space-y-2 mb-5 text-[11px] font-mono text-slate-300">
+              <ul className="space-y-2 mb-5 text-xs font-mono text-slate-300">
                 <li className="flex items-start gap-2">
                   <span className="text-cyan-500 font-bold">✓</span>
-                  <span><strong className="text-white">9 dedizierte B2B-Rollen:</strong> Volle Sichtbarkeit für Catering, Rental, Locations, Bands & Crew.</span>
+                  <span><strong className="text-white">10 dedizierte B2B-Rollen:</strong> Volle Sichtbarkeit für Catering, Rental, Locations, Bands & Crew.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-cyan-500 font-bold">✓</span>
@@ -553,6 +570,38 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
 
             </div>
           )}
+
+
+        {/* RECHTE DEKO-AURA (HÄLT DAS DESIGN REAKTIV RECHTS BALANCIERT) */}
+        <div className="hidden md:block mt-8 w-5/12 h-64 bg-gradient-to-tr from-purple-600/10 to-pink-500/5 rounded-3xl border border-slate-900/40 backdrop-blur-xs relative overflow-hidden shadow-2xl">
+          <div className="absolute inset-0 rounded-[20px] overflow-hidden border border-cyan-500/20 bg-black/20 backdrop-blur-xl">
+
+            <video
+              autoPlay
+              muted={videoMuted}
+              loop
+              playsInline
+              className="w-full h-full object-cover"
+            >
+              <source
+                src="/videos/gigsda_video_liquidrole.mp4"
+                type="video/mp4"
+              />
+            </video>
+
+            <button
+              onClick={() => setVideoMuted(!videoMuted)}
+              className="absolute top-3 right-3 px-2 py-1 rounded-lg bg-black/40 border border-cyan-500/30 text-cyan-400 text-[10px] font-mono uppercase hover:bg-cyan-500/10"
+            >
+              {videoMuted ? "🔇 Ton" : "🔊 Ton"}
+            </button>
+            {/* 
+            <div className="absolute bottom-3 left-4 text-[12px] font-mono text-cyan-400 tracking-widest uppercase">
+              // Live Concert Feed Active
+            </div>
+              */}
+          </div>
+        </div>
 
         </div>
 

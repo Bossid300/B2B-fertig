@@ -468,7 +468,7 @@ const submitB2BRequest = async (project) => {
           <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent pointer-events-none space-y-2">
             <p className="text-cyan-400 text-xs tracking-widest uppercase">// {slides[currentSlide].l1}</p>
             <h1 className="text-white font-black text-2xl md:text-3xl tracking-tight uppercase leading-tight">{slides[currentSlide].l2}</h1>
-            <h2 className="text-slate-200 text-base font-bold">{activeFields.display_name || activeFields.name || 'UNBENANNTE ENTITÄT'}</h2>
+            <h2 className="text-slate-200 text-base font-bold">{activeFields.display_name || activeFields.Klarname || 'UNBENANNTE ENTITÄT'}</h2>
             <div className="pt-1"><div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded border text-[10px] font-bold uppercase tracking-wider ${badge.style}`}>{badge.icon} {badge.text}</div></div>
           </div>
 

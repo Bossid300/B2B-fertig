@@ -65,7 +65,7 @@ export default function WhatIsGigsda({ setView }) {
               {/* NEU: Das Bild als visueller Header der Sektion */}
               <div className="mb-10 relative aspect-[21/9] w-full overflow-hidden rounded-2xl border border-cyan-400/25 bg-slate-900 shadow-2xl">
                 <img
-                  src="/2026/profiles/gigsda_banner.jpg" 
+                  src="/profiles/gigsda_banner.jpg" 
                   alt="GIGSDA Event Revolution Vision"
                   className="absolute inset-0 h-full w-full object-cover object-center opacity-90 transition-opacity duration-500 hover:opacity-100"
                 />
@@ -107,7 +107,7 @@ export default function WhatIsGigsda({ setView }) {
                     <div className="absolute -inset-[2px] bg-gradient-to-br from-cyan-400 via-pink-500 to-purple-500 rounded-2xl blur-[2px] opacity-75 animate-[borderGlow_5s_linear_infinite] bg-[length:300%_300%]" />
                     <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
                       <img
-                        src="/2026/profiles/die_mission.jpg"
+                        src="/profiles/die_mission.jpg"
                         alt="Live Stage"
                         className="w-full h-72 md:h-80 object-cover"
                       />
@@ -214,7 +214,7 @@ export default function WhatIsGigsda({ setView }) {
                     <div className="absolute -inset-[2px] bg-gradient-to-br from-cyan-400 via-pink-500 to-purple-500 rounded-2xl blur-[2px] opacity-75 animate-[borderGlow_5s_linear_infinite] bg-[length:300%_300%]" />
                     <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
                       <img
-                        src="/2026/profiles/die_vision.jpg"
+                        src="/profiles/die_vision.jpg"
                         alt="Live Stage"
                         className="w-full h-72 md:h-80 object-cover"
                       />
@@ -324,7 +324,7 @@ export default function WhatIsGigsda({ setView }) {
                     <div className="absolute -inset-[2px] bg-gradient-to-br from-cyan-400 via-pink-500 to-purple-500 rounded-2xl blur-[2px] opacity-75 animate-[borderGlow_5s_linear_infinite] bg-[length:300%_300%]" />
                     <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
                       <img
-                        src="/2026/profiles/fuer_wen_ist_gigsda.jpg"
+                        src="/profiles/fuer_wen_ist_gigsda.jpg"
                         alt="Live Stage"
                         className="w-full h-72 md:h-80 object-cover"
                       />
@@ -504,7 +504,7 @@ export default function WhatIsGigsda({ setView }) {
                     <div className="absolute -inset-[2px] bg-gradient-to-br from-cyan-400 via-pink-500 to-purple-500 rounded-2xl blur-[2px] opacity-75 animate-[borderGlow_5s_linear_infinite] bg-[length:300%_300%]" />
                     <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
                       <img
-                        src="/2026/profiles/tausend_moeglichkeiten.jpg"
+                        src="/profiles/tausend_moeglichkeiten.jpg"
                         alt="Live Stage"
                         className="w-full h-72 md:h-80 object-cover"
                       />
@@ -603,7 +603,7 @@ export default function WhatIsGigsda({ setView }) {
                       <div className="absolute -inset-[2px] bg-gradient-to-br from-cyan-400 via-pink-500 to-purple-500 rounded-2xl blur-[2px] opacity-75 animate-[borderGlow_5s_linear_infinite] bg-[length:300%_300%]" />
                       <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
                         <img
-                          src="/2026/profiles/location_aufruf.png"
+                          src="/profiles/location_aufruf.png"
                           alt="Live Stage"
                           className="w-full max-w-full h-auto"
                         />

@@ -93,6 +93,10 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
           ...profile,
           ...formData
         };
+
+        updatedProfile.name =
+          `${formData.vorname || ''} ${formData.nachname || ''}`.trim();
+
         delete updatedProfile.project_name;
 
         const geo =
@@ -163,7 +167,9 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">
         <div className="flex items-center gap-2">
           <User size={14} className="text-purple-400" />
-          <span className="text-xs font-black tracking-widest uppercase">// STAMMDATEN REGISTER (KONTOTYP-ID: {formData.role})</span>
+          <span className="text-xs font-black tracking-widest uppercase">
+            // STAMMDATEN REGISTER (KONTOTYP-ID: {formData.role})
+          </span>
         </div>
         
         {canEdit && !isEditing && (
@@ -196,17 +202,30 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
             </div>
 
             <div className="flex flex-col text-center sm:text-left z-10">
-              <span className="text-[10px] text-cyan-400 font-mono tracking-widest uppercase">// AVATAR CHANNEL</span>
-              <span className="bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent">{Klarname || 'User'}</span>
+              <span className="text-4xl bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent">
+                {name || 'User'}
+              </span>
+              <span className="text-yellow-400 text-xs font-mono tracking-widest uppercase">
+                GIGSDA-ID ({id || 'SYS-NEW'})
+              </span>
               {canEdit && (
-                <div className="flex items-center gap-1.5 mt-1 text-[9px] text-slate-400 justify-center sm:justify-start">
-                  {show_avatarUrl ? <Eye size={10} className="text-purple-400" /> : <EyeOff size={10} className="text-slate-600" />}
-                  <span className="font-mono tracking-wide">{show_avatarUrl ? "IM NETZWERK SICHTBAR" : "PRIVAT / AUSGEBLENDET"}</span>
+                <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-400 justify-center sm:justify-start">
+                  {show_avatarUrl 
+                  ? <Eye size={10} className="text-purple-400" /> 
+                  : <EyeOff size={10} className="text-slate-600" />}
+                  <span className="font-mono tracking-wide">
+                    {show_avatarUrl 
+                    ? "IM NETZWERK SICHTBAR" 
+                    : "PRIVAT / AUSGEBLENDET"
+                    }
+                  </span>
                 </div>
               )}
             </div>
+          
           </div>
 
+          {/* Stamm Daten */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-xs text-slate-400">
             <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
               <span className="text-slate-500">KATEGORIE / BERUF:</span> 
@@ -216,31 +235,18 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
               </div>
             </div>
             <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
-              <span className="text-slate-500">FIRMEN / KÜNSTLERNAME:</span> 
-              <div className="flex items-center gap-2">
-                <span className="text-white font-bold">{Klarname || 'Nicht hinterlegt'}</span>
-                {canEdit && (show_Klarname ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
-              </div>
-            </div>
-            <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
-              <span className="text-slate-500">PROFILNAME:</span> 
-              <div className="flex items-center gap-2">
-                <span className="text-white font-bold">{name}</span>
-                {canEdit && (show_name ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
-              </div>
-            </div>
-            <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
-              <span className="text-slate-500">VORNAME / NACHNAME:</span> 
-              <div className="flex items-center gap-2">
-                <span className="text-white font-bold">{vorname} {nachname || 'Nicht hinterlegt'}</span>
-                {canEdit && (show_name_real ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
-              </div>
-            </div>
-            <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
               <span className="text-slate-500">TELEFON:</span> 
               <div className="flex items-center gap-2">
                 <span className="text-cyan-400">{phone || 'Nicht hinterlegt'}</span>
                 {canEdit && (show_phone ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
+              <span className="text-slate-500">FIRMEN / KÜNSTLERNAME:</span> 
+              <div className="flex items-center gap-2">
+                <span className="text-white font-bold">{Klarname || 'Nicht hinterlegt'}</span>
+                {canEdit && (show_Klarname ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
               </div>
             </div>
             <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
@@ -250,13 +256,15 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
                 {canEdit && (show_email ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
               </div>
             </div>
+
             <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
-              <span className="text-slate-500">ADRESSE:</span> 
+              <span className="text-slate-500">VORNAME / NACHNAME:</span> 
               <div className="flex items-center gap-2">
-                <span className="text-white">{street ? `${street}, ${plz} ${city}` : 'Nicht hinterlegt'}</span>
-                {canEdit && (show_address ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
+                <span className="text-white font-bold">{vorname} {nachname || 'Nicht hinterlegt'}</span>
+                {canEdit && (show_name_real ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
               </div>
             </div>
+
             <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
               <span className="text-slate-500">WEBSEITE:</span> 
               <div className="flex items-center gap-2">
@@ -264,6 +272,7 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
                 {canEdit && (show_website ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
               </div>
             </div>
+
             {genre && (
               <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
                 <span className="text-slate-500">GENRE / CORE-AUSRICHTUNG:</span> 
@@ -273,9 +282,17 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
                 </div>
               </div>
             )}
-
-            <div className="flex justify-between items-center py-1 border-b border-slate-900/50"><span className="text-slate-500">GIGSDA-ID:</span> <span className="text-slate-600 text-[10px] font-mono">{id || 'SYS-NEW'}</span></div>
+            
+            <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
+              <span className="text-slate-500">ADRESSE:</span> 
+              <div className="flex items-center gap-2">
+                <span className="text-white">
+                  {street ? `${street}, ${plz} ${city}` : 'Nicht hinterlegt'}</span>
+                {canEdit && (show_address ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
+              </div>
+            </div>
           </div>
+
           {description && (
             <div className="p-3 bg-slate-900/30 border border-slate-900 rounded-xl mt-2 relative">
               <div className="flex justify-between items-center mb-1">

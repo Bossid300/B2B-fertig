@@ -9,9 +9,9 @@ import A3bildernetzwerk from "./components/a_3bilder_netzwerk";
 
 // 📡 Daniels originale Testdaten (Bands, Termine und geile Locations)
 const initialGigs = [
-  { id: 1, title: "Band", date: "27.08.2026", location: "Bambug", img: "/2026/profiles/Jud-Herbert/banner.jpg" },
-  { id: 2, title: "Band", date: "23.09.2026", location: "Bombug", img: "/2026/profiles/Jud-Herbert/banner.jpg" },
-  { id: 3, title: "Band", date: "27.08.2026", location: "Exrnwkug", img: "/2026/profiles/Jud-Herbert/banner.jpg" }
+  { id: 1, title: "Band", date: "27.08.2026", location: "Bambug", img: "/profiles/Jud-Herbert/banner.jpg" },
+  { id: 2, title: "Band", date: "23.09.2026", location: "Bombug", img: "/profiles/Jud-Herbert/banner.jpg" },
+  { id: 3, title: "Band", date: "27.08.2026", location: "Exrnwkug", img: "/profiles/Jud-Herbert/banner.jpg" }
 ];
 
 export default function LandingPage({ onEnterCenter, onCreateAccount, setView }) {
@@ -38,7 +38,7 @@ const [videoMuted, setVideoMuted] = useState(true);
         style={{ 
           // Holt das Bild direkt aus eurem public/logos/ oder assets-Ordner, falls lokal abgelegt. 
           // Hier als absolut sicherer, kristallklarer Live-Konzert-Stream eingesetzt!
-          backgroundImage: `url('/2026/profiles/vibrant-concert-scene-stockcake.jpg')` 
+          backgroundImage: `url('/profiles/vibrant-concert-scene-stockcake.jpg')` 
         }}
       >
         {/* SCHWARZE VERLAUFS-BLENDE NACH UNTEN (Verhindert harte Kanten bei den Kacheln!) */}
@@ -126,13 +126,13 @@ const [videoMuted, setVideoMuted] = useState(true);
                     }}
                     className="absolute left-3 top-2.5 text-cyan-500/60 hover:text-cyan-400 transition-colors cursor-pointer bg-transparent border-none p-0 z-10"
                   >
-                    <MapPin className="w-4 h-4 animate-pulse" />
+                    <MapPin className="w-6 h-6 animate-pulse" />
                   </button>
                   
                   <input
                     type="text"
                     name="geocity"
-                    placeholder="Stadt eingeben oder auf den Pin klicken ➔"
+                    placeholder="Stadt eingeben oder Pin klicken ➔"
                     required
                     className="w-full bg-transparent pl-8 pr-2 py-2 text-sm text-slate-300 placeholder-slate-600 outline-none border-none focus:ring-0 font-medium tracking-wide"
                   />
@@ -161,7 +161,7 @@ const [videoMuted, setVideoMuted] = useState(true);
                 className="w-full h-full object-cover"
               >
                 <source
-                  src="/2026/videos/gigsda_video_stahlhammer.mp4"
+                  src="/videos/gigsda_video_stahlhammer.mp4"
                   type="video/mp4"
                 />
               </video>
@@ -172,10 +172,11 @@ const [videoMuted, setVideoMuted] = useState(true);
               >
                 {videoMuted ? "🔇 Ton" : "🔊 Ton"}
               </button>
-
+              {/* 
               <div className="absolute bottom-3 left-4 text-[12px] font-mono text-cyan-400 tracking-widest uppercase">
                 // Live Concert Feed Active
               </div>
+               */}
             </div>
         </div>
 
@@ -289,7 +290,7 @@ const [videoMuted, setVideoMuted] = useState(true);
           <span className="animate-ping absolute inline-flex h-24 w-24 md:h-36 md:w-36 rounded-full bg-cyan-500/10 border border-cyan-500/20 opacity-40"></span>
           {/* DAS ECHTE LOGO (Frisch aus eurem Assets-Ordner!) */}
           <img 
-            src="/2026/logos/gigsda-logo-1.svg" 
+            src="/logos/gigsda-logo-1.svg" 
             alt="Gigsda Portal Logo" 
             className="h-36 md:h-48 w-auto object-contain relative z-10 drop-shadow-[0_0_15px_rgba(6,182,212,0.25)]"
             onError={(e) => {
@@ -381,16 +382,16 @@ const [videoMuted, setVideoMuted] = useState(true);
               <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-4">
                 🎪 Teil echter Event-Crews werden
               </div> */}
-              <div class="gigsda-grid pt-6 md:pt-8 gap-4 md:gap-6">
-                <div class="gigsda-box">
-                <svg class="gigsda-icon" viewBox="0 0 24 24">
+              <div className="gigsda-grid pt-6 md:pt-8 gap-4 md:gap-6">
+                <div className="gigsda-box">
+                <svg className="gigsda-icon" viewBox="0 0 24 24">
                 <path d="M2 12h3l3-9 4 18 3-9h3" />
                 </svg>
                     Crew & Bühne finden
                 </div>
                 
-                <div class="gigsda-box">
-                <svg class="gigsda-icon" viewBox="0 0 24 24">
+                <div className="gigsda-box">
+                <svg className="gigsda-icon" viewBox="0 0 24 24">
                 <circle cx="5" cy="6" r="2" />
                 <circle cx="19" cy="8" r="2" />
                 <circle cx="12" cy="18" r="2" />
@@ -401,16 +402,16 @@ const [videoMuted, setVideoMuted] = useState(true);
                     Neue Kontakte knüpfen
                 </div>
                 
-                <div class="gigsda-box">
-                <svg class="gigsda-icon" viewBox="0 0 24 24">
+                <div className="gigsda-box">
+                <svg className="gigsda-icon" viewBox="0 0 24 24">
                 <polyline points="9 18 15 12 9 6" />
                 <line x1="16" y1="18" x2="20" y2="18" />
                 </svg>
                     Für Projekte angefragt werden
                 </div>
                 
-                <div class="gigsda-box">
-                <svg class="gigsda-icon" viewBox="0 0 24 24">
+                <div className="gigsda-box">
+                <svg className="gigsda-icon" viewBox="0 0 24 24">
                 <circle cx="12" cy="12" r="8" />
                 <line x1="12" y1="2" x2="12" y2="6" />
                 <line x1="12" y1="18" x2="12" y2="22" />
@@ -421,8 +422,8 @@ const [videoMuted, setVideoMuted] = useState(true);
                     Regional sichtbar werden
                 </div>
                 
-                <div class="gigsda-box">
-                <svg class="gigsda-icon" viewBox="0 0 24 24">
+                <div className="gigsda-box">
+                <svg className="gigsda-icon" viewBox="0 0 24 24">
                 <circle cx="18" cy="5" r="3" />
                 <circle cx="6" cy="12" r="3" />
                 <circle cx="18" cy="19" r="3" />
@@ -432,8 +433,8 @@ const [videoMuted, setVideoMuted] = useState(true);
                     Community nutzen
                 </div>
                 
-                <div class="gigsda-box">
-                <svg class="gigsda-icon" viewBox="0 0 24 24">
+                <div className="gigsda-box">
+                <svg className="gigsda-icon" viewBox="0 0 24 24">
                 <rect x="2" y="6" width="20" height="12" rx="2" />
                 <line x1="6" y1="12" x2="8" y2="12" />
                 <circle cx="18" cy="12" r="1" fill="#00e5ff" />

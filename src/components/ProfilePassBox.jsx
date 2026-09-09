@@ -47,7 +47,7 @@ export default function ProfilePassBox({ currentProfileId, profileId, setView, s
   }, [currentProfileId]);
 
   // Generiert den passenden reaktiven Reflink aus dem Künstlernamen
-  const refLink = `https://www.gigsda.com/2026/?portfolio=${profileId}&ref=${profileId}`;
+  const refLink = `https://www.gigsda.com?portfolio=${profileId}&ref=${profileId}`;
 
   // Holt das erste Bild aus dem übergebenen Slider-Array (oder nutzt ein Fallback)
   const firstSliderImage = sliderImages && sliderImages.length > 0 ? sliderImages[0] : '';
@@ -153,7 +153,7 @@ export default function ProfilePassBox({ currentProfileId, profileId, setView, s
                     key={data.id}
                     className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2"
                   >
-                    ✅ {data.name}
+                    ✅ {data.name} ({data.id})
                   </div>
                 );
               })}

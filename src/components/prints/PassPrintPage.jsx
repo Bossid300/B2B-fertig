@@ -189,7 +189,7 @@ export default function PassPrintPage() {
             <div className="flex flex-col items-center justify-center pl-2">
               <div className="w-[25mm] h-[25mm] rounded-xl border border-cyan-500/20 bg-slate-950 flex items-center justify-center p-1">
                 <QRCode
-                  value={`https://gigsda.com/2026?portfolio=${profile.id}`}
+                  value={`https://gigsda.com?portfolio=${profile.id}`}
                   size={76}
                   bgColor="transparent"
                   fgColor="#ffffff"

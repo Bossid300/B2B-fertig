@@ -710,7 +710,7 @@ useEffect(() => {
                 
                 {/* DAS LOGO */}
                 <img 
-                  src="/2026/logos/gigsda-logo-2.svg" 
+                  src="/logos/gigsda-logo-2.svg" 
                   alt="Gigsda Logo" 
                   className="h-6 w-auto object-contain relative z-10 opacity-90 brightness-100 group-hover:opacity-100 group-hover:brightness-125 transition-all duration-300"
                   onError={(e) => {

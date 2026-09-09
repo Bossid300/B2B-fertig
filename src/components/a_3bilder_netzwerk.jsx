@@ -4,19 +4,19 @@ export default function A3bildernetzwerk() {
 
 const cards = [
   {
-    image: '/2026/landing/regional_sichtbar_werden.png',
+    image: '/landing/regional_sichtbar_werden.png',
     alt: 'Standort wählen',
     label: 'Standort wählen',
     color: 'cyan'
   },
   {
-    image: '/2026/landing/community_nutzen.png',
+    image: '/landing/community_nutzen.png',
     alt: 'Gig finden',
     label: 'Gig finden',
     color: 'purple'
   },
   {
-    image: '/2026/landing/neue_kontakte_crew.png',
+    image: '/landing/neue_kontakte_crew.png',
     alt: 'Dabei sein',
     label: 'Dabei sein',
     color: 'pink'
