@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Footer from "./Footer";
 import { Search, MapPin, Ticket, Shield, Sliders, Calendar, ArrowRight, CheckCircle2, ChevronDown, Users, Layers, Award } from 'lucide-react';
 import GuestPass from './GuestPass';
-import Roadmap from "./components/Roadmap";
+import Roadmap from "./pages/info/Roadmap";
 import ASoFunktioniertEs from "./components/a_SoFunktioniertEs";
 import A3bildernetzwerk from "./components/a_3bilder_netzwerk";
 

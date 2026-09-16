@@ -38,6 +38,7 @@ import FAQPage from './pages/info/FAQPage.jsx';
 import AboutGigsda from './pages/info/AboutGigsda.jsx';
 import ContactPage from './pages/info/ContactPage.jsx';
 import CareerPage from './pages/info/CareerPage.jsx';
+import Roadmap from './pages/info/Roadmap.jsx';
 
 
 
@@ -1346,6 +1347,10 @@ useEffect(() => {
  
           {view === 'career' && (
             <CareerPage setView={setView} />
+          )}
+ 
+          {view === 'roadmap' && (
+            <Roadmap setView={setView} />
           )}
  
 

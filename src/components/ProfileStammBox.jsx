@@ -168,7 +168,7 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
         <div className="flex items-center gap-2">
           <User size={14} className="text-purple-400" />
           <span className="text-xs font-black tracking-widest uppercase">
-            // STAMMDATEN REGISTER (KONTOTYP-ID: {formData.role})
+            // STAMMDATEN REGISTER (KONTOTYP: {formData.role})
           </span>
         </div>
         
@@ -208,6 +208,7 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
               <span className="text-yellow-400 text-xs font-mono tracking-widest uppercase">
                 GIGSDA-ID ({id || 'SYS-NEW'})
               </span>
+              
               {canEdit && (
                 <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-400 justify-center sm:justify-start">
                   {show_avatarUrl 

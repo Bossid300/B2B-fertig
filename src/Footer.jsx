@@ -163,6 +163,14 @@ export default function Footer({ setView }) {
               >
                 Karriere
               </button>
+            </li>            
+            <li>
+              <button
+                onClick={() => setView('roadmap')}
+                className="hover:text-cyan-400 transition-colors"
+              >
+                Roadmap
+              </button>
             </li>
             <li className="text-[11px] font-mono text-slate-700 pt-2">© 2026 GIGDATA GmbH</li>
           </ul>
