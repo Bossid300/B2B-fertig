@@ -1,6 +1,7 @@
 import React from "react";
+import Footer from "../../Footer";
 
-export default function Roadmap() {
+export default function Roadmap({ setView }) {
   const completed = [
     "Profile System",
     "Events System",
@@ -41,7 +42,8 @@ export default function Roadmap() {
   ];
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-6 py-10 text-slate-200">
+    <div className="min-h-screen bg-[#050B1F] text-slate-300">
+      <div className="w-full max-w-7xl mx-auto px-6 py-10 text-slate-200">
 
       {/* HERO */}
 
@@ -225,6 +227,11 @@ export default function Roadmap() {
         </p>
       </section>
 
+
     </div>
+          <Footer setView={setView} />    
+          </div>
+
+    
   );
 }
