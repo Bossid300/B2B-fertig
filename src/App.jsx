@@ -16,6 +16,7 @@ import GlobalNavigation from './GlobalNavigation';
 
 import GuestEvents from './GuestEvents';
 import SearchExplorer from './SearchExplorer.jsx';
+import GuestProjectsPage from './GuestProjectsPage';
 import ArtistSearchPage from './components/ArtistSearchPage'; // Pfad anpassen, falls im Unterordner
 import UniversalSearchPage from './components/UniversalSearchPage'; // Pfad anpassen, falls im Unterordner
 
@@ -690,7 +691,7 @@ useEffect(() => {
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#0b0f19] border-b border-slate-900/60 shadow-lg font-mono">
           <div className="w-full bg-[#0b0f19]/95 backdrop-blur-md rounded-b-[14px]">
             {/* 🚨 DANIELS ORIGINALER ZENTRIER-CONTAINER: REPARIERT DAS LAYOUT DER RESTLICHEN SEITE! */}
-            <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+            <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
               
               {/* 🌌 REAKTIVES INTERAKTIVES NAVBAR-LOGO MIT GAST-LINK & HOVER-EFFEKT */}
               <button
@@ -799,6 +800,13 @@ useEffect(() => {
             <GuestEvents 
               onBack={() => setView('landing')} 
               onNavigate={setView}
+            />
+          )}
+
+          {/* 📁 GAST-PROJEKTE ROUTE */}
+          {view === 'guestProjects' && (
+            <GuestProjectsPage
+              setView={setView}
             />
           )}
 

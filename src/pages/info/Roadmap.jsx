@@ -229,8 +229,10 @@ export default function Roadmap({ setView }) {
 
 
     </div>
-          <Footer setView={setView} />    
-          </div>
+    
+          <Footer setView={setView} />
+
+    </div>
 
     
   );
