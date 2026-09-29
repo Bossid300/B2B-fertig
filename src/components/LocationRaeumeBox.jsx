@@ -206,8 +206,10 @@ if (changedEvent) {
       {/* Box Header-Zeile */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/60 pb-5 mb-6">
         <div>
-          <span className="text-xs font-semibold tracking-wider text-cyan-500 uppercase">// 3. Kapazitäten & Technische Details</span>
-          <h2 className="text-xl font-bold text-white tracking-tight mt-0.5">VERFÜGBARE RÄUMLICHKEITEN & TECH-AUSSTATTUNG</h2>
+          <span className="text-xs font-semibold tracking-wider text-cyan-500 uppercase">
+            // Kapazitäten & Technische Details</span>
+          <h2 className="text-xs font-bold text-white tracking-tight mt-0.5">
+            VERFÜGBARE RÄUMLICHKEITEN & TECH-AUSSTATTUNG</h2>
         </div>
 
         {/* CanEdit Weiche aus deiner Stammbox gesteuert */}

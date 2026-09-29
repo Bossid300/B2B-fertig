@@ -158,7 +158,7 @@ export default function ProfileHilfeBox({ currentProfileId, isOwner }) {
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">
         <div className="flex items-center gap-2">
           <HelpCircle size={14} className="text-amber-400" />
-          <span className="text-xs font-black tracking-widest uppercase">// B2B CREW-SUPPORT & NACHBARSCHAFTSHILFE</span>
+          <span className="text-xs font-black tracking-widest uppercase">// CREW-SUPPORT & NACHBARSCHAFTSHILFE</span>
         </div>
         
         <div className="flex items-center gap-2">

@@ -123,7 +123,7 @@ export default function ProfileSocialBox({ currentProfileId, isOwner }) {
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">
         <div className="flex items-center gap-2">
           <Share2 size={14} className="text-cyan-400" />
-          <span className="text-xs font-black tracking-widest uppercase">// B2B SOCIAL-RADAR & WEB-LINKS</span>
+          <span className="text-xs font-black tracking-widest uppercase">// SOCIAL-RADAR & WEB-LINKS</span>
         </div>
         
         <div className="flex items-center gap-2">

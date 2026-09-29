@@ -144,7 +144,7 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">
         <div className="flex items-center gap-2">
           <Award size={14} className="text-cyan-400" />
-          <span className="text-xs font-black tracking-widest uppercase">// SKILLS & CERTIFICATES MATRIX</span>
+          <span className="text-xs font-black tracking-widest uppercase">// Kompetenz & Zertifizierung</span>
         </div>
         
         {canEdit && !isEditing && (
@@ -165,13 +165,13 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
           {/* SKILLS DISPLAY */}
           <div className="space-y-2">
             <div className="flex justify-between items-center border-b border-slate-900 pb-1">
-              <span className="text-[10px] text-slate-500 font-bold uppercase">// CORE SKILLS</span>
+              <span className="text-[10px] text-slate-500 font-bold uppercase">// Kompetenzen</span>
               {canEdit && (showSkills ? <Eye size={12} className="text-cyan-500/50" /> : <EyeOff size={12} className="text-slate-700" />)}
             </div>
             <div className="flex flex-wrap gap-1.5 pt-1">
               {skills.length > 0 ? (
                 skills.map((s, idx) => (
-                  <span key={idx} className="px-2.5 py-1 text-[10px] bg-slate-900 border border-slate-800 text-slate-300 rounded-md font-bold uppercase tracking-wide">
+                  <span key={idx} className="px-2.5 py-1 text-[12px] bg-slate-900 border border-slate-800 text-slate-300 rounded-md font-bold uppercase tracking-wide">
                     ⚡ {s}
                   </span>
                 ))
@@ -184,7 +184,7 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
           {/* CERTIFICATES DISPLAY */}
           <div className="space-y-2">
             <div className="flex justify-between items-center border-b border-slate-900 pb-1">
-              <span className="text-[10px] text-slate-500 font-bold uppercase">// BEHÖRDLICHE NACHWEISE</span>
+              <span className="text-[10px] text-slate-500 font-bold uppercase">// NACHWEISE</span>
               {canEdit && (showCertificates ? <Eye size={12} className="text-cyan-500/50" /> : <EyeOff size={12} className="text-slate-700" />)}
             </div>
             <div className="flex flex-col gap-1.5 pt-1">
@@ -209,7 +209,7 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
             {/* SKILLS FORMULAR */}
             <div className="space-y-3">
               <div className="flex justify-between items-center border-b border-slate-900 pb-1">
-                <span className="text-[10px] text-slate-500 font-bold uppercase">// CORE SKILLS VERWALTEN</span>
+                <span className="text-[10px] text-slate-500 font-bold uppercase">// Kernkompetenzen</span>
                 <button 
                   type="button" 
                   onClick={() => setShowSkills(!showSkills)} 
@@ -243,7 +243,7 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
             {/* CERTIFICATES FORMULAR */}
             <div className="space-y-3">
               <div className="flex justify-between items-center border-b border-slate-900 pb-1">
-                <span className="text-[10px] text-slate-500 font-bold uppercase">// NACHWEISE VERWALTEN</span>
+                <span className="text-[10px] text-slate-500 font-bold uppercase">// NACHWEISE </span>
                 <button 
                   type="button" 
                   onClick={() => setShowCertificates(!showCertificates)} 

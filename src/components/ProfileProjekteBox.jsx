@@ -133,7 +133,7 @@ const toggleProjectPrivacy = async () => {
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">
         <div className="flex items-center gap-2">
           <Briefcase size={14} className="text-purple-400" />
-          <span className="text-xs font-black tracking-widest uppercase">// MY B2B CREW-ENGAGEMENTS & REFERENZEN</span>
+          <span className="text-xs font-black tracking-widest uppercase">// ENGAGEMENTS & REFERENZEN</span>
         </div>
         
         {canEditPrivacy && (

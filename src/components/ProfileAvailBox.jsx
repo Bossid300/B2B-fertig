@@ -105,7 +105,7 @@ const canEdit = isOwner || currentProfileId === localStorage.getItem('gigsda_pro
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">
         <div className="flex items-center gap-2">
           <Calendar size={14} className="text-emerald-400" />
-          <span className="text-xs font-black tracking-widest uppercase">// B2B AVAIL DISPONENTEN KALENDER</span>
+          <span className="text-xs font-black tracking-widest uppercase">// Kapazitäts- & Einsatzkalender</span>
         </div>
         
         <div className="flex items-center gap-2">

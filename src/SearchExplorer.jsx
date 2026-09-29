@@ -251,7 +251,12 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
 
     setAllUsers(
       normalizedProfiles.filter(
-        user => user && user.name
+        user =>
+          user &&
+          (
+            user.name?.trim() ||
+            user.Klarname?.trim()
+          )
       )
     );
 

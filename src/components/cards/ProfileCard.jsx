@@ -1,12 +1,58 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import {
+  getFavoriteCount,
+  getEvents
+} from "../../services/apiService";
 
 export default function ProfileCard({
  user,
  onProfile,
  onRequest,
- isGuest = false
+ isGuest = false,
+ favoriteCount = 0
 }) {
   const [expanded, setExpanded] = useState(false);
+
+  const [realFavoriteCount, setRealFavoriteCount] = useState(0);
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    getFavoriteCount(user.id)
+      .then(count => {
+        setRealFavoriteCount(count);
+      })
+      .catch(() => {
+        setRealFavoriteCount(0);
+      });
+  }, [user?.id]);
+
+
+  const [projectCount, setProjectCount] = useState(0);
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    getEvents()
+      .then(events => {
+        const count = events.filter(event =>
+          event &&
+          (
+            event.ownerId === user.id ||
+            event.owner_id === user.id ||
+            event.crewIds?.includes(user.id)
+          )
+        ).length;
+
+        setProjectCount(count);
+      })
+      .catch(() => {
+        setProjectCount(0);
+      });
+
+  }, [user?.id]);
+
+
 
   const roleStyles = {
     Veranstalter: "bg-pink-500/10 border border-pink-500/30 text-pink-400",
@@ -71,7 +117,11 @@ export default function ProfileCard({
       <div className="absolute top-12 left-4 z-20">
         <div className="w-16 h-16 rounded-full border-2 border-slate-950 overflow-hidden bg-slate-900 shadow-xl">
           {user.avatarUrl ? (
-            <img src={user.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+            <img 
+              src={user.avatarUrl} 
+              alt="Avatar" 
+              className="w-full h-full object-cover" 
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-xs font-black text-slate-600 bg-slate-900">
               {user.name?.substring(0, 2).toUpperCase()}
@@ -84,6 +134,9 @@ export default function ProfileCard({
       <div className="p-4 pt-7 pl-4">
         <div className="mb-4">
           <h3 className="text-xl font-black uppercase text-white tracking-wide group-hover:text-cyan-400 transition-colors">
+            {user.Klarname}
+          </h3>
+          <h3 className="text-xm font-black uppercase text-white tracking-wide group-hover:text-cyan-400 transition-colors">
             {user.name}
           </h3>
           <p className="text-[11px] uppercase mt-0.5">
@@ -140,8 +193,8 @@ export default function ProfileCard({
             <div className="col-span-2 grid grid-cols-2 gap-6 pt-2">
               <div>
                 <div className="text-slate-500 mb-1 font-semibold">COMMUNITY</div>
-                <div className="text-slate-400">💛 12 Favoriten</div>
-                <div className="text-slate-400">⛺ 3 Projekte</div>
+                <div className="text-slate-400">💛 {realFavoriteCount} Favoriten</div>
+                <div className="text-slate-400">⛺ {projectCount} Projekte</div>
               </div>
 
               {role === "Künstler" && (

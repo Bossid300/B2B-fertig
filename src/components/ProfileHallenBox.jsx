@@ -146,8 +146,10 @@ export default function ProfileHallenBox({ currentProfileId, isOwner }) {
       {/* HEADER DER BOX */}
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-5">
         <div className="flex flex-col">
-          <span className="text-[10px] text-slate-500 font-bold tracking-widest uppercase">// 3. KAPAZITÄTEN & BESTUHLUNGSVARIANTEN</span>
-          <span className="text-xs font-black tracking-wider uppercase text-slate-200 mt-0.5">VERFÜGBARE RÄUMLICHKEITEN & TECH-AUSSTATTUNG</span>
+          <span className="text-xs font-black tracking-wider uppercase text-slate-200 mt-0.5">
+            🏢 // KAPAZITÄTEN & BESTUHLUNGSVARIANTEN</span>
+          <span className="text-xs font-black tracking-wider uppercase text-slate-200 mt-0.5">
+            VERFÜGBARE RÄUMLICHKEITEN & TECH-AUSSTATTUNG</span>
         </div>
         
         <div className="flex items-center gap-2">
@@ -184,7 +186,7 @@ export default function ProfileHallenBox({ currentProfileId, isOwner }) {
                 {/* RAUM HEADER ZEILE */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-900/50 pb-2 gap-2">
                   <div className="text-xs font-black text-white uppercase tracking-wide flex items-center gap-2">
-                    🏢 RAUM {idx + 1}: {room.name || 'UNBENANNTER BEREICH'}
+                    RAUM {idx + 1}: {room.name || 'UNBENANNTER BEREICH'}
                   </div>
                   
                   {/* INLINE TECH INDICATORS */}

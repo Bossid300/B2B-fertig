@@ -3,8 +3,10 @@ import { Users, Eye, EyeOff } from 'lucide-react';
 import {
   saveProfile,
   getProfilesDb,
-  getCrewRequests
+  getCrewRequests,
+  getFavoriteCount
 } from '../services/apiService';
+
 
 
 export default function ProfileNetworkBox({ currentProfileId, isOwner }) {
@@ -31,7 +33,7 @@ export default function ProfileNetworkBox({ currentProfileId, isOwner }) {
           localStorage.getItem(favoriteKey);
 
         getProfilesDb()
-          .then(allProfiles => {
+          .then(async allProfiles => {
 
             const found = allProfiles.find(
               p => p?.id === currentProfileId
@@ -44,10 +46,10 @@ export default function ProfileNetworkBox({ currentProfileId, isOwner }) {
                 ? JSON.parse(found.profile_json)
                 : found;
 
-const profileName =
-  (profile?.name || '')
-    .trim()
-    .toLowerCase();
+            const profileName =
+              (profile?.name || '')
+                .trim()
+                .toLowerCase();
 
 
             setProfile(profile);
@@ -59,10 +61,21 @@ const profileName =
 
             const partnerList =
               allProfiles
+                .map(p => {
+                  const data =
+                    typeof p.profile_json === 'string'
+                      ? JSON.parse(p.profile_json)
+                      : (p.profile_json || {});
+
+                  return {
+                    ...p,
+                    ...data
+                  };
+                })
                 .filter(p =>
                   p &&
-                  p.name?.toLowerCase() !==
-                    profileName &&
+                  p.id !== currentProfileId &&
+                  (p.name || p.Klarname) &&
                   (
                     p.role === profile.role ||
                     p.city === profile.city ||
@@ -81,54 +94,19 @@ const profileName =
               (profile.category || '').trim().toLowerCase()
             ].filter(v => v !== '');
 
-            const savedFavs =
-              localStorage.getItem(favoriteKey);
+            const myRequests = reqs.filter(r =>
+              r &&
+              r.requestedProfileId === currentProfileId &&
+              r.status === 'accepted'
+            );
 
-            let myRequests = [];
+            const favoriteCount =
+              await getFavoriteCount(currentProfileId);
 
-              if (
-                profileName ===
-                loggedInUser.toLowerCase()
-              ) {
-              myRequests = reqs.filter(
-                r =>
-                  r &&
-                  r.requestedProfileName &&
-                  nameVariations.includes(
-                    r.requestedProfileName.trim().toLowerCase()
-                  )
-              );
-            } else {
-              myRequests = reqs.filter(
-                r =>
-                  r &&
-                  r.requesterProfileName &&
-                  nameVariations.includes(
-                    r.requesterProfileName.trim().toLowerCase()
-                  )
-              );
-            }
-
-            const favs =
-              JSON.parse(savedFavs || '[]');
-
-            const isFavInLists =
-              favs.filter(f => {
-                if (!f) return false;
-
-                const entryName =
-                  typeof f === 'object' && f.name
-                    ? f.name
-                    : f;
-
-                return nameVariations.includes(
-                  entryName.trim().toLowerCase()
-                );
-              });
 
             setStats({
               requestsCount: myRequests.length,
-              favoritedByCount: isFavInLists.length
+              favoritedByCount: favoriteCount
             });
           })
           .catch(console.error);
@@ -194,7 +172,7 @@ const profileName =
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">
         <div className="flex items-center gap-2">
           <Users size={14} className="text-cyan-400" />
-          <span className="text-xs font-black tracking-widest uppercase">// B2B NETWORK & ALLIANZEN</span>
+          <span className="text-xs font-black tracking-widest uppercase">// NETZWERK & ALLIANZEN</span>
         </div>
         
         {canEditPrivacy && (
@@ -212,9 +190,9 @@ const profileName =
         
         {/* NETWORK STATUS / LIVE-METRIKEN */}
         <div className="p-3 bg-slate-900/30 border border-slate-900 rounded-2xl flex flex-col justify-center space-y-2">
-          <div className="text-[10px] text-slate-500 font-bold tracking-wider uppercase">// PLATFORM KPI STATUS</div>
+          <div className="text-[10px] text-slate-500 font-bold tracking-wider uppercase">// Netzwerk STATUS</div>
           <div className="flex items-center justify-between border-b border-slate-900/50 py-1">
-            <span className="text-xs text-slate-400">Crew Buchungen:</span>
+            <span className="text-xs text-slate-400">Buchungen:</span>
             <span className="text-xs text-cyan-400 font-black font-mono">{stats.requestsCount}x Aktiv</span>
           </div>
           <div className="flex items-center justify-between py-1">
@@ -225,30 +203,54 @@ const profileName =
 
         {/* VERKNÜPFTE CREW-PARTNER */}
         <div className="md:col-span-2 space-y-2">
-          <div className="text-[10px] text-slate-500 font-bold tracking-wider uppercase">// DIREKTE SYNERGIEN & NETZWERK-STAMM</div>
-          
+          <div className="text-[10px] text-slate-500 font-bold tracking-wider uppercase">
+            // Matching
+          </div>
+
           {!isNetworkVisible ? (
-            <div className="p-4 bg-slate-900/10 border border-slate-900 rounded-xl text-center text-xs text-slate-600 font-mono">// PARTNERLISTE VOM INHABER AUSGEBLENDET</div>
+            <div className="p-4 bg-slate-900/10 border border-slate-900 rounded-xl text-center text-xs text-slate-600 font-mono">
+              // PARTNERLISTE VOM INHABER AUSGEBLENDET
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {networkUsers.length > 0 ? (
                 networkUsers.map((user, idx) => (
-                  <div key={idx} className="p-2.5 bg-slate-900/60 border border-slate-800 rounded-xl flex items-center gap-2.5 hover:border-cyan-500/50 transition-all">
+                  <div
+                    key={user.id || idx}
+                    className="p-2.5 bg-slate-900/60 border border-slate-800 rounded-xl flex items-center gap-2.5 hover:border-cyan-500/50 transition-all"
+                  >
+                    {/* AVATAR */}
                     <div className="w-7 h-7 rounded-full overflow-hidden border border-slate-800 bg-slate-950 shrink-0">
+                      {user.avatarUrl ? (
                       <img 
-                        src={user.avatarUrl && user.avatarUrl.trim() !== "" ? user.avatarUrl : "https://unsplash.com"} 
-                        alt="Partner" 
-                        className="w-full h-full object-cover"
+                        src={user.avatarUrl} 
+                        alt="Avatar" 
+                        className="w-full h-full object-cover" 
                       />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[9px] font-black text-slate-500">
+                          {(user.name || user.Klarname || 'PA')
+                            .substring(0, 2)
+                            .toUpperCase()}
+                        </div>
+                      )}
                     </div>
+                    {/* PROFILDATEN */}
                     <div className="flex flex-col truncate">
-                      <span className="text-[10px] text-white font-bold truncate uppercase">{user.name}</span>
-                      <span className="text-[8px] text-slate-500 truncate uppercase font-mono">{user.category || user.role || 'Partner'}</span>
+                      <span className="text-[10px] text-white font-bold truncate uppercase">
+                        {user.name || user.Klarname || 'Partner'}
+                      </span>
+
+                      <span className="text-[8px] text-slate-500 truncate uppercase font-mono">
+                        {user.category || user.role || 'Partner'}
+                      </span>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="sm:col-span-3 p-4 bg-slate-900/10 border border-slate-900 rounded-xl text-center text-xs text-slate-600 font-mono">// NOCH KEINE NETZWERK-KOPPLUNGEN</div>
+                <div className="sm:col-span-3 p-4 bg-slate-900/10 border border-slate-900 rounded-xl text-center text-xs text-slate-600 font-mono">
+                  // NOCH KEINE NETZWERK-KOPPLUNGEN
+                </div>
               )}
             </div>
           )}

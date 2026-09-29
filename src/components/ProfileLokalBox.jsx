@@ -175,7 +175,7 @@ export default function ProfileLokalBox({ currentProfileId, isOwner }) {
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">
         <div className="flex items-center gap-2">
           <Database size={14} className="text-purple-400" />
-          <span className="text-xs font-black tracking-widest uppercase">// LOCAL SYSTEM CONTROL & PROTOCOL BACKUP</span>
+          <span className="text-xs font-black tracking-widest uppercase">// Lokale Systemkontrolle & Datensicherung</span>
         </div>
         <div className="text-[10px] text-slate-500 font-bold font-mono">ALLOKATION: {dataSize}</div>
       </div>
@@ -194,7 +194,7 @@ export default function ProfileLokalBox({ currentProfileId, isOwner }) {
 
         {/* IMPORT INPUT */}
         <label className="flex items-center justify-center gap-2 p-3 bg-slate-900/40 border border-slate-800 rounded-2xl text-xs font-bold hover:border-cyan-500/50 hover:text-cyan-400 transition-all cursor-pointer uppercase tracking-wider text-center">
-          <Upload size={13} /> Protokoll Laden
+          <Upload size={13} /> Backup Upload
           <input type="file" accept=".json" onChange={handleImport} className="hidden" />
         </label>
 

@@ -198,7 +198,7 @@ const profileName =
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">
         <div className="flex items-center gap-2">
           <Star size={14} className="text-amber-400 fill-amber-400" />
-          <span className="text-xs font-black tracking-widest uppercase">// B2B CREDIBILITY & REVIEWS ({averageStars} ⭐)</span>
+          <span className="text-xs font-black tracking-widest uppercase">// Bewertungsportal ({averageStars} ⭐)</span>
         </div>
         
         {canEditPrivacy && (

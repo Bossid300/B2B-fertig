@@ -31,13 +31,15 @@ export default function Roadmap({ setView }) {
   ];
 
   const upcoming = [
+    "Voting System",
+    "Verfügbarkeitskalender",
     "Notification Center",
     "Activity Feed",
     "Realtime Chat",
     "Matrix Search V2",
     "Referral System V2",
     "Ticketing Integration",
-    "Agency Accounts",
+    "Premium Accounts",
     "Team Funktionen",
   ];
 

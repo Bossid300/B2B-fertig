@@ -364,6 +364,16 @@ export async function getFavorites(
   return data.favorites || [];
 }
 
+export async function getFavoriteCount(profileId) {
+  const response = await fetch(
+    `${API_BASE}/getFavoriteCount.php?profile_id=${profileId}`
+  );
+
+  const data = await response.json();
+
+  return Number(data.count || 0);
+}
+
 export async function deleteFavorite(
   profileId,
   favoriteProfileId

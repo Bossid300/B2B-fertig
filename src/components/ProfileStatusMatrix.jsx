@@ -69,7 +69,7 @@ export default function ProfileStatusMatrix({ currentProfileId }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-900 pb-3 mb-3">
         <div className="flex items-center gap-2">
           <Activity size={14} className="text-cyan-400 animate-pulse" />
-          <span className="text-xs font-black tracking-widest uppercase">// B2B COMPLIANCE & INTELLIGENCE RADAR</span>
+          <span className="text-xs font-black tracking-widest uppercase">// Profilvalidierung & Profileingaben-Check</span>
         </div>
         
         {score === 100 ? (

@@ -135,7 +135,7 @@ export default function ProfileLogistikBox({ currentProfileId, isOwner }) {
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">
         <div className="flex items-center gap-2">
           <Truck size={14} className="text-emerald-400" />
-          <span className="text-xs font-black tracking-widest uppercase">// B2B MOBILITY & LOGISTICS RADIUS</span>
+          <span className="text-xs font-black tracking-widest uppercase">// Mobilität & LOGISTIK RADIUS</span>
         </div>
         
         <div className="flex items-center gap-2">

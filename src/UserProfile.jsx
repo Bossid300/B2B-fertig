@@ -150,7 +150,8 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
 
       <ProfileStammBox currentProfileId={currentProfileId} isOwner={isOwner}/>
       <ProfileStatusMatrix currentProfileId={currentProfileId} />
-      
+      {isOwner && (
+        <>
       <div className="bg-slate-900/40 border border-cyan-500/20 rounded-2xl p-4 mb-4">
         <h3 className="text-xs font-black uppercase text-cyan-400 tracking-wider">
           🔍 // Live-Vorschau SearchExplorer
@@ -165,7 +166,8 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
       </div>
 
       <ProfileCard user={profileData} />
-      
+      </>
+      )}
       <ProfileBioTabsBox currentProfileId={currentProfileId} isOwner={isOwner} />
       <ArtistAudioBox currentProfileId={currentProfileId} isOwner={isOwner} />
       <ArtistStammBox currentProfileId={currentProfileId} isOwner={isOwner} />

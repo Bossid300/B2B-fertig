@@ -135,7 +135,7 @@ export default function ProfileGalleryBox({ currentProfileId, isOwner }) {
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">
         <div className="flex items-center gap-2">
           <Image size={14} className="text-pink-500" />
-          <span className="text-xs font-black tracking-widest uppercase">// B2B PORTFOLIO GALLERY</span>
+          <span className="text-xs font-black tracking-widest uppercase">// GALLERY Auftritte & Referenzen</span>
         </div>
         
         {canEdit && !isEditing && (

@@ -150,7 +150,7 @@ const { company_uid, steuernummer, tax_type, rate_hour, rate_day, payment_terms,
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">
         <div className="flex items-center gap-2">
           <Landmark size={14} className="text-amber-500" />
-          <span className="text-xs font-black tracking-widest uppercase">// B2B FINANCE & SETTLEMENT PROTOCOL</span>
+          <span className="text-xs font-black tracking-widest uppercase">// Finanz- und Abwicklungsvereinbarung</span>
         </div>
         
         <div className="flex items-center gap-2">

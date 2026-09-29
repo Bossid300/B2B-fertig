@@ -127,7 +127,7 @@ export default function ArtistStammBox({ currentProfileId, isOwner }) {
         <h2 className="text-sm font-bold text-white tracking-widest uppercase flex items-center gap-2">
           <Sliders className="w-4 h-4 text-indigo-400" /> // Musikalische Stammdaten & Tech-Specs
         </h2>
-        {!isEditing && (isOwner || true) && (
+        {!isEditing && isOwner && (
           <button
             onClick={() => setIsEditing(true)}
             className="flex items-center gap-1.5 px-4 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold rounded uppercase tracking-wider transition-all border border-slate-700"
