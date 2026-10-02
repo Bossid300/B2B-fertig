@@ -64,6 +64,12 @@ export default function EventCard({ event }) {
 
   const [expanded, setExpanded] = useState(false);
 
+  const venueParts = (event.city || "").split(",").map(v => v.trim());
+
+  const venueName = venueParts[0] || "";
+  const venueAddress = venueParts[1] || "";
+  const venueCity = venueParts.slice(2).join(", ");
+
   return (
 
     <div className="
@@ -141,19 +147,33 @@ export default function EventCard({ event }) {
           </div>
 
           <div className="pt-3 border-t border-slate-900 flex justify-between text-xs text-slate-400">
-            <span>
-              STADT:
-              <strong className="text-slate-200 ml-1">
-                {event.city || 'Nicht hinterlegt'}
-              </strong>
+            {/* STADT / LOCATION */}
+            <div className="flex flex-col min-w-0">
+              <span className="text-slate-400 uppercase mb-1">
+                Stadt
               </span>
-              <span>
+
+              <strong className="text-slate-200 leading-tight">
+                {venueName}
+              </strong>
+
+              <span className="text-slate-400 leading-tight">
+                {venueAddress}
+              </span>
+
+              <span className="text-slate-400 leading-tight">
+                {venueCity}
+              </span>
+            </div>
+
+            <span>
               DISTANZ:
               <strong className="text-cyan-400 ml-1">
                 {getDistanceTo(event.city)} KM
               </strong>
             </span>
           </div>
+          
         </div>
 
         {/* 3. EXPANDED-DETAILS BEREICH (Schon perfekt abgesichert) */}

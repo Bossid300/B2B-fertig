@@ -161,7 +161,7 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
   );
 
   return (
-    <div className="w-full max-w-5xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white relative select-none">
+    <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white relative select-none">
       
       {/* HEADER DER MATRIX */}
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">

@@ -10,15 +10,22 @@ import EventPlanner from './EventPlanner';
 import EventPromotion from './EventPromotion';
 import LiveCountdown from './LiveCountdown';
 import ProfileSettings from './ProfileSettings';
+
 // 👈 Lade Navigation
 import GuestNavigation from './GuestNavigation';
 import GlobalNavigation from './GlobalNavigation';
 
 import GuestEvents from './GuestEvents';
+
 import SearchExplorer from './SearchExplorer.jsx';
+
+import CalendarPage from './CalendarPage';
+
 import GuestProjectsPage from './GuestProjectsPage';
-import ArtistSearchPage from './components/ArtistSearchPage'; // Pfad anpassen, falls im Unterordner
-import UniversalSearchPage from './components/UniversalSearchPage'; // Pfad anpassen, falls im Unterordner
+
+import ArtistSearchPage from './components/ArtistSearchPage';
+import UniversalSearchPage from './components/UniversalSearchPage';
+
 
 
 import TermsPage from './pages/info/TermsPage.jsx';
@@ -1303,6 +1310,14 @@ useEffect(() => {
             />
           )}
           
+          {view === 'calendar' && (
+            <CalendarPage
+              setView={setView}
+              currentProfileId={currentProfile?.id}
+              currentProfileType={currentProfile?.role}
+            />
+          )}
+
 
           {/* ========================================================================= */}
           {/* FOOTER UNTERSEITEN                                                        */}

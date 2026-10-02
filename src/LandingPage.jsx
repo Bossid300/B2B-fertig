@@ -3,6 +3,7 @@ import Footer from "./Footer";
 import { Search, MapPin, Ticket, Shield, Sliders, Calendar, ArrowRight, CheckCircle2, ChevronDown, Users, Layers, Award } from 'lucide-react';
 import GuestPass from './GuestPass';
 import Roadmap from "./pages/info/Roadmap";
+import LandingEventPromo from "./components/LandingEventPromo";
 import ASoFunktioniertEs from "./components/a_SoFunktioniertEs";
 import A3bildernetzwerk from "./components/a_3bilder_netzwerk";
 
@@ -179,35 +180,10 @@ const [videoMuted, setVideoMuted] = useState(true);
                */}
             </div>
         </div>
-
       </div>
 
-      {/* 📊 DIE DREI NEON-BAND-KACHELN (1-ZU-1 DESIGNEFFECT AUS DEM SCREENSHOT!) */}
-      <div className="max-w-6xl mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-3 gap-5 mb-16 z-10 relative">
-        {initialGigs.map((gig) => (
-          <div 
-            key={gig.id}
-            className="
-            p-[2px] bg-gradient-to-r from-cyan-500/80 to-pink-500/80 rounded-2xl shadow-lg hover:shadow-[0_0_20px_rgba(236,72,153,0.15)] transition-all duration-300 transform hover:scale-[1.01] flex flex-col
-            "
-          >
-            <div className="bg-[#0b0f19] rounded-[14px] p-4 flex items-center gap-4 text-left h-full">
-              {/* BAND-FOTO */}
-              <div className="w-16 h-16 rounded-xl border border-slate-800 overflow-hidden shrink-0 relative bg-slate-950">
-                <img src={gig.img} alt={gig.title} className="w-full h-full object-cover filter brightness-90 contrast-110" />
-              </div>
-              {/* DETAILS */}
-              <div className="space-y-0.5 min-w-0 font-sans">
-                <span className="text-[9px] text-slate-400 font-bold block">Datum: {gig.date}</span>
-                <h3 className="text-base font-black text-white uppercase tracking-wide truncate">{gig.title}</h3>
-                <span className="text-[10px] text-slate-400 font-medium block truncate">Location: <span className="text-slate-300 font-bold">{gig.location}</span></span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-
+      {/* LIVE EVENT PROMOTION */}
+      <LandingEventPromo />
 
       {/* 🛠️ SPERREN-SEKTION: "SO FUNKTIONIERT ES" */}
        <ASoFunktioniertEs onEnterCenter={onEnterCenter} />

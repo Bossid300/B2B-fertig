@@ -59,7 +59,7 @@
   background: #0b0f19; /* Dunkler Hintergrund */
   padding: 24px;
 }
- 
+
 .gigsda-box {
   display: flex;
   align-items: center;
@@ -75,7 +75,7 @@
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
 }
- 
+
 /* Aktiver / Hover-Zustand mit Neon-Glow */
 .gigsda-box:hover,
 .gigsda-box.active {
@@ -83,7 +83,7 @@
   box-shadow: 0 0 15px rgba(0, 229, 255, 0.25);
   background: rgba(0, 229, 255, 0.05);
 }
- 
+
 .gigsda-icon {
   width: 24px;
   height: 24px;
@@ -94,7 +94,7 @@
   stroke-linejoin: round;
   flex-shrink: 0;
 }
- 
+
 /* ========================================================================= */
 /* PASSPRINT                                                                 */
 /* ========================================================================= */
@@ -106,4 +106,13 @@
 
 .no-spinner {
   -moz-appearance: textfield;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

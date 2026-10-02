@@ -126,15 +126,15 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
 
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl relative space-y-6">
+    <div className="max-w-6xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl relative space-y-6">
 
       {/* ZURÜCK LINK (OPTIONAL, FALLS DU EINEN BUTTON BRAUCHST) */}
-      {typeof onBack === 'function' && (
+{/*       {typeof onBack === 'function' && (
         <button onClick={onBack} className="text-[10px] uppercase text-slate-500 hover:text-white mb-2 transition-all cursor-pointer font-black">
           &lt; [ Back to Terminal ]
         </button>
       )}
-
+ */}
       {/* BOX 0: Deine Crew-Zentrale (Anfragen) */}
       <CrewRequestCenter currentProfileId={currentProfileId} />
 
@@ -152,7 +152,7 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
       <ProfileStatusMatrix currentProfileId={currentProfileId} />
       {isOwner && (
         <>
-      <div className="bg-slate-900/40 border border-cyan-500/20 rounded-2xl p-4 mb-4">
+      <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
         <h3 className="text-xs font-black uppercase text-cyan-400 tracking-wider">
           🔍 // Live-Vorschau SearchExplorer
         </h3>

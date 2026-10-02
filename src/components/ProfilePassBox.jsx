@@ -58,7 +58,7 @@ export default function ProfilePassBox({ currentProfileId, profileId, setView, s
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto my-6 space-y-6">
+    <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
       
       {/* INJEKTION FÜR DEN FILTER (Zwingt das PDF zum Dark-Design und steuert die Bilder) */}
       <style dangerouslySetInnerHTML={{__html: `

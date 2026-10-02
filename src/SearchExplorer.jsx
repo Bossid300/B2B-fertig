@@ -363,7 +363,7 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Verleiher', 'Location', 'Ve
 
 
 return (
-  <div className="max-w-7xl mx-auto p-6 text-white min-h-screen font-mono relative">
+  <div className="max-w-6xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl relative space-y-6">
 
       {/* BANNER HEADER */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 border border-slate-900 p-8 mb-8 shadow-2xl">
@@ -372,9 +372,11 @@ return (
         </div>
         <div className="relative z-10 max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-950/40 border border-cyan-500/30 text-cyan-400 text-[10px] font-black uppercase tracking-widest mb-4 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
-            <ShieldCheck size={12} /> Gigsda Engine V3.0 Activated
+            <ShieldCheck size={12} /> Gigsda Engine V1.0 Activated
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2 bg-gradient-to-r from-white via-slate-200 to-slate-500 bg-clip-text text-transparent">B2B Crew Explorer</h1>
+          <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2 bg-gradient-to-r from-white via-slate-200 to-slate-500 bg-clip-text text-transparent">
+            Crew Explorer
+          </h1>
           <p className="text-xs text-slate-400 leading-relaxed max-w-lg uppercase tracking-wide">
             Durchsuche das verifizierte Gigsda-Netzwerk nach Technikern, Künstlern und Allianzen für deine anstehenden Produktionen.
           </p>

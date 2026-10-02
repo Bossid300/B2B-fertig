@@ -173,13 +173,23 @@ useEffect(() => {
           onClick={() => triggerNav('radar')}
           className={`${desktopBase} ${view === 'radar' ? activeClass : inactiveClass}`}
         >
-          🗣 SEARCH-EXPLORER
+          🗣 CREW-EXPLORER
         </span>
         <span
           onClick={() => triggerNav('guestEvents')}
           className={`${desktopBase} ${view === 'guestEvents' ? activeClass : inactiveClass}`}
         >
           📅 EVENTS-RADAR
+        </span>
+        <span
+          onClick={() => triggerNav('calendar')}
+          className={`${desktopBase} ${
+            view === 'calendar'
+              ? activeClass
+              : inactiveClass
+          }`}
+        >
+          📅 KALENDER
         </span>
         <span
           onClick={() => triggerNav('projects')}
@@ -316,12 +326,26 @@ useEffect(() => {
           <button onClick={() => triggerNav('radar')} className={`${mobileBase} ${view === 'radar' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
             🗣 SEARCH-EXPLORER
           </button>
+
           <button onClick={() => triggerNav('guestEvents')} className={`${mobileBase} ${view === 'guestEvents' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
             📅 EVENTS-RADAR
           </button>
+
+          <button
+            onClick={() => triggerNav('calendar')}
+            className={`${mobileBase} ${
+              view === 'calendar'
+                ? 'bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold'
+                : 'text-slate-400 border-transparent'
+            }`}
+          >
+            📅 KALENDER
+          </button>
+
           <button onClick={() => triggerNav('projects')} className={`${mobileBase} ${view === 'projects' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
             📁 PROJEKTE
           </button>
+
           <button
             onClick={() => triggerNav('pricing')}
             className={`${mobileBase} ${
@@ -331,7 +355,8 @@ useEffect(() => {
             }`}
           >
             💎 PREISE
-          </button>        
+          </button>       
+
         </div>
       )}
   </div>

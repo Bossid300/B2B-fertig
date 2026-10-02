@@ -418,7 +418,7 @@ const submitB2BRequest = async (project) => {
 
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-3 mb-6 text-white select-none font-mono">
+    <div className="w-full mx-auto space-y-3 mb-6 text-white select-none font-mono">
       
       {/* CONTROLLER BAR */}
       <div className="w-full bg-slate-950 border border-slate-900 p-3 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl">
@@ -457,7 +457,6 @@ const submitB2BRequest = async (project) => {
           <button type="button" onClick={() => setIsRequestMaskOpen(true)} className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-950/40 border border-purple-900/50 text-purple-400 text-[10px] font-mono hover:border-purple-500 transition-all cursor-pointer shadow-md uppercase font-black tracking-wider whitespace-nowrap"><MessageSquare size={10} /> Anfrage</button>
           <button type="button" onClick={handleToggleFavorite} className={`flex items-center gap-1 px-3 py-1.5 rounded-xl border text-[10px] font-mono transition-all cursor-pointer shadow-md uppercase font-black tracking-wider whitespace-nowrap ${isFavorite ? 'bg-amber-950/40 border-amber-500 text-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.1)]' : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'}`}><span>{isFavorite ? '★' : '☆'}</span> {isFavorite ? 'Aktiv' : 'Favorit'}</button>
           <button type="button" onClick={() => { localStorage.setItem('gigsda_current_view', 'crewfavoriten'); if (typeof setView === 'function') { setView('crewfavoriten'); } window.location.reload(); }} className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-cyan-900/50 bg-cyan-950/20 text-cyan-400 text-[10px] font-mono hover:border-cyan-500 transition-all cursor-pointer shadow-md uppercase font-black tracking-wider whitespace-nowrap">⭐ Pool</button>
-          <button type="button" onClick={() => window.history.back()} className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-white text-[10px] font-mono hover:border-slate-600 transition-all cursor-pointer uppercase font-black tracking-wider whitespace-nowrap">&lt; Back</button>
         </div>
       </div>
 

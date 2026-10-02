@@ -33,7 +33,7 @@ export default function GuestNavigation({ setView, activeView }) {
           <button 
             onClick={() => handleNavClick('radar')} 
             className={`${desktopBase} ${activeView === 'radar' ? activeClass : inactiveClass}`}>
-            🗣 SEARCH-EXPLORER
+            🗣 CREW-EXPLORER
           </button>          
           <button onClick={() => handleNavClick('guestEvents')} 
           className={`${desktopBase} ${activeView === 'guestEvents' ? activeClass : inactiveClass}`}>

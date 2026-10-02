@@ -258,7 +258,7 @@ const eventLimitReached =
 currentEvents >= maxEvents;
 
   return (
-    <div className="space-y-6 my-6 max-w-4xl mx-auto text-slate-300 text-xs font-mono animate-fade-in">
+    <div className="max-w-6xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl relative space-y-6">
       
       {/* 📊 DIE NEUE MANAGER-KOMMANDOZENTRALE */}
 {/* 
@@ -688,6 +688,7 @@ const eventOpenRequests = requests.filter(r =>
 
         </>
       )}
+      
     </div>
   );
 }

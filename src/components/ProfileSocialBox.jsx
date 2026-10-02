@@ -10,6 +10,7 @@ export default function ProfileSocialBox({ currentProfileId, isOwner }) {
   const [showSocials, setShowSocials] = useState(true);
   const [formData, setFormData] = useState({
     social_instagram: '',
+    social_facebook: '',
     social_linkedin: '',
     social_spotify: '',
     social_youtube: ''
@@ -39,6 +40,8 @@ export default function ProfileSocialBox({ currentProfileId, isOwner }) {
         setFormData({
           social_instagram:
             profile.social_instagram || '',
+          social_facebook:
+            profile.social_facebook || '',
           social_linkedin:
             profile.social_linkedin || '',
           social_spotify:
@@ -69,6 +72,8 @@ export default function ProfileSocialBox({ currentProfileId, isOwner }) {
         ...profileData,
         social_instagram:
           formData.social_instagram,
+        social_facebook:
+          formData.social_facebook,
         social_linkedin:
           formData.social_linkedin,
         social_spotify:
@@ -92,7 +97,7 @@ export default function ProfileSocialBox({ currentProfileId, isOwner }) {
       setProfile(updatedProfile);
       setProfileData(updatedProfile);
       alert(
-        "B2B Web- & Social-Radar erfolgreich eingebrannt! 🌐📱"
+        "Web- & Social-Radar erfolgreich eingebrannt! 🌐📱"
       );
       setIsEditing(false);
     } catch (e) {
@@ -117,7 +122,7 @@ export default function ProfileSocialBox({ currentProfileId, isOwner }) {
   const hasAnyLink = formData.social_instagram || formData.social_linkedin || formData.social_spotify || formData.social_youtube;
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
+    <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
       
       {/* HEADER DER BOX */}
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">
@@ -186,6 +191,12 @@ export default function ProfileSocialBox({ currentProfileId, isOwner }) {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {formData.social_facebook && (
+                <a href={formData.social_facebook} target="_blank" rel="noreferrer" className="p-3 bg-slate-900/40 border border-slate-900 rounded-xl flex items-center gap-2.5 group hover:border-cyan-500/40 transition-all cursor-pointer">
+                  <Globe size={14} className="text-blue-500 shrink-0" />
+                  <span className="text-xs font-bold uppercase tracking-wide truncate text-slate-300 group-hover:text-cyan-400 transition-all">Facebook</span>
+                </a>
+              )}
               {formData.social_instagram && (
                 <a href={formData.social_instagram} target="_blank" rel="noreferrer" className="p-3 bg-slate-900/40 border border-slate-900 rounded-xl flex items-center gap-2.5 group hover:border-cyan-500/40 transition-all cursor-pointer">
                   <Globe size={14} className="text-pink-500 shrink-0" />
@@ -219,6 +230,12 @@ export default function ProfileSocialBox({ currentProfileId, isOwner }) {
             <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest block">// DIGITAL NETWORK CHANNELS REKURSION</span>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+              <div className="flex flex-col gap-1">
+                <span className="text-[10px] text-slate-500 font-bold">// FACEBOOK PROFILE URL</span>
+                <input type="text" name="social_facebook" value={formData.social_facebook || ''} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" placeholder="https://facebook.com" />
+              </div>
+
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] text-slate-500 font-bold">// INSTAGRAM PROFILE URL</span>
                 <input type="text" name="social_instagram" value={formData.social_instagram || ''} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" placeholder="https://instagram.com" />

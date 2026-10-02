@@ -84,7 +84,7 @@ export default function ProfileBioTabsBox({ currentProfileId, isOwner }) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
+    <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6 border-b border-slate-800/60 pb-3">
         <h2 className="text-xs font-bold text-white tracking-widest uppercase flex items-center gap-2">

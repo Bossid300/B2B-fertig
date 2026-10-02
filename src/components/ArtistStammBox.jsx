@@ -121,7 +121,7 @@ export default function ArtistStammBox({ currentProfileId, isOwner }) {
   } = formData;
 
   return (
-    <div className="bg-[#0b111e] border border-slate-800 p-6 rounded-xl max-w-4xl mx-auto my-4 shadow-xl">
+    <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
       {/* HEADER */}
       <div className="flex justify-between items-center mb-6 border-b border-slate-800/60 pb-3">
         <h2 className="text-sm font-bold text-white tracking-widest uppercase flex items-center gap-2">

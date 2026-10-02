@@ -129,7 +129,7 @@ export default function ProfileLogistikBox({ currentProfileId, isOwner }) {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
+    <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
       
       {/* HEADER DER BOX */}
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">

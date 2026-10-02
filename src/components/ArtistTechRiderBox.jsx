@@ -220,7 +220,7 @@ export default function ArtistTechRiderBox({ currentProfileId, isOwner }) {
     };
 
   return (
-    <div className="bg-[#0b111e] rounded-xl border border-slate-800/50 shadow-xl p-3 mb-3 text-slate-200 font-sans">
+    <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
       
       {/* Box Header-Zeile */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/40 pb-1.5 mb-3">
