@@ -90,7 +90,7 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
     // Verhindert Flackern während die Daten laden
     if (!profileData) {
       return (
-        <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
+        <div className="w-full max-w-6xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
           // GIGSDA CORE CORE PROFILE REDIRECT...
         </div>
       );

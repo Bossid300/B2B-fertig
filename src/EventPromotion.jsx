@@ -48,6 +48,10 @@ const [promoData, setPromoData] = useState(
   activeEvent?.promotionData || {
     title: '',
     category: '',
+    venueName: '',
+    street: '',
+    zip: '',
+    city: '',
     shortDescription: '',
     description: '',
     promoImage: '',
@@ -66,7 +70,10 @@ const [promoData, setPromoData] = useState(
 const promoChecks = [
   promoData.title,
   promoData.category || activeEvent?.category,
-  activeEvent?.venue,
+  promoData.venueName,
+  promoData.street,
+  promoData.zip,
+  promoData.city,
   activeEvent?.date,
   promoData.promoImage,
   promoData.shortDescription,
@@ -107,6 +114,9 @@ useEffect(() => {
   const promo =
     activeEvent?.promotionData;
   if (!promo) return;
+
+console.log('ACTIVE EVENT:', activeEvent);
+
     setPromoData({
     title:
       promo.title ||
@@ -116,6 +126,22 @@ useEffect(() => {
       promo.category ||
       activeEvent?.type ||
       '',
+    venueName:
+      promo.venueName ||
+      activeEvent?.venueName ||
+      '',
+    street:
+      promo.street ||
+      activeEvent?.street ||
+      '',
+    zip:
+      promo.zip ||
+      activeEvent?.zip ||
+      '',
+    city:
+      promo.city ||
+      activeEvent?.city ||
+      '',      
     shortDescription:
       promo.shortDescription || '',
     description:
@@ -156,9 +182,31 @@ const handleSavePromotion = () => {
       return {
         ...event,
 
+        venueName: promoData.venueName,
+        street: promoData.street,
+        zip: promoData.zip,
+        city: promoData.city,
+
+        venue: [
+          promoData.venueName,
+          promoData.street,
+          `${promoData.zip} ${promoData.city}`
+        ]
+        .filter(Boolean)
+        .join(', '),
+
         promotionData: promoData
       };
+
     });
+
+console.log({
+  venueName: promoData.venueName,
+  street: promoData.street,
+  zip: promoData.zip,
+  city: promoData.city
+});
+    
   eventService.saveEvents(updatedEvents);
 
   const changedEvent =
@@ -312,7 +360,16 @@ return (
 
             <div>{promoData.category || activeEvent?.category ? '✅' : '🔴'} Kategorie</div>
 
-            <div>{activeEvent?.venue ? '✅' : '🔴'} Veranstaltungsort</div>
+            <div>
+              {
+                promoData.venueName &&
+                promoData.street &&
+                promoData.zip &&
+                promoData.city
+                  ? '✅'
+                  : '🔴'
+              } Veranstaltungsort
+            </div>
 
             <div>{activeEvent?.date ? '✅' : '🔴'} Datum</div>
 
@@ -388,25 +445,56 @@ return (
 
 
 
-<div className="grid md:grid-cols-2 gap-5">
+  <div className="space-y-5">
 
-  <div>
+      <div className="space-y-4">
 
-    <label className="block text-xs uppercase text-slate-500 mb-2">
-      Kategorie
-    </label>
+      <div>
+        <label className="block text-xs uppercase text-slate-500 mb-2">
+          Kategorie
+        </label>
+
+          <input
+          type="text"
+          value={promoData.category}
+          disabled={!isOwner}
+          onChange={(e) =>
+              setPromoData({
+              ...promoData,
+              category: e.target.value
+              })
+          }
+          className="
+              w-full
+              bg-slate-950
+              border
+              border-slate-800
+              rounded-xl
+              p-3
+              text-white
+          "
+          />
+      </div>
+
+    </div>
+
+    <div className="space-y-4">
+
+      <div>
+        <label className="block text-xs uppercase text-slate-500 mb-2">
+          Locationname
+        </label>
 
         <input
-        type="text"
-        value={promoData.category}
-        disabled={!isOwner}
-        onChange={(e) =>
-            setPromoData({
-            ...promoData,
-            category: e.target.value
-            })
-        }
-        className="
+          type="text"
+          value={promoData.venueName}
+          onChange={(e) =>
+            setPromoData(prev => ({
+              ...prev,
+              venueName: e.target.value
+            }))
+          }
+          className="
             w-full
             bg-slate-950
             border
@@ -414,37 +502,103 @@ return (
             rounded-xl
             p-3
             text-white
-        "
+          "
         />
+      </div>
 
 
+      <div>
+        <label className="block text-xs uppercase text-slate-500 mb-2">
+          Adresse
+        </label>
+
+        <input
+          type="text"
+          value={promoData.street}
+          onChange={(e) =>
+            setPromoData(prev => ({
+              ...prev,
+              street: e.target.value
+            }))
+          }
+          className="
+            w-full
+            bg-slate-950
+            border
+            border-slate-800
+            rounded-xl
+            p-3
+            text-white
+          "
+        />
+      </div>
+
+
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs uppercase text-slate-500 mb-2">
+            PLZ
+          </label>
+
+          <input
+            type="text"
+            value={promoData.zip}
+            onChange={(e) =>
+              setPromoData(prev => ({
+                ...prev,
+                zip: e.target.value
+              }))
+            }
+            className="
+              w-full
+              bg-slate-950
+              border
+              border-slate-800
+              rounded-xl
+              p-3
+              text-white
+            "
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs uppercase text-slate-500 mb-2">
+            Ort
+          </label>
+
+          <input
+            type="text"
+            value={promoData.city}
+            onChange={(e) =>
+              setPromoData(prev => ({
+                ...prev,
+                city: e.target.value
+              }))
+            }
+            className="
+              w-full
+              bg-slate-950
+              border
+              border-slate-800
+              rounded-xl
+              p-3
+              text-white
+            "
+          />
+        </div>
+      </div>
+
+    </div>
   </div>
 
-  <div>
 
-    <label className="block text-xs uppercase text-slate-500 mb-2">
-      Veranstaltungsort
-    </label>
 
-    <input
-      type="text"
-      value={activeEvent?.venue || ''}
-      disabled={!isOwner}
-      readOnly
-      className="
-        w-full
-        bg-slate-950
-        border
-        border-slate-800
-        rounded-xl
-        p-3
-        text-white
-      "
-    />
 
-  </div>
 
-</div>
+
+
+
 
 <div className="grid md:grid-cols-2 gap-5">
 
@@ -650,6 +804,10 @@ return (
     />
   </div>
 
+
+
+
+
   <div>
     <label className="block text-xs uppercase text-slate-500 mb-2">
       Eventstatus
@@ -670,6 +828,11 @@ return (
       <option value="Ausverkauft">Ausverkauft</option>
     </select>
   </div>
+
+
+
+
+
 
   <div>
     <label className="block text-xs uppercase text-slate-500 mb-2">

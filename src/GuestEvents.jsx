@@ -5,14 +5,13 @@ import { eventService } from './services/eventService';
 import { distanceKm, geocodeAddress } from './services/geoService';
 import { getProfilesDb } from './services/apiService';
 import SearchMap from './components/maps/SearchMap';
+import EventPromotionView from './components/EventPromotionView';
 
 export default function GuestEvents({ onNavigate }) {
+const [viewMode, setViewMode] = useState('list');
 
-const [viewMode, setViewMode] =
-  useState('list');
-
-const [selectedEvent, setSelectedEvent] =
-  useState(null);
+const [selectedEvent, setSelectedEvent] = useState(null);
+const [selectedPromoEvent, setSelectedPromoEvent] = useState(null);
 
 const [currentProfile, setCurrentProfile] = useState(null);
 
@@ -145,9 +144,27 @@ useEffect(() => {
       event.id?.toLowerCase().includes(searchValue) ||
       event.eventId?.toLowerCase().includes(searchValue);
 
+    const eventCategory =
+      event.category ||
+      event.promotionData?.category ||
+      '';
+
     const matchesCategory =
       selectedCategory === 'Alle' ||
-      event.category === selectedCategory;
+
+      (selectedCategory === 'Konzerte' &&
+        eventCategory === 'Konzert') ||
+
+      (selectedCategory === 'Festivals' &&
+        eventCategory === 'Festival') ||
+
+      (selectedCategory === 'Club-Gigs' &&
+        eventCategory === 'Clubshow') ||
+
+      (selectedCategory === 'B2B-Messen' &&
+        eventCategory === 'Messe');
+        
+    eventCategory === selectedCategory;
 
     const eventDistance =
       baseCoordinates?.lat &&
@@ -383,6 +400,11 @@ return (
                 shortDescription:
                   event.promotionData?.shortDescription,
 
+                description:
+                  event.promotionData?.description ||
+                  event.promotionData?.longDescription ||
+                  event.description,
+
                 slide1_url:
                   event.promotionData?.promoImage ||
                   event.slide1_url,
@@ -412,6 +434,8 @@ return (
                   event.venue ||
                   event.city
               }}
+
+              onViewEvent={setSelectedPromoEvent}
             />
             ))
 
@@ -480,6 +504,12 @@ return (
                     shortDescription:
                       selectedEvent?.promotionData?.shortDescription,
 
+
+
+
+
+                      
+
                     slide1_url:
                       selectedEvent?.promotionData?.promoImage ||
                       selectedEvent?.slide1_url,
@@ -515,6 +545,17 @@ return (
         )}
       </div>
       )}
+
+      {selectedPromoEvent && (
+        <EventPromotionView
+          event={selectedPromoEvent}
+          onClose={() => setSelectedPromoEvent(null)}
+        />
+      )}
+
     </div>
   );
+
+
+
 }

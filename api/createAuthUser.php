@@ -63,6 +63,7 @@ try {
         'Neue Registrierung auf GIGSDA',
         "Neue Registrierung auf GIGSDA\n\n" .
         "Profil-ID: " . $data['profileId'] . "\n" .
+        "Rolle: " . ($data['role'] ?? 'Unbekannt') . "\n" .
         "E-Mail: " . $data['email'] . "\n" .
         "Zeitpunkt: " . date('d.m.Y H:i:s') . "\n\n" .
         "https://www.gigsda.com"

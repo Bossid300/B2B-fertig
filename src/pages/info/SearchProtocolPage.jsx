@@ -1,5 +1,4 @@
 import React from "react";
-import Footer from "../../Footer";
 
 export default function SearchProtocolPage({ setView }) {
   return (
@@ -134,7 +133,6 @@ export default function SearchProtocolPage({ setView }) {
 
       </div>
 
-      <Footer setView={setView} />
     </div>
   );
 }

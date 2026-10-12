@@ -1,5 +1,5 @@
 import React from "react";
-import Footer from "../../Footer";
+
 
 export default function SecurityPage({ setView }) {
   return (
@@ -136,7 +136,6 @@ export default function SecurityPage({ setView }) {
 
       </div>
 
-      <Footer setView={setView} />
     </div>
   );
 }

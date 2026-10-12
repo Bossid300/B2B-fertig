@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Footer from "./Footer";
 import { Search, MapPin, Ticket, Shield, Sliders, Calendar, ArrowRight, CheckCircle2, ChevronDown, Users, Layers, Award } from 'lucide-react';
 import GuestPass from './GuestPass';
 import Roadmap from "./pages/info/Roadmap";
@@ -544,6 +543,108 @@ const [videoMuted, setVideoMuted] = useState(true);
         </div>
       </section>
       
+
+
+
+
+      {/* Der Locationaufruf. */}
+      <section className="mt-12 max-w-6xl mx-auto pt-6 px-4 md:px-8 space-y-10 mb-10">
+              
+        <div className="relative overflow-hidden rounded-3xl border border-purple-500/20 bg-slate-950/60 backdrop-blur-sm p-8 md:p-12">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-transparent to-cyan-500/5 pointer-events-none" />
+
+          <h2 className="font-[Orbitron] text-xs tracking-[0.25em] text-yellow-400/80 uppercase mb-10">
+            // Der Locationaufruf, gib Talenten eine Bühne..
+          </h2>
+
+          <div className="gap-12 items-center">
+            <div>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-6 text-yellow-400/80">
+                🏟️ Deine Location kann der Beginn von etwas Großem sein
+              </p>
+
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-6">
+                Jede erfolgreiche Veranstaltung beginnt mit einer einzigen Entscheidung:
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-6">
+                Jemand stellt einen Raum zur Verfügung und macht Möglichkeiten sichtbar.
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-6">
+                Viele Locations stehen an einzelnen Tagen, Abenden oder in bestimmten Zeiträumen leer. 
+                Gleichzeitig suchen Künstler, Veranstalter, Techniker und 
+                kreative Projekte nach dem passenden Ort, um Ideen Wirklichkeit werden zu lassen.
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-6">
+                Warum Potenzial ungenutzt lassen?
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-6">
+                Ob vergünstigt, partnerschaftlich oder sogar kostenfrei für ausgewählte Projekte: 
+                Wer seine Location öffnet, schafft Chancen 
+                für neue Veranstaltungen, neue Kontakte und neue Geschichten.
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-6 text-yellow-400/80">
+                🚀 Räume schaffen Erlebnisse
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-6 text-orange-400/80">
+                Mit jeder geöffneten Tür entsteht die Möglichkeit für:
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-1">
+                ✨ neue Künstler und Talente
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-1">
+                ✨ lokale Veranstaltungen
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-1">
+                ✨ langfristige Kooperationen
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-1">
+                ✨ neue Gäste und Netzwerke
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-8">
+                ✨ eine aktive Event-Community
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-8">
+                Eine ungenutzte Location bleibt ein Raum.
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-8">
+                Eine geöffnete Location wird zur Bühne.
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-6 text-yellow-400/80">
+                🤝 Gemeinsam die Eventszene stärken
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-8">
+                GIGSDA bringt Menschen zusammen, die etwas bewegen wollen.
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-8">
+                Wenn du über freie Zeiten, ungenutzte Flächen oder verfügbare Räume verfügst, 
+                kannst du einen wichtigen Beitrag leisten und gleichzeitig die Sichtbarkeit deiner Location erhöhen.
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-8">
+                Denn jede Bühne, die nicht leer bleibt, kann der Anfang eines unvergesslichen Events sein. 🎵✨
+              </p>
+              <p className="text-mx md:text-mx text-slate-100 leading-relaxed mb-8">
+                Öffne deine Türen. Entdecke neue Möglichkeiten. Werde Teil des GIGSDA-Netzwerks. 🚀
+              </p>
+
+
+              <div className="relative">
+                <div className="absolute -inset-[2px] bg-gradient-to-br from-cyan-400 via-pink-500 to-purple-500 rounded-2xl blur-[2px] opacity-75 animate-[borderGlow_5s_linear_infinite] bg-[length:300%_300%]" />
+                <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+                  <img
+                    src="/profiles/location_aufruf.png"
+                    alt="Live Stage"
+                    className="w-full max-w-full h-auto"
+                  />
+                </div>
+                
+              </div>
+
+
+            </div>
+          </div>
+        </div>
+      </section>
+      
       
       {/* ================================================================ */}
       {/* // DEINE REGION. DEINE SZENE. */}
@@ -606,7 +707,6 @@ const [videoMuted, setVideoMuted] = useState(true);
 
 
 
-      <Footer setView={setView} />
 
     </div>
   );

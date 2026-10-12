@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import LandingPage from './LandingPage';
 import LoginRegisterMask from './LoginRegisterMask';
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+
 import ProjectDashboard from './ProjectDashboard';
 import CrewShortlist from './CrewShortlist';
 import StageSpecs from './StageSpecs';
@@ -27,6 +29,7 @@ import ArtistSearchPage from './components/ArtistSearchPage';
 import UniversalSearchPage from './components/UniversalSearchPage';
 
 
+import Footer from "./Footer";
 
 import TermsPage from './pages/info/TermsPage.jsx';
 import PrivacyPage from './pages/info/PrivacyPage.jsx';
@@ -47,7 +50,6 @@ import AboutGigsda from './pages/info/AboutGigsda.jsx';
 import ContactPage from './pages/info/ContactPage.jsx';
 import CareerPage from './pages/info/CareerPage.jsx';
 import Roadmap from './pages/info/Roadmap.jsx';
-
 
 
 // 👈 Lade Profile
@@ -676,6 +678,19 @@ useEffect(() => {
     progressService.getProgress(
       freshActiveEvent
     );
+
+
+
+useEffect(() => {
+  const token = new URLSearchParams(
+    window.location.search
+  ).get("resetToken");
+
+  if (token) {
+    setView("resetPassword");
+  }
+}, []);
+
 
 
 
@@ -1315,9 +1330,13 @@ useEffect(() => {
               setView={setView}
               currentProfileId={currentProfile?.id}
               currentProfileType={currentProfile?.role}
+              isGuest={!currentProfile?.id}
             />
           )}
 
+          {view === "resetPassword" && (
+            <ResetPasswordPage />
+          )}
 
           {/* ========================================================================= */}
           {/* FOOTER UNTERSEITEN                                                        */}
@@ -1382,12 +1401,15 @@ useEffect(() => {
 
         </main>
  
+        <Footer setView={setView} />
+
+
         {/* ========================================================================= */}
         {/* FOOTER                                                                    */}
         {/* ========================================================================= */}
         <footer className="w-full border-t border-slate-900/60 bg-slate-950 py-3 text-center text-xm text-slate-600 mt-12">
-          GIGSDA PROTOCOL V2.6 // OPERATOR: 
-          <span className="text-cyan-400 font-bold">{ticketName} </span> 
+          GIGSDA PROTOCOL V1.0 // OPERATOR: 
+          <span className="text-cyan-400 font-bold"> {ticketName} </span> 
           // RECHTSGÜLTIG GESICHERT
         </footer>
       </div>
@@ -1403,7 +1425,6 @@ useEffect(() => {
         />
       )}
 
-      
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import React from "react";
-import Footer from "../../Footer";
 
 export default function EventsLocationsPage({ setView }) {
   return (
@@ -111,7 +110,6 @@ export default function EventsLocationsPage({ setView }) {
 
       </div>
 
-      <Footer setView={setView} />
     </div>
   );
 }

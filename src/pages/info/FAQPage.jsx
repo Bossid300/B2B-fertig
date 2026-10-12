@@ -1,5 +1,4 @@
 import React from "react";
-import Footer from "../../Footer";
 
 export default function FAQPage({ setView }) {
   return (
@@ -136,7 +135,6 @@ export default function FAQPage({ setView }) {
 
       </div>
 
-      <Footer setView={setView} />
     </div>
   );
 }

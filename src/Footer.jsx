@@ -115,6 +115,7 @@ export default function Footer({ setView }) {
                 Zahlungsarten
               </button>
             </li>
+{/* 
             <li>
               <button
                 onClick={() => setView('escrowprotection')}
@@ -123,7 +124,8 @@ export default function Footer({ setView }) {
                 Treuhand-Schutz
               </button>
             </li>
-            <li>
+            
+ */}            <li>
               <button
                 onClick={() => setView('faq')}
                 className="hover:text-cyan-400 transition-colors"
@@ -137,7 +139,7 @@ export default function Footer({ setView }) {
         {/* Spalte 4 */}
         <div className="space-y-2.5">
           <h5 className="font-mono text-sm font-bold text-slate-400 uppercase tracking-widest">
-            // GIGDATA GMBH
+            // GIGSDA
           </h5>
           <ul className="space-y-1.5">
             <li>
@@ -156,6 +158,7 @@ export default function Footer({ setView }) {
                 Kontakt
               </button>
             </li>
+{/* 
             <li>
               <button
                 onClick={() => setView('career')}
@@ -163,7 +166,8 @@ export default function Footer({ setView }) {
               >
                 Karriere
               </button>
-            </li>            
+            </li>
+ */}            
             <li>
               <button
                 onClick={() => setView('roadmap')}
@@ -172,7 +176,7 @@ export default function Footer({ setView }) {
                 Roadmap
               </button>
             </li>
-            <li className="text-[11px] font-mono text-slate-700 pt-2">© 2026 GIGDATA GmbH</li>
+            <li className="text-[11px] font-mono text-slate-700 pt-2">© 2026 GIGSDA </li>
           </ul>
         </div>
       </div>

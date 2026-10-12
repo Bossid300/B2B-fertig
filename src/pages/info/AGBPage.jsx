@@ -1,5 +1,4 @@
 import React from "react";
-import Footer from "../../Footer";
 
 export default function AGBPage({ setView }) {
   return (
@@ -132,7 +131,6 @@ export default function AGBPage({ setView }) {
 
       </div>
 
-      <Footer setView={setView} />
     </div>
   );
 }

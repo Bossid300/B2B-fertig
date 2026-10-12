@@ -4,14 +4,18 @@ import { getProfilesDb } from "../services/apiService";
 import { eventService } from '../services/eventService';
 
 
-export default function ArtistPortfolio() {
+export default function ArtistPortfolio({
+  profileId = null,
+  onBack = null,
+}) {
 		
 		const [profile, setProfile] = useState(null);
 		const handlePrintPdf = () => {
 		window.print();
 		};
 		const activeProfileId =
-				localStorage.getItem('gigsda_portfolio_profile');
+			profileId ||
+			localStorage.getItem('gigsda_portfolio_profile');
 
 		const loggedInProfileId =
 		localStorage.getItem('gigsda_profile_id');

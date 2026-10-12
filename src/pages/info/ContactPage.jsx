@@ -1,5 +1,4 @@
 import React from 'react';
-import Footer from "../../Footer";
 
 export default function ContactPage({ setView }) {
   return (
@@ -70,12 +69,12 @@ export default function ContactPage({ setView }) {
 
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 mt-6">
           <h2 className="text-xl font-bold mb-4">
-            GIGDATA GmbH
+            GIGSDA
           </h2>
 
           <div className="text-slate-300 space-y-2">
             <p>
-              GIGDATA GmbH
+              GIGSDA
             </p>
 
             <p>
@@ -83,13 +82,12 @@ export default function ContactPage({ setView }) {
             </p>
 
             <p>
-              Österreich / Deutschland
+              Österreich / Deutschland / Schweiz
             </p>
           </div>
         </div>
 
       </div>
-      <Footer setView={setView} />
 
     </div>
   );

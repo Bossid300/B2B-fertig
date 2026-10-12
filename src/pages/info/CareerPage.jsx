@@ -1,5 +1,4 @@
 import React from "react";
-import Footer from "../../Footer";
 
 export default function CareerPage({ setView }) {
   return (
@@ -10,7 +9,7 @@ export default function CareerPage({ setView }) {
         {/* HERO */}
         <div className="text-center mb-16">
           <div className="text-cyan-400 text-xs uppercase tracking-[0.4em] mb-4">
-            // GIGDATA GMBH
+            // GIGSDA
           </div>
 
           <h1 className="text-4xl md:text-6xl font-black text-white mb-6">
@@ -110,8 +109,6 @@ export default function CareerPage({ setView }) {
         </div>
 
       </div>
-
-      <Footer setView={setView} />
 
     </div>
   );

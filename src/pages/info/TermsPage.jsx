@@ -1,5 +1,4 @@
 import React from "react";
-import Footer from "../../Footer";
 
 export default function TermsPage({ setView }) {
   return (
@@ -107,7 +106,7 @@ export default function TermsPage({ setView }) {
 
       </div>
 
-      <Footer setView={setView} />
+
     </div>
   );
 }

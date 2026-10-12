@@ -17,6 +17,8 @@ const INITIAL_FORM = {
   title: '',
   date_from: '',
   date_to: '',
+  time_from: '',
+  time_to: '',
   location: '',
   region: '',
   category: '',
@@ -75,6 +77,8 @@ export default function CreateFreeSpotForm({
       title: editSpot.title || '',
       date_from: editSpot.spot_date || '',
       date_to: '',
+      time_from: editSpot.time_from || '',
+      time_to: editSpot.time_to || '',
       location: editSpot.location || '',
       region: editSpot.region || '',
       category: editSpot.category || '',
@@ -121,6 +125,9 @@ export default function CreateFreeSpotForm({
 
       title: form.title.trim(),
       spot_date: form.date_from,
+
+      time_from: form.time_from || null,
+      time_to: form.time_to || null,
 
       location: form.location.trim(),
       region: form.region.trim(),
@@ -268,6 +275,32 @@ export default function CreateFreeSpotForm({
 
           </div>
 
+          {/* ZEIT */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            <Field label="Verfügbar von">
+              <input
+                type="time"
+                value={form.time_from}
+                onChange={(e) =>
+                  updateField('time_from', e.target.value)
+                }
+                className={inputClass}
+              />
+            </Field>
+
+            <Field label="Verfügbar bis">
+              <input
+                type="time"
+                value={form.time_to}
+                onChange={(e) =>
+                  updateField('time_to', e.target.value)
+                }
+                className={inputClass}
+              />
+            </Field>
+
+          </div>
 
           {/* LOCATION */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

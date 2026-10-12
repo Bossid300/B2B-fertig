@@ -1,5 +1,4 @@
 import React from "react";
-import Footer from "../../Footer";
 
 export default function ImpressumPage({ setView }) {
   return (
@@ -30,7 +29,7 @@ export default function ImpressumPage({ setView }) {
             </h2>
 
             <div className="space-y-2 text-slate-400">
-              <p>GIGDATA GmbH</p>
+              <p>GIGSDA </p>
               <p>Stadtplatz 24/3</p>
               <p>5280 Braunau am Inn</p>
               <p>Österreich</p>
@@ -43,7 +42,7 @@ export default function ImpressumPage({ setView }) {
             </h2>
 
             <div className="space-y-2 text-slate-400">
-              <p>E-Mail: info@gigsda.com</p>
+              <p>E-Mail: support@gigsda.com</p>
               <p>Web: www.gigsda.com</p>
             </div>
           </div>
@@ -54,7 +53,7 @@ export default function ImpressumPage({ setView }) {
             </h2>
 
             <p className="text-slate-400">
-              Herbert J., Daniel K., Winston J.
+              Herbert Jud, Daniel Klingesberger, Winston Jud
             </p>
           </div>
 
@@ -64,9 +63,9 @@ export default function ImpressumPage({ setView }) {
             </h2>
 
             <div className="space-y-2 text-slate-400">
-              <p>Firmenbuchnummer: [ergänzen]</p>
-              <p>UID-Nummer: [ergänzen]</p>
-              <p>Firmenbuchgericht: [ergänzen]</p>
+              <p>Firmenbuchnummer: </p>
+              <p>UID-Nummer: </p>
+              <p>Firmenbuchgericht: </p>
             </div>
           </div>
 
@@ -87,7 +86,6 @@ export default function ImpressumPage({ setView }) {
 
       </div>
 
-      <Footer setView={setView} />
     </div>
   );
 }

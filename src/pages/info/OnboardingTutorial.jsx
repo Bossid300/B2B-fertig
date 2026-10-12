@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import Footer from "../../Footer";
 
 import { CheckCircle2, Circle, ArrowRight, Award, Sparkles, Sliders, MapPin, User } from 'lucide-react';
 
@@ -88,7 +87,6 @@ export default function OnboardingTutorial({ onGoToView, setView }) {
 
       </div>
     </div>
-      <Footer setView={setView} />
     </div>
   );
 }

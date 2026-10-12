@@ -12,7 +12,12 @@ import React, { useState } from "react";
   };
 
 
-export default function EventCard({ event }) {
+export default function EventCard({
+  event,
+  onViewEvent,
+}) {
+
+  const [expanded, setExpanded] = useState(false);
 
   if (!event) return null;
 
@@ -62,7 +67,6 @@ export default function EventCard({ event }) {
         `${String(date.getDate()).padStart(2,'0')}.${months[date.getMonth()]}`;
     }
 
-  const [expanded, setExpanded] = useState(false);
 
   const venueParts = (event.city || "").split(",").map(v => v.trim());
 
@@ -221,6 +225,35 @@ export default function EventCard({ event }) {
               </div>
 
             <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewEvent?.(event);
+              }}
+              className="
+                w-full
+                mt-4
+                py-2.5
+                rounded-xl
+                border
+                border-purple-500/30
+                bg-purple-500/10
+                text-purple-300
+                text-[10px]
+                font-black
+                uppercase
+                tracking-wider
+                hover:bg-purple-500/20
+                hover:border-purple-400/60
+                hover:text-white
+                transition-all
+                duration-300
+              "
+            >
+              ⚡ Event ansehen
+            </button>
+
+            <button
               onClick={() => {
                 alert(
                   "⚡ GIGSDA TICKET-GATE\n\nDiese Funktion befindet sich aktuell im Aufbau.\n\nDie Anbindung an Ticketanbieter folgt in einem kommenden Update."
@@ -233,6 +266,7 @@ export default function EventCard({ event }) {
 
           </div>
         )}
+
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import React from "react";
-import Footer from "../../Footer";
 
 export default function EscrowProtectionPage({ setView }) {
   return (
@@ -108,7 +107,6 @@ export default function EscrowProtectionPage({ setView }) {
 
       </div>
 
-      <Footer setView={setView} />
     </div>
   );
 }

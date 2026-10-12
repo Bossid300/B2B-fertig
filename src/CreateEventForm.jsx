@@ -5,7 +5,12 @@ export default function CreateEventForm({ onBack, onCreateEvent }) {
   // Alle Zustände für deine strukturierte Eingabemaske
   const [category, setCategory] = useState('Clubshows');
   const [title, setTitle] = useState('');
-  const [venue, setVenue] = useState('');
+
+  const [venueName, setVenueName] = useState('');
+  const [street, setStreet] = useState('');
+  const [zip, setZip] = useState('');
+  const [city, setCity] = useState('');
+
   const [calendarDate, setCalendarDate] = useState(''); // Der echte HTML5 Kalender
   const [time, setTime] = useState('20:00'); // Wunschzeit Standardwert 20:00 Uhr
   const formatDateDe = (isoDate) => {
@@ -21,25 +26,46 @@ export default function CreateEventForm({ onBack, onCreateEvent }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!title.trim() || !venue.trim() || !calendarDate) return;
+    if (
+      !title.trim() ||
+      !venueName.trim() ||
+      !calendarDate
+    ) return;
+
+  const fullAddress =
+    `${street}, ${zip} ${city}`;
 
   const geo =
-    await geocodeAddress(venue);
+    await geocodeAddress(fullAddress);
+
     if (onCreateEvent) {
       onCreateEvent({
         id: "EVT-" + Date.now().toString().slice(-4),
+
         title,
+
         date: calendarDate,
         displayDate: formatDateDe(calendarDate),
+
         time,
         category,
-        venue,
+
+        venueName,
+        street,
+        zip,
+        city,
+
+        venue:
+          `${venueName}, ${street}, ${zip} ${city}`,
+
         lat: geo?.lat || null,
         lng: geo?.lng || null,
+
         doneProgress: 0
       });
     }
-  };
+
+    };
 
   return (
     <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-2xl relative max-w-md mx-auto text-slate-300 text-xs animate-fade-in max-h-[90vh] overflow-y-auto">
@@ -86,20 +112,69 @@ export default function CreateEventForm({ onBack, onCreateEvent }) {
         </div>
 
         {/* BLOCK 2: WO */}
-        <div className="space-y-3 pt-3 border-t border-slate-800/60">
-          <p className="text-purple-400 font-mono text-[9px] uppercase tracking-widest font-black">// 🟣 WO (Platzierung)</p>
-          
+        <div className="space-y-3">
+
           <div>
-            <label className="block text-[9px] font-mono text-slate-500 uppercase tracking-wider mb-1">Name der Location / Spielstätte</label>
-            <input 
-              type="text" 
-              placeholder="z.B. Stadtpark Wiese, Braunau" 
-              value={venue} 
-              onChange={(e) => setVenue(e.target.value)}
+            <label className="block text-[9px] font-mono text-slate-500 uppercase tracking-wider mb-1">
+              Name der Location
+            </label>
+
+            <input
+              type="text"
+              placeholder="z.B. Burgkeller Bar"
+              value={venueName}
+              onChange={(e) => setVenueName(e.target.value)}
               required
               className="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 font-mono text-xs"
             />
           </div>
+
+          <div>
+            <label className="block text-[9px] font-mono text-slate-500 uppercase tracking-wider mb-1">
+              Adresse
+            </label>
+
+            <input
+              type="text"
+              placeholder="z.B. Stadtplatz 61"
+              value={street}
+              onChange={(e) => setStreet(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 font-mono text-xs"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+
+            <div>
+              <label className="block text-[9px] font-mono text-slate-500 uppercase tracking-wider mb-1">
+                PLZ
+              </label>
+
+              <input
+                type="text"
+                placeholder="84489"
+                value={zip}
+                onChange={(e) => setZip(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 font-mono text-xs"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[9px] font-mono text-slate-500 uppercase tracking-wider mb-1">
+                Ort
+              </label>
+
+              <input
+                type="text"
+                placeholder="Burghausen"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-900 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-purple-500 font-mono text-xs"
+              />
+            </div>
+
+          </div>
+
         </div>
 
         {/* BLOCK 3: WANN */}
@@ -149,7 +224,11 @@ export default function CreateEventForm({ onBack, onCreateEvent }) {
           
           <button
             type="submit"
-            disabled={!title.trim() || !venue.trim() || !calendarDate}
+            disabled={
+              !title.trim() || 
+              !venueName.trim() || 
+              !calendarDate
+            }
             className="w-2/3 bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-black h-11 rounded-xl transition-all text-[10px] uppercase tracking-wider shadow-lg shadow-emerald-500/10 active:scale-[0.97] disabled:opacity-30"
           >
             Event anlegen 💥

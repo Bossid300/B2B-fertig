@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { eventService } from './services/eventService';
 import CreateFreeSpotForm from './components/CreateFreeSpotForm';
 import { freeSpotService } from './services/freeSpotService';
+import { getProfiles } from './services/apiService';
+import ArtistPortfolio from './components/ArtistPortfolio';
 
 const FILTERS = [
   { id: 'all', label: 'Alle', icon: '📅' },
@@ -91,6 +93,7 @@ export default function CalendarPage({
   setView,
   currentProfileId,
   currentProfileType,
+  isGuest = false,
 }) {
 
   const [events, setEvents] = useState([]);
@@ -102,12 +105,16 @@ export default function CalendarPage({
   const [showFreeSpotForm, setShowFreeSpotForm] = useState(false);
   const [editingFreeSpot, setEditingFreeSpot] = useState(null);
 
+  const [profiles, setProfiles] = useState([]);
+  const [portfolioProfileId, setPortfolioProfileId] = useState(null);
+
   useEffect(() => {
     const loadCalendarData = async () => {
       try {
-        const [dbEvents, dbFreeSpots] = await Promise.all([
+        const [dbEvents, dbFreeSpots, dbProfiles] = await Promise.all([
           eventService.syncFromDb(),
           freeSpotService.getFreeSpots(),
+          getProfiles(),
         ]);
 
         setEvents(
@@ -118,7 +125,35 @@ export default function CalendarPage({
           dbFreeSpots.filter((spot) => spot && spot.title)
         );
 
-        console.log('CALENDAR FREE SPOTS:', dbFreeSpots);
+        const normalizedProfiles = dbProfiles.map((profile) => {
+          let profileData = {};
+
+          try {
+            profileData = profile.profile_json
+              ? JSON.parse(profile.profile_json)
+              : {};
+          } catch (e) {
+            console.error('PROFILE JSON FEHLER', e);
+          }
+
+          return {
+            ...profile,
+            ...profileData,
+            role: profile.role,
+            type: profile.type,
+          };
+        });
+
+        setProfiles(normalizedProfiles);
+
+      console.log(
+        'CALENDAR LOCATION PROFILES:',
+        normalizedProfiles.filter(
+          (profile) => profile.role === 'Location'
+        )
+      );
+
+      console.log('CALENDAR FREE SPOTS:', dbFreeSpots);
 
       } catch (e) {
         console.error('CALENDAR DATEN FEHLER', e);
@@ -208,8 +243,12 @@ export default function CalendarPage({
         })
       : [];
 
-
-
+  const getFreeSpotOwner = (spot) => {
+    return profiles.find(
+      (profile) =>
+        String(profile.id) === String(spot.owner_id)
+    );
+  };
 
   return (
     <div className="min-h-screen bg-[#030816] text-white">
@@ -295,7 +334,7 @@ export default function CalendarPage({
             <option>Schweiz</option>
           </select>
 
-          {currentProfileType === 'Location' && (
+          {!isGuest && currentProfileType === 'Location' && (
             <button
               onClick={() => setShowFreeSpotForm(true)}
               className="
@@ -332,74 +371,99 @@ export default function CalendarPage({
         </div>
 
 
-        {currentProfileType === 'Location' && showFreeSpotForm && (
-          <div className="mb-5">
-            <CreateFreeSpotForm
-              editSpot={editingFreeSpot}
-              currentProfileId={currentProfileId}
-
-              onCancel={() => {
+        {!isGuest &&
+          currentProfileType === 'Location' &&
+          showFreeSpotForm && (
+            <div
+              className="
+                fixed
+                inset-0
+                z-[9999]
+                bg-black/80
+                backdrop-blur-sm
+                flex
+                items-center
+                justify-center
+                p-3
+                sm:p-6
+              "
+              onClick={() => {
                 setShowFreeSpotForm(false);
                 setEditingFreeSpot(null);
               }}
+            >
+              <div
+                className="
+                  relative
+                  w-full
+                  max-w-3xl
+                  max-h-[92vh]
+                  overflow-y-auto
+                "
+                onClick={(e) => e.stopPropagation()}
+              >
+                <CreateFreeSpotForm
+                  editSpot={editingFreeSpot}
+                  currentProfileId={currentProfileId}
 
-              onSubmit={async (freeSpot) => {
-                const result = editingFreeSpot
-                  ? await freeSpotService.updateFreeSpot(freeSpot)
-                  : await freeSpotService.saveFreeSpot(freeSpot);
+                  onCancel={() => {
+                    setShowFreeSpotForm(false);
+                    setEditingFreeSpot(null);
+                  }}
 
-                console.log('FREE SPOT DB SAVE ✅', result);
+                  onSubmit={async (freeSpot) => {
+                    const wasEditing = !!editingFreeSpot;
 
-                // Free Spots direkt neu aus DB laden
-                const updatedFreeSpots =
-                  await freeSpotService.getFreeSpots();
+                    const result = editingFreeSpot
+                      ? await freeSpotService.updateFreeSpot(freeSpot)
+                      : await freeSpotService.saveFreeSpot(freeSpot);
 
-                setFreeSpots(
-                  updatedFreeSpots.filter(
-                    (spot) => spot && spot.title
-                  )
-                );
+                    console.log('FREE SPOT DB SAVE ✅', result);
 
-                // Zum neuen Free Spot springen
-                const newDate = parseEventDate(freeSpot.spot_date);
+                    // Free Spots direkt neu aus DB laden
+                    const updatedFreeSpots =
+                      await freeSpotService.getFreeSpots();
 
-                if (newDate) {
-                  setSelectedDate(newDate);
+                    setFreeSpots(
+                      updatedFreeSpots.filter(
+                        (spot) => spot && spot.title
+                      )
+                    );
 
-                  setCurrentMonth(
-                    new Date(
-                      newDate.getFullYear(),
-                      newDate.getMonth(),
-                      1
-                    )
-                  );
-                }
+                    // Zum Free-Spot-Datum springen
+                    const newDate =
+                      parseEventDate(freeSpot.spot_date);
 
-                // Free-Spots-Filter aktivieren
-                setActiveFilter('freeSpots');
+                    if (newDate) {
+                      setSelectedDate(newDate);
 
-                // Formular schließen
-                setEditingFreeSpot(null);
+                      setCurrentMonth(
+                        new Date(
+                          newDate.getFullYear(),
+                          newDate.getMonth(),
+                          1
+                        )
+                      );
+                    }
 
-                // Merken, ob bearbeitet oder neu erstellt wurde
-                const wasEditing = !!editingFreeSpot;
+                    // Free-Spots-Filter aktivieren
+                    setActiveFilter('freeSpots');
 
-                // Formular schließen
-                setShowFreeSpotForm(false);
-                setEditingFreeSpot(null);
+                    // Formular schließen
+                    setShowFreeSpotForm(false);
+                    setEditingFreeSpot(null);
 
-                // Erfolgsbestätigung
-                window.alert(
-                  wasEditing
-                    ? '✅ Free Spot wurde erfolgreich aktualisiert.'
-                    : '✅ Free Spot wurde erfolgreich veröffentlicht.'
-                );
-
-              }}
-            />
-          </div>
+                    // Erfolgsbestätigung
+                    window.alert(
+                      wasEditing
+                        ? '✅ Free Spot wurde erfolgreich aktualisiert.'
+                        : '✅ Free Spot wurde erfolgreich veröffentlicht.'
+                    );
+                  }}
+                />
+              </div>
+            </div>
         )}
-
 
 
         {/* CONTENT */}
@@ -562,7 +626,9 @@ export default function CalendarPage({
                           >
                             <span className="w-2 h-2 rounded-full bg-cyan-400 shrink-0" />
                             <span className="truncate">
-                              {event.title || event.name}
+                              {isGuest
+                                ? 'Event'
+                                : event.title || event.name}
                             </span>
                           </div>
                         ))}
@@ -590,7 +656,9 @@ export default function CalendarPage({
                             <span className="w-2 h-2 rounded-full bg-pink-500 shrink-0" />
 
                             <span className="truncate">
-                              {spot.title}
+                              {isGuest
+                                ? 'Free Spot'
+                                : spot.title}
                             </span>
                           </div>
                         ))}
@@ -610,6 +678,9 @@ export default function CalendarPage({
 
           </section>
 
+
+
+
           {/* DETAIL PANEL */}
           <aside className="
             bg-[#07101f]
@@ -620,6 +691,56 @@ export default function CalendarPage({
             xl:sticky
             xl:top-4
           ">
+
+
+            {isGuest ? (
+              <div
+                className="
+                  min-h-[320px]
+                  flex
+                  flex-col
+                  items-center
+                  justify-center
+                  text-center
+                  p-6
+                "
+              >
+                <div className="text-4xl mb-4">
+                  🔒
+                </div>
+
+                <h3 className="text-lg font-black text-white">
+                  Informationen nur für registrierte User
+                </h3>
+
+                <p className="text-sm text-slate-400 mt-3 max-w-[280px]">
+                  Registriere dich oder melde dich an, um Details zu Events,
+                  Free Spots und weiteren Kalendereinträgen zu sehen.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => setView?.('login')}
+                  className="
+                    mt-6
+                    px-5 py-3
+                    rounded-xl
+                    border border-cyan-500/30
+                    bg-cyan-500/10
+                    text-cyan-300
+                    text-sm
+                    font-bold
+                    hover:bg-cyan-500/20
+                    transition
+                  "
+                >
+                  Anmelden / Registrieren
+                </button>
+              </div>
+            ) : (
+              <>
+
+                {/* HIER DEIN KOMPLETTER BISHERIGER DETAIL-INHALT */}
 
             <div className="flex items-start justify-between mb-5">
 
@@ -761,6 +882,50 @@ export default function CalendarPage({
                       </div>
                     )}
 
+                    {(() => {
+                      const owner = getFreeSpotOwner(spot);
+
+                      if (!owner) return null;
+
+                      const ownerName =
+                        owner.name ||
+                        owner.klarname ||
+                        spot.owner_id;
+
+                      return (
+                        <div className="mt-4 pt-4 border-t border-pink-500/20">
+                          <div className="text-[10px] uppercase tracking-wider text-slate-500">
+                            Erstellt von
+                          </div>
+
+                          <div className="text-sm font-bold text-pink-300 mt-1">
+                            🏠 {ownerName}
+                          </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setPortfolioProfileId(spot.owner_id)}
+                          className="
+                            mt-3
+                            px-4 py-2
+                            rounded-lg
+                            border border-cyan-500/30
+                            bg-cyan-500/5
+                            text-cyan-300
+                            text-xs
+                            font-bold
+                            hover:bg-cyan-500/15
+                            hover:border-cyan-400/50
+                            transition
+                          "
+                        >
+                          👁 Portfolio ansehen
+                        </button>
+
+                        </div>
+                      );
+                    })()}
+
                     {/* ZEIT */}
                     {(spot.time_from || spot.time_to) && (
                       <div className="text-sm text-slate-400 mt-1">
@@ -886,7 +1051,8 @@ export default function CalendarPage({
 
               </div>
             </div>
-
+              </>
+            )}
           </aside>
 
         </div>
@@ -908,6 +1074,72 @@ export default function CalendarPage({
           background: rgba(34, 211, 238, 0.08);
         }
       `}</style>
+
+
+      {/* PORTFOLIO POPUP */}
+      {portfolioProfileId && (
+        <div
+          className="
+            fixed
+            inset-0
+            z-[9999]
+            bg-black/80
+            backdrop-blur-sm
+            flex
+            items-center
+            justify-center
+            p-3
+            sm:p-6
+          "
+          onClick={() => setPortfolioProfileId(null)}
+        >
+          <div
+            className="
+              relative
+              w-full
+              max-w-6xl
+              max-h-[92vh]
+              overflow-y-auto
+              bg-[#030816]
+              border border-cyan-500/30
+              rounded-2xl
+              shadow-2xl
+            "
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setPortfolioProfileId(null)}
+              className="
+                sticky
+                top-4
+                float-right
+                z-[10000]
+                mr-4
+                mt-4
+                w-10
+                h-10
+                rounded-full
+                bg-slate-950/90
+                border border-slate-700
+                text-slate-300
+                hover:text-white
+                hover:border-cyan-400
+                transition
+              "
+            >
+              ×
+            </button>
+
+            <ArtistPortfolio
+              profileId={portfolioProfileId}
+              onBack={() => setPortfolioProfileId(null)}
+            />
+
+          </div>
+        </div>
+      )}
+
 
     </div>
   );

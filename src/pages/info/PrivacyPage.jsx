@@ -1,5 +1,4 @@
 import React from "react";
-import Footer from "../../Footer";
 
 export default function PrivacyPage({ setView }) {
   return (
@@ -79,6 +78,35 @@ export default function PrivacyPage({ setView }) {
 
           <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
             <h2 className="text-2xl font-bold text-white mb-4">
+              Cookies und Tracking
+            </h2>
+
+            <p className="text-slate-400 leading-relaxed">
+              Diese Website verwendet Cookies um die Nutzung der Seite zu 
+              verbessern und zu vereinfachen. Bei Cookies handelt es sich um 
+              keine Textdateien, welche auf ihrem Gerät abgespeichert werden. 
+            </p>
+          </div>
+
+          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+            <h2 className="text-2xl font-bold text-white mb-4">
+              Eingebettete Inhalte von anderen Websites
+            </h2>
+
+            <p className="text-slate-400 leading-relaxed">
+              Beiträge auf dieser Website können eingebettete Inhalte beinhalten 
+              (z. B. Videos, Bilder, Beiträge etc.). Eingebettete Inhalte von anderen 
+              Websites verhalten sich exakt so, als ob der Besucher die andere Website besucht hätte.
+
+              Diese Websites können Daten über dich sammeln, Cookies benutzen, zusätzliche 
+              Tracking-Dienste von Dritten einbetten und deine Interaktion mit diesem 
+              eingebetteten Inhalt aufzeichnen, inklusive deiner Interaktion mit dem 
+              eingebetteten Inhalt, falls du ein Konto hast und auf dieser Website angemeldet bist.
+            </p>
+          </div>
+
+          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+            <h2 className="text-2xl font-bold text-white mb-4">
               Deine Rechte
             </h2>
 
@@ -108,7 +136,6 @@ export default function PrivacyPage({ setView }) {
 
       </div>
 
-      <Footer setView={setView} />
     </div>
   );
 }

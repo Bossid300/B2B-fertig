@@ -1,5 +1,4 @@
 import React from "react";
-import Footer from "../../Footer";
 
 export default function Roadmap({ setView }) {
   const completed = [
@@ -232,7 +231,6 @@ export default function Roadmap({ setView }) {
 
     </div>
     
-          <Footer setView={setView} />
 
     </div>
 

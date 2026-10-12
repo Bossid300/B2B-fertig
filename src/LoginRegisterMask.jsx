@@ -13,6 +13,9 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
   const [loginField, setLoginField] = useState('');
   const [loginPass, setLoginPass] = useState('');
 
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+
   const [regEmail, setRegEmail] = useState('');
   const [regPass, setRegPass] = useState('');
   const [regRole, setRegRole] = useState('');
@@ -29,6 +32,51 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
 
   const [honeypot, setHoneypot] = useState('');
 
+
+
+  const handlePasswordReset = async () => {
+    if (!resetEmail.trim()) {
+      alert("Bitte gib eine E-Mail-Adresse ein.");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "https://www.gigsda.com/api/requestPasswordReset.php",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: resetEmail,
+          }),
+        }
+      );
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert(
+          "Falls die E-Mail-Adresse existiert, wurde ein Reset-Link versendet."
+        );
+
+        setShowResetPassword(false);
+        setResetEmail("");
+      } else {
+        alert(result.error || "Fehler beim Versenden.");
+      }
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        "Verbindung zum Server fehlgeschlagen."
+      );
+    }
+  };
+
+
+  
   // 💥 FUNKTION 1: DAS INTELLIGENTE LOGIN (Durchsucht die Festplatte)
   // 🛠️ REAKTIVES LOGIN-UHRWERK (BOMBENFEST UND IMMUN GEGEN VARIABLEN-CRASHES)
   const handleLoginSubmit = async (e) => {
@@ -279,7 +327,8 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
         id: "AUTH-" + Date.now(),
         email: regEmail,
         password: regPass,
-        profileId: generatedId
+        profileId: generatedId,
+        role: regRole
       });
 
     if (!authResult.success)
@@ -502,6 +551,18 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
                     className="w-full bg-slate-950 border border-slate-900 rounded-xl pl-9 pr-4 py-2.5 text-white text-xs focus:outline-none focus:border-cyan-400 font-mono" 
                   />
                 </div>
+                <div
+                  onClick={() => setShowResetPassword(true)}
+                  style={{
+                    cursor: "pointer",
+                    color: "#27d7ff",
+                    fontSize: "12px",
+                    marginTop: "8px",
+                    textAlign: "right"
+                  }}
+                >
+                  ➡️ Passwort vergessen?
+                </div>
               </div>
 
               <button type="submit" className="w-full bg-cyan-400 hover:bg-cyan-300 text-slate-950 font-black h-11 rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer shadow-xl font-mono">
@@ -535,7 +596,7 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
                   NOCH KEIN GIGSDA-KONTO?
                 </h3>
                 <p className="text-[12px] text-slate-400 leading-relaxed">
-                  Tritt dem zweiseitigen B2B-Marktplatz bei und verbinde dich direkt mit der Industrie.
+                  Tritt dem zweiseitigen Marktplatz bei und verbinde dich direkt mit der Industrie.
                 </p>
               </div>
 
@@ -543,7 +604,7 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
               <ul className="space-y-2 mb-5 text-xs font-mono text-slate-300">
                 <li className="flex items-start gap-2">
                   <span className="text-cyan-500 font-bold">✓</span>
-                  <span><strong className="text-white">10 dedizierte B2B-Rollen:</strong> Volle Sichtbarkeit für Catering, Rental, Locations, Bands & Crew.</span>
+                  <span><strong className="text-white">10 dedizierte Rollen:</strong> Volle Sichtbarkeit für Catering, Rental, Locations, Bands & Crew.</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-cyan-500 font-bold">✓</span>
@@ -572,42 +633,129 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
           )}
 
 
-        {/* RECHTE DEKO-AURA (HÄLT DAS DESIGN REAKTIV RECHTS BALANCIERT) */}
-        <div className="hidden md:block mt-8 w-5/12 h-64 bg-gradient-to-tr from-purple-600/10 to-pink-500/5 rounded-3xl border border-slate-900/40 backdrop-blur-xs relative overflow-hidden shadow-2xl">
-          <div className="absolute inset-0 rounded-[20px] overflow-hidden border border-cyan-500/20 bg-black/20 backdrop-blur-xl">
+          {/* RECHTE DEKO-AURA (HÄLT DAS DESIGN REAKTIV RECHTS BALANCIERT) */}
+          <div className="hidden md:block mt-8 w-5/12 h-64 bg-gradient-to-tr from-purple-600/10 to-pink-500/5 rounded-3xl border border-slate-900/40 backdrop-blur-xs relative overflow-hidden shadow-2xl">
+            <div className="absolute inset-0 rounded-[20px] overflow-hidden border border-cyan-500/20 bg-black/20 backdrop-blur-xl">
 
-            <video
-              autoPlay
-              muted={videoMuted}
-              loop
-              playsInline
-              className="w-full h-full object-cover"
-            >
-              <source
-                src="/videos/gigsda_video_liquidrole.mp4"
-                type="video/mp4"
-              />
-            </video>
+              <video
+                autoPlay
+                muted={videoMuted}
+                loop
+                playsInline
+                className="w-full h-full object-cover"
+              >
+                <source
+                  src="/videos/gigsda_video_liquidrole.mp4"
+                  type="video/mp4"
+                />
+              </video>
 
-            <button
-              onClick={() => setVideoMuted(!videoMuted)}
-              className="absolute top-3 right-3 px-2 py-1 rounded-lg bg-black/40 border border-cyan-500/30 text-cyan-400 text-[10px] font-mono uppercase hover:bg-cyan-500/10"
-            >
-              {videoMuted ? "🔇 Ton" : "🔊 Ton"}
-            </button>
-            {/* 
-            <div className="absolute bottom-3 left-4 text-[12px] font-mono text-cyan-400 tracking-widest uppercase">
-              // Live Concert Feed Active
+              <button
+                onClick={() => setVideoMuted(!videoMuted)}
+                className="absolute top-3 right-3 px-2 py-1 rounded-lg bg-black/40 border border-cyan-500/30 text-cyan-400 text-[10px] font-mono uppercase hover:bg-cyan-500/10"
+              >
+                {videoMuted ? "🔇 Ton" : "🔊 Ton"}
+              </button>
+              {/* 
+              <div className="absolute bottom-3 left-4 text-[12px] font-mono text-cyan-400 tracking-widest uppercase">
+                // Live Concert Feed Active
+              </div>
+                */}
             </div>
-              */}
           </div>
-        </div>
 
         </div>
 
         {/* RECHTSEITE: SOCIAL MEDIA NETZWERK */}
 
+        {showResetPassword && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              background: "rgba(0,0,0,0.85)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 99999
+            }}
+            >
+            <div
+              style={{
+                width: "420px",
+                background: "#071224",
+                border: "1px solid #00d4ff",
+                borderRadius: "12px",
+                padding: "24px"
+              }}
+            >
+              <h3
+                style={{
+                  color: "#fff",
+                  marginBottom: "20px"
+                }}
+              >
+                ➡️ Passwort zurücksetzen
+              </h3>
+
+              <input
+                type="email"
+                placeholder="E-Mail-Adresse"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  marginBottom: "16px",
+                  background: "#020817",
+                  border: "1px solid #334155",
+                  borderRadius: "8px",
+                  color: "#fff"
+                }}
+              />
+
+              <button
+                onClick={handlePasswordReset}
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  background: "#06b6d4",
+                  border: "none",
+                  borderRadius: "8px",
+                  marginBottom: "10px",
+                  cursor: "pointer"
+                }}
+              >
+                Link senden
+              </button>
+
+              <button
+                onClick={() => setShowResetPassword(false)}
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  background: "#1e293b",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer"
+                }}
+              >
+                Abbrechen
+              </button>
+            </div>
+          </div>
+        )}
+
+
+
+
       </div>
+
+
 
     </div>
   );

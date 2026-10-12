@@ -27,7 +27,7 @@ import ProfileCard from './components/cards/ProfileCard';
 import { getProfilesDb } from './services/apiService';
 import { saveFavorite, deleteFavorite, getFavorites } from './services/apiService';
 
-export default function UserProfile({ onBack, currentProfileId, isOwner, setView }) {
+export default function LocationProfile({ onBack, currentProfileId, isOwner, setView }) {
   const [profileData, setProfileData] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -109,7 +109,7 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
    // Verhindert Flackern während die Daten laden
     if (!profileData) {
       return (
-        <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
+        <div className="w-full max-w-6xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl font-mono text-xs text-purple-400 animate-pulse">
           // GIGSDA CORE LOCATION PROFILE REDIRECT...
         </div>
       );
@@ -117,7 +117,7 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
 
   
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl relative space-y-6">
+    <div className="max-w-6xl mx-auto p-6 bg-slate-950 border border-slate-900 rounded-3xl font-mono text-white shadow-2xl relative space-y-6">
 
       {/* ZURÜCK LINK (OPTIONAL, FALLS DU EINEN BUTTON BRAUCHST) */}
       {typeof onBack === 'function' && (
@@ -141,14 +141,15 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
 
       <ProfileStammBox currentProfileId={currentProfileId} isOwner={isOwner}/>
       <ProfileStatusMatrix currentProfileId={currentProfileId} />
-
-      <div className="bg-slate-900/40 border border-cyan-500/20 rounded-2xl p-4 mb-4">
+      {isOwner && (
+        <>
+      <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
         <h3 className="text-xs font-black uppercase text-cyan-400 tracking-wider">
           🔍 // Live-Vorschau SearchExplorer
         </h3>
 
         <p className="text-xs text-slate-500 mt-1">
-          So erscheint dein Profil aktuell in der Partnersuche.
+          So erscheint dein Profil aktuell in der Crew Search Explorer.
         </p>        
         <p className="text-xs text-slate-500 mt-1">
           Button "PROFIL" & "ANFRAGEN" haben hier keine Funktion!
@@ -156,7 +157,8 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
       </div>
 
       <ProfileCard user={profileData} />
-
+      </>
+      )}
       <ProfileBioTabsBox currentProfileId={currentProfileId} isOwner={isOwner} />
       <ProfileGalleryBox currentProfileId={currentProfileId} isOwner={isOwner} />
       <ProfileNetworkBox currentProfileId={currentProfileId} isOwner={isOwner} />
