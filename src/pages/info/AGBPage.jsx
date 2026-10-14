@@ -2,7 +2,7 @@ import React from "react";
 
 export default function AGBPage({ setView }) {
   return (
-    <div className="min-h-screen bg-[#050B1F] text-slate-300">
+    <div className="bg-[#050B1F] text-slate-300">
 
       <div className="max-w-5xl mx-auto px-6 py-16">
 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, Lock, User, CheckCircle2 } from 'lucide-react';
 import { createProfile, createAuthUser, getLoginUser, getProfileById } from './services/apiService';
 import { Turnstile } from "@marsidev/react-turnstile";
+import AGBPage from "./pages/info/AGBPage";
 
 export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess }) {
   const [turnstileToken, setTurnstileToken] = useState('');
@@ -32,7 +33,8 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
 
   const [honeypot, setHoneypot] = useState('');
 
-
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showAGB, setShowAGB] = useState(false);
 
   const handlePasswordReset = async () => {
     if (!resetEmail.trim()) {
@@ -211,6 +213,14 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
   // 💥 FUNKTION 2: DIE REGISTRIERUNG
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
+
+    if (!acceptedTerms) {
+      alert(
+        "Bitte akzeptiere die AGB, um ein Konto erstellen zu können."
+      );
+      return;
+    }
+
 
     // Honeypot
     if (honeypot.trim() !== '')
@@ -507,6 +517,45 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
                 </div>
               </div>
 
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "10px",
+                  marginTop: "15px",
+                  marginBottom: "15px",
+                  color: "#cbd5e1",
+                  fontSize: "14px"
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                />
+
+                <span>
+                  Ich habe die{" "}
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowAGB(true);
+                    }}
+                    style={{
+                      color: "#06b6d4"
+                    }}
+                  >
+
+                    AGB
+                  </a>{" "}
+                  gelesen und akzeptiere diese.
+                </span>
+              </div>
+
+
+
               <button 
               type="submit" 
               className="w-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black h-11 rounded-xl text-xs uppercase tracking-wider transition-all cursor-pointer mt-2 shadow-lg font-mono
@@ -755,7 +804,60 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
 
       </div>
 
+      {showAGB && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.85)",
+            zIndex: 99999,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            paddingTop: "10px",
+          }}
+        >
+          <div
+            style={{
+              width: "100%",
+              maxWidth: "1100px",
+              height: "90vh",
+              background: "#020617",
+              borderRadius: "12px",
+              overflow: "hidden",
+              position: "relative",
+            }}
+          >
+          <button
+            onClick={() => setShowAGB(false)}
+            style={{
+              position: "fixed",
+              top: "20px",
+              right: "20px",
+              zIndex: 100000,
+              padding: "10px 15px",
+              background: "#06b6d4",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              color: "#fff",
+              fontWeight: "bold"
+            }}
+          >
+            ✕ Schließen
+          </button>
 
+            <div
+              style={{
+                height: "100%",
+                overflowY: "auto",
+              }}
+            >
+              <AGBPage />
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

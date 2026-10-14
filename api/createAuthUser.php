@@ -39,24 +39,31 @@ try {
             email,
             password,
             profileId,
-            createdAt
+            createdAt,
+            acceptedTerms,
+            acceptedTermsDate
         )
         VALUES (
             :id,
             :email,
             :password,
             :profileId,
-            :createdAt
+            :createdAt,
+            :acceptedTerms,
+            :acceptedTermsDate
         )
-    ");
+        ");
 
-    $stmt->execute([
-        ':id' => $data['id'],
-        ':email' => $data['email'],
-        ':password' => $data['password'],
-        ':profileId' => $data['profileId'],
-        ':createdAt' => time()
-    ]);
+        $stmt->execute([
+            ':id' => $data['id'],
+            ':email' => $data['email'],
+            ':password' => $data['password'],
+            ':profileId' => $data['profileId'],
+            ':createdAt' => time(),
+            ':acceptedTerms' => 1,
+            ':acceptedTermsDate' => date('Y-m-d H:i:s')
+        ]);
+
 
     @mail(
         'support@gigsda.com',
