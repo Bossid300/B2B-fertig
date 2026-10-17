@@ -36,6 +36,12 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
           type: found.type
         };
 
+
+
+
+
+
+
         setProfile(mergedProfile);
 
         setFormData({
@@ -146,6 +152,14 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
     show_category, show_Klarname, show_name, show_name_real, show_phone, show_email, show_address, show_website, show_genre, show_description, show_avatarUrl
   } = formData;
 
+
+
+const displayName =
+  `${vorname || ''} ${nachname || ''}`.trim() ||
+  "User";
+
+
+
   const EyeToggle = ({ active, flagName }) => (
     <button
       type="button"
@@ -159,6 +173,10 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
       {active ? <Eye size={13} /> : <EyeOff size={13} />}
     </button>
   );
+
+
+
+
 
   return (
     <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white relative select-none">
@@ -203,7 +221,7 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
 
             <div className="flex flex-col text-center sm:text-left z-10">
               <span className="text-4xl bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent">
-                {name || 'User'}
+                {displayName}
               </span>
               <span className="text-yellow-400 text-xs font-mono tracking-widest uppercase">
                 GIGSDA-ID ({id || 'SYS-NEW'})
@@ -261,7 +279,7 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
             <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
               <span className="text-slate-500">VORNAME / NACHNAME:</span> 
               <div className="flex items-center gap-2">
-                <span className="text-white font-bold">{vorname} {nachname || 'Nicht hinterlegt'}</span>
+                <span className="text-white font-bold">{displayName}</span>
                 {canEdit && (show_name_real ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
               </div>
             </div>

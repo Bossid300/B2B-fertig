@@ -19,6 +19,8 @@ export default function ProfileHeaderBox({
   const [myProjects, setMyProjects] = useState([]);
   const [profileData, setProfileData] = useState(null);
 
+  const [isSliderEditorOpen, setIsSliderEditorOpen] = useState(false);
+
 
   // Eigerer Zustand für das flache Mitschreiben der Ticker-Inputs
   const [tickerFields, setTickerFields] = useState({
@@ -428,7 +430,7 @@ const submitB2BRequest = async (project) => {
             </span>
           <div className="flex flex-col">
             <span className="text-[9px] font-mono text-purple-400 tracking-widest uppercase">
-              // BACKSTAGE CONTROLLER
+              BACKSTAGE CONTROLLER
             </span>
             <span className="text-white font-black text-xs tracking-wide uppercase">
               GIGSDA BOARD
@@ -445,14 +447,13 @@ const submitB2BRequest = async (project) => {
           {currentAchievement.badge}
         </div>
 
-        <button
-          type="button"
-          onClick={() => setView('billing')}
-          className="px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-slate-950 text-emerald-300 text-[10px] font-mono uppercase tracking-widest hover:border-emerald-400 cursor-pointer"
-        >
-          📄 BILLING
-        </button>
-
+          <button
+            type="button"
+            onClick={() => setView('billing')}
+            className="px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-slate-950 text-emerald-300 text-[10px] font-mono uppercase tracking-widest hover:border-emerald-400 cursor-pointer"
+          >
+            📄 BILLING
+          </button>
 
           <button type="button" onClick={() => setIsRequestMaskOpen(true)} className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-950/40 border border-purple-900/50 text-purple-400 text-[10px] font-mono hover:border-purple-500 transition-all cursor-pointer shadow-md uppercase font-black tracking-wider whitespace-nowrap"><MessageSquare size={10} /> Anfrage</button>
           <button type="button" onClick={handleToggleFavorite} className={`flex items-center gap-1 px-3 py-1.5 rounded-xl border text-[10px] font-mono transition-all cursor-pointer shadow-md uppercase font-black tracking-wider whitespace-nowrap ${isFavorite ? 'bg-amber-950/40 border-amber-500 text-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.1)]' : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'}`}><span>{isFavorite ? '★' : '☆'}</span> {isFavorite ? 'Aktiv' : 'Favorit'}</button>
@@ -465,7 +466,7 @@ const submitB2BRequest = async (project) => {
         <div className="relative h-[300px] w-full bg-slate-900 group">
           <img src={slides[currentSlide].url} alt="Banner" className="w-full h-full object-cover opacity-60 transition-all duration-500" />
           <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent pointer-events-none space-y-2">
-            <p className="text-cyan-400 text-xs tracking-widest uppercase">// {slides[currentSlide].l1}</p>
+            <p className="text-cyan-400 text-xs tracking-widest uppercase">{slides[currentSlide].l1}</p>
             <h1 className="text-white font-black text-2xl md:text-3xl tracking-tight uppercase leading-tight">{slides[currentSlide].l2}</h1>
             <h2 className="text-slate-200 text-base font-bold">{activeFields.display_name || activeFields.Klarname || 'UNBENANNTE ENTITÄT'}</h2>
             <div className="pt-1"><div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded border text-[10px] font-bold uppercase tracking-wider ${badge.style}`}>{badge.icon} {badge.text}</div></div>
@@ -475,7 +476,12 @@ const submitB2BRequest = async (project) => {
           <button type="button" onClick={() => setCurrentSlide(p => (p + 1) % slides.length)} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-950/60 border border-slate-800 text-white hover:bg-slate-900 opacity-0 group-hover:opacity-100 z-20 cursor-pointer">&gt;</button>
 
           {canEditSlider && !isSliderMaskOpen && (
-            <button type="button" onClick={() => { setIsRequestMaskOpen(false); setIsSliderMaskOpen(true); }} className="absolute top-4 right-4 flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 border border-slate-700 text-cyan-400 text-xs hover:border-cyan-500 shadow-lg backdrop-blur-sm z-30 cursor-pointer">✏️ SLIDER EDITIEREN</button>
+            <button type="button" onClick={() => { setIsRequestMaskOpen(false); setIsSliderMaskOpen(true); }} 
+              className="absolute top-4 right-4 flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 
+              border border-slate-700 text-cyan-400 text-xs hover:border-cyan-500 shadow-lg backdrop-blur-sm z-30 cursor-pointer"
+              >
+              ✏️ SLIDER EDITIEREN
+            </button>
           )}
         </div>
 
@@ -505,20 +511,31 @@ const submitB2BRequest = async (project) => {
 
         {/* CLOUD-TICKER MASK (DIREKTE, FEHLERFREIE ZUWEISUNG AN tickerFields) */}
         {isSliderMaskOpen && canEditSlider && (
-          <div className="absolute inset-0 z-50 bg-slate-950/95 backdrop-blur-md p-6 font-mono text-sm text-slate-300 overflow-y-auto rounded-3xl">
-            <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-2">
+          <div
+            className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setIsSliderMaskOpen(false)}
+          >
+            <div
+              className="w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-3xl border border-cyan-500/30 bg-slate-950 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+
+            <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950">
               <h3 className="text-cyan-400 text-xs tracking-widest font-bold uppercase">// CLOUD-TICKER CONFIGURATION MASKE</h3>
               <button type="button" onClick={() => setIsSliderMaskOpen(false)} className="text-slate-500 hover:text-white cursor-pointer">✕</button>
             </div>
             
-            <form onSubmit={handleTickerSave} className="space-y-4 pb-4">
+            <form
+                onSubmit={handleTickerSave}
+                className="space-y-4 p-6"
+              >
               {/* SLIDE 1 */}
               <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl space-y-2">
                 <div className="text-cyan-400 text-[9px] tracking-wide font-bold">// SLIDE 1 PARAMETER</div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                   <input type="text" name="slide1_url" placeholder="Bild URL" value={tickerFields.slide1_url || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
-                  <input type="text" name="slide1_line1" placeholder="Subline" value={tickerFields.slide1_line1 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
-                  <input type="text" name="slide1_line2" placeholder="Headline" value={tickerFields.slide1_line2 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
+                  <input type="text" name="slide1_line1" placeholder="WILLKOMMEN AUF MEINEM PROFIL" value={tickerFields.slide1_line1 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
+                  <input type="text" name="slide1_line2" placeholder="GIGSDA LIVE PROTOCOL 2026" value={tickerFields.slide1_line2 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
                 </div>
               </div>
 
@@ -527,8 +544,8 @@ const submitB2BRequest = async (project) => {
                 <div className="text-cyan-400 text-[9px] tracking-wide font-bold">// SLIDE 2 PARAMETER</div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                   <input type="text" name="slide2_url" placeholder="Bild URL" value={tickerFields.slide2_url || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
-                  <input type="text" name="slide2_line1" placeholder="Subline" value={tickerFields.slide2_line1 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
-                  <input type="text" name="slide2_line2" placeholder="Headline" value={tickerFields.slide2_line2 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
+                  <input type="text" name="slide2_line1" placeholder="LIVE IMPRESSIONEN" value={tickerFields.slide2_line1 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
+                  <input type="text" name="slide2_line2" placeholder="FESTIVAL TOURNEE 2026" value={tickerFields.slide2_line2 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
                 </div>
               </div>
 
@@ -537,8 +554,8 @@ const submitB2BRequest = async (project) => {
                 <div className="text-cyan-400 text-[9px] tracking-wide font-bold">// SLIDE 3 PARAMETER</div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                   <input type="text" name="slide3_url" placeholder="Bild URL" value={tickerFields.slide3_url || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
-                  <input type="text" name="slide3_line1" placeholder="Subline" value={tickerFields.slide3_line1 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
-                  <input type="text" name="slide3_line2" placeholder="Headline" value={tickerFields.slide3_line2 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
+                  <input type="text" name="slide3_line1" placeholder="BOOKING & ANFRAGEN" value={tickerFields.slide3_line1 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
+                  <input type="text" name="slide3_line2" placeholder="JETZT TERMIN SICHERN" value={tickerFields.slide3_line2 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
                 </div>
               </div>
 
@@ -547,18 +564,21 @@ const submitB2BRequest = async (project) => {
                 <div className="text-cyan-400 text-[9px] tracking-wide font-bold">// SLIDE 4 PARAMETER</div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                   <input type="text" name="slide4_url" placeholder="Bild URL" value={tickerFields.slide4_url || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
-                  <input type="text" name="slide4_line1" placeholder="Subline" value={tickerFields.slide4_line1 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
-                  <input type="text" name="slide4_line2" placeholder="Headline" value={tickerFields.slide4_line2 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
+                  <input type="text" name="slide4_line1" placeholder="NEXT GIGS" value={tickerFields.slide4_line1 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
+                  <input type="text" name="slide4_line2" placeholder="CHECK DEN EVENT RADAR" value={tickerFields.slide4_line2 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-2 border-t border-slate-900">
+              <div className="sticky bottom-0 flex justify-end gap-3 px-6 py-4 border-t border-slate-800 bg-slate-950">
                 <button type="button" onClick={() => setIsSliderMaskOpen(false)} className="px-4 py-2 rounded border border-slate-800 text-slate-400 text-xs uppercase hover:text-white cursor-pointer">Abbrechen</button>
-                <button type="submit" className="px-5 py-2 rounded bg-amber-400 text-slate-950 text-xs font-black uppercase tracking-wider hover:bg-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.3)] cursor-pointer">Cloud-Ticker einbrennen ✓</button>
+                <button type="submit" className="px-5 py-2 rounded bg-amber-400 text-slate-950 text-xs font-black uppercase tracking-wider hover:bg-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.3)] cursor-pointer">SLIDER SPEICHERN</button>
               </div>
             </form>
           </div>
+          </div>
         )}
+
+
       </div>
     </div>
   );
