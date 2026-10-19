@@ -254,18 +254,8 @@ useEffect(() => {
 }, [plannerProgress, setProgress]);
 
 
-const currentUserName =
-  localStorage.getItem('gigsda_user_name');
-
-const currentProfile =
-  profiles.find(
-    p =>
-      (p.name || '').toLowerCase() ===
-      (currentUserName || '').toLowerCase()
-  );
-
 const currentUserId =
-  currentProfile?.id;
+  localStorage.getItem('gigsda_profile_id');
 
 const isOwner =
   activeEvent?.ownerId === currentUserId;
@@ -371,7 +361,7 @@ if (changedEvent) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
+    <div className="max-w-6xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
       
       {/* 6 ECHTE MEILENSTEINE NAVIGATOR */}
       <FahrplanMetrics progress={progress} activeStep="planner" onNavigate={onNavigateToStep} />

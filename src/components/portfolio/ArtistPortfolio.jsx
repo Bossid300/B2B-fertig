@@ -1,72 +1,48 @@
-import React, { useEffect, useState } from "react";
-import GigsdaPass from "../components/GigsdaPass";
-import { getProfilesDb } from "../services/apiService";
-import { eventService } from '../services/eventService';
-
+import React from 'react';
+import GigsdaPass from "../GigsdaPass";
+import { eventService } from '../../services/eventService';
 
 export default function ArtistPortfolio({
-  profileId = null,
+  profile,
   onBack = null,
 }) {
-		
-		const [profile, setProfile] = useState(null);
-		const handlePrintPdf = () => {
+
+const loggedInProfileId =
+  localStorage.getItem('gigsda_profile_id');
+
+const isOwner =
+  String(loggedInProfileId) === String(profile?.id);
+	
+	const handlePrintPdf = () => {
 		window.print();
 		};
-		const activeProfileId =
-			profileId ||
-			localStorage.getItem('gigsda_portfolio_profile');
-
-		const loggedInProfileId =
-		localStorage.getItem('gigsda_profile_id');
-
-		const isOwner =
-		String(loggedInProfileId) === String(activeProfileId);
 
 		const events =
 		eventService.getEvents();
 
-		useEffect(() => {
-				getProfilesDb()
-				.then(allProfiles => {
-						const found = allProfiles.find(p => {
-						const profileData =
-								p.profile_json
-								? JSON.parse(p.profile_json)
-								: p;
-						return (
-								profileData.id === activeProfileId
-						);
-						});
-						if (!found) return;
-						const loadedProfile =
-						found.profile_json
-								? JSON.parse(found.profile_json)
-								: found;
-				setProfile(loadedProfile);
-			})
-			.catch(console.error);
-	}, [activeProfileId]);
-	const references =
-		events.filter(evt => {
-			const hasJoined =
-				Array.isArray(evt.crew) &&
-				evt.crew.some(member =>
-					member &&
-					member.name === profile?.name &&
-					(
-						member.status === "accepted" ||
-						member.status === "confirmed"
-					)
-				);
-			const isOwner =
-				evt.ownerId === profile?.id;
-			return hasJoined || isOwner;
-		});
-	if (!profile) {
-		return null;
-	}
+		const references =
+			events.filter(evt => {
+				const hasJoined =
+					Array.isArray(evt.crew) &&
+					evt.crew.some(member =>
+						member &&
+						member.name === profile?.name &&
+						(
+							member.status === "accepted" ||
+							member.status === "confirmed"
+						)
+					);
+				const isOwner =
+					evt.ownerId === profile?.id;
+				return hasJoined || isOwner;
+			});
 
+
+		if (!profile) {
+			return null;
+		}
+
+	
 	return (
 		<div className="max-w-7xl mx-auto px-6 py-10 space-y-12">
 			{/* 01 // HERO STAGE */}
@@ -105,11 +81,13 @@ export default function ArtistPortfolio({
 										{profile?.role}
 								</button>
 
-{/* 
 								<button className="no-print px-5 py-3 rounded-xl border border-slate-700">
-										{profile?.type}
+										Anfrage senden
 								</button>
- */}
+
+								<button className="no-print px-5 py-3 rounded-xl border border-slate-700">
+										Favorit hinzufügen
+								</button>
 
 								</div>
 								
@@ -472,7 +450,9 @@ export default function ArtistPortfolio({
 
 				{/* GIGSDAPASS - NUR FÜR OWNER */}
 				{isOwner && (
-				<GigsdaPass />
+				<GigsdaPass 
+					profile={profile}
+					/>
 				)}
 
 		</div>

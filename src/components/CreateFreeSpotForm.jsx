@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { geocodeAddress } from '../services/geoService';
+
 
 const CATEGORIES = [
   'Künstler',
@@ -118,6 +120,11 @@ export default function CreateFreeSpotForm({
       return;
     }
 
+    const geo =
+      await geocodeAddress(
+        form.location.trim()
+      );
+
     const freeSpot = {
       ...(editSpot?.id && { id: editSpot.id }),
 
@@ -131,6 +138,10 @@ export default function CreateFreeSpotForm({
 
       location: form.location.trim(),
       region: form.region.trim(),
+
+      lat: geo?.lat || null,
+      lng: geo?.lng || null,
+
       category: form.category,
       description: form.description.trim(),
 

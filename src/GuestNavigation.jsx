@@ -34,12 +34,12 @@ export default function GuestNavigation({ setView, activeView }) {
           <button 
             onClick={() => handleNavClick('radar')} 
             className={`${desktopBase} ${activeView === 'radar' ? activeClass : inactiveClass}`}>
-            🗣 CREW-EXPLORER
+            🗣 Portfolios
           </button>  
 
           <button onClick={() => handleNavClick('guestEvents')} 
           className={`${desktopBase} ${activeView === 'guestEvents' ? activeClass : inactiveClass}`}>
-            📅 EVENTS-RADAR
+            📅 Events
           </button>
 
           <button
@@ -98,11 +98,11 @@ export default function GuestNavigation({ setView, activeView }) {
           <button onClick={() => handleNavClick('whatIsGigsda')} className={`${mobileBase} ${activeView === 'whatIsGigsda' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
             🎵 Was ist gigsda?
           </button>
-          <button onClick={() => handleNavClick('guestEvents')} className={`${mobileBase} ${activeView === 'guestEvents' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
-            📅 EVENTS-RADAR
-          </button>
           <button onClick={() => handleNavClick('radar')} className={`${mobileBase} ${activeView === 'radar' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
-            🗣 SEARCH-EXPLORER
+            🗣 Portfolios
+          </button>
+          <button onClick={() => handleNavClick('guestEvents')} className={`${mobileBase} ${activeView === 'guestEvents' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
+            📅 Events
           </button>
           <button
             onClick={() => handleNavClick('calendar')}

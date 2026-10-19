@@ -9,7 +9,7 @@ export default function Footer({ setView }) {
   return (
 
     <footer className="w-full border-t border-slate-900 bg-slate-950 pt-12 pb-0 px-4">
-      <div className="max-w-5xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 text-sm font-sans text-slate-500">
+      <div className="max-w-6xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 text-sm font-sans text-slate-500">
         
         {/* Spalte 1 */}
         <div className="space-y-2.5">

@@ -10,7 +10,7 @@ import { eventService } from '../services/eventService';
 export default function LocationRaeumeBox({ currentProfileId, isOwner, selectedRoom }) {
   const [isEditing, setIsEditing] = useState(false);
   const [rooms, setRooms] = useState([]);
-
+  const [fullProfile, setFullProfile] = useState({});
   const canEdit = isOwner || currentProfileId === localStorage.getItem('gigsda_profile_id');
   
   // Hilfsfunktion zum Prüfen, ob ein Link ein Bild ist
@@ -29,10 +29,14 @@ useEffect(() => {
 
       if (!found) return;
 
+      console.log("FOUND", found);
+
       const profileData =
         found?.profile_json
           ? JSON.parse(found.profile_json)
           : found;
+
+      setFullProfile(profileData);
 
       const loadedRooms = [];
       let index = 1;
@@ -122,9 +126,13 @@ useEffect(() => {
   const handleSave = async () => {
     if (!currentProfileId) return;
     try {
-      const updatedProfile = {
-        id: profileId
-      };
+
+      console.log("FULL PROFILE", fullProfile);
+
+  const updatedProfile = {
+    ...fullProfile,
+    id: currentProfileId
+  };
       rooms.forEach((room, idx) => {
         const i = idx + 1;
         updatedProfile[`room${i}_name`] = room.name;
@@ -147,7 +155,10 @@ useEffect(() => {
         updatedProfile.id ||
         updatedProfile.profileId ||
         currentProfileId;
-
+console.log(
+  "ROOM SAVE",
+  updatedProfile
+);
       await saveProfile({
         profileId: saveProfileId,
         profile: updatedProfile

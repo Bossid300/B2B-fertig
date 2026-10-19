@@ -31,6 +31,8 @@ $location    = trim($data['location'] ?? '');
 $city        = trim($data['city'] ?? '');
 $region      = trim($data['region'] ?? '');
 $category    = trim($data['category'] ?? '');
+$lat         = $data['lat'] ?? null;
+$lng         = $data['lng'] ?? null;
 
 if (!$ownerId || !$title || !$spotDate) {
     echo json_encode([
@@ -54,6 +56,8 @@ try {
             location,
             city,
             region,
+            lat,
+            lng,
             category,
             status
         )
@@ -68,6 +72,8 @@ try {
             :location,
             :city,
             :region,
+            :lat,
+            :lng,
             :category,
             'active'
         )
@@ -85,6 +91,8 @@ try {
         ':location'     => $location ?: null,
         ':city'         => $city ?: null,
         ':region'       => $region ?: null,
+        ':lat'          => $lat ?: null,
+        ':lng'          => $lng ?: null,
         ':category'     => $category ?: null
     ]);
 

@@ -293,7 +293,12 @@ window.dispatchEvent(
   const events = eventService.getEvents();
 
   const currentUserId =
-    currentProfileData?.id;
+    localStorage.getItem('gigsda_profile_id');
+
+
+  const currentProfileId =
+    localStorage.getItem('gigsda_profile_id');
+
 
   const currentEvent =
     events.find(e => e.id === activeStub?.id);
@@ -364,13 +369,8 @@ const [showMatrixInfo, setShowMatrixInfo] =
 
 
 
-
-
-
-
-
   return (
-    <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
+    <div className="max-w-6xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
       
       {/* 📊 GLOBALER B2B-FORTSCHRITTS-FAHRPLAN (DIREKT IM COCKPIT INTEGRIERT) */}
       <FahrplanMetrics progress={progress} activeStep="shortlist" onNavigate={onNavigateToStep} />
@@ -386,6 +386,7 @@ const [showMatrixInfo, setShowMatrixInfo] =
         ownerName={ownerName}
         onBack={onBack}
       />
+
 
 
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl gap-4">

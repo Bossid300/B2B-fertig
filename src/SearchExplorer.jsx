@@ -375,7 +375,7 @@ return (
             <ShieldCheck size={12} /> Gigsda Engine V1.0 Activated
           </div>
           <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2 bg-gradient-to-r from-white via-slate-200 to-slate-500 bg-clip-text text-transparent">
-            Crew Explorer
+            Portfolios | Profil | Netzwerk
           </h1>
           <p className="text-xs text-slate-400 leading-relaxed max-w-lg uppercase tracking-wide">
             Durchsuche das verifizierte Gigsda-Netzwerk nach Technikern, Künstlern und Allianzen für deine anstehenden Produktionen.
@@ -627,6 +627,7 @@ return (
                 key={`${user.id || 'user'}-${index}`}
                 user={user}
                 isGuest={!isLoggedIn}
+/*                 
                 onProfile={() => {
                   localStorage.setItem(
                     'gigsda_active_guest_profile_id',
@@ -636,6 +637,23 @@ return (
                     setFavorites(user);
                   }
                 }}
+
+ */
+onProfile={() => {
+  localStorage.setItem(
+    'gigsda_portfolio_profile',
+    user.id
+  );
+
+  localStorage.setItem(
+    'gigsda_current_view',
+    'artistPortfolio'
+  );
+
+  window.location.reload();
+}}
+
+
                 onRequest={() => {
                   setActiveRequestUser(user);
                   setRequestText(
@@ -698,6 +716,7 @@ return (
                     <ProfileCard
                       user={selectedUser}
                       isGuest={!isLoggedIn}
+/*                       
                       onProfile={() => {
                         localStorage.setItem(
                           'gigsda_active_guest_profile_id',
@@ -708,6 +727,22 @@ return (
                           setFavorites(selectedUser);
                         }
                       }}
+
+ */
+onProfile={() => {
+  localStorage.setItem(
+    'gigsda_portfolio_profile',
+    user.id
+  );
+
+  localStorage.setItem(
+    'gigsda_current_view',
+    'artistPortfolio'
+  );
+
+  window.location.reload();
+}}
+
                       onRequest={() => {
                         setActiveRequestUser(selectedUser);
 

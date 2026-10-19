@@ -41,17 +41,9 @@ export default function StageSpecs({
     p => p.id === activeEvent?.ownerId
   )?.name || "Unbekannt";
 
-  const currentUserName =
-    localStorage.getItem("gigsda_user_name");
-
-  const currentProfile = profiles.find(
-    p =>
-      (p.name || "").toLowerCase() ===
-      (currentUserName || "").toLowerCase()
-  );
-
-  const currentUserId = currentProfile?.id;
-
+  const currentUserId =
+    localStorage.getItem('gigsda_profile_id');
+    
   const isOwner =
     activeEvent?.ownerId === currentUserId;
 
@@ -143,7 +135,7 @@ export default function StageSpecs({
 
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
+    <div className="max-w-6xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
       
     {/* GLOBALER FAHRPLAN */}
     <FahrplanMetrics progress={progress} activeStep="stage" onNavigate={onNavigateToStep} />

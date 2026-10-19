@@ -3,7 +3,8 @@ import { eventService } from './services/eventService';
 import CreateFreeSpotForm from './components/CreateFreeSpotForm';
 import { freeSpotService } from './services/freeSpotService';
 import { getProfiles } from './services/apiService';
-import ArtistPortfolio from './components/ArtistPortfolio';
+import ArtistPortfolio from './components/portfolio/ArtistPortfolio';
+import { geocodeAddress, distanceKm } from './services/geoService';
 
 const FILTERS = [
   { id: 'all', label: 'Alle', icon: '📅' },
@@ -125,6 +126,7 @@ export default function CalendarPage({
           dbFreeSpots.filter((spot) => spot && spot.title)
         );
 
+        
         const normalizedProfiles = dbProfiles.map((profile) => {
           let profileData = {};
 
@@ -146,14 +148,6 @@ export default function CalendarPage({
 
         setProfiles(normalizedProfiles);
 
-      console.log(
-        'CALENDAR LOCATION PROFILES:',
-        normalizedProfiles.filter(
-          (profile) => profile.role === 'Location'
-        )
-      );
-
-      console.log('CALENDAR FREE SPOTS:', dbFreeSpots);
 
       } catch (e) {
         console.error('CALENDAR DATEN FEHLER', e);
@@ -175,7 +169,29 @@ export default function CalendarPage({
 
   const [selectedDate, setSelectedDate] = useState(today);
   const [activeFilter, setActiveFilter] = useState('all');
-  const [region, setRegion] = useState('Region');
+
+  const [searchRadius, setSearchRadius] = useState(500);
+  const [baseLocation, setBaseLocation] = useState('Braunau');
+  const [baseCoordinates, setBaseCoordinates] = useState(null);
+
+
+  useEffect(() => {
+    const loadBaseCoordinates = async () => {
+      if (!baseLocation?.trim()) return;
+
+      try {
+        const geo =
+          await geocodeAddress(baseLocation);
+
+        setBaseCoordinates(geo);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    loadBaseCoordinates();
+  }, [baseLocation]);
+
 
   const calendarDays = useMemo(
     () => createMonthGrid(currentMonth),
@@ -227,10 +243,45 @@ export default function CalendarPage({
 
 
   const selectedDayEvents =
-    activeFilter === 'all' || activeFilter === 'events'
+    activeFilter === 'all' ||
+    activeFilter === 'events'
       ? events.filter((event) => {
-          const eventDate = parseEventDate(event.event_date);
-          return eventDate && sameDay(eventDate, selectedDate);
+
+          const eventDate =
+            parseEventDate(event.event_date);
+
+          const sameDate =
+            eventDate &&
+            sameDay(eventDate, selectedDate);
+
+          if (!sameDate) return false;
+
+          // Noch keine Basis-Koordinaten?
+          if (
+            !baseCoordinates?.lat ||
+            !baseCoordinates?.lng
+          ) {
+            return true;
+          }
+
+          // Event hat keine Koordinaten?
+          if (
+            !event?.lat ||
+            !event?.lng
+          ) {
+            return true;
+          }
+
+          const eventDistance =
+            distanceKm(
+              baseCoordinates.lat,
+              baseCoordinates.lng,
+              event.lat,
+              event.lng
+            );
+
+          return eventDistance <= searchRadius;
+
         })
       : [];
 
@@ -238,9 +289,42 @@ export default function CalendarPage({
   const selectedDayFreeSpots =
     activeFilter === 'all' || activeFilter === 'freeSpots'
       ? freeSpots.filter((spot) => {
-          const spotDate = parseEventDate(spot.spot_date);
-          return spotDate && sameDay(spotDate, selectedDate);
-        })
+
+          const spotDate =
+            parseEventDate(spot.spot_date);
+
+          const sameDate =
+            spotDate &&
+            sameDay(spotDate, selectedDate);
+
+          if (!sameDate) return false;
+
+          if (
+            !baseCoordinates?.lat ||
+            !baseCoordinates?.lng
+          ) {
+            return true;
+          }
+
+          // alte Spots ohne Koordinaten
+          if (
+            !spot?.lat ||
+            !spot?.lng
+          ) {
+            return true;
+          }
+
+          const spotDistance =
+            distanceKm(
+              baseCoordinates.lat,
+              baseCoordinates.lng,
+              spot.lat,
+              spot.lng
+            );
+
+          return spotDistance <= searchRadius;
+
+      })
       : [];
 
   const getFreeSpotOwner = (spot) => {
@@ -316,23 +400,55 @@ export default function CalendarPage({
           ))}
 
           {/* REGION */}
-          <select
-            value={region}
-            onChange={(e) => setRegion(e.target.value)}
-            className="
-              bg-[#07101f]
-              border border-slate-700
-              rounded-xl
-              px-4
-              text-slate-200
-              outline-none
-            "
-          >
-            <option>Region</option>
-            <option>Deutschland</option>
-            <option>Österreich</option>
-            <option>Schweiz</option>
-          </select>
+          <div className="flex items-center gap-3">
+
+            <input
+              type="text"
+              value={baseLocation}
+              onChange={(e) => setBaseLocation(e.target.value)}
+              placeholder="Standort"
+              className="
+                w-50
+                bg-[#07101f]
+                border border-slate-700
+                rounded-xl
+                px-3 py-2
+                text-xm
+                text-white
+              "
+            />
+
+            <div className="flex items-center gap-2">
+
+              <input
+                type="range"
+                min="0"
+                max="500"
+                step="10"
+                value={searchRadius}
+                onChange={(e) =>
+                  setSearchRadius(Number(e.target.value))
+                }
+                className="w-24 accent-cyan-500"
+              />
+
+              <span
+                className="
+                  w-14
+                  text-right
+                  text-xm
+                  font-bold
+                  text-cyan-400
+                  shrink-0
+                "
+              >
+                {searchRadius} km
+              </span>
+
+            </div>
+
+          </div>
+
 
           {!isGuest && currentProfileType === 'Location' && (
             <button
@@ -551,19 +667,85 @@ export default function CalendarPage({
                 const selected = sameDay(date, selectedDate);
                 const isToday = sameDay(date, today);
                 const dayEvents =
-                  activeFilter === 'all' || activeFilter === 'events'
+                  activeFilter === 'all' ||
+                  activeFilter === 'events'
                     ? events.filter((event) => {
-                        const eventDate = parseEventDate(event.event_date);
-                        return eventDate && sameDay(eventDate, date);
+
+                        const eventDate =
+                          parseEventDate(event.event_date);
+
+                        const sameDate =
+                          eventDate &&
+                          sameDay(eventDate, date);
+
+                        if (!sameDate) return false;
+
+                        if (
+                          !baseCoordinates?.lat ||
+                          !baseCoordinates?.lng
+                        ) {
+                          return true;
+                        }
+
+                        if (
+                          !event?.lat ||
+                          !event?.lng
+                        ) {
+                          return true;
+                        }
+
+                        const eventDistance =
+                          distanceKm(
+                            baseCoordinates.lat,
+                            baseCoordinates.lng,
+                            event.lat,
+                            event.lng
+                          );
+
+                        return eventDistance <= searchRadius;
+
                       })
                     : [];
 
                 const dayFreeSpots =
                   activeFilter === 'all' || activeFilter === 'freeSpots'
                     ? freeSpots.filter((spot) => {
-                        const spotDate = parseEventDate(spot.spot_date);
-                        return spotDate && sameDay(spotDate, date);
-                      })
+
+                        const spotDate =
+                          parseEventDate(spot.spot_date);
+
+                        const sameDate =
+                          spotDate &&
+                          sameDay(spotDate, date);
+
+                        if (!sameDate) return false;
+
+                        if (
+                          !baseCoordinates?.lat ||
+                          !baseCoordinates?.lng
+                        ) {
+                          return true;
+                        }
+
+                        // alte Spots ohne Koordinaten
+                        if (
+                          !spot?.lat ||
+                          !spot?.lng
+                        ) {
+                          return true;
+                        }
+
+                        const spotDistance =
+                          distanceKm(
+                            baseCoordinates.lat,
+                            baseCoordinates.lng,
+                            spot.lat,
+                            spot.lng
+                          );
+
+                        return spotDistance <= searchRadius;
+
+                    })
                     : [];
 
                 return (

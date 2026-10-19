@@ -204,7 +204,7 @@ return (
             <ShieldCheck size={12} /> Gigsda Engine V1.0 Activated
           </div>
           <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight mb-2 bg-gradient-to-r from-white via-slate-200 to-slate-500 bg-clip-text text-transparent">
-            EVENT-RADAR
+            EVENTS | GIGS | KONZERTE
           </h1>
           <p className="text-xs text-slate-400 leading-relaxed max-w-lg uppercase tracking-wide">
             Durchsuche alle anstehenden Veranstaltungen und regionalen Gigs.

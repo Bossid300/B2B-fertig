@@ -115,8 +115,6 @@ useEffect(() => {
     activeEvent?.promotionData;
   if (!promo) return;
 
-console.log('ACTIVE EVENT:', activeEvent);
-
     setPromoData({
     title:
       promo.title ||
@@ -200,13 +198,7 @@ const handleSavePromotion = () => {
 
     });
 
-console.log({
-  venueName: promoData.venueName,
-  street: promoData.street,
-  zip: promoData.zip,
-  city: promoData.city
-});
-    
+   
   eventService.saveEvents(updatedEvents);
 
   const changedEvent =
@@ -316,7 +308,7 @@ return (
 
 
     
-    <div className="max-w-4xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
+    <div className="max-w-6xl mx-auto space-y-6 my-6 p-4 text-xs text-slate-300 font-mono animate-fade-in">
 
 
       {/* 📊 GLOBALER B2B-FORTSCHRITTS-FAHRPLAN (DIREKT IM COCKPIT INTEGRIERT) */}

@@ -239,7 +239,7 @@ export default function EventCard({
                 border-purple-500/30
                 bg-purple-500/10
                 text-purple-300
-                text-[10px]
+                text-sm
                 font-black
                 uppercase
                 tracking-wider
@@ -250,7 +250,7 @@ export default function EventCard({
                 duration-300
               "
             >
-              ⚡ Event ansehen
+              Details
             </button>
 
             <button
@@ -259,9 +259,9 @@ export default function EventCard({
                   "⚡ GIGSDA TICKET-GATE\n\nDiese Funktion befindet sich aktuell im Aufbau.\n\nDie Anbindung an Ticketanbieter folgt in einem kommenden Update."
                 );
               }}
-              className="bg-cyan-500/5 border border-cyan-500/20 hover:border-cyan-500/50 text-cyan-400 text-[10px] font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center tracking-wider w-full"
+              className="mt-4 bg-cyan-500/5 border border-cyan-500/20 hover:border-cyan-500/50 text-cyan-400 text-sm font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center tracking-wider w-full"
             >
-              TICKET ✎
+              TICKET
             </button>
 
           </div>

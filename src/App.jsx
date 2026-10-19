@@ -70,7 +70,9 @@ import RiderZentrale from './RiderZentrale'; // 🎛️ Schaltet das geteilte B2
 import CommunityChat from './CommunityChat';
 
 import { initialUsers, initialProfiles } from './data/mockData';
-import ArtistPortfolio from "./components/ArtistPortfolio";
+import PortfolioRouter from './components/portfolio/PortfolioRouter';
+import ArtistPortfolio from "./components/portfolio/ArtistPortfolio.jsx";
+
 import GigsdaPass from "./components/GigsdaPass";
 import PassPrintPage from './components/prints/PassPrintPage';
 
@@ -1293,9 +1295,9 @@ useEffect(() => {
             />
           )}
 
-          {view === "artistPortfolio" && (
-            <ArtistPortfolio
-              setView={setView}
+          {view === 'artistPortfolio' && (
+            <PortfolioRouter
+              onBack={() => setView('matrix')}
             />
           )}
 

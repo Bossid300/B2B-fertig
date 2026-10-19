@@ -3,43 +3,12 @@ import { getProfilesDb } from '../services/apiService';
 import QRCode from "react-qr-code";
 
 export default function GigsdaPass({
+    profile,
   setView
 }) {
-    const [profile, setProfile] = useState(null);
 
-    const targetUser =
-    localStorage.getItem('gigsda_user_name');
-
-    useEffect(() => {
-
-    getProfilesDb()
-        .then(profiles => {
-
-        const found = profiles.find(
-            p =>
-            p &&
-            (p.name || p.user_name || p.display_name)
-                ?.trim()
-                .toLowerCase() ===
-            targetUser?.trim().toLowerCase()
-        );
-
-        if (found) {
-
-            if (found.profile_json) {
-            setProfile(
-                JSON.parse(found.profile_json)
-            );
-            } else {
-            setProfile(found);
-            }
-
-        }
-
-        })
-        .catch(console.error);
-
-    }, [targetUser]);
+const memberLabel =
+  `${profile?.role?.toUpperCase()} MEMBER`;
 
     if (!profile) {
     return (
@@ -112,7 +81,7 @@ export default function GigsdaPass({
                 {profile.id}
             </div>
             <div className="mt-6 inline-block px-5 py-2 rounded-full border border-cyan-500 text-cyan-400 text-sm font-bold tracking-wider">
-                ARTIST MEMBER • 2026
+                {memberLabel} • 2026
             </div>
             </div>
         </div>

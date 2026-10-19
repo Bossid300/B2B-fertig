@@ -159,14 +159,18 @@ export default function LocationProfile({ onBack, currentProfileId, isOwner, set
       <ProfileCard user={profileData} />
       </>
       )}
-      <ProfileBioTabsBox currentProfileId={currentProfileId} isOwner={isOwner} />
+{/*       <ProfileBioTabsBox currentProfileId={currentProfileId} isOwner={isOwner} />
+ */}      
       <ProfileGalleryBox currentProfileId={currentProfileId} isOwner={isOwner} />
       <ProfileNetworkBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileAvailBox currentProfileId={currentProfileId} isOwner={isOwner} />
+{/*       <ProfileAvailBox currentProfileId={currentProfileId} isOwner={isOwner} />
+ */}      
       <ProfileProjekteBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileEquipmentBox currentProfileId={currentProfileId} isOwner={isOwner} />
+{/*       <ProfileEquipmentBox currentProfileId={currentProfileId} isOwner={isOwner} />
+ */}      
       <ProfileBewertungsBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileHallenBox currentProfileId={currentProfileId} isOwner={isOwner} />
+{/*       <ProfileHallenBox currentProfileId={currentProfileId} isOwner={isOwner} />
+ */}      
       <LocationRaeumeBox currentProfileId={currentProfileId} isOwner={isOwner} />
       <ProfileFinanzBox currentProfileId={currentProfileId} isOwner={isOwner} />
       <ProfileLokalBox currentProfileId={currentProfileId} isOwner={isOwner} />

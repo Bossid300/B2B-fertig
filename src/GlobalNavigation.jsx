@@ -24,18 +24,14 @@ export default function GlobalNavigation({ view, setView, onLogout }) {
   const [profileData, setProfileData] = useState(null);
   const [avatarUrl, setAvatarUrl] = useState('https://via.placeholder.com/32');
   const regRole = localStorage.getItem('gigsda_reg_role') || "Gast";
-  const userName = localStorage.getItem('gigsda_user_name') || "User";
+  const currentProfileId = localStorage.getItem('gigsda_profile_id');
 
   // ✅ Badge zählen
   useEffect(() => {
     getProfilesDb()
       .then(profiles => {
         const found = profiles.find(
-          p =>
-            p &&
-            (p.name || '')
-              .toLowerCase() ===
-            userName.toLowerCase()
+          p => p.id === currentProfileId
         );
 
         if (!found) return;
@@ -54,7 +50,7 @@ export default function GlobalNavigation({ view, setView, onLogout }) {
         );
       })
       .catch(console.error);
-  }, [userName]);
+  }, [currentProfileId]);
 
 
 useEffect(() => {
@@ -173,13 +169,13 @@ useEffect(() => {
           onClick={() => triggerNav('radar')}
           className={`${desktopBase} ${view === 'radar' ? activeClass : inactiveClass}`}
         >
-          🗣 CREW-EXPLORER
+          🗣 Portfolios
         </span>
         <span
           onClick={() => triggerNav('guestEvents')}
           className={`${desktopBase} ${view === 'guestEvents' ? activeClass : inactiveClass}`}
         >
-          📅 EVENTS-RADAR
+          📅 Events
         </span>
         <span
           onClick={() => triggerNav('calendar')}
@@ -324,11 +320,11 @@ useEffect(() => {
           }
 
           <button onClick={() => triggerNav('radar')} className={`${mobileBase} ${view === 'radar' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
-            🗣 SEARCH-EXPLORER
+            🗣 Portfolios
           </button>
 
           <button onClick={() => triggerNav('guestEvents')} className={`${mobileBase} ${view === 'guestEvents' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
-            📅 EVENTS-RADAR
+            📅 Events
           </button>
 
           <button

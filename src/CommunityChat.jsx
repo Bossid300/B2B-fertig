@@ -11,7 +11,8 @@ import {
 
 export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
 
-  const currentUserName = localStorage.getItem('gigsda_user_name');
+  const currentProfileId =
+  localStorage.getItem('gigsda_profile_id');
 
   const [allProfiles, setAllProfiles] = useState([]);
   const [currentProfileData, setCurrentProfileData] = useState(null);
@@ -76,22 +77,13 @@ export default function CommunityChat({ onBack, progress, onNavigateToStep }) {
         setAllProfiles(normalizedProfiles);
 
         const found = normalizedProfiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name || '')
-              .trim()
-              .toLowerCase() ===
-            (currentUserName || '')
-              .trim()
-              .toLowerCase()
+          p => p.id === currentProfileId
         );
-
-
 
         setCurrentProfileData(found || null);
       })
       .catch(console.error);
-  }, [currentUserName]);
+  }, [currentProfileId]);
 
   const hasAccess =
   activeEvent &&
@@ -255,6 +247,7 @@ const [activeChannel, setActiveChannel] = useState('USR-8717');
 
   // Filtert nur die Nachrichten für den aktuell ausgewählten Kanal
   const filteredMessages = chatHistory.filter(m => m.channel === activeChannel);
+
   if (!currentProfileData) {
     return (
       <div className="max-w-4xl mx-auto p-6 text-center text-slate-500">

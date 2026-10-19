@@ -158,15 +158,15 @@ export default function ProfileCard({
           <div className="grid grid-cols-2 gap-2 mt-2 pt-3 border-t border-slate-900/60">
             <button
               onClick={(e) => { e.stopPropagation(); onProfile(); }}
-              className="bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-[10px] font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center"
+              className="bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-sm font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center"
             >
-              PROFIL
+              Details
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); onRequest(); }}
-              className="bg-cyan-500/5 border border-cyan-500/20 hover:border-cyan-500/50 text-cyan-400 text-[10px] font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center tracking-wider w-full"
+              className="bg-cyan-500/5 border border-cyan-500/20 hover:border-cyan-500/50 text-cyan-400 text-sm font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center tracking-wider w-full"
             >
-              ANFRAGEN ✎
+              ANFRAGEN
             </button>
           </div>
         )}

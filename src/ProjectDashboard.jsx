@@ -154,41 +154,39 @@ const handleDelete = (eventId, e) => {
   }, []);
 
 
-  const currentUserName = localStorage.getItem('gigsda_user_name');
-useEffect(() => {
-  if (!currentUserName) return;
+  const currentProfileId =
+    localStorage.getItem('gigsda_profile_id');
 
-  getProfilesDb()
-    .then(profiles => {
-      const found = profiles.find(
-        p =>
-          p &&
-          (p.name || p.user_name || p.display_name || '')
-            .trim()
-            .toLowerCase() ===
-          currentUserName.trim().toLowerCase()
-      );
+  useEffect(() => {
+    if (!currentProfileId) return;
+
+    getProfilesDb()
+      .then(profiles => {
+
+        const found = profiles.find(
+          p => p.id === currentProfileId
+        );
 
 
-      if (!found) return;
+        if (!found) return;
 
-      const profileData =
-        found?.profile_json
-          ? JSON.parse(found.profile_json)
-          : found;
+        const profileData =
+          found?.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
 
-      setCurrentProfileData(profileData);
-    })
-    .catch(console.error);
-}, [currentUserName]);
+        setCurrentProfileData(profileData);
+      })
+      .catch(console.error);
+  }, [currentProfileId]);
 
 
-const formatEventDateDe = (isoDate) => {
-  if (!isoDate) return '';
+  const formatEventDateDe = (isoDate) => {
+    if (!isoDate) return '';
 
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) {
-    return isoDate;
-  }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) {
+      return isoDate;
+    }
 
   const [year, month, day] = isoDate.split('-');
 
@@ -416,6 +414,8 @@ currentEvents >= maxEvents;
               
               const isOwner =
                 evt.ownerId === currentUserId;
+
+
 
               // Dynamische Prozentberechnung basierend auf der echten Team-Auswahl für dieses Event
               const crewProgress =

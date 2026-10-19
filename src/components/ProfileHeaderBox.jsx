@@ -463,7 +463,7 @@ const submitB2BRequest = async (project) => {
 
       {/* SLIDER BLOCK */}
       <div className="relative w-full bg-slate-950 border border-slate-900 rounded-3xl overflow-hidden shadow-2xl">
-        <div className="relative h-[300px] w-full bg-slate-900 group">
+        <div className="relative h-[350px] w-full bg-slate-900 group">
           <img src={slides[currentSlide].url} alt="Banner" className="w-full h-full object-cover opacity-60 transition-all duration-500" />
           <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent pointer-events-none space-y-2">
             <p className="text-cyan-400 text-xs tracking-widest uppercase">{slides[currentSlide].l1}</p>

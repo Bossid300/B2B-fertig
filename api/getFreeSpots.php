@@ -25,6 +25,8 @@ try {
             location,
             city,
             region,
+            lat,
+            lng,
             category,
             status,
             created_at,

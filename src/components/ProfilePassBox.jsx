@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, FileText, ArrowLeft } from 'lucide-react';
-import ArtistPortfolio from "./ArtistPortfolio";
+import ArtistPortfolio from "./portfolio/ArtistPortfolio";
 import { getProfiles } from '../services/apiService';
 import { ArrowUp } from 'lucide-react';
 
