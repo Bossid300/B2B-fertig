@@ -25,71 +25,211 @@ export default function ImpressumPage({ setView }) {
 
         <div className="space-y-8">
 
-          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              Betreiber der Plattform (Medieninhaber & Herausgeber)
-            </h2>
-            <h3 className="text-2xl font-bold text-white mb-4">
-              GIGSDA (Gesellschaft bürgerlichen Rechts – GesbR)
-            </h3>
+<div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+  <h2 className="text-2xl font-bold text-white mb-2">
+    Betreiber der Plattform
+  </h2>
 
-            <div className="space-y-2 text-slate-400">
-              <p>Vertreten durch die Gesellschafter:</p>
-              <p>Herbert Jud</p>
-              <p>Stadtplatz 24, 5280 Braunau am Inn</p>
-              <p>Österreich</p>
-              <p>Daniel Klingesberger</p>
-              <p>Talstrasse 1, 5280 Braunau am Inn</p>
-              <p>Österreich</p>
-            </div>
-          </div>
+  <p className="text-cyan-400 mb-6">
+    Medieninhaber & Herausgeber
+  </p>
 
-          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              Kontakt
-            </h2>
+  <div className="mb-6">
+    <h3 className="text-xl font-semibold text-white">
+      GIGSDA (Gesellschaft bürgerlichen Rechts – GesbR)
+    </h3>
+  </div>
 
-            <div className="space-y-2 text-slate-400">
-              <p>E-Mail: support@gigsda.com</p>
-              <p>Telefon: +43 676 475 5522</p>
-              <p>Web: www.gigsda.com</p>
-            </div>
-          </div>
+  <div className="space-y-6 text-slate-400">
+    <div>
+      <p className="font-medium text-slate-300 mb-3">
+        Vertreten durch die Gesellschafter:
+      </p>
 
-          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              Unternehmensgegenstand & Ausrichtung des Mediums (Blattlinie)
-            </h2>
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/50">
+          <p className="font-semibold text-white">
+            Herbert Jud
+          </p>
+          <p>Stadtplatz 24</p>
+          <p>5280 Braunau am Inn</p>
+          <p>Österreich</p>
+        </div>
 
-            <p className="text-slate-400">
-              Unternehmensgegenstand: Betrieb einer digitalen Vermittlungs- und Netzwerkplattform für Künstler, Veranstalter, Event-Locations, Dienstleister (z. B. Techniker, Verleiher, Security) und Event-Besucher.
-            </p>
-            <p className="text-slate-400">
-              Blattlinie: Information über das Angebot der Plattform GIGSDA, Vernetzung von Akteuren der Event- und Musikbranche sowie Bereitstellung von digitalen Tools zur Event-Planung und Abwicklung.
-            </p>
-          </div>
+        <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/50">
+          <p className="font-semibold text-white">
+            Daniel Klingesberger
+          </p>
+          <p>Talstraße 1</p>
+          <p>5280 Braunau am Inn</p>
+          <p>Österreich</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              Anwendbare Rechtsvorschriften
-            </h2>
+<div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+  <h2 className="text-2xl font-bold text-white mb-6">
+    Kontakt
+  </h2>
 
-            <div className="space-y-2 text-slate-400">
-              <p>Gewerbe- und Berufsrecht: Gewerbeordnung (GewO), E-Commerce-Gesetz (ECG), Mediengesetz (MedienG). Abrufbar unter www.ris.bka.gv.at.</p>
-              <p>Aufsichtsbehörde / Gewerbebehörde: Bezirkshauptmannschaft Braunau am Inn (bzw. die jeweils zuständige BH/Magistrat).</p>
-            </div>
-          </div>
+  <div className="space-y-2 text-slate-400 leading-relaxed">
+    <p className="font-medium text-white">
+      GIGSDA (GesbR)
+    </p>
 
-          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              EU-Streitbeilegung
-            </h2>
+    <p>
+      E-Mail:{" "}
+      <a
+        href="mailto:support@gigsda.com"
+        className="text-cyan-400 hover:text-cyan-300"
+      >
+        support@gigsda.com
+      </a>
+    </p>
 
-            <div className="space-y-2 text-slate-400">
-              <p>Verbraucher haben die Möglichkeit, Beschwerden an die Online-Streitbeilegungsplattform der EU zu richten: https://ec.europa.eu/consumers/odr.</p>
-              <p>Sie können allfällige Beschwerden auch an die oben angeführte E-Mail-Adresse richten.</p>
-            </div>
-          </div>
+    <p>
+      Telefon:{" "}
+      <a
+        href="tel:+436764755522"
+        className="text-cyan-400 hover:text-cyan-300"
+      >
+        +43 676 475 5522
+      </a>
+    </p>
+
+    <p>
+      Web:{" "}
+      <a
+        href="https://www.gigsda.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-cyan-400 hover:text-cyan-300"
+      >
+        www.gigsda.com
+      </a>
+    </p>
+  </div>
+</div>
+
+
+<div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+  <h2 className="text-2xl font-bold text-white mb-6">
+    Unternehmensgegenstand &amp; Ausrichtung des Mediums (Blattlinie)
+  </h2>
+
+  <div className="space-y-6 text-slate-400 leading-relaxed">
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-2">
+        Unternehmensgegenstand
+      </h3>
+
+      <p>
+        Betrieb einer digitalen Vermittlungs- und Netzwerkplattform für
+        Künstler, Veranstalter, Event-Locations, Dienstleister
+        (insbesondere Techniker, Verleiher und Sicherheitsdienste) sowie
+        Event-Besucher.
+      </p>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-2">
+        Blattlinie
+      </h3>
+
+      <p>
+        Information über das Angebot der Plattform GIGSDA, Förderung der
+        Vernetzung von Akteuren der Event-, Kultur- und Musikbranche sowie
+        Bereitstellung digitaler Werkzeuge zur Planung, Organisation und
+        Durchführung von Veranstaltungen.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+  <h2 className="text-2xl font-bold text-white mb-6">
+    Anwendbare Rechtsvorschriften
+  </h2>
+
+  <div className="space-y-6 text-slate-400 leading-relaxed">
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-2">
+        Gewerbe- und Berufsrecht
+      </h3>
+
+      <p>
+        Für die Plattform GIGSDA gelten insbesondere die Bestimmungen der
+        Gewerbeordnung (GewO), des E-Commerce-Gesetzes (ECG) sowie des
+        Mediengesetzes (MedienG).
+      </p>
+
+      <p className="mt-2">
+        Die aktuellen Gesetzestexte können im
+        Rechtsinformationssystem des Bundes (RIS) eingesehen werden:
+      </p>
+
+      <a
+        href="https://www.ris.bka.gv.at"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center mt-3 text-cyan-400 hover:text-cyan-300 transition-colors"
+      >
+        www.ris.bka.gv.at
+      </a>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-2">
+        Aufsichtsbehörde / Gewerbebehörde
+      </h3>
+
+      <p>
+        Zuständige Gewerbebehörde ist die
+        Bezirkshauptmannschaft Braunau am Inn beziehungsweise die jeweils
+        sachlich und örtlich zuständige Behörde.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+  <h2 className="text-2xl font-bold text-white mb-6">
+    EU-Streitbeilegung
+  </h2>
+
+  <div className="space-y-4 text-slate-400 leading-relaxed">
+    <p>
+      Verbraucher haben die Möglichkeit, Beschwerden an die
+      Online-Streitbeilegungsplattform der Europäischen Kommission zu
+      richten.
+    </p>
+
+    <div className="border-l-4 border-cyan-500/40 pl-4">
+      <a
+        href="https://ec.europa.eu/consumers/odr"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-cyan-400 hover:text-cyan-300 break-all"
+      >
+        https://ec.europa.eu/consumers/odr
+      </a>
+    </div>
+
+    <p>
+      Sie können allfällige Beschwerden auch direkt an die im Impressum
+      bzw. in den Kontaktinformationen angeführte E-Mail-Adresse richten.
+    </p>
+
+    <p>
+      Wir sind nicht verpflichtet und nicht bereit, an einem
+      Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle
+      teilzunehmen.
+    </p>
+  </div>
+</div>
+
 
           <div className="bg-gradient-to-br from-cyan-500/10 to-purple-500/10 border border-cyan-500/10 rounded-3xl p-8">
             <h2 className="text-2xl font-bold text-white mb-4">

@@ -28,216 +28,690 @@ export default function AGBPage({ setView }) {
 
         <div className="space-y-8">
 
-          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              § 1 Geltungsbereich und Betreiber
-            </h2>
+<div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+  <h2 className="text-2xl font-bold text-white mb-6">
+    § 1 Geltungsbereich und Betreiber
+  </h2>
 
-            <p className="text-slate-400 leading-relaxed">
-              Geltungsbereich: Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für 
-              die Nutzung der Online-Plattform GIGSDA (abrufbar unter [www.gigsda.com](https://www.gigsda.com) 
-              sowie über etwaige zugehörige mobile Applikationen) sowie für alle darauf angebotenen Funktionen, 
-              Services und digitalen Inhalte.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Betreiber: Betreiber der Plattform GIGSDA sind:
-            </p>
-             <p className="text-slate-200 leading-relaxed">
-              Herbert Jud, Stadtplatz 24, 5280 Braunau am Inn
-            </p>
-            <p className="text-slate-200 leading-relaxed">
-              Daniel Klingesberger, Talstrasse 1, 5280 Braunau am Inn
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              (als Gesellschafter bürgerlichen Rechts – GesbR; nachfolgend gemeinsam 
-              als „Betreiber“ oder „GIGSDA“ bezeichnet).
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Nutzerkreis: Die Nutzung der Plattform steht sowohl Verbrauchern 
-              (z. B. Event-Besucher, Fans) als auch Unternehmern, Gewerbetreibenden 
-              und Freiberuflern (z. B. Künstler, Bands, DJs, Veranstalter, Venues/Locations, 
-              Techniker, Verleiher, Catering-Dienstleister, Security-/Sicherheitsdienste) offen.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Abweichende Bedingungen: Entgegenstehende oder von diesen AGB abweichende 
-              Bedingungen der Nutzer werden nicht anerkannt, es sei denn, die Betreiber stimmen 
-              ihrer Geltung ausdrücklich schriftlich zu.
-            </p>
-          </div>
+  <div className="space-y-6 text-slate-400 leading-relaxed">
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-2">
+        Geltungsbereich
+      </h3>
 
-          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              § 2 Leistungsbeschreibung, Rolle von GIGSDA und Deal-Funktionen
-            </h2>
+      <p>
+        Diese Allgemeinen Geschäftsbedingungen (AGB) gelten für die Nutzung
+        der Online-Plattform GIGSDA, abrufbar unter{" "}
+        <a
+          href="https://www.gigsda.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-cyan-400 hover:text-cyan-300"
+        >
+          www.gigsda.com
+        </a>
+        , sowie für sämtliche darauf angebotenen Funktionen, Services und
+        digitalen Inhalte einschließlich etwaiger mobiler Applikationen.
+      </p>
+    </div>
 
-            <p className="text-slate-400 leading-relaxed">
-              Vermittlungs- und Netzwerkplattform: GIGSDA stellt eine digitale Infrastruktur 
-              und Werkzeuge bereit, die es Nutzern ermöglichen, Profile zu erstellen, Veranstaltungen 
-              zu präsentieren, Netzwerk-Kontakte in der Event- und Musikbranche zu knüpfen sowie 
-              Absprachen und Projektplanungen für Events durchzuführen.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Keine eigene Vertragspartei bei Nutzer-Absprachen: Kommt es zwischen Nutzern 
-              (z. B. zwischen Veranstalter und Künstler, Techniker, Venue, Security oder Besucher) 
-              zum Abschluss von Verträgen oder Absprachen über Auftritte, Vermietungen, Dienstleistungen 
-              oder Ticketkäufe, entstehen diese ausschließlich und direkt zwischen den jeweiligen Nutzern. 
-              Die Betreiber von GIGSDA sind weder Partei noch Erfüllungsgehilfe dieser Verträge. 
-              Insbesondere übernehmen die Betreiber von GIGSDA keinerlei Haftung oder Pflichten bezüglich 
-              der organisatorischen Durchführung, der Einhaltung von Sicherheitsvorschriften, der Verkehrssicherungspflichten 
-              oder für Personen- und Sachschäden auf den jeweiligen Veranstaltungen.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Technische Tools für Zusage-Deals und Deal-Absicherung:
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              GIGSDA stellt Nutzern digitale Werkzeuge, Interaktionsschaltflächen 
-              (z. B. Buttons und Funktionen wie „Deal absichern“, „Zusage-Deal“, „Deal bestätigen“, „Projekt sichern“ oder vergleichbare Statusanzeigen) 
-              zur Verfügung, um Absprachen, Termine und Rahmenbedingungen für Veranstaltungen technisch zu dokumentieren und zu strukturieren.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Klarstellungshinweis: Die Interaktion mit sowie die Nutzung von Schaltflächen, Statusanzeigen oder Funktionen zur Deal-Absicherung, 
-              Terminbestätigung oder Projektverwaltung stellen keine eigenständige Garantie, Bürgschaft, Gewährleistung oder Ausfallversicherung 
-              durch die Betreiber von GIGSDA dar. Der rechtsverbindliche Vertrag (z. B. über Honorar/Gage, Auftrittspflicht, Absagekonditionen, Technical Rider) 
-              kommt weiterhin ausschließlich direkt zwischen den beteiligten Nutzern zustande. Die Betreiber von GIGSDA haften nicht für die 
-              Einhaltung, Absage, Stornierung oder Mängel bei der Durchsetzung dieser Vereinbarungen.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Entwicklungsstatus / Verfügbarkeit: GIGSDA befindet sich kontinuierlich in Weiterentwicklung. 
-              Die Betreiber bemühen sich um eine hohe Verfügbarkeit der Plattform, übernehmen jedoch keine Garantie 
-              für die unterbrechungs- oder fehlerfreie Erreichbarkeit. Wartungsarbeiten, Sicherheitsüberprüfungen 
-              oder Kapazitätsgrenzen können zu vorübergehenden Einschränkungen führen.
-            </p>
-          </div>
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Betreiber
+      </h3>
 
-          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              § 3 Registrierung, Nutzerkonto und Zugangsdaten
-            </h2>
+      <p className="mb-4">
+        Betreiber der Plattform GIGSDA sind:
+      </p>
 
-            <p className="text-slate-400 leading-relaxed">
-              Registrierung: Die Nutzung erweiterter Plattformfunktionen (z. B. Erstellen von Künstler-, Venue- oder Dienstleisterprofilen, 
-              Veröffentlichung von Events/Projekten, Nutzung von Zusage-Deals) setzt die Erstellung eines Nutzerkontos voraus.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Wahrheitspflicht: Der Nutzer verpflichtet sich, bei der Registrierung und Profilerstellung vollständige und 
-              wahrheitsgemäße Angaben zu machen und diese bei Änderungen unverzüglich zu aktualisieren.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Geheimhaltung: Die Zugangsdaten (Passwort) sind geheim zu halten und vor dem Zugriff Dritter zu schützen. 
-              Der Nutzer haftet für alle Aktivitäten, die unter seinem Nutzerkonto vorgenommen werden, sofern er diese zu vertreten hat.
-            </p>
-          </div>
+      <div className="space-y-4">
+        <div>
+          <p className="font-medium text-slate-200">
+            Herbert Jud
+          </p>
+          <p>Stadtplatz 24</p>
+          <p>5280 Braunau am Inn</p>
+          <p>Österreich</p>
+        </div>
 
-          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              § 4 Pflichten der Nutzer, Inhaltsrichtlinien und Urheberrechte
-            </h2>
+        <div>
+          <p className="font-medium text-slate-200">
+            Daniel Klingesberger
+          </p>
+          <p>Talstraße 1</p>
+          <p>5280 Braunau am Inn</p>
+          <p>Österreich</p>
+        </div>
+      </div>
 
-            <p className="text-slate-400 leading-relaxed">
-              Eigenverantwortung für Inhalte: Der Nutzer trägt die alleinige Verantwortung für alle von ihm hochgeladenen oder 
-              veröffentlichten Inhalte (z. B. Texte, Bilder, Promofotos, Logos, MP3/Audiodateien, Videos, Technical Rider, Veranstaltungsdaten).
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Rechte Dritter: Der Nutzer garantiert ausdrücklich, dass er über sämtliche erforderlichen Urheber-, Marken-, Namens- und 
-              Persönlichkeitsrechte an den von ihm eingestellten Inhalten verfügt und keine Rechte Dritter oder gesetzliche Vorschriften verletzt.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Unzulässige Inhalte & Verhaltensweisen: Es ist strengstens untersagt, Inhalte einzustellen oder Handlungen vorzunehmen, die:
-            </p>
+      <p className="mt-4">
+        Die Betreiber handeln als Gesellschafter einer Gesellschaft
+        bürgerlichen Rechts (GesbR) und werden nachfolgend gemeinsam als
+        <strong> „Betreiber“ </strong>
+        oder
+        <strong> „GIGSDA“ </strong>
+        bezeichnet.
+      </p>
+    </div>
 
-            <ul className="space-y-3 text-slate-400">
-              <li>• gegen geltendes Recht oder die guten Sitten verstoßen,</li>
-              <li>• rassistisch, diskriminierend, gewaltverherrlichend, obszön, beleidigend oder ehrverletzend sind,</li>
-              <li>• Urheber-, Marken- oder sonstige Schutzrechte Dritter verletzen,</li>
-              <li>• Fake-Events, fingierte Buchungsanfragen, Scherz-Einträge oder vorsätzlich irreführende Angaben zu Preisen, Terminen oder Verfügbarkeiten darstellen,</li>
-              <li>• Viren, Schadsoftware, automatisierte Skripte oder unerwünschte Werbung (Spam) enthalten.</li>
-            </ul>
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-2">
+        Nutzerkreis
+      </h3>
 
-            <p className="text-slate-400 leading-relaxed">
-              Freistellungserklärung & Schadensersatz: Der Nutzer stellt die Betreiber von GIGSDA von sämtlichen Ansprüchen, Schäden und Kosten (inklusive angemessener Rechtsverteidigungskosten) frei, die Dritte oder andere Nutzer aufgrund von Rechtsverletzungen, Fake-Einträgen oder nutzungswidrigem Verhalten gegenüber den Betreibern geltend machen. GIGSDA behält sich ausdrücklich das Recht vor, durch Fake-Einträge entstandene Schäden oder Aufwände direkt gegenüber dem Verursacher geltend zu machen.
-            </p>
-          </div>
+      <p>
+        Die Nutzung der Plattform steht sowohl Verbrauchern
+        (z. B. Eventbesuchern und Fans) als auch Unternehmern,
+        Gewerbetreibenden und Freiberuflern offen. Hierzu zählen
+        insbesondere Künstler, Bands, DJs, Veranstalter,
+        Venues/Locations, Techniker, Verleiher, Catering-Dienstleister
+        sowie Security- und Sicherheitsunternehmen.
+      </p>
+    </div>
 
-          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              § 5 Kostenfreie vs. Kostenpflichtige Leistungen und Treuhand-Abwicklung
-            </h2>
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-2">
+        Abweichende Bedingungen
+      </h3>
 
-            <p className="text-slate-400 leading-relaxed">
-              Gratis-Nutzung: Die Registrierung sowie die grundlegende Nutzung der Plattform als Gast, Besucher oder Basis-Mitglied sind kostenfrei.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Kostenpflichtige Funktionen: Sofern GIGSDA künftig kostenpflichtige Zusatzfunktionen, Premium-Mitgliedschaften oder gebührenpflichtige Vermittlungsdienste anbietet, werden die Preise, Laufzeiten und Leistungsinhalte dem Nutzer vor dem verbindlichen Abschluss gesondert und transparent angezeigt.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Treuhand- und Zahlungsabwicklung: Sofern im Rahmen von Deal-Absicherungen oder Buchungsfunktionen integrierte Zahlungsdienste oder Treuhand-Schutz-Funktionen zur Einzahlung oder Reservierung von Gagen/Gebühren angeboten werden, erfolgt die technische Abwicklung über externe, lizenzierte Zahlungsdienstleister. GIGSDA verwaltet selbst keine Treuhandgelder auf eigenen Bankkonten, sondern stellt lediglich die technische Schnittstelle bereit.
-            </p>
-          </div>
+      <p>
+        Entgegenstehende oder von diesen AGB abweichende Bedingungen der
+        Nutzer werden nicht anerkannt, es sei denn, die Betreiber haben
+        ihrer Geltung ausdrücklich und schriftlich zugestimmt.
+      </p>
+    </div>
+  </div>
+</div>
 
-          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              § 6 Haftung der Betreiber
-            </h2>
+<div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+  <h2 className="text-2xl font-bold text-white mb-6">
+    § 2 Leistungsbeschreibung, Rolle von GIGSDA und Deal-Funktionen
+  </h2>
 
-            <p className="text-slate-400 leading-relaxed">
-              Unbeschränkte Haftung: Die Betreiber haften unbeschränkt für Schäden aus der Verletzung des Lebens, des Körpers oder der Gesundheit, die auf einer vorsätzlichen oder fahrlässigen Pflichtverletzung der Betreiber beruhen, sowie für Schäden, die auf Vorsatz oder grober Fahrlässigkeit beruhen.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Leichte Fahrlässigkeit: Bei leicht fahrlässiger Verletzung wesentlicher Vertragspflichten (Kardinalpflichten – also Pflichten, deren Erfüllung die ordnungsgemäße Durchführung des Vertrages überhaupt erst ermöglicht und auf deren Einhaltung der Nutzer regelmäßig vertrauen darf) ist die Haftung der Betreiber auf den bei Vertragsschluss vorhersehbaren, vertragstypischen Schaden begrenzt.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Ausschluss im Übrigen: Im Übrigen ist die Haftung der Betreiber – gleich aus welchem Rechtsgrund – ausgeschlossen. Insbesondere haften die Betreiber nicht für die Richtigkeit, Vollständigkeit oder Aktualität der von Nutzern generierten Profile und Inhalte sowie für Schäden, die aus Ausfällen oder technischen Störungen der Plattform entstehen.
-            </p>
-          </div>
+  <div className="space-y-8 text-slate-400 leading-relaxed">
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Vermittlungs- und Netzwerkplattform
+      </h3>
 
-          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              § 7 Laufzeit, Sperrung und Kündigung
-            </h2>
+      <p>
+        GIGSDA stellt eine digitale Infrastruktur sowie verschiedene
+        Werkzeuge zur Verfügung, die es Nutzern ermöglichen, Profile zu
+        erstellen, Veranstaltungen zu präsentieren, Kontakte innerhalb der
+        Event- und Musikbranche zu knüpfen sowie Projektplanungen und
+        organisatorische Absprachen rund um Events durchzuführen.
+      </p>
+    </div>
 
-            <p className="text-slate-400 leading-relaxed">
-              Löschung des Kontos: Der Nutzer kann sein kostenfreies Nutzerkonto jederzeit ohne Angabe von Gründen über die Kontoeinstellungen löschen oder die Löschung in Textform (z. B. per E-Mail) anfordern.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Sperrung bei Verstößen: Die Betreiber sind berechtigt, Inhalte unverzüglich zu entfernen, Profile vorübergehend zu sperren oder Nutzerkonten fristlos zu kündigen, wenn konkrete Anhaltspunkte für einen Verstoß gegen diese AGB, Rechte Dritter oder geltendes Recht vorliegen.
-            </p>
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Keine eigene Vertragspartei bei Nutzer-Absprachen
+      </h3>
 
-          </div>
+      <p className="mb-4">
+        Kommt es zwischen Nutzern der Plattform zu Vereinbarungen oder
+        Vertragsabschlüssen, beispielsweise zwischen Veranstaltern,
+        Künstlern, Technikern, Venues, Sicherheitsdiensten oder Besuchern,
+        entstehen diese ausschließlich und unmittelbar zwischen den
+        jeweiligen Nutzern.
+      </p>
 
-          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              § 8 Datenschutz
-            </h2>
+      <p className="mb-4">
+        Die Betreiber von GIGSDA sind weder Vertragspartei noch
+        Erfüllungsgehilfe solcher Vereinbarungen.
+      </p>
 
-            <p className="text-slate-400 leading-relaxed">
-              Die Erhebung, Verarbeitung und Nutzung personenbezogener Daten erfolgt streng nach den Vorgaben der Datenschutz-Grundverordnung (DSGVO) und den geltenden nationalen Datenschutzbestimmungen. Ausführliche Informationen hierzu finden sich in der separaten Datenschutzerklärung auf GIGSDA.
-            </p>
-          </div>
+      <p>
+        Insbesondere übernehmen die Betreiber keine Haftung für die
+        organisatorische Durchführung von Veranstaltungen, die Einhaltung
+        gesetzlicher Vorschriften, Sicherheitsmaßnahmen,
+        Verkehrssicherungspflichten oder für Personen- und Sachschäden im
+        Zusammenhang mit Veranstaltungen.
+      </p>
+    </div>
 
-          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              § 9 Änderungen dieser AGB
-            </h2>
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Technische Tools für Zusage-Deals und Deal-Absicherung
+      </h3>
 
-            <p className="text-slate-400 leading-relaxed">
-              Die Betreiber behalten sich vor, diese AGB mit Wirkung für die Zukunft zu ändern oder anzupassen. Die Nutzer werden über geplante Änderungen rechtzeitig (z. B. per E-Mail oder Systembenachrichtigung) informiert. Widerspricht der Nutzer den Änderungen nicht innerhalb von 4 Wochen nach Zugang der Mitteilung, gelten die geänderten AGB als akzeptiert.
-            </p>
-          </div>
+      <p>
+        GIGSDA bietet digitale Werkzeuge und Interaktionsfunktionen an,
+        beispielsweise „Deal absichern“, „Zusage-Deal“,
+        „Deal bestätigen“, „Projekt sichern“ oder vergleichbare
+        Statusanzeigen. Diese Funktionen dienen der technischen
+        Dokumentation, Strukturierung und Nachverfolgung von Absprachen,
+        Terminen und Rahmenbedingungen zwischen Nutzern.
+      </p>
+    </div>
 
-          <div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              § 10 Schlussbestimmungen
-            </h2>
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Klarstellung zu Deal-Funktionen
+      </h3>
 
-            <p className="text-slate-400 leading-relaxed">
-              Anwendbares Recht: Es gilt das Recht der Republik Österreich unter Ausschluss des UN-Kaufrechts, soweit dem keine zwingenden verbraucherschutzrechtlichen Bestimmungen entgegenstehen.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Gerichtsstand: Sofern der Nutzer Kaufmann, eine juristische Person des öffentlichen Rechts oder ohne allgemeinen Gerichtsstand im Inland ist, wird der Wohnsitz bzw. Geschäftssitz der Betreiber als ausschließlicher Gerichtsstand vereinbart.
-            </p>
-            <p className="text-slate-400 leading-relaxed">
-              Salvatorische Klausel: Sollten einzelne Bestimmungen dieser AGB unwirksam oder undurchführbar sein oder werden, bleibt die Wirksamkeit der übrigen Bestimmungen davon unberührt. Anstelle der unwirksamen Bestimmung tritt diejenige gesetzliche Regelung, die dem wirtschaftlichen Zweck der unwirksamen Bestimmung am nächsten kommt.            </p>
-          </div>
+      <div className="border-l-4 border-cyan-500/40 pl-4">
+        <p className="mb-3">
+          Die Nutzung von Deal-Funktionen, Statusanzeigen oder
+          Projektwerkzeugen stellt keine Garantie, Bürgschaft,
+          Gewährleistung, Versicherung oder Haftungsübernahme durch die
+          Betreiber von GIGSDA dar.
+        </p>
+
+        <p>
+          Rechtsverbindliche Vereinbarungen über Honorare, Gagen,
+          Auftritte, Leistungen, Absagebedingungen, Technical Rider oder
+          sonstige Vertragsbestandteile kommen ausschließlich zwischen den
+          beteiligten Nutzern zustande. Die Betreiber von GIGSDA haften
+          nicht für deren Zustandekommen, Erfüllung, Durchsetzbarkeit,
+          Absage oder Stornierung.
+        </p>
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Entwicklungsstatus und Verfügbarkeit
+      </h3>
+
+      <p className="mb-4">
+        GIGSDA wird laufend weiterentwickelt und technisch verbessert.
+      </p>
+
+      <p>
+        Die Betreiber bemühen sich um eine möglichst hohe Verfügbarkeit
+        der Plattform. Eine jederzeit unterbrechungsfreie, fehlerfreie und
+        uneingeschränkt verfügbare Nutzung kann jedoch nicht garantiert
+        werden. Wartungsarbeiten, Sicherheitsmaßnahmen, technische
+        Störungen oder Kapazitätsgrenzen können zu vorübergehenden
+        Einschränkungen führen.
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+  <h2 className="text-2xl font-bold text-white mb-6">
+    § 3 Registrierung, Nutzerkonto und Zugangsdaten
+  </h2>
+
+  <div className="space-y-6 text-slate-400 leading-relaxed">
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-2">
+        Registrierung
+      </h3>
+
+      <p>
+        Die Nutzung erweiterter Plattformfunktionen, insbesondere die
+        Erstellung von Künstler-, Venue- oder Dienstleisterprofilen, die
+        Veröffentlichung von Events und Projekten sowie die Nutzung von
+        Zusage-Deals und vergleichbaren Funktionen, setzt die Erstellung
+        eines Nutzerkontos voraus.
+      </p>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-2">
+        Wahrheitspflicht
+      </h3>
+
+      <p>
+        Der Nutzer verpflichtet sich, bei der Registrierung sowie bei der
+        Erstellung und Pflege seines Profils vollständige, aktuelle und
+        wahrheitsgemäße Angaben zu machen. Änderungen relevanter Daten sind
+        unverzüglich zu aktualisieren.
+      </p>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-2">
+        Zugangsdaten und Sicherheit
+      </h3>
+
+      <p className="mb-4">
+        Zugangsdaten, insbesondere Passwörter, sind vertraulich zu behandeln
+        und vor dem Zugriff unbefugter Dritter zu schützen.
+      </p>
+
+      <p>
+        Der Nutzer ist für sämtliche Aktivitäten verantwortlich, die über
+        sein Nutzerkonto erfolgen, soweit er diese zu vertreten hat.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+  <h2 className="text-2xl font-bold text-white mb-6">
+    § 4 Pflichten der Nutzer, Inhaltsrichtlinien und Urheberrechte
+  </h2>
+
+  <div className="space-y-6 text-slate-400 leading-relaxed">
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-2">
+        Eigenverantwortung für Inhalte
+      </h3>
+
+      <p>
+        Der Nutzer trägt die alleinige Verantwortung für sämtliche von ihm
+        hochgeladenen, veröffentlichten oder bereitgestellten Inhalte. Dies
+        umfasst insbesondere Texte, Bilder, Promofotos, Logos,
+        Audiodateien, Videos, Technical Rider, Veranstaltungsdaten sowie
+        sonstige Inhalte.
+      </p>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-2">
+        Rechte Dritter
+      </h3>
+
+      <p>
+        Der Nutzer garantiert, dass er über sämtliche erforderlichen
+        Urheber-, Marken-, Namens-, Persönlichkeits- und sonstigen Rechte
+        verfügt, die für die Veröffentlichung der Inhalte erforderlich sind,
+        und dass durch die Nutzung der Plattform keine Rechte Dritter oder
+        gesetzliche Bestimmungen verletzt werden.
+      </p>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Unzulässige Inhalte und Verhaltensweisen
+      </h3>
+
+      <p className="mb-4">
+        Es ist insbesondere untersagt, Inhalte einzustellen oder Handlungen
+        vorzunehmen, die:
+      </p>
+
+      <ul className="list-disc list-inside space-y-3">
+        <li>
+          gegen geltendes Recht oder die guten Sitten verstoßen,
+        </li>
+
+        <li>
+          rassistisch, diskriminierend, beleidigend,
+          gewaltverherrlichend, obszön oder ehrverletzend sind,
+        </li>
+
+        <li>
+          Urheber-, Marken- oder sonstige Schutzrechte Dritter verletzen,
+        </li>
+
+        <li>
+          Fake-Events, fingierte Buchungsanfragen, Scherz-Einträge oder
+          bewusst irreführende Angaben zu Preisen, Terminen oder
+          Verfügbarkeiten enthalten,
+        </li>
+
+        <li>
+          Schadsoftware, Viren, automatisierte Skripte oder unerwünschte
+          Werbung (Spam) enthalten oder verbreiten.
+        </li>
+      </ul>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Freistellung und Schadensersatz
+      </h3>
+
+      <div className="border-l-4 border-cyan-500/40 pl-4">
+        <p className="mb-3">
+          Der Nutzer stellt die Betreiber von GIGSDA von sämtlichen
+          Ansprüchen, Schäden, Verlusten und Kosten einschließlich
+          angemessener Rechtsverfolgungs- und Rechtsverteidigungskosten frei,
+          die aufgrund rechtswidriger Inhalte, Fake-Einträge oder sonstiger
+          Verstöße gegen diese AGB entstehen.
+        </p>
+
+        <p>
+          GIGSDA behält sich ausdrücklich vor, entstandene Schäden,
+          Aufwände oder Kosten direkt gegenüber dem verursachenden Nutzer
+          geltend zu machen.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+  <h2 className="text-2xl font-bold text-white mb-6">
+    § 5 Kostenfreie vs. kostenpflichtige Leistungen und Treuhand-Abwicklung
+  </h2>
+
+  <div className="space-y-8 text-slate-400 leading-relaxed">
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Kostenfreie Nutzung
+      </h3>
+
+      <p>
+        Die Registrierung sowie die grundlegende Nutzung der Plattform als
+        Gast, Besucher oder Basis-Mitglied sind kostenfrei.
+      </p>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Kostenpflichtige Leistungen
+      </h3>
+
+      <p className="mb-4">
+        GIGSDA behält sich vor, künftig kostenpflichtige Zusatzfunktionen,
+        Premium-Mitgliedschaften, Werbeleistungen oder sonstige
+        gebührenpflichtige Dienste anzubieten.
+      </p>
+
+      <p>
+        Preise, Leistungsumfang, Vertragslaufzeiten sowie etwaige
+        Kündigungsfristen werden dem Nutzer vor dem verbindlichen Abschluss
+        transparent angezeigt. Kostenpflichtige Leistungen kommen erst
+        durch die ausdrückliche Bestätigung des Nutzers zustande.
+      </p>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Treuhand- und Zahlungsabwicklung
+      </h3>
+
+      <p className="mb-4">
+        Sofern im Rahmen von Buchungen, Deal-Absicherungen oder zukünftigen
+        Zahlungsfunktionen Treuhand- oder Zahlungsdienste angeboten werden,
+        erfolgt die technische Abwicklung über externe, lizenzierte
+        Zahlungsdienstleister.
+      </p>
+
+      <div className="border-l-4 border-cyan-500/40 pl-4">
+        <p className="mb-3">
+          GIGSDA verwaltet selbst keine Treuhandgelder oder Kundengelder auf
+          eigenen Bankkonten.
+        </p>
+
+        <p>
+          Die Plattform stellt lediglich die technische Infrastruktur und
+          gegebenenfalls die Schnittstellen zu den jeweiligen
+          Zahlungsdienstleistern bereit.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+  <h2 className="text-2xl font-bold text-white mb-6">
+    § 6 Haftung der Betreiber
+  </h2>
+
+  <div className="space-y-8 text-slate-400 leading-relaxed">
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Unbeschränkte Haftung
+      </h3>
+
+      <p>
+        Die Betreiber haften unbeschränkt für Schäden aus der Verletzung
+        des Lebens, des Körpers oder der Gesundheit, die auf einer
+        vorsätzlichen oder fahrlässigen Pflichtverletzung beruhen.
+      </p>
+
+      <p className="mt-3">
+        Eine unbeschränkte Haftung besteht außerdem für Schäden, die
+        vorsätzlich oder grob fahrlässig verursacht wurden.
+      </p>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Haftung bei leichter Fahrlässigkeit
+      </h3>
+
+      <p>
+        Bei leicht fahrlässiger Verletzung wesentlicher Vertragspflichten
+        (Kardinalpflichten) haften die Betreiber nur für den bei
+        Vertragsschluss vorhersehbaren und vertragstypischen Schaden.
+      </p>
+
+      <div className="mt-4 border-l-4 border-cyan-500/40 pl-4">
+        <p>
+          Kardinalpflichten sind solche Pflichten, deren Erfüllung die
+          ordnungsgemäße Durchführung des Vertrags überhaupt erst
+          ermöglicht und auf deren Einhaltung der Nutzer regelmäßig
+          vertrauen darf.
+        </p>
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Haftungsausschluss im Übrigen
+      </h3>
+
+      <p className="mb-4">
+        Soweit gesetzlich zulässig, ist die Haftung der Betreiber im
+        Übrigen ausgeschlossen, unabhängig vom jeweiligen Rechtsgrund.
+      </p>
+
+      <ul className="list-disc list-inside space-y-2">
+        <li>
+          für die Richtigkeit, Vollständigkeit oder Aktualität von
+          nutzergenerierten Profilen, Angaben und Inhalten,
+        </li>
+
+        <li>
+          für Vereinbarungen, Verträge oder Absprachen zwischen Nutzern,
+        </li>
+
+        <li>
+          für Ausfälle, Unterbrechungen oder technische Störungen der
+          Plattform,
+        </li>
+
+        <li>
+          für Datenverluste, soweit diese nicht auf vorsätzlichem oder
+          grob fahrlässigem Verhalten der Betreiber beruhen,
+        </li>
+
+        <li>
+          für Schäden im Zusammenhang mit Veranstaltungen, Buchungen,
+          Auftritten oder sonstigen über die Plattform angebahnten
+          Geschäftsbeziehungen.
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+  <h2 className="text-2xl font-bold text-white mb-6">
+    § 7 Laufzeit, Sperrung und Kündigung
+  </h2>
+
+  <div className="space-y-8 text-slate-400 leading-relaxed">
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Löschung des Kontos
+      </h3>
+
+      <p>
+        Nutzer können ihr kostenfreies Nutzerkonto jederzeit und ohne
+        Angabe von Gründen löschen. Die Löschung kann entweder über die
+        entsprechenden Kontoeinstellungen innerhalb der Plattform oder in
+        Textform, beispielsweise per E-Mail an die Betreiber, beantragt
+        werden.
+      </p>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Sperrung bei Verstößen
+      </h3>
+
+      <p className="mb-4">
+        Die Betreiber sind berechtigt, Inhalte zu entfernen, Profile
+        vorübergehend zu sperren oder Nutzerkonten fristlos zu kündigen,
+        wenn konkrete Anhaltspunkte dafür vorliegen, dass:
+      </p>
+
+      <ul className="list-disc list-inside space-y-2">
+        <li>gegen diese AGB verstoßen wurde,</li>
+        <li>Rechte Dritter verletzt werden,</li>
+        <li>geltendes Recht missachtet wird,</li>
+        <li>
+          die Plattform missbräuchlich oder zweckwidrig genutzt wird,
+        </li>
+        <li>
+          Sicherheitsrisiken für andere Nutzer oder die Plattform
+          entstehen.
+        </li>
+      </ul>
+
+      <p className="mt-4">
+        Die Betreiber werden dabei die berechtigten Interessen des
+        betroffenen Nutzers angemessen berücksichtigen, soweit gesetzliche
+        Vorgaben oder berechtigte Sicherheitsinteressen dem nicht
+        entgegenstehen.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+  <h2 className="text-2xl font-bold text-white mb-6">
+    § 8 Datenschutz
+  </h2>
+
+  <div className="space-y-4 text-slate-400 leading-relaxed">
+    <p>
+      Die Erhebung, Verarbeitung und Nutzung personenbezogener Daten
+      erfolgt ausschließlich im Einklang mit den Bestimmungen der
+      Datenschutz-Grundverordnung (DSGVO) sowie den jeweils geltenden
+      nationalen Datenschutzgesetzen.
+    </p>
+
+    <p>
+      GIGSDA verarbeitet personenbezogene Daten nur, soweit dies zur
+      Bereitstellung der Plattform, zur Vertragserfüllung, zur Wahrung
+      berechtigter Interessen oder aufgrund einer erteilten Einwilligung
+      erforderlich ist.
+    </p>
+
+    <div className="border-l-4 border-cyan-500/40 pl-4">
+      <p>
+        Ausführliche Informationen über Art, Umfang, Zweck,
+        Rechtsgrundlagen und Dauer der Datenverarbeitung sowie über Ihre
+        Rechte als betroffene Person finden Sie in der gesonderten
+        Datenschutzerklärung von GIGSDA.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+  <h2 className="text-2xl font-bold text-white mb-6">
+    § 9 Änderungen dieser AGB
+  </h2>
+
+  <div className="space-y-6 text-slate-400 leading-relaxed">
+    <p>
+      Die Betreiber behalten sich das Recht vor, diese Allgemeinen
+      Geschäftsbedingungen mit Wirkung für die Zukunft zu ändern oder zu
+      ergänzen, sofern dies aufgrund gesetzlicher, technischer,
+      wirtschaftlicher oder betrieblicher Entwicklungen erforderlich ist
+      und die Nutzer hierdurch nicht unangemessen benachteiligt werden.
+    </p>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Information über Änderungen
+      </h3>
+
+      <p>
+        Nutzer werden über geplante Änderungen der AGB rechtzeitig
+        informiert. Die Information kann insbesondere per E-Mail,
+        Plattform-Mitteilung oder durch einen Hinweis beim Login erfolgen.
+      </p>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Widerspruchsrecht
+      </h3>
+
+      <p>
+        Sofern der Nutzer den geänderten Bedingungen nicht innerhalb von
+        vier Wochen nach Zugang der Änderungsmitteilung widerspricht,
+        gelten die Änderungen als angenommen.
+      </p>
+    </div>
+
+    <div className="border-l-4 border-cyan-500/40 pl-4">
+      <p>
+        In der Änderungsmitteilung werden die Nutzer ausdrücklich auf die
+        vorgesehenen Änderungen, die Frist für einen Widerspruch sowie die
+        Folgen eines ausbleibenden Widerspruchs hingewiesen.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+  <h2 className="text-2xl font-bold text-white mb-6">
+    § 10 Schlussbestimmungen
+  </h2>
+
+  <div className="space-y-8 text-slate-400 leading-relaxed">
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Anwendbares Recht
+      </h3>
+
+      <p>
+        Es gilt das Recht der Republik Österreich unter Ausschluss des
+        UN-Kaufrechts, soweit dem keine zwingenden
+        verbraucherschutzrechtlichen Bestimmungen entgegenstehen.
+      </p>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Gerichtsstand
+      </h3>
+
+      <p>
+        Sofern der Nutzer Kaufmann, eine juristische Person des
+        öffentlichen Rechts oder ein öffentlich-rechtliches Sondervermögen
+        ist oder keinen allgemeinen Gerichtsstand in Österreich hat, gilt
+        der Wohn- bzw. Geschäftssitz der Betreiber als ausschließlicher
+        Gerichtsstand, soweit gesetzlich zulässig.
+      </p>
+    </div>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Salvatorische Klausel
+      </h3>
+
+      <div className="border-l-4 border-cyan-500/40 pl-4">
+        <p className="mb-3">
+          Sollten einzelne Bestimmungen dieser Allgemeinen
+          Geschäftsbedingungen ganz oder teilweise unwirksam oder
+          undurchführbar sein oder werden, bleibt die Wirksamkeit der
+          übrigen Bestimmungen hiervon unberührt.
+        </p>
+
+        <p>
+          An die Stelle der unwirksamen oder undurchführbaren Regelung tritt
+          diejenige gesetzlich zulässige Regelung, die dem wirtschaftlichen
+          Zweck der unwirksamen Bestimmung am nächsten kommt.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
 
           <div className="bg-gradient-to-br from-cyan-500/10 to-purple-500/10 border border-cyan-500/10 rounded-3xl p-8">
             <h2 className="text-2xl font-bold text-white mb-4">
