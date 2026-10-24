@@ -127,6 +127,9 @@ const getPortfolioIdFromPath = (path) => {
 };
 
 export default function App() {
+  const [resetToken] = useState(
+    () => new URLSearchParams(window.location.search).get('resetToken')
+  );
 
     // 📡 REAKTIVER CREW-ALARM EMPFÄNGER
   const [hasPendingRequests, setHasPendingRequests] = useState(false);
@@ -756,14 +759,10 @@ useEffect(() => {
 
 
 useEffect(() => {
-  const token = new URLSearchParams(
-    window.location.search
-  ).get("resetToken");
-
-  if (token) {
+  if (resetToken) {
     setView("resetPassword");
   }
-}, []);
+}, [resetToken]);
 
 
 
@@ -1413,7 +1412,7 @@ useEffect(() => {
           )}
 
           {view === "resetPassword" && (
-            <ResetPasswordPage />
+            <ResetPasswordPage resetToken={resetToken} />
           )}
 
           {/* ========================================================================= */}

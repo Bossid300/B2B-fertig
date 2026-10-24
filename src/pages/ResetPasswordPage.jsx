@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function ResetPasswordPage() {
+export default function ResetPasswordPage({ resetToken }) {
   const [password, setPassword] = useState("");
   const [passwordRepeat, setPasswordRepeat] = useState("");
 
@@ -15,10 +15,6 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    const token = new URLSearchParams(
-      window.location.search
-    ).get("resetToken");
-
     try {
       const response = await fetch(
         "https://www.gigsda.com/api/resetPassword.php",
@@ -28,7 +24,7 @@ export default function ResetPasswordPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            token,
+            token: resetToken,
             password,
           }),
         }
