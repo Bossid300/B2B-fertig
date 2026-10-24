@@ -6,6 +6,19 @@ require_once 'db.php';
 
 require_once("cors.php");
 
+session_start();
+
+$profileId = $_SESSION['profile_id'] ?? null;
+
+if (!$profileId) {
+    http_response_code(401);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Nicht authentifiziert'
+    ]);
+    exit;
+}
+
 $data = json_decode(file_get_contents("php://input"), true);
 
 try {
@@ -17,7 +30,7 @@ try {
     ");
 
     $stmt->execute([
-        ':id' => $data['id'],
+        ':id' => $profileId,
         ':profileJson' => json_encode($data['profile'])
     ]);
 
