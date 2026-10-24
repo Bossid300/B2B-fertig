@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { eventService } from './services/eventService';
 import CreateFreeSpotForm from './components/CreateFreeSpotForm';
+import FreeSpotCard from './components/cards/FreeSpotCard';
+import EventCard from './components/cards/EventCard';
 import { freeSpotService } from './services/freeSpotService';
-import { getProfiles } from './services/apiService';
-import ArtistPortfolio from './components/portfolio/ArtistPortfolio';
+import { getProfiles, saveCrewRequest } from './services/apiService';
+import PortfolioRouter from './components/portfolio/PortfolioRouter';
+import EventPromotionView from './components/EventPromotionView';
 import { geocodeAddress, distanceKm } from './services/geoService';
 
 const FILTERS = [
@@ -108,6 +111,12 @@ export default function CalendarPage({
 
   const [profiles, setProfiles] = useState([]);
   const [portfolioProfileId, setPortfolioProfileId] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedFreeSpot, setSelectedFreeSpot] = useState(null);
+  const [activeFreeSpotRequest, setActiveFreeSpotRequest] = useState(null);
+  const [freeSpotRequestNote, setFreeSpotRequestNote] = useState('');
+  const [freeSpotRequestError, setFreeSpotRequestError] = useState('');
+  const [isSendingFreeSpotRequest, setIsSendingFreeSpotRequest] = useState(false);
 
   useEffect(() => {
     const loadCalendarData = async () => {
@@ -332,6 +341,86 @@ export default function CalendarPage({
       (profile) =>
         String(profile.id) === String(spot.owner_id)
     );
+  };
+
+  const handleFreeSpotRequest = async (event) => {
+    event.preventDefault();
+
+    if (!activeFreeSpotRequest || !currentProfileId) {
+      setFreeSpotRequestError('Bitte melde dich an, um eine Anfrage zu senden.');
+      return;
+    }
+
+    const spot = activeFreeSpotRequest;
+    const owner = getFreeSpotOwner(spot);
+    const requester =
+      profiles.find(
+        (profile) => String(profile.id) === String(currentProfileId)
+      );
+    const now = Date.now();
+
+    setIsSendingFreeSpotRequest(true);
+    setFreeSpotRequestError('');
+
+    try {
+      const result = await saveCrewRequest({
+        requestId: `REQ-${now}-${Math.floor(Math.random() * 1000)}`,
+        requestType: 'free_spot',
+        source: 'calendar_free_spot',
+        eventId: `free-spot-${spot.id}`,
+        eventName: `Free Spot: ${spot.title}`,
+        date: spot.spot_date || 'Termin auf Anfrage',
+        requestedProfileId: spot.owner_id,
+        requestedProfileName:
+          owner?.name ||
+          owner?.klarname ||
+          owner?.display_name ||
+          String(spot.owner_id),
+        requestedProfileRole:
+          owner?.role ||
+          owner?.type ||
+          owner?.gewerk ||
+          'Location',
+        requestedProfileCity:
+          owner?.city ||
+          owner?.ort ||
+          spot.region ||
+          '',
+        requesterProfileId: currentProfileId,
+        requesterProfileName:
+          requester?.name ||
+          requester?.klarname ||
+          localStorage.getItem('gigsda_user_name') ||
+          'Mitglied',
+        requesterName:
+          requester?.name ||
+          requester?.klarname ||
+          localStorage.getItem('gigsda_user_name') ||
+          'Mitglied',
+        status: 'pending',
+        createdAt: now,
+        updatedAt: now,
+        note:
+          freeSpotRequestNote.trim() ||
+          `Anfrage zum Free Spot "${spot.title}".`,
+      });
+
+      if (!result?.success) {
+        throw new Error(result?.error || 'Die Anfrage konnte nicht gesendet werden.');
+      }
+
+      window.dispatchEvent(new CustomEvent('request-sent'));
+      window.dispatchEvent(new CustomEvent('route-change'));
+      setActiveFreeSpotRequest(null);
+      setFreeSpotRequestNote('');
+    } catch (error) {
+      console.error('FREE SPOT ANFRAGE FEHLER', error);
+      setFreeSpotRequestError(
+        error.message || 'Die Anfrage konnte nicht gesendet werden.'
+      );
+    } finally {
+      setIsSendingFreeSpotRequest(false);
+    }
   };
 
   return (
@@ -950,41 +1039,58 @@ export default function CalendarPage({
             {selectedDayEvents.length > 0 ? (
 
               <div className="space-y-3">
-                {selectedDayEvents.map((event) => (
-
-                  <div
-                    key={event.id}
-                    className="
-                      border border-cyan-500/30
-                      bg-cyan-500/5
-                      rounded-xl
-                      p-4
-                    "
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="w-2 h-2 rounded-full bg-cyan-400" />
-
-                      <span className="text-xs uppercase tracking-wider text-cyan-400">
-                        {event.event_type || event.type || 'Event'}
-                      </span>
-                    </div>
-
-                    <h4 className="font-bold text-white">
-                      {event.title || event.name}
-                    </h4>
-
-                    {event.location && (
-                      <div className="text-sm text-slate-400 mt-2">
-                        📍 {event.location}
-                      </div>
-                    )}
-
-                    {event.displayDate && (
-                      <div className="text-sm text-slate-400 mt-1">
-                        📅 {event.displayDate}
-                      </div>
-                    )}
-                  </div>
+                {selectedDayEvents.map((event, index) => (
+                  <EventCard
+                    key={`${event.id || 'event'}-${index}`}
+                    event={{
+                      ...event,
+                      title:
+                        event.promotionData?.title ||
+                        event.title ||
+                        event.name,
+                      category:
+                        event.promotionData?.category ||
+                        event.category ||
+                        event.event_type ||
+                        event.type,
+                      shortDescription:
+                        event.promotionData?.shortDescription ||
+                        event.shortDescription,
+                      description:
+                        event.promotionData?.description ||
+                        event.promotionData?.longDescription ||
+                        event.description,
+                      slide1_url:
+                        event.promotionData?.promoImage ||
+                        event.slide1_url,
+                      entryTime:
+                        event.promotionData?.entryTime ||
+                        event.entryTime,
+                      startTime:
+                        event.promotionData?.startTime ||
+                        event.startTime,
+                      ticketPrice:
+                        event.promotionData?.ticketPrice ??
+                        event.ticketPrice,
+                      ticketStatus:
+                        event.promotionData?.ticketStatus ||
+                        event.ticketStatus,
+                      fsk:
+                        event.promotionData?.fsk ||
+                        event.fsk,
+                      lineup:
+                        event.promotionData?.lineup ||
+                        event.lineup,
+                      amenities:
+                        event.promotionData?.amenities ||
+                        event.amenities,
+                      city:
+                        event.venue ||
+                        event.city ||
+                        event.location,
+                    }}
+                    onViewEvent={setSelectedEvent}
+                  />
                 ))}
 
               </div>
@@ -1019,187 +1125,53 @@ export default function CalendarPage({
             {selectedDayFreeSpots.length > 0 && (
               <div className="space-y-3 mt-4">
 
-                {selectedDayFreeSpots.map((spot) => (
-                  <div
-                    key={spot.id}
-                    className="
-                      border border-pink-500/30
-                      bg-pink-500/5
-                      rounded-xl
-                      p-4
-                    "
-                  >
-                    {/* TYP */}
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="w-2 h-2 rounded-full bg-pink-500" />
+                {selectedDayFreeSpots.map((spot) => {
+                  const isOwner =
+                    Boolean(currentProfileId) &&
+                    String(spot.owner_id) === String(currentProfileId);
 
-                      <span className="text-xs uppercase tracking-wider text-pink-400">
-                        Free Spot
-                      </span>
-                    </div>
+                  return (
+                    <FreeSpotCard
+                      key={spot.id}
+                      spot={spot}
+                      owner={getFreeSpotOwner(spot)}
+                      isOwner={isOwner}
+                      canRequest={Boolean(currentProfileId)}
+                      onDetails={() => setSelectedFreeSpot(spot)}
+                      onPortfolio={() => setPortfolioProfileId(spot.owner_id)}
+                      onEdit={() => {
+                        setEditingFreeSpot(spot);
+                        setShowFreeSpotForm(true);
+                      }}
+                      onDelete={async () => {
+                        const confirmed = window.confirm(
+                          'Diesen Free Spot wirklich löschen?'
+                        );
 
-                    {/* TITEL */}
-                    <h4 className="font-bold text-white text-lg">
-                      {spot.title}
-                    </h4>
+                        if (!confirmed) return;
 
-                    {/* KATEGORIE */}
-                    {spot.category && (
-                      <div className="text-sm text-pink-300 mt-2">
-                        {spot.category}
-                      </div>
-                    )}
+                        try {
+                          await freeSpotService.deleteFreeSpot(
+                            spot.id,
+                            currentProfileId
+                          );
 
-                    {/* ORT */}
-                    {spot.location && (
-                      <div className="text-sm text-slate-400 mt-2">
-                        📍 {spot.location}
-                      </div>
-                    )}
+                          const updatedFreeSpots =
+                            await freeSpotService.getFreeSpots();
 
-                    {/* REGION */}
-                    {spot.region && (
-                      <div className="text-sm text-slate-400 mt-1">
-                        🌐 {spot.region}
-                      </div>
-                    )}
-
-                    {(() => {
-                      const owner = getFreeSpotOwner(spot);
-
-                      if (!owner) return null;
-
-                      const ownerName =
-                        owner.name ||
-                        owner.klarname ||
-                        spot.owner_id;
-
-                      return (
-                        <div className="mt-4 pt-4 border-t border-pink-500/20">
-                          <div className="text-[10px] uppercase tracking-wider text-slate-500">
-                            Erstellt von
-                          </div>
-
-                          <div className="text-sm font-bold text-pink-300 mt-1">
-                            🏠 {ownerName}
-                          </div>
-
-                        <button
-                          type="button"
-                          onClick={() => setPortfolioProfileId(spot.owner_id)}
-                          className="
-                            mt-3
-                            px-4 py-2
-                            rounded-lg
-                            border border-cyan-500/30
-                            bg-cyan-500/5
-                            text-cyan-300
-                            text-xs
-                            font-bold
-                            hover:bg-cyan-500/15
-                            hover:border-cyan-400/50
-                            transition
-                          "
-                        >
-                          👁 Portfolio ansehen
-                        </button>
-
-                        </div>
-                      );
-                    })()}
-
-                    {/* ZEIT */}
-                    {(spot.time_from || spot.time_to) && (
-                      <div className="text-sm text-slate-400 mt-1">
-                        🕒 {spot.time_from || ''}
-                        {spot.time_from && spot.time_to ? ' - ' : ''}
-                        {spot.time_to || ''}
-                      </div>
-                    )}
-
-                    {/* BESCHREIBUNG */}
-                    {spot.description && (
-                      <div
-                        className="
-                          mt-4
-                          pt-4
-                          border-t border-pink-500/20
-                          text-sm
-                          text-slate-300
-                          leading-relaxed
-                        "
-                      >
-                        {spot.description}
-                      </div>
-                    )}
-
-                    {String(spot.owner_id) === String(currentProfileId) && (
-                      <div className="mt-4 pt-4 border-t border-pink-500/20 flex gap-2">
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingFreeSpot(spot);
-                            setShowFreeSpotForm(true);
-                          }}
-                          className="
-                            text-xs
-                            text-pink-300
-                            border border-pink-500/30
-                            bg-pink-500/5
-                            rounded-lg
-                            px-3 py-2
-                            hover:bg-pink-500/15
-                            transition
-                          "
-                        >
-                          ✏️ Free Spot bearbeiten
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            const confirmed = window.confirm(
-                              'Diesen Free Spot wirklich löschen?'
-                            );
-
-                            if (!confirmed) return;
-
-                            try {
-                              await freeSpotService.deleteFreeSpot(
-                                spot.id,
-                                currentProfileId
-                              );
-
-                              const updatedFreeSpots =
-                                await freeSpotService.getFreeSpots();
-
-                              setFreeSpots(updatedFreeSpots);
-
-                              console.log('FREE SPOT GELÖSCHT ✅', spot.id);
-                            } catch (error) {
-                              console.error('FREE SPOT DELETE FEHLER ❌', error);
-                            }
-                          }}
-                          className="
-                            text-xs
-                            text-red-400
-                            border border-red-500/30
-                            bg-red-500/5
-                            rounded-lg
-                            px-3 py-2
-                            hover:bg-red-500/15
-                            transition
-                          "
-                        >
-                          🗑️ Free Spot löschen
-                        </button>
-
-                      </div>
-                    )}
-
-                  </div>
-                ))}
+                          setFreeSpots(updatedFreeSpots);
+                        } catch (error) {
+                          console.error('FREE SPOT DELETE FEHLER ❌', error);
+                        }
+                      }}
+                      onRequest={() => {
+                        setActiveFreeSpotRequest(spot);
+                        setFreeSpotRequestNote('');
+                        setFreeSpotRequestError('');
+                      }}
+                    />
+                  );
+                })}
 
               </div>
             )}
@@ -1257,6 +1229,152 @@ export default function CalendarPage({
         }
       `}</style>
 
+      {selectedFreeSpot && (
+        <div
+          className="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setSelectedFreeSpot(null)}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="free-spot-details-title"
+            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-pink-500/30 bg-[#07101f] p-6 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-widest text-pink-400">
+                  Free Spot
+                </div>
+                <h2 id="free-spot-details-title" className="mt-2 text-2xl font-black text-white">
+                  {selectedFreeSpot.title}
+                </h2>
+              </div>
+              <button
+                type="button"
+                aria-label="Details schließen"
+                onClick={() => setSelectedFreeSpot(null)}
+                className="h-9 w-9 shrink-0 rounded-full border border-slate-700 text-slate-300 hover:border-pink-400 hover:text-white"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {[
+                ['Datum', selectedFreeSpot.spot_date],
+                ['Zeit', [selectedFreeSpot.time_from, selectedFreeSpot.time_to].filter(Boolean).join(' – ')],
+                ['Kategorie', selectedFreeSpot.category],
+                ['Ort', selectedFreeSpot.location],
+                ['Region', selectedFreeSpot.region],
+              ].filter(([, value]) => value).map(([label, value]) => (
+                <div key={label} className="rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    {label}
+                  </div>
+                  <div className="mt-1 text-sm text-slate-200">{value}</div>
+                </div>
+              ))}
+            </div>
+
+            {selectedFreeSpot.description && (
+              <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/60 p-4">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  Beschreibung
+                </div>
+                <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-300">
+                  {selectedFreeSpot.description}
+                </p>
+              </div>
+            )}
+          </section>
+        </div>
+      )}
+
+      {activeFreeSpotRequest && (
+        <div
+          className="fixed inset-0 z-[10000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => {
+            if (!isSendingFreeSpotRequest) setActiveFreeSpotRequest(null);
+          }}
+        >
+          <form
+            onSubmit={handleFreeSpotRequest}
+            className="w-full max-w-lg rounded-2xl border border-cyan-500/30 bg-[#07101f] p-6 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-widest text-cyan-400">
+                  Free Spot anfragen
+                </div>
+                <h2 className="mt-2 text-xl font-black text-white">
+                  {activeFreeSpotRequest.title}
+                </h2>
+                <p className="mt-2 text-sm text-slate-400">
+                  Deine Anfrage geht an{' '}
+                  {getFreeSpotOwner(activeFreeSpotRequest)?.name ||
+                    getFreeSpotOwner(activeFreeSpotRequest)?.klarname ||
+                    'den Ersteller des Free Spots'}.
+                </p>
+              </div>
+              <button
+                type="button"
+                aria-label="Anfrage schließen"
+                disabled={isSendingFreeSpotRequest}
+                onClick={() => setActiveFreeSpotRequest(null)}
+                className="h-9 w-9 shrink-0 rounded-full border border-slate-700 text-slate-300 hover:border-cyan-400 hover:text-white disabled:opacity-50"
+              >
+                ×
+              </button>
+            </div>
+
+            <label className="mt-5 block text-sm font-semibold text-slate-300">
+              Nachricht (optional)
+              <textarea
+                value={freeSpotRequestNote}
+                onChange={(event) => setFreeSpotRequestNote(event.target.value)}
+                rows={4}
+                maxLength={1000}
+                placeholder="Schreibe eine kurze Nachricht zu deiner Anfrage."
+                className="mt-2 w-full resize-y rounded-xl border border-slate-700 bg-[#030816] p-3 text-sm text-white placeholder:text-slate-600 focus:border-cyan-500 focus:outline-none"
+              />
+            </label>
+
+            {freeSpotRequestError && (
+              <p role="alert" className="mt-3 text-sm text-red-300">
+                {freeSpotRequestError}
+              </p>
+            )}
+
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                type="button"
+                disabled={isSendingFreeSpotRequest}
+                onClick={() => setActiveFreeSpotRequest(null)}
+                className="rounded-xl border border-slate-700 px-4 py-2.5 text-sm font-semibold text-slate-300 hover:text-white disabled:opacity-50"
+              >
+                Abbrechen
+              </button>
+              <button
+                type="submit"
+                disabled={isSendingFreeSpotRequest}
+                className="rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-bold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-wait disabled:opacity-50"
+              >
+                {isSendingFreeSpotRequest ? 'Wird gesendet…' : 'Anfrage senden'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {selectedEvent && (
+        <EventPromotionView
+          event={selectedEvent}
+          onClose={() => setSelectedEvent(null)}
+          onNavigate={setView}
+        />
+      )}
 
       {/* PORTFOLIO POPUP */}
       {portfolioProfileId && (
@@ -1313,7 +1431,7 @@ export default function CalendarPage({
               ×
             </button>
 
-            <ArtistPortfolio
+            <PortfolioRouter
               profileId={portfolioProfileId}
               onBack={() => setPortfolioProfileId(null)}
             />

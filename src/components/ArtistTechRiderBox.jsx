@@ -29,7 +29,7 @@ export default function ArtistTechRiderBox({ currentProfileId, isOwner }) {
 
   // 1. DATEN-PIPELINE: Lädt flache Keys inklusive deinem korrekten stageplot_url
   useEffect(() => {
-    getProfilesDb()
+    getProfilesDb(currentProfileId)
       .then(profiles => {
 
         const found = profiles.find(

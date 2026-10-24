@@ -24,7 +24,7 @@ export default function ProfileDokumenteBox({ currentProfileId, isOwner }) {
   // 1. DATABASE & SECURITY PIPELINE: Lädt Dokumente & prüft Crew-Status des Besuchers
   useEffect(() => {
   const savedEvents = eventService.getEvents();
-  getProfilesDb()
+  getProfilesDb(currentProfileId)
     .then(profiles => {
       const found = profiles.find(
         p => p?.id === currentProfileId

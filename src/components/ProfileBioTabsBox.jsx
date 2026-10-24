@@ -19,7 +19,7 @@ export default function ProfileBioTabsBox({ currentProfileId, isOwner }) {
 
   // 1. DATABASE PIPELINE: Lädt die geteilten Texte live aus DB
   useEffect(() => {
-    getProfilesDb()
+    getProfilesDb(currentProfileId)
       .then(profiles => {
 
         const found = profiles.find(

@@ -206,17 +206,6 @@ export default function ImpressumPage({ setView }) {
       richten.
     </p>
 
-    <div className="border-l-4 border-cyan-500/40 pl-4">
-      <a
-        href="https://ec.europa.eu/consumers/odr"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-cyan-400 hover:text-cyan-300 break-all"
-      >
-        https://ec.europa.eu/consumers/odr
-      </a>
-    </div>
-
     <p>
       Sie können allfällige Beschwerden auch direkt an die im Impressum
       bzw. in den Kontaktinformationen angeführte E-Mail-Adresse richten.

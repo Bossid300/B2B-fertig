@@ -11,7 +11,7 @@ export default function ProfileLokalBox({ currentProfileId, isOwner }) {
 
   // 1. DATABASE PIPELINE: Berechnet reaktiv die Profil-Größe
   useEffect(() => {
-    getProfilesDb()
+    getProfilesDb(currentProfileId)
       .then(allProfiles => {
         const found = allProfiles.find(
           p => p?.id === currentProfileId

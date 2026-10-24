@@ -411,6 +411,21 @@ export default function AGBPage({ setView }) {
         transparent angezeigt. Kostenpflichtige Leistungen kommen erst
         durch die ausdrückliche Bestätigung des Nutzers zustande.
       </p>
+
+      <div className="mt-4 border-l-4 border-cyan-500/40 pl-4">
+        <h4 className="text-white font-semibold mb-2">
+          Aktueller Testbetrieb der Mitgliedschaftstarife
+        </h4>
+        <p>
+          Die auf der Plattform angezeigten Mitgliedschaftstarife und
+          Preise dienen derzeit der Entwicklung und Erprobung. Eine
+          Tarifauswahl kann einen offenen Auftrag im System vormerken;
+          dadurch wird keine Abonnementzahlung eingezogen und keine
+          automatische Abbuchung ausgelöst. Freiwillige Unterstützungen
+          über den PayPal-Link auf der Preisseite sind davon unabhängig
+          und können eine echte Zahlung über PayPal auslösen.
+        </p>
+      </div>
     </div>
 
     <div>
@@ -575,6 +590,12 @@ export default function AGBPage({ setView }) {
         Vorgaben oder berechtigte Sicherheitsinteressen dem nicht
         entgegenstehen.
       </p>
+      <p className="mt-4">
+        Wird ein Inhalt entfernt oder ein Nutzerkonto eingeschränkt oder
+        gesperrt, informiert GIGSDA den betroffenen Nutzer über die Gründe
+        der Maßnahme, soweit keine gesetzlichen oder behördlichen Gründe
+        entgegenstehen.
+      </p>
     </div>
   </div>
 </div>
@@ -710,6 +731,65 @@ export default function AGBPage({ setView }) {
         </p>
       </div>
     </div>
+  </div>
+</div>
+
+<div className="bg-slate-900/60 border border-cyan-500/10 rounded-3xl p-8">
+  <h2 className="text-2xl font-bold text-white mb-6">
+    § 11 Nutzergenerierte Inhalte und Moderation
+  </h2>
+
+  <div className="space-y-6 text-slate-400 leading-relaxed">
+    <p>
+      Nutzer sind für die von ihnen auf GIGSDA veröffentlichten Inhalte,
+      insbesondere Profile, Events, Nachrichten und Portfolios, selbst
+      verantwortlich.
+    </p>
+
+    <div>
+      <h3 className="text-lg font-semibold text-white mb-3">
+        Unzulässige Inhalte
+      </h3>
+      <p className="mb-3">
+        Untersagt sind insbesondere:
+      </p>
+      <ul className="list-disc list-inside space-y-2">
+        <li>rechtswidrige Inhalte,</li>
+        <li>Urheberrechtsverletzungen,</li>
+        <li>Hassrede und diskriminierende Inhalte,</li>
+        <li>Belästigung anderer Nutzer,</li>
+        <li>Spam sowie</li>
+        <li>betrügerische oder irreführende Inhalte.</li>
+      </ul>
+    </div>
+
+    <p>
+      GIGSDA behält sich vor, gemeldete Inhalte zu prüfen und Inhalte oder
+      Nutzerkonten bei Verstößen gegen Gesetze, diese AGB oder
+      Plattformregeln einzuschränken, zu entfernen oder zu sperren. Über
+      eine Maßnahme und ihre Gründe wird der betroffene Nutzer informiert,
+      soweit keine gesetzlichen oder behördlichen Gründe entgegenstehen.
+    </p>
+
+    <p>
+      Meldungen rechtswidriger Inhalte sowie Beschwerden und Anfragen nach
+      dem Digital Services Act können an{' '}
+      <a
+        className="text-cyan-400 hover:text-cyan-300"
+        href="mailto:support@gigsda.com"
+      >
+        support@gigsda.com
+      </a>{' '}
+      gerichtet werden. Weitere Informationen finden Sie auf der{' '}
+      <button
+        className="text-cyan-400 hover:text-cyan-300"
+        onClick={() => setView('dsa')}
+        type="button"
+      >
+        DSA-Kontaktstellenseite
+      </button>
+      .
+    </p>
   </div>
 </div>
 

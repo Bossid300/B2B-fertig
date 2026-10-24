@@ -32,7 +32,7 @@ export default function ProfileNetworkBox({ currentProfileId, isOwner }) {
         const savedFavs =
           localStorage.getItem(favoriteKey);
 
-        getProfilesDb()
+        getProfilesDb(currentProfileId)
           .then(async allProfiles => {
 
             const found = allProfiles.find(

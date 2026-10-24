@@ -20,7 +20,7 @@ export default function ProfileSocialBox({ currentProfileId, isOwner }) {
 
   // 1. DATABASE PIPELINE: Lädt die Social-Links live
   useEffect(() => {
-    getProfilesDb()
+    getProfilesDb(currentProfileId)
       .then(allProfiles => {
 
         const found = allProfiles.find(

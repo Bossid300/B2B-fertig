@@ -22,7 +22,7 @@ export default function ProfileComplianceBox({ currentProfileId, isOwner }) {
   useEffect(() => {
   const savedEvents = eventService.getEvents();
 
-  getProfilesDb()
+  getProfilesDb(currentProfileId)
     .then(profiles => {
       const found = profiles.find(
         p => p?.id === currentProfileId

@@ -21,7 +21,7 @@ export default function ProfileVertretungBox({ currentProfileId, isOwner }) {
   // 1. DATABASE PIPELINE: Lädt Vertretungs-Daten live aus DB
   useEffect(() => {
 
-    getProfilesDb()
+    getProfilesDb(currentProfileId)
       .then(profiles => {
         const found = profiles.find(
           p => p?.id === currentProfileId

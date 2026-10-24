@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function EventPromotionView({
   event,
   onClose,
+  onNavigate,
 }) {
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -22,21 +23,48 @@ export default function EventPromotionView({
     };
   }, [onClose]);
 
+  const profileId =
+    localStorage.getItem('gigsda_profile_id') || '';
+
+  const eventId =
+    event?.id ||
+    event?.eventId ||
+    event?._id ||
+    `${event?.title || event?.name || 'event'}-${event?.displayDate || event?.date || ''}`;
+
+  const favoriteStorageKey =
+    `gigsda_event_favorite_${encodeURIComponent(profileId || 'guest')}_${encodeURIComponent(String(eventId))}`;
+
+  const [favoriteState, setFavoriteState] = useState(
+    () => ({
+      storageKey: favoriteStorageKey,
+      value: localStorage.getItem(favoriteStorageKey) === 'true',
+    })
+  );
+  const isFavorite =
+    favoriteState.storageKey === favoriteStorageKey
+      ? favoriteState.value
+      : localStorage.getItem(favoriteStorageKey) === 'true';
+
   if (!event) return null;
 
+  const promotionData = event.promotionData || {};
 
   const title =
+    promotionData.title ||
     event.title ||
     event.name ||
     'Event';
 
   const category =
+    promotionData.category ||
     event.category ||
     event.event_type ||
     event.type ||
     '';
 
   const image =
+    promotionData.promoImage ||
     event.slide1_url ||
     event.promoImage ||
     event.promo_image ||
@@ -45,18 +73,22 @@ export default function EventPromotionView({
     '';
 
   const shortDescription =
+    promotionData.shortDescription ||
     event.shortDescription ||
     event.short_description ||
     event.descriptionShort ||
     '';
 
   const description =
+    promotionData.description ||
+    promotionData.longDescription ||
     event.description ||
     event.longDescription ||
     event.long_description ||
     '';
 
   const location =
+    promotionData.venueName ||
     event.venueName ||
     event.location ||
     event.venue ||
@@ -64,15 +96,18 @@ export default function EventPromotionView({
     '';
 
   const address =
+    promotionData.street ||
     event.street ||
     event.address ||
     '';
 
   const city =
-    event.city &&
-    !event.city.includes(',')
-      ? event.city
-      : '';
+    promotionData.city ||
+    (
+      event.city && !event.city.includes(',')
+        ? event.city
+        : ''
+    );
 
   const safeCity =
     city ||
@@ -85,8 +120,9 @@ export default function EventPromotionView({
             .replace(/^\d+\s+/, '')
         : ''
     );
-        
+
   const postalCode =
+    promotionData.zip ||
     event.zip ||
     event.postalCode ||
     event.plz ||
@@ -100,6 +136,7 @@ export default function EventPromotionView({
     '';
 
   const admission =
+    promotionData.entryTime ||
     event.admission ||
     event.entryTime ||
     event.entry_time ||
@@ -107,6 +144,7 @@ export default function EventPromotionView({
     '';
 
   const startTime =
+    promotionData.startTime ||
     event.startTime ||
     event.start_time ||
     event.begin ||
@@ -121,17 +159,20 @@ export default function EventPromotionView({
     '';
 
   const ticketLink =
+    promotionData.ticketLink ||
     event.ticketLink ||
     event.ticket_link ||
     event.ticketUrl ||
     '';
 
   const ticketPrice =
+    promotionData.ticketPrice ??
     event.ticketPrice ??
     event.ticket_price ??
     '';
 
   const eventStatus =
+    promotionData.ticketStatus ||
     event.ticketStatus ||
     event.status ||
     event.eventStatus ||
@@ -139,15 +180,18 @@ export default function EventPromotionView({
     '';
 
   const fsk =
+    promotionData.fsk ||
     event.fsk ||
     '';
 
   const lineUp =
+    promotionData.lineup ||
     event.lineup ||
     event.line_up ||
     '';
 
   const amenities =
+    promotionData.amenities ||
     event.amenities ||
     event.fanAmenities ||
     event.fan_amenities ||
@@ -156,6 +200,60 @@ export default function EventPromotionView({
   const hasTicketLink =
     typeof ticketLink === 'string' &&
     /^https?:\/\//i.test(ticketLink);
+
+  const eventLocation =
+    [location, address, postalCode, safeCity]
+      .filter(Boolean)
+      .join(', ');
+
+  const mapDestination =
+    event.lat != null &&
+    event.lng != null &&
+    Number.isFinite(Number(event.lat)) &&
+    Number.isFinite(Number(event.lng))
+      ? `${event.lat},${event.lng}`
+      : eventLocation;
+
+  const mapUrl =
+    mapDestination
+      ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapDestination)}`
+      : '';
+
+  const organizerEmail =
+    event.contactEmail ||
+    event.organizerEmail ||
+    event.organizer_email ||
+    '';
+
+  const website =
+    event.website ||
+    event.websiteUrl ||
+    event.website_url ||
+    event.organizerWebsite ||
+    '';
+
+  const hasWebsite =
+    typeof website === 'string' &&
+    /^https?:\/\//i.test(website);
+
+  const ownerId =
+    event.ownerId ||
+    event.owner_id ||
+    '';
+
+  const isOwner =
+    Boolean(profileId) &&
+    String(profileId) === String(ownerId);
+
+  const toggleFavorite = () => {
+    const nextFavorite = !isFavorite;
+    localStorage.setItem(favoriteStorageKey, String(nextFavorite));
+    setFavoriteState({
+      storageKey: favoriteStorageKey,
+      value: nextFavorite,
+    });
+    window.dispatchEvent(new Event('storage'));
+  };
 
   return (
     <div
@@ -225,7 +323,7 @@ export default function EventPromotionView({
             <img
               src={image}
               alt={title}
-              className="w-full h-[250px] sm:h-[500px] object-cover"
+              className="w-full h-[380px] sm:h-[500px] object-cover"
             />
           ) : (
             <div
@@ -298,6 +396,75 @@ export default function EventPromotionView({
                 #{category}
               </div>
             )}
+
+            <div className="mt-5 flex flex-wrap gap-2.5">
+              {eventLocation && (
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('event-location')?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center',
+                  })}
+                  className="rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
+                >
+                  Location
+                </button>
+              )}
+
+              {mapUrl && (
+                <a
+                  href={mapUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
+                >
+                  Route planen
+                </a>
+              )}
+
+              <button
+                type="button"
+                onClick={toggleFavorite}
+                aria-pressed={isFavorite}
+                className="rounded-xl border border-slate-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-cyan-400 hover:text-cyan-300"
+              >
+                {isFavorite ? 'Favorisiert' : 'Favorit'}
+              </button>
+
+              {typeof organizerEmail === 'string' &&
+                /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(organizerEmail) && (
+                  <a
+                    href={`mailto:${organizerEmail}?subject=${encodeURIComponent(`Anfrage: ${title}`)}`}
+                    className="rounded-xl border border-slate-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-cyan-400 hover:text-cyan-300"
+                  >
+                    Anfrage
+                  </a>
+                )}
+
+              {hasWebsite && (
+                <a
+                  href={website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-xl border border-slate-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:border-cyan-400 hover:text-cyan-300"
+                >
+                  Website
+                </a>
+              )}
+
+              {isOwner && onNavigate && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose?.();
+                    onNavigate('projects');
+                  }}
+                  className="rounded-xl border border-cyan-500 px-4 py-2.5 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-500 hover:text-slate-950"
+                >
+                  Verwalten
+                </button>
+              )}
+            </div>
           </div>
         </section>
 
@@ -344,7 +511,7 @@ export default function EventPromotionView({
 
           {/* LOCATION */}
           {(location || address || city) && (
-            <ContentBox title="📍 Veranstaltungsort">
+            <ContentBox id="event-location" title="📍 Veranstaltungsort">
 
               {location && (
                 <div className="text-xl font-black text-white">
@@ -568,9 +735,10 @@ function InfoBox({ icon, label, value }) {
 }
 
 
-function ContentBox({ title, children }) {
+function ContentBox({ title, children, id }) {
   return (
     <section
+      id={id}
       className="
         bg-[#07101f]
         border

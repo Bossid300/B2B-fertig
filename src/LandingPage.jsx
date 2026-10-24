@@ -58,7 +58,7 @@ const [videoMuted, setVideoMuted] = useState(true);
               </span>
             </h1>
             <p className="text-sm md:text-base text-slate-300 font-medium tracking-wide">
-              Die größte Gig-Datenbank für deine Region.
+              Die Gig-Datenbank für deine Region.
             </p>
           </div>
 

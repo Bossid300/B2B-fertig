@@ -3,6 +3,7 @@ import {
   getFavoriteCount,
   getEvents
 } from "../../services/apiService";
+import ReportContentLink from '../ReportContentLink';
 
 export default function ProfileCard({
  user,
@@ -170,6 +171,12 @@ export default function ProfileCard({
             </button>
           </div>
         )}
+        <ReportContentLink
+          contentType="Profil"
+          contentId={user.id}
+          title={user.Klarname || user.name}
+          className="mt-3 inline-flex w-fit rounded-lg border border-amber-500/30 px-3 py-2 text-xs font-semibold text-amber-300 transition hover:border-amber-400 hover:text-amber-200"
+        />
       </div>
  
       {/* 3. EXPANDED-DETAILS BEREICH (Schon perfekt abgesichert) */}

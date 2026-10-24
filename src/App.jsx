@@ -35,6 +35,7 @@ import TermsPage from './pages/info/TermsPage.jsx';
 import PrivacyPage from './pages/info/PrivacyPage.jsx';
 import ImpressumPage from './pages/info/ImpressumPage.jsx';
 import AGBPage from './pages/info/AGBPage.jsx';
+import DSAContactPage from './pages/info/DSAContactPage.jsx';
 
 import WhatIsGigsda from './pages/info/WhatIsGigsda.jsx';
 import EventsLocationsPage from './pages/info/EventsLocationsPage.jsx';
@@ -91,6 +92,39 @@ import BillingCenter from './components/BillingCenter';
 import { getProfiles } from './services/apiService';
 
 import BudgetPlanner from './components/BudgetPlanner';
+
+const PATH_VIEWS = {
+  '/events': 'guestEvents',
+  '/portfolios': 'radar',
+  '/impressum': 'impressum',
+  '/datenschutz': 'privacy',
+  '/agb': 'agb',
+  '/dsa': 'dsa'
+};
+
+const VIEW_PATHS = {
+  landing: '/',
+  guestEvents: '/events',
+  radar: '/portfolios',
+  impressum: '/impressum',
+  privacy: '/datenschutz',
+  agb: '/agb',
+  dsa: '/dsa'
+};
+
+const normalizePath = (path) =>
+  path.length > 1 ? path.replace(/\/+$/, '') : path;
+
+const getPortfolioIdFromPath = (path) => {
+  const match = normalizePath(path).match(/^\/portfolio\/([^/]+)$/);
+  if (!match) return null;
+
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return null;
+  }
+};
 
 export default function App() {
 
@@ -474,11 +508,39 @@ useEffect(() => {
   }, [isLoggedIn]);
  
   // 🔒 INTELLIGENTER ROUTER-SPEICHER: Merkt sich den Bildschirm auch bei F5!
-  const [view, setViewWithStorage] = useState(() => localStorage.getItem('gigsda_current_view') || 'landing');
+  const [view, setViewWithStorage] = useState(() => {
+    const portfolioId = getPortfolioIdFromPath(window.location.pathname);
+    if (portfolioId) {
+      localStorage.setItem('gigsda_portfolio_profile', portfolioId);
+      return 'artistPortfolio';
+    }
+
+    return (
+      PATH_VIEWS[normalizePath(window.location.pathname)] ||
+      localStorage.getItem('gigsda_current_view') ||
+      'landing'
+    );
+  });
 
   const setView = (newView) => {
     localStorage.setItem('gigsda_current_view', newView);
+    const portfolioId = localStorage.getItem('gigsda_portfolio_profile');
+    const path =
+      newView === 'artistPortfolio' && portfolioId
+        ? `/portfolio/${encodeURIComponent(portfolioId)}`
+        : VIEW_PATHS[newView] || '/';
+    if (
+      window.location.pathname !== path ||
+      window.history.state?.view !== newView
+    ) {
+      window.history.pushState({ view: newView }, '', path);
+    }
     setViewWithStorage(newView);
+  };
+
+  const openPortfolio = (profileId) => {
+    localStorage.setItem('gigsda_portfolio_profile', profileId);
+    setView('artistPortfolio');
   };
 
   const [activeEvent, setActiveEvent] = useState(null);
@@ -544,15 +606,25 @@ useEffect(() => {
   ]);
 
 
-  // DANIELS DAUMENTASTEN-SCHUTZ
+  // Keep browser back/forward navigation in sync with the active view.
   useEffect(() => {
-    window.history.pushState({ view: view }, '', '');
     const handlePopState = (event) => {
-      if (event.state && event.state.view) setView(event.state.view);
+      const portfolioId = getPortfolioIdFromPath(window.location.pathname);
+      if (portfolioId) {
+        localStorage.setItem('gigsda_portfolio_profile', portfolioId);
+      }
+
+      const nextView = portfolioId
+        ? 'artistPortfolio'
+        : event.state?.view ||
+          PATH_VIEWS[normalizePath(window.location.pathname)] ||
+          'landing';
+      localStorage.setItem('gigsda_current_view', nextView);
+      setViewWithStorage(nextView);
     };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
-  }, [view]);
+  }, []);
  
   // 📡 DER FEHLENDE LOGIN-EMPFÄNGER
   const handleLoginUser = (name, role) => {
@@ -838,6 +910,7 @@ useEffect(() => {
           {view === 'radar' && !isLoggedIn && (
             <SearchExplorer 
               onBack={() => setView('landing')} 
+              onOpenPortfolio={openPortfolio}
               setFavorites={(profileId) => {
 
                 setActiveGuestProfileId(profileId);
@@ -856,6 +929,7 @@ useEffect(() => {
           {view === 'radar' && isLoggedIn && (
             <SearchExplorer 
               onBack={() => setView('projects')} 
+              onOpenPortfolio={openPortfolio}
               setFavorites={(artistView) => {
 
                 setActiveGuestProfileId(
@@ -1254,6 +1328,7 @@ useEffect(() => {
           {view === 'search' && (
             <SearchExplorer 
               onBack={() => setView('shortlist')} 
+              onOpenPortfolio={openPortfolio}
               isGuest={!isLoggedIn} 
               onTriggerGate={triggerGate} 
               favorites={activeEvent ? (events.find(e => e.id === activeEvent.id)?.crewIds || []) : []} 
@@ -1297,7 +1372,8 @@ useEffect(() => {
 
           {view === 'artistPortfolio' && (
             <PortfolioRouter
-              onBack={() => setView('matrix')}
+              onBack={() => setView('radar')}
+              setView={setView}
             />
           )}
 
@@ -1356,6 +1432,9 @@ useEffect(() => {
           {view === 'agb' && (
             <AGBPage setView={setView} />
           )}
+          {view === 'dsa' && (
+            <DSAContactPage />
+          )}
           {/* ========================================================================= */}
           {view === 'eventlocation' && (
             <EventsLocationsPage setView={setView} />
@@ -1412,7 +1491,6 @@ useEffect(() => {
         <footer className="w-full border-t border-slate-900/60 bg-slate-950 py-3 text-center text-xm text-slate-600 mt-12">
           GIGSDA PROTOCOL V1.0 // OPERATOR: 
           <span className="text-cyan-400 font-bold"> {ticketName} </span> 
-          // RECHTSGÜLTIG GESICHERT
         </footer>
       </div>
  

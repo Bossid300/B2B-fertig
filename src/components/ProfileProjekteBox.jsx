@@ -15,7 +15,7 @@ const canEditPrivacy = isOwner || currentProfileId === localStorage.getItem( 'gi
 
   // 1. NESTED CREW PIPELINE: Filtert die Einsätze direkt aus den Event-Objekten!
   useEffect(() => {
-    getProfilesDb()
+    getProfilesDb(currentProfileId)
       .then(allProfiles => {
 
         const found = allProfiles.find(

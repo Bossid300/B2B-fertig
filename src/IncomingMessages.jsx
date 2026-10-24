@@ -136,21 +136,19 @@ const handleUpdateStatus = async (requestId, newStatus) => {
   const [counterText, setCounterText] =
     useState('');
 
-useEffect(() => {
-  const loadRequests = async () => {
-    try {
-      const dbRequests =
-        await getCrewRequests();
+    useEffect(() => {
+      const loadRequests = async () => {
+        try {
+          const dbRequests =
+            await getCrewRequests();
 
-      const currentUserId =
-        currentProfileData?.id ||
-        localStorage.getItem('gigsda_profile_id');
+          const currentUserId =
+              localStorage.getItem('gigsda_profile_id');
 
-      const filtered = dbRequests.filter(r =>
-        r &&
-        r.requestedProfileId === currentUserId
-      );
-
+          const filtered = dbRequests.filter(r =>
+            r &&
+            r.requestedProfileId === currentUserId
+          );
       setIncomingRequests(filtered);
 
     } catch (e) {

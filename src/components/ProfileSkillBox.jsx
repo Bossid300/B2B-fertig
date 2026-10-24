@@ -20,7 +20,7 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
 
   // 1. DATABASE PIPELINE: Lädt Skills & Zertifikate live aus der DB
   useEffect(() => {
-    getProfilesDb()
+    getProfilesDb(currentProfileId)
       .then(profiles => {
 
         const found = profiles.find(

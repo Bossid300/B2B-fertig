@@ -15,35 +15,35 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
 
   // 1. DATABASE PIPELINE: Lädt Stammdaten & Sichtbarkeits-Flags (Default: true)
   useEffect(() => {
-    getProfilesDb()
-      .then(profiles => {
+    let isCurrent = true;
+
+    const loadProfile = async () => {
+      try {
+        const profiles = await getProfilesDb(currentProfileId);
+        if (!isCurrent) return;
 
         const found = profiles.find(
           p => p?.id === currentProfileId
         );
-
         if (!found) return;
 
         const profileData =
           found.profile_json
             ? JSON.parse(found.profile_json)
             : {};
+        delete profileData.profile_json;
+
+        const profileFields = { ...found };
+        delete profileFields.profile_json;
 
         const mergedProfile = {
-          ...found,
+          ...profileFields,
           ...profileData,
           role: found.role,
           type: found.type
         };
 
-
-
-
-
-
-
         setProfile(mergedProfile);
-
         setFormData({
           role: mergedProfile.role || 'Künstler',
           avatarUrl: mergedProfile.avatarUrl || '',
@@ -76,12 +76,20 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
           show_avatarUrl: mergedProfile.show_avatarUrl !== false,
 
           is_demo: mergedProfile.is_demo === true
-      });
+        });
+      } catch (error) {
+        if (isCurrent) {
+          console.error(error);
+        }
+      }
+    };
 
-    })
-    .catch(console.error);
+    loadProfile();
 
-}, [currentProfileId, isEditing]);
+    return () => {
+      isCurrent = false;
+    };
+  }, [currentProfileId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -462,7 +470,7 @@ const displayName =
               <span className="text-[10px] text-slate-500 font-bold">INFO-TEXT / PROFIL-BESCHREIBUNG</span>
               <EyeToggle active={show_description} flagName="show_description" />
             </div>
-            <textarea name="description" value={description || ''} onChange={handleChange} rows={3} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-slate-300 focus:outline-none focus:border-purple-500 font-mono text-xs resize-none" placeholder="Beschreibe dein B2B-Profil für das Gigsda-Netzwerk..." />
+            <textarea name="description" value={description || ''} onChange={handleChange} rows={6} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-slate-300 focus:outline-none focus:border-purple-500 font-mono text-xs resize-y" placeholder="Beschreibe dein B2B-Profil für das Gigsda-Netzwerk..." />
           </div>
 
           {/* CONTROL STRIP */}

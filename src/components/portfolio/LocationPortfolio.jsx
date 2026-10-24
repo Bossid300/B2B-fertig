@@ -1,10 +1,25 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import GigsdaPass from "../GigsdaPass";
 import { eventService } from '../../services/eventService';
+import GoogleMapsConsent from '../maps/GoogleMapsConsent';
+import PortfolioActionBar from './shared/PortfolioActionBar';
+
+const POWER_SUPPLY_LABELS = {
+  'cee 63a': 'CEE 63A (Großbühne)',
+  'cee 32a': 'CEE 32A (Mittelbühne / Club)',
+  'cee 16a': 'CEE 16A (Kleine Bühne)',
+  schuko: '230V Schuko (Standard)'
+};
+
+const getPowerSupplyLabel = (value) => {
+  const normalizedValue = String(value || '').trim().toLowerCase();
+  return POWER_SUPPLY_LABELS[normalizedValue] || value || 'Keine Angabe';
+};
 
 export default function LocationPortfolio({
   profile,
   onBack = null,
+  setView
 }) {
 
 const loggedInProfileId =
@@ -12,6 +27,9 @@ const loggedInProfileId =
 
 const isOwner =
   String(loggedInProfileId) === String(profile?.id);
+
+const powerSupply =
+  getPowerSupplyLabel(profile?.room1_power_supply);
   
   const handlePrintPdf = () => {
     window.print();
@@ -42,13 +60,11 @@ const isOwner =
       return null;
     }
 
-    console.log(profile);
-
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 space-y-12">
       {/* 01 // HERO STAGE */}
         <section className="relative overflow-hidden rounded-3xl border border-cyan-500/20 bg-slate-950">
-            <div className="relative h-[500px] overflow-hidden">
+            <div className="relative h-[550px] overflow-hidden">
             <img
             src={profile?.slide1_url}
             alt="Hero"
@@ -70,30 +86,14 @@ const isOwner =
                 </h1>
 
                 <p className="text-slate-300 mt-3 text-lg">
-                {profile.street}, {profile?.plz}{profile?.city}
+                {profile.street}, {profile?.plz} {profile?.city}
                 </p>
 
-                <p className="text-slate-400 mt-2">
-                {profile?.website || "-"}
-                </p>
-
-                <div className="no-print flex gap-3 mt-6">
-                  <button className="px-5 py-3 rounded-xl bg-cyan-500 text-black font-semibold">
-                      {profile?.role}
-                  </button>
-
-                  <button className="no-print px-5 py-3 rounded-xl border border-slate-700">
-                      Route planen
-                  </button>
-
-                  <button className="no-print px-5 py-3 rounded-xl border border-slate-700">
-                      Anfragen
-                  </button>
-
-                  <button className="no-print px-5 py-3 rounded-xl border border-slate-700">
-                      Favorit hinzufügen
-                  </button>
-                </div>
+                <PortfolioActionBar
+                    profile={profile}
+                    isOwner={isOwner}
+                    setView={setView}
+                />
                 
             </div>
         </section>
@@ -155,12 +155,16 @@ const isOwner =
               </p>
 
               <p>
-                <strong>⚡ Strombedarf:</strong> {profile?.room1_power_supply}
+                <strong>⚡ Strom:</strong> {powerSupply}
               </p>
 
               <p>
-                <strong>🌙 Sperrstunde:</strong> {profile?.room1_sperrstunde}
+                <strong>🌙 Sperrstunde:</strong> {profile?.room1_curfew_time} Uhr
               </p>
+              <p>
+                <strong>🕒 Öffnungszeiten:</strong> {profile?.room1_opening_hours || "Keine Angabe"}
+              </p>
+              <div className="my-4 h-px bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent" />
               <p>
               <strong>Preise, Konditionen & Mietbedingungen:</strong>
               </p>
@@ -318,22 +322,22 @@ const isOwner =
             <div>
 
               <h3 className="font-bold text-cyan-400 mb-4">
-                Adresse
-              </h3>
+                {profile?.Klarname
+}             </h3>
 
               <p>
-                {profile?.address}
+                {profile?.street}
               </p>
 
               <p className="mt-2">
-                {profile?.city}
+                {profile?.plz}, {profile?.city}
               </p>
 
               <a
                 href={`https://www.google.com/maps?q=${profile?.lat},${profile?.lng}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
+                className="mt-4 inline-block bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300"
               >
                 Route planen
               </a>
@@ -342,15 +346,17 @@ const isOwner =
 
             <div className="rounded-2xl overflow-hidden border border-slate-800">
 
-              <iframe
-                src={`https://maps.google.com/maps?q=${profile?.lat},${profile?.lng}&z=15&output=embed`}
-                width="100%"
-                height="300px"
-                className="border-0"
-                allowFullScreen=""
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              ></iframe>
+              <GoogleMapsConsent height="300px">
+                <iframe
+                  src={`https://maps.google.com/maps?q=${profile?.lat},${profile?.lng}&z=15&output=embed`}
+                  width="100%"
+                  height="300px"
+                  className="border-0"
+                  allowFullScreen=""
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title={`Google Maps Karte für ${profile?.Klarname || profile?.city || 'Location'}`}
+                />
+              </GoogleMapsConsent>
 
             </div>
 
@@ -411,6 +417,31 @@ const isOwner =
 
         </div>
         </section>
+
+				{/* FÜR VERANSTALTER ODER AGENCY */}
+				<section className="rounded-3xl bg-slate-950 border border-slate-800 p-8">
+
+					<h2 className="text-2xl font-bold mb-8">
+							Für Veranstalter oder Agency
+					</h2>
+
+					<div className="grid md:grid-cols-2 gap-6">
+
+							<div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+							<h3 className="font-semibold mb-4">
+									Printinfo als PDF öffnen
+							</h3>
+								<a
+									href="/profiles/Location Portfolio - Tanz Arena Kirchdorf.pdf"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="text-cyan-400 hover:text-cyan-300 underline"
+								>
+									📄 Portfolio PDF öffnen
+								</a>
+							</div>
+					</div>
+				</section>
 
 
         {/* GIGSDAPASS - NUR FÜR OWNER */}

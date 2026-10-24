@@ -48,11 +48,11 @@ export default function ProfileHeaderBox({
 
   // 1. DATABASE PIPELINE: Lädt die Profildaten für Fremdprofile & befüllt die Inputs
   useEffect(() => {
-    getProfilesDb()
+    getProfilesDb(currentProfileId)
       .then(profiles => {
 
         const found = profiles.find(
-          p => p?.id === currentProfileId
+          p => String(p?.id) === String(currentProfileId)
         );
 
         if (!found) return;
@@ -61,10 +61,14 @@ export default function ProfileHeaderBox({
           found.profile_json
             ? JSON.parse(found.profile_json)
             : {};
+        delete profileData.profile_json;
+
+        const profileFields = { ...found };
+        delete profileFields.profile_json;
 
         setProfileData({
+          ...profileFields,
           ...profileData,
-          ...found,
           role: found.role,
           type: found.type
         });
@@ -77,7 +81,7 @@ export default function ProfileHeaderBox({
       })
       .catch(console.error);
       
-  }, [currentProfileId, isSliderMaskOpen]);
+  }, [currentProfileId]);
 
   // Synchronisiert die Eingabefelder, sobald die Maske geöffnet wird
   useEffect(() => {
@@ -136,36 +140,40 @@ const myEvents = savedEvents.filter(
   // 2. SAVE PIPELINE: Brennt Daten autark in die DB ein
   const handleTickerSave = async (e) => {
     e.preventDefault();
-      try {
+    try {
+      const baseProfile = profileData || localFields || {};
+      const profileId =
+        baseProfile.id ||
+        baseProfile.profileId ||
+        currentProfileId ||
+        localStorage.getItem('gigsda_profile_id');
 
-        const updatedProfile = {
-          ...profileData,
-          ...tickerFields
-        };
+      const updatedProfile = {
+        ...baseProfile,
+        ...tickerFields
+      };
 
-        const profileId =
-          updatedProfile.id ||
-          updatedProfile.profileId ||
-          localStorage.getItem(
-            'gigsda_profile_id'
-          );
+      if (!profileId) {
+        throw new Error('Profil-ID fehlt; Slider-Angaben können nicht gespeichert werden.');
+      }
 
-        await saveProfile({
-          profileId,
-          profile: updatedProfile
-        });
+      const result = await saveProfile({
+        profileId,
+        profile: updatedProfile
+      });
 
-        setProfileData(updatedProfile);
+      if (!result?.success) {
+        throw new Error(result?.error || 'Slider-Angaben konnten nicht gespeichert werden.');
+      }
 
-        alert(
-          "Cloud-Ticker erfolgreich in der Gigsda-Datenbank eingebrannt! 💾🔥"
-        );
-
-        setIsSliderMaskOpen(false);
+      setProfileData(updatedProfile);
+      alert("Slider-Angaben erfolgreich gespeichert! 💾🔥");
+      setIsSliderMaskOpen(false);
 
       } catch (err) {
 
         console.error(err);
+        alert("Die Slider-Angaben konnten nicht gespeichert werden. Bitte prüfe deine Verbindung und versuche es erneut.");
 
       }
   };
@@ -455,15 +463,67 @@ const submitB2BRequest = async (project) => {
             📄 BILLING
           </button>
 
-          <button type="button" onClick={() => setIsRequestMaskOpen(true)} className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-950/40 border border-purple-900/50 text-purple-400 text-[10px] font-mono hover:border-purple-500 transition-all cursor-pointer shadow-md uppercase font-black tracking-wider whitespace-nowrap"><MessageSquare size={10} /> Anfrage</button>
-          <button type="button" onClick={handleToggleFavorite} className={`flex items-center gap-1 px-3 py-1.5 rounded-xl border text-[10px] font-mono transition-all cursor-pointer shadow-md uppercase font-black tracking-wider whitespace-nowrap ${isFavorite ? 'bg-amber-950/40 border-amber-500 text-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.1)]' : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'}`}><span>{isFavorite ? '★' : '☆'}</span> {isFavorite ? 'Aktiv' : 'Favorit'}</button>
-          <button type="button" onClick={() => { localStorage.setItem('gigsda_current_view', 'crewfavoriten'); if (typeof setView === 'function') { setView('crewfavoriten'); } window.location.reload(); }} className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-cyan-900/50 bg-cyan-950/20 text-cyan-400 text-[10px] font-mono hover:border-cyan-500 transition-all cursor-pointer shadow-md uppercase font-black tracking-wider whitespace-nowrap">⭐ Pool</button>
+          <button type="button" onClick={() => setIsRequestMaskOpen(true)} 
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-950/40 border border-purple-900/50 text-purple-400 text-[10px] 
+            font-mono hover:border-purple-500 transition-all cursor-pointer shadow-md uppercase font-black tracking-wider whitespace-nowrap">
+            <MessageSquare size={10} /> 
+              Anfrage
+          </button>
+     
+          <button type="button" onClick={handleToggleFavorite} 
+          className={`flex items-center gap-1 px-3 py-1.5 rounded-xl border text-[10px] font-mono transition-all cursor-pointer 
+          shadow-md uppercase font-black tracking-wider whitespace-nowrap 
+          ${isFavorite ? 'bg-amber-950/40 border-amber-500 text-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.1)]' : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'}`}>
+            <span>{isFavorite ? '★' : '☆'}</span> {isFavorite ? 'Aktiv' : 'Favorit'}
+          </button>
+
+          <button type="button" onClick={() => { localStorage.setItem('gigsda_current_view', 'crewfavoriten'); 
+            if (typeof setView === 'function') { setView('crewfavoriten'); } window.location.reload(); }} 
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-cyan-900/50 bg-cyan-950/20 text-cyan-400 
+            text-[10px] font-mono hover:border-cyan-500 transition-all cursor-pointer shadow-md uppercase font-black tracking-wider whitespace-nowrap">
+              ⭐ Pool
+          </button>
+
+
+          <button
+            onClick={() => {
+
+              const currentProfileId =
+                localStorage.getItem('gigsda_profile_id');
+
+              localStorage.setItem(
+                'gigsda_portfolio_profile',
+                currentProfileId
+              );
+
+              setView('artistPortfolio');
+
+            }}
+            className="
+              px-4 py-1.5
+              rounded-lg
+              border border-cyan-500/40
+              bg-cyan-500/10
+              text-cyan-300
+              text-xs
+              font-bold
+              uppercase
+              tracking-wider
+              hover:bg-cyan-500/20
+              hover:border-cyan-400
+              transition
+            "
+          >
+            PORTFOLIO
+          </button>
+
+
         </div>
       </div>
 
       {/* SLIDER BLOCK */}
       <div className="relative w-full bg-slate-950 border border-slate-900 rounded-3xl overflow-hidden shadow-2xl">
-        <div className="relative h-[350px] w-full bg-slate-900 group">
+        <div className="relative h-[550px] w-full bg-slate-900 group">
           <img src={slides[currentSlide].url} alt="Banner" className="w-full h-full object-cover opacity-60 transition-all duration-500" />
           <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent pointer-events-none space-y-2">
             <p className="text-cyan-400 text-xs tracking-widest uppercase">{slides[currentSlide].l1}</p>

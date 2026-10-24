@@ -1,11 +1,14 @@
 import React from 'react';
 import GigsdaPass from "../GigsdaPass";
 import { eventService } from '../../services/eventService';
+import PortfolioActionBar from './shared/PortfolioActionBar';
 
 export default function ArtistPortfolio({
   profile,
   onBack = null,
+  setView
 }) {
+
 
 const loggedInProfileId =
   localStorage.getItem('gigsda_profile_id');
@@ -42,12 +45,14 @@ const isOwner =
 			return null;
 		}
 
-	
+console.log(profile);
+
 	return (
 		<div className="max-w-7xl mx-auto px-6 py-10 space-y-12">
+			
 			{/* 01 // HERO STAGE */}
 				<section className="relative overflow-hidden rounded-3xl border border-cyan-500/20 bg-slate-950">
-						<div className="relative h-[500px] overflow-hidden">
+						<div className="relative h-[550px] overflow-hidden">
 						<img
 						src={profile?.slide1_url}
 						alt="Hero"
@@ -76,20 +81,12 @@ const isOwner =
 								{profile?.genre}
 								</p>
 
-								<div className="no-print flex gap-3 mt-6">
-								<button className="px-5 py-3 rounded-xl bg-cyan-500 text-black font-semibold">
-										{profile?.role}
-								</button>
 
-								<button className="no-print px-5 py-3 rounded-xl border border-slate-700">
-										Anfrage senden
-								</button>
-
-								<button className="no-print px-5 py-3 rounded-xl border border-slate-700">
-										Favorit hinzufügen
-								</button>
-
-								</div>
+								<PortfolioActionBar
+										profile={profile}
+										isOwner={isOwner}
+										setView={setView}
+								/>
 								
 						</div>
 				</section>
@@ -151,35 +148,124 @@ const isOwner =
 
 				{/* MEDIA SHOWCASE */}
 				<section className="rounded-3xl bg-slate-950 border border-slate-800 p-8">
-				<h2 className="text-2xl font-bold mb-8">
+
+					<h2 className="text-2xl font-bold mb-8">
 						Media Showcase
-				</h2>
-				<div className="grid md:grid-cols-3 gap-6">
+					</h2>
 
-						{[1, 2, 3].map((num) => {
+					<div className="space-y-8">
 
-						const name = profile?.[`audio${num}_name`];
-						const url = profile?.[`audio${num}_url`];
+						{[1,2,3,4,5].map(albumNum => {
 
-						if (!url) return null;
+							const cover =
+								profile?.[`album${albumNum}_cover`];
 
-						return (
+							const title =
+								profile?.[`album${albumNum}_title`];
+
+							if (!cover && !title) return null;
+
+							return (
+
 								<div
-								key={num}
-								className="rounded-2xl bg-slate-900 border border-slate-800 p-5"
+									key={albumNum}
+									className="rounded-2xl bg-slate-900 border border-slate-800 overflow-hidden"
 								>
-								<h3 className="font-semibold mb-4">
-										{name}
-								</h3>
-								<audio controls className="w-full">
-										<source src={url} type="audio/mpeg" />
-										Dein Browser unterstützt Audio nicht.
-								</audio>
+
+									{cover ? (
+										<img
+											src={cover}
+											alt={title}
+											className="w-full h-64 object-cover"
+										/>
+									) : (
+										<div className="w-full h-64 bg-slate-800 flex items-center justify-center text-slate-500">
+											Kein Cover vorhanden
+										</div>
+									)}
+
+									<div className="p-6">
+
+										<h3 className="text-2xl font-bold mb-6">
+											{title}
+										</h3>
+
+										<div className="space-y-4">
+
+											{[1,2,3,4].map(trackNum => {
+
+												let trackName;
+												let trackUrl;
+
+												if (albumNum === 1) {
+
+													trackName =
+														profile?.[`audio${trackNum}_name`];
+
+													trackUrl =
+														profile?.[`audio${trackNum}_url`];
+
+												} else {
+
+													trackName =
+														profile?.[`album${albumNum}_track${trackNum}_name`];
+
+													trackUrl =
+														profile?.[`album${albumNum}_track${trackNum}_url`];
+
+												}
+
+												if (!trackUrl) return null;
+
+												return (
+
+													<div
+														key={trackNum}
+														className="rounded-xl border border-slate-800 p-4"
+													>
+
+														<div className="mb-3">
+
+															<span className="text-cyan-400 text-xs uppercase tracking-wider">
+																Track {trackNum}
+															</span>
+
+															<h4 className="font-semibold mt-1">
+																{trackName}
+															</h4>
+
+														</div>
+
+														<audio
+															controls
+															className="w-full"
+														>
+															<source
+																src={trackUrl}
+																type="audio/mpeg"
+															/>
+														</audio>
+
+													</div>
+
+												);
+
+											})}
+
+										</div>
+
+									</div>
+
 								</div>
-						);
+
+							);
+
 						})}
-				</div>
+
+					</div>
+
 				</section>
+
 
 				{/* GALLERY */}
 				<section className="rounded-3xl bg-slate-950 border border-slate-800 p-8">
@@ -258,7 +344,7 @@ const isOwner =
 								</h3>
 
 								<p className="text-slate-300 leading-relaxed">
-										{profile?.einleitung || "Keine Einleitung vorhanden."}
+										{profile?.bio_einleitung || "Keine Einleitung vorhanden."}
 								</p>
 						</div>
 
@@ -267,7 +353,7 @@ const isOwner =
 										Karriere
 								</h3>
 								<p className="text-slate-300 leading-relaxed">
-										{profile?.karriere || "Keine Karriereinformationen vorhanden."}
+										{profile?.bio_karriere || "Keine Karriereinformationen vorhanden."}
 								</p>
 						</div>
 
@@ -277,7 +363,7 @@ const isOwner =
 								</h3>
 
 								<p className="text-slate-300 leading-relaxed">
-										{profile?.privates || "Keine weiteren Informationen vorhanden."}
+										{profile?.bio_privates || "Keine weiteren Informationen vorhanden."}
 								</p>
 						</div>
 
@@ -388,64 +474,91 @@ const isOwner =
 				{/* TECHNICAL RIDER */}
 				<section className="rounded-3xl bg-slate-950 border border-slate-800 p-8">
 
-				<h2 className="text-2xl font-bold mb-8">
-						Technical Rider
-				</h2>
+					<h2 className="text-2xl font-bold mb-8">
+							Technical Rider
+					</h2>
 
-				<div className="grid md:grid-cols-2 gap-6">
+					<div className="grid md:grid-cols-2 gap-6">
 
-						<div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
-						<h3 className="font-semibold mb-4">
-								Technical Rider PDF
-						</h3>
+							<div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+							<h3 className="font-semibold mb-4">
+									Technical Rider PDF
+							</h3>
 
+									<a
+									href={profile?.rider_pdf_url}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="text-cyan-400 hover:text-cyan-300 underline break-all"
+									>
+									📄 Rider öffnen
+									</a>
+							</div>
+
+							<div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+							<h3 className="font-semibold mb-4">
+									Stageplot
+							</h3>
+
+							<a
+									href={profile?.stageplot_url}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="text-cyan-400 hover:text-cyan-300 underline break-all"
+							>
+									🗺️ Stageplot öffnen
+							</a>
+							</div>
+
+							<div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+							<h3 className="font-semibold mb-4">
+									Monitoring
+							</h3>
+
+							<p className="text-slate-300">
+									{profile?.rider_monitors}
+							</p>
+							</div>
+
+							<div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+							<h3 className="font-semibold mb-4">
+									Backline
+							</h3>
+
+							<p className="text-slate-300">
+									{profile?.rider_backline}
+							</p>
+							</div>
+
+					</div>
+
+				</section>
+
+
+				{/* FÜR VERANSTALTER ODER AGENCY */}
+				<section className="rounded-3xl bg-slate-950 border border-slate-800 p-8">
+
+					<h2 className="text-2xl font-bold mb-8">
+							Für Veranstalter oder Agency
+					</h2>
+
+					<div className="grid md:grid-cols-2 gap-6">
+
+							<div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+							<h3 className="font-semibold mb-4">
+									Printinfo als PDF öffnen
+							</h3>
 								<a
-								href={profile?.rider_pdf_url}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-cyan-400 hover:text-cyan-300 underline break-all"
+									href="/profiles/Artist Portfolio - Winston Jud.pdf"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="text-cyan-400 hover:text-cyan-300 underline"
 								>
-								📄 Rider öffnen
+									📄 Portfolio PDF öffnen
 								</a>
-						</div>
+							</div>
 
-						<div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
-						<h3 className="font-semibold mb-4">
-								Stageplot
-						</h3>
-
-						<a
-								href={profile?.stageplot_url}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="text-cyan-400 hover:text-cyan-300 underline break-all"
-						>
-								🗺️ Stageplot öffnen
-						</a>
-						</div>
-
-						<div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
-						<h3 className="font-semibold mb-4">
-								Monitoring
-						</h3>
-
-						<p className="text-slate-300">
-								{profile?.rider_monitors}
-						</p>
-						</div>
-
-						<div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
-						<h3 className="font-semibold mb-4">
-								Backline
-						</h3>
-
-						<p className="text-slate-300">
-								{profile?.rider_backline}
-						</p>
-						</div>
-
-				</div>
-
+					</div>
 				</section>
 
 				{/* GIGSDAPASS - NUR FÜR OWNER */}

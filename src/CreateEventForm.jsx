@@ -32,11 +32,17 @@ export default function CreateEventForm({ onBack, onCreateEvent }) {
       !calendarDate
     ) return;
 
-  const fullAddress =
-    `${street}, ${zip} ${city}`;
+  const addressCandidates = [
+    [street, [zip, city].filter(Boolean).join(' ')].filter(Boolean).join(', '),
+    [zip, city].filter(Boolean).join(' '),
+    city
+  ].filter(Boolean);
 
-  const geo =
-    await geocodeAddress(fullAddress);
+  let geo = null;
+  for (const address of addressCandidates) {
+    geo = await geocodeAddress(address);
+    if (geo) break;
+  }
 
     if (onCreateEvent) {
       onCreateEvent({

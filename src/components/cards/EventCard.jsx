@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import ReportContentLink from '../ReportContentLink';
 
 
   // 🗺️ DIE LIVE-ENTFERNUNGSMATRIX (Exakt identisch zum SearchExplorer von eurer Heimatbasis Braunau)
@@ -176,6 +177,15 @@ export default function EventCard({
                 {getDistanceTo(event.city)} KM
               </strong>
             </span>
+          </div>
+
+          <div className="mt-3">
+            <ReportContentLink
+              contentType="Event"
+              contentId={event.id || event.eventId || event._id}
+              title={event.title}
+              className="inline-flex rounded-lg border border-amber-500/30 px-3 py-2 text-xs font-semibold text-amber-300 transition hover:border-amber-400 hover:text-amber-200"
+            />
           </div>
           
         </div>

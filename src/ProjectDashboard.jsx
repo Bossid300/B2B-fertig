@@ -282,17 +282,20 @@ currentEvents >= maxEvents;
             localStorage.getItem('gigsda_profile_id') ||
             '';
 
+          const eventCategory =
+            newEvent.category === 'Festivals'
+              ? 'Festival'
+              : newEvent.category === 'OpenAirs'
+                ? 'Open Air'
+                : 'Clubshow';
+
           const fresh = {
             id: newEvent.id || "EVT-" + Date.now().toString().slice(-4),
             title: `${newEvent.title}`,
             date: newEvent.date,
             displayDate: newEvent.displayDate,
-            type:
-              newEvent.category === 'Festivals'
-                ? 'Festival'
-                : newEvent.category === 'OpenAirs'
-                  ? 'Open Air'
-                  : 'Clubshow',
+            type: eventCategory,
+            category: eventCategory,
             text: "Event frisch angelegt. Starte die Crew-Suche im Radar.",
             venue: newEvent.venue || "Stadtpark Wiese, Braunau",
 

@@ -52,6 +52,18 @@ try {
             $ip,
             true
         );
+
+        session_set_cookie_params([
+            'httponly' => true,
+            'secure' => true,
+            'samesite' => 'Lax'
+        ]);
+        session_start();
+        session_regenerate_id(true);
+
+        $_SESSION['profile_id'] = $user['profileId'];
+        $_SESSION['auth_user_id'] = $user['id'];
+        $_SESSION['login_time'] = time();
     }
     else
     {
@@ -69,7 +81,10 @@ try {
 
     echo json_encode([
         'success' => !!$user,
-        'user' => $user
+        'user' => $user ? [
+            'id' => $user['id'],
+            'profileId' => $user['profileId']
+        ] : null
     ]);
 
 } catch (Exception $e) {

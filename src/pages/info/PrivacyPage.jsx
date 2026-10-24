@@ -301,9 +301,11 @@ export default function PrivacyPage({ setView }) {
       </p>
 
       <p className="mb-4">
-        Zur Nutzung dieser Kartenfunktionen kann es erforderlich sein,
-        Ihre IP-Adresse an die Server des jeweiligen Kartenanbieters
-        zu übertragen.
+        Karten werden erst geladen, wenn Sie die Schaltfläche „Karte laden“
+        aktivieren. Dabei wird eine Verbindung zum jeweiligen Anbieter,
+        insbesondere zu Google, hergestellt und Ihre IP-Adresse sowie
+        technische Browserdaten können übermittelt werden. Wenn Sie die
+        Schaltfläche nicht aktivieren, wird keine Karte von Google geladen.
       </p>
 
       <div className="space-y-2">

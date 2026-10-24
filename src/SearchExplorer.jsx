@@ -7,7 +7,12 @@ import { eventService } from './services/eventService';
 import { distanceKm, geocodeAddress } from './services/geoService';
 import SearchMap from './components/maps/SearchMap';
 
-export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat }) {
+export default function SearchExplorer({
+  onNavigate,
+  onOpenPortfolio,
+  setFavorites,
+  setActiveChat,
+}) {
   const [allUsers, setAllUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchRadius, setSearchRadius] = useState(500); // 📡 Live-Suchumkreis
@@ -24,6 +29,14 @@ export default function SearchExplorer({ onNavigate, setFavorites, setActiveChat
   const [selectedUser, setSelectedUser] = useState(null);
   useEffect(() => {
   }, [selectedUser]);
+
+  const handleOpenPortfolio = (profile) => {
+    if (typeof onOpenPortfolio === 'function') {
+      onOpenPortfolio(profile.id);
+    } else if (typeof setFavorites === 'function') {
+      setFavorites(profile);
+    }
+  };
 
   // 🏟️ ECHTZEIT-PROJEKTLISTE FÜR DIE EXPLORER-DIREKTANFRAGE
   const [events, setEvents] = useState([]);
@@ -283,10 +296,9 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Verleiher', 'Location', 'Ve
     }
 
   const searchValue = searchTerm.toLowerCase();
-  const matchesName =
-    user.name?.toLowerCase().includes(searchValue);
-  const matchesId =
-    user.id?.toLowerCase().includes(searchValue);   
+  const matchesSearch = [user.name, user.Klarname, user.id].some(value =>
+    value?.toLowerCase().includes(searchValue)
+  );
   const matchesGenre =
   !genreFilter ||
   (user.genre || '')
@@ -352,7 +364,7 @@ const ROLES_LIST = ['Alle', 'Künstler', 'Caterer', 'Verleiher', 'Location', 'Ve
 
     const matchesRadius = userDistance <= searchRadius;
 
-    return (matchesName || matchesId) &&
+    return matchesSearch &&
        matchesRole &&
        matchesRadius &&
        matchesGenre &&
@@ -415,7 +427,7 @@ return (
           <div className="relative">
             <input
               type="text"
-              placeholder="Nach Namen suchen..."
+              placeholder="Firmen-/Künstlername oder ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="
@@ -453,7 +465,7 @@ return (
           </label>
           <input
             type="text"
-            placeholder="Genre Durchsuchen Text"
+            placeholder="Genre durchsuchen"
             value={genreFilter}
             onChange={(e) => setGenreFilter(e.target.value)}
             className="
@@ -640,17 +652,7 @@ return (
 
  */
 onProfile={() => {
-  localStorage.setItem(
-    'gigsda_portfolio_profile',
-    user.id
-  );
-
-  localStorage.setItem(
-    'gigsda_current_view',
-    'artistPortfolio'
-  );
-
-  window.location.reload();
+  handleOpenPortfolio(user);
 }}
 
 
@@ -730,17 +732,7 @@ onProfile={() => {
 
  */
 onProfile={() => {
-  localStorage.setItem(
-    'gigsda_portfolio_profile',
-    user.id
-  );
-
-  localStorage.setItem(
-    'gigsda_current_view',
-    'artistPortfolio'
-  );
-
-  window.location.reload();
+  handleOpenPortfolio(selectedUser);
 }}
 
                       onRequest={() => {

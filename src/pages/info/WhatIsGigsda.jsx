@@ -263,7 +263,6 @@ export default function WhatIsGigsda({ setView }) {
 
       {/* Custom Animations */}
       <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
 
         @keyframes gradientMove {
           0% { background-position: 0% 50%; }

@@ -147,6 +147,8 @@ useEffect(() => {
     const eventCategory =
       event.category ||
       event.promotionData?.category ||
+      event.type ||
+      event.event_type ||
       '';
 
     const matchesCategory =
@@ -166,22 +168,24 @@ useEffect(() => {
         
     eventCategory === selectedCategory;
 
-    const eventDistance =
-      baseCoordinates?.lat &&
-      baseCoordinates?.lng &&
-      event?.lat &&
-      event?.lng
-        ? distanceKm(
-            baseCoordinates.lat,
-            baseCoordinates.lng,
-            event.lat,
-            event.lng
-          )
-        : Number.MAX_VALUE;
-
+    const hasCoordinates =
+      baseCoordinates?.lat != null &&
+      baseCoordinates?.lng != null &&
+      event?.lat != null &&
+      event?.lng != null &&
+      Number.isFinite(Number(baseCoordinates.lat)) &&
+      Number.isFinite(Number(baseCoordinates.lng)) &&
+      Number.isFinite(Number(event.lat)) &&
+      Number.isFinite(Number(event.lng));
 
     const matchesRadius =
-      eventDistance <= searchRadius;
+      !hasCoordinates ||
+      distanceKm(
+        Number(baseCoordinates.lat),
+        Number(baseCoordinates.lng),
+        Number(event.lat),
+        Number(event.lng)
+      ) <= searchRadius;
 
     return (
       (matchesName || matchesId) &&
@@ -550,6 +554,7 @@ return (
         <EventPromotionView
           event={selectedPromoEvent}
           onClose={() => setSelectedPromoEvent(null)}
+          onNavigate={onNavigate}
         />
       )}
 

@@ -26,7 +26,7 @@ export default function ProfileBewertungsBox({ currentProfileId, isOwner }) {
       const savedEvents =
         eventService.getEvents();
 
-      getProfilesDb()
+      getProfilesDb(currentProfileId)
         .then(allProfiles => {
 
           const found =

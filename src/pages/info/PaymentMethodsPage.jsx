@@ -20,6 +20,14 @@ export default function PaymentMethodsPage({ setView }) {
             Zahlungsinfrastruktur für Mitglieder, Projekte,
             Veranstaltungen und zukünftige Premium-Dienste.
           </p>
+          <p className="max-w-3xl mx-auto mt-4 text-slate-300 leading-relaxed">
+            Die Mitgliedschaftstarife befinden sich derzeit in der
+            Entwicklungs- und Testphase. Über Abonnements werden aktuell
+            keine Zahlungen eingezogen und keine automatischen Abbuchungen
+            ausgelöst. Freiwillige Unterstützungen über den PayPal-Link auf
+            der Preisseite sind davon unabhängig und können eine echte
+            Zahlung über PayPal auslösen.
+          </p>
         </div>
 
         <div className="space-y-8">
@@ -30,10 +38,11 @@ export default function PaymentMethodsPage({ setView }) {
             </h2>
 
             <p className="text-slate-400 leading-relaxed">
-              Für schnelle und unkomplizierte Online-Zahlungen
-              ist die Unterstützung von PayPal vorgesehen.
-              Nutzer profitieren von einer bekannten und weit
-              verbreiteten Zahlungsmethode.
+              PayPal ist aktuell für freiwillige Unterstützungen über den
+              Link auf der Preisseite verfügbar. Diese Zahlungen sind
+              unabhängig von Mitgliedschaftstarifen und werden über PayPal
+              abgewickelt. Als Zahlungsmethode für kostenpflichtige
+              Mitgliedschaften ist PayPal noch nicht freigeschaltet.
             </p>
           </div>
 
@@ -44,9 +53,10 @@ export default function PaymentMethodsPage({ setView }) {
 
             <p className="text-slate-400 leading-relaxed">
               Überweisungen innerhalb des europäischen
-              Zahlungsraums sollen eine zuverlässige Möglichkeit
-              für Mitgliedschaften, Dienstleistungen und
-              Projektzahlungen bieten.
+              Zahlungsraums werden als mögliche zukünftige
+              Zahlungsmethode geprüft und sind für Mitgliedschaften,
+              Dienstleistungen und Projektzahlungen derzeit nicht
+              freigeschaltet.
             </p>
           </div>
 
@@ -57,8 +67,8 @@ export default function PaymentMethodsPage({ setView }) {
 
             <p className="text-slate-400 leading-relaxed">
               Die Integration von Klarna wird geprüft, um weitere
-              flexible Zahlungsoptionen für Mitglieder
-              bereitzustellen.
+              flexible Zahlungsoptionen bereitzustellen. Klarna ist
+              derzeit nicht als Zahlungsmethode freigeschaltet.
             </p>
           </div>
 
@@ -81,10 +91,11 @@ export default function PaymentMethodsPage({ setView }) {
             </h2>
 
             <p className="text-slate-300 leading-relaxed">
-              Der Zahlungsbereich befindet sich aktuell im
-              Ausbau. Einzelne Zahlungsmethoden können während
-              der Entwicklungsphase simuliert oder schrittweise
-              aktiviert werden.
+              Die Zahlungsinfrastruktur für Mitgliedschaften und weitere
+              Plattformleistungen befindet sich im Aufbau. Tarifauswahlen
+              können im Testsystem als offene Aufträge vorgemerkt werden;
+              sie lösen keine Abonnementzahlung oder automatische
+              Abbuchung aus.
             </p>
           </div>
 

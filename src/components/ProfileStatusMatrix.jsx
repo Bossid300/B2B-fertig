@@ -9,7 +9,7 @@ export default function ProfileStatusMatrix({ currentProfileId }) {
 
   // 1. ANALYTICS ENGINE: Durchleuchtet das Profil live im LocalStorage
   useEffect(() => {
-    getProfilesDb()
+    getProfilesDb(currentProfileId)
       .then(profiles => {
         const found = profiles.find(
           p => p?.id === currentProfileId

@@ -18,7 +18,7 @@ export default function ProfileLogistikBox({ currentProfileId, isOwner }) {
 
   // 1. DATABASE PIPELINE: Lädt Logistik-Daten live
   useEffect(() => {
-  getProfilesDb()
+  getProfilesDb(currentProfileId)
     .then(profiles => {
 
       const found = profiles.find(

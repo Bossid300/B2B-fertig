@@ -37,7 +37,7 @@ export default function ArtistAudioBox({ currentProfileId, isOwner }) {
 
   // 1. DATEN-PIPELINE: Lädt deine bestehende DevTools-Struktur
   useEffect(() => {
-    getProfilesDb()
+    getProfilesDb(currentProfileId)
       .then(profiles => {
 
         const found = profiles.find(

@@ -3,10 +3,12 @@ import { getProfilesDb } from "../../services/apiService";
 
 import ArtistPortfolio from './ArtistPortfolio';
 import LocationPortfolio from './LocationPortfolio';
+import TechnicianPortfolio from './TechnicianPortfolio';
 
 export default function PortfolioRouter({
   profileId = null,
-  onBack
+  onBack,
+  setView
 }) {
 
   const [profile, setProfile] = useState(null);
@@ -52,6 +54,16 @@ export default function PortfolioRouter({
         <LocationPortfolio
           profile={profile}
           onBack={onBack}
+          setView={setView}
+        />
+      );
+
+    case 'techniker':
+      return (
+        <TechnicianPortfolio
+          profile={profile}
+          onBack={onBack}
+          setView={setView}
         />
       );
 
@@ -60,7 +72,10 @@ export default function PortfolioRouter({
         <ArtistPortfolio
           profile={profile}
           onBack={onBack}
+          setView={setView}
         />
       );
   }
+
+
 }

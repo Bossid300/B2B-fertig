@@ -7,10 +7,21 @@ import { getProfilesDb } from '../services/apiService';
 import { saveProfile } from '../services/apiService';
 import { eventService } from '../services/eventService';
 
+const POWER_SUPPLY_LABELS = {
+  'cee 63a': 'CEE 63A (Großbühne)',
+  'cee 32a': 'CEE 32A (Mittelbühne / Club)',
+  'cee 16a': 'CEE 16A (Kleine Bühne)',
+  schuko: '230V Schuko (Standard)'
+};
+
+const getPowerSupplyLabel = (value) => {
+  const normalizedValue = String(value || '').trim().toLowerCase();
+  return POWER_SUPPLY_LABELS[normalizedValue] || value || '—';
+};
+
 export default function LocationRaeumeBox({ currentProfileId, isOwner, selectedRoom }) {
   const [isEditing, setIsEditing] = useState(false);
   const [rooms, setRooms] = useState([]);
-  const [fullProfile, setFullProfile] = useState({});
   const canEdit = isOwner || currentProfileId === localStorage.getItem('gigsda_profile_id');
   
   // Hilfsfunktion zum Prüfen, ob ein Link ein Bild ist
@@ -21,10 +32,10 @@ export default function LocationRaeumeBox({ currentProfileId, isOwner, selectedR
 
   // 2. DATEN-PIPELINE: Lädt Räume passend zur Arena Braunau Struktur
 useEffect(() => {
-  getProfilesDb()
+  getProfilesDb(currentProfileId)
     .then(profiles => {
       const found = profiles.find(
-        p => p?.id === currentProfileId
+        p => String(p?.id) === String(currentProfileId)
       );
 
       if (!found) return;
@@ -35,8 +46,6 @@ useEffect(() => {
         found?.profile_json
           ? JSON.parse(found.profile_json)
           : found;
-
-      setFullProfile(profileData);
 
       const loadedRooms = [];
       let index = 1;
@@ -66,9 +75,11 @@ useEffect(() => {
           area:
             profileData[`room${index}_area`] || '',
           power_supply:
-            profileData[`room${index}_power_supply`] || '',
+            profileData[`room${index}_power_supply`] || 'schuko',
           curfew_time:
             profileData[`room${index}_curfew_time`] || '',
+          opening_hours:
+            profileData[`room${index}_opening_hours`] || '',
           equipment:
             profileData[`room${index}_equipment`] || '',
           opnv:
@@ -85,7 +96,7 @@ useEffect(() => {
       setRooms(loadedRooms);
     })
     .catch(console.error);
-}, [currentProfileId, isEditing]);
+}, [currentProfileId]);
 
 
   // Input Handler
@@ -108,6 +119,9 @@ useEffect(() => {
       theater: '',
       uform: '',
       area: '',
+      power_supply: 'schuko',
+      curfew_time: '',
+      opening_hours: '',
       equipment: '',
       opnv: '',
       konditionen: '',
@@ -126,15 +140,25 @@ useEffect(() => {
   const handleSave = async () => {
     if (!currentProfileId) return;
     try {
+      const profiles = await getProfilesDb(currentProfileId);
+      const found = profiles.find(
+        profile => String(profile?.id) === String(currentProfileId)
+      );
+      if (!found) {
+        throw new Error('Profil konnte vor dem Speichern nicht geladen werden.');
+      }
 
-      console.log("FULL PROFILE", fullProfile);
+      const latestProfile =
+        found.profile_json
+          ? JSON.parse(found.profile_json)
+          : found;
 
-  const updatedProfile = {
-    ...fullProfile,
-    id: currentProfileId
-  };
-      rooms.forEach((room, idx) => {
-        const i = idx + 1;
+      const updatedProfile = {
+        ...latestProfile,
+        id: currentProfileId
+      };
+      rooms.forEach((room) => {
+        const i = room.index;
         updatedProfile[`room${i}_name`] = room.name;
         updatedProfile[`room${i}_img`] = room.img;
         updatedProfile[`room${i}_tech_plan`] = room.tech_plan;
@@ -145,6 +169,7 @@ useEffect(() => {
         updatedProfile[`room${i}_area`] = room.area;
         updatedProfile[`room${i}_power_supply`] = room.power_supply;
         updatedProfile[`room${i}_curfew_time`] = room.curfew_time;
+        updatedProfile[`room${i}_opening_hours`] = room.opening_hours;
         updatedProfile[`room${i}_equipment`] = room.equipment;
         updatedProfile[`room${i}_opnv`] = room.opnv;
         updatedProfile[`room${i}_konditionen`] = room.konditionen;
@@ -155,14 +180,14 @@ useEffect(() => {
         updatedProfile.id ||
         updatedProfile.profileId ||
         currentProfileId;
-console.log(
-  "ROOM SAVE",
-  updatedProfile
-);
-      await saveProfile({
+      const result = await saveProfile({
         profileId: saveProfileId,
         profile: updatedProfile
       });
+
+      if (!result?.success) {
+        throw new Error(result?.error || 'Profil konnte nicht gespeichert werden.');
+      }
 
       // Event-Markierung bleibt
       try {
@@ -208,6 +233,7 @@ if (changedEvent) {
         'Location Räume Save Fehler:',
           err
       );
+        window.alert('Die Änderungen konnten nicht gespeichert werden. Bitte prüfe deine Verbindung und versuche es erneut.');
     }
   };
 
@@ -422,10 +448,10 @@ if (changedEvent) {
                     )}
                   </div>
                   <div>
-                    <label className="text-amber-500 block mb-0.5 font-mono">⚡ STROMBEDARF</label>
+                    <label className="text-amber-500 block mb-0.5 font-mono">⚡ STROM</label>
                     {isEditing ? (
                       <select 
-                        value={room.power_supply || 'schuko'} 
+                        value={room.power_supply}
                         onChange={(e) => handleInputChange(room.index, 'power_supply', e.target.value)} 
                         className="w-full bg-slate-900 border border-amber-900/40 rounded p-1 text-white text-xs font-mono h-[26px]"
                       >
@@ -436,7 +462,7 @@ if (changedEvent) {
                       </select>
                     ) : (
                       <span className="font-bold text-amber-400 text-sm font-mono">
-                        {room.power_supply ? room.power_supply.toUpperCase() : '—'}
+                        {getPowerSupplyLabel(room.power_supply)}
                       </span>
                     )}
                   </div>
@@ -447,6 +473,15 @@ if (changedEvent) {
                       <input type="text" placeholder="e.g. 02:00" value={room.curfew_time} onChange={(e) => handleInputChange(room.index, 'curfew_time', e.target.value)} className="w-full bg-slate-900 border border-cyan-900/40 rounded p-1 text-white text-xs font-mono" />
                     ) : (
                       <span className="font-bold text-cyan-400 text-sm font-mono">{room.curfew_time || '—'}</span>
+                    )}
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="text-cyan-500 block mb-0.5 font-mono">🕒 ÖFFNUNGSZEITEN</label>
+                    {isEditing ? (
+                      <input type="text" placeholder="z. B. Mo–Sa 18:00–02:00" value={room.opening_hours} onChange={(e) => handleInputChange(room.index, 'opening_hours', e.target.value)} className="w-full bg-slate-900 border border-cyan-900/40 rounded p-1 text-white text-xs font-mono" />
+                    ) : (
+                      <span className="font-bold text-cyan-400 text-sm font-mono">{room.opening_hours || '—'}</span>
                     )}
                   </div>
                 </div>

@@ -24,7 +24,7 @@ export default function ProfileFinanzBox({ currentProfileId, isOwner }) {
 
   // 1. DATABASE PIPELINE: Lädt Finanzkonditionen live 
   useEffect(() => {
-  getProfilesDb()
+  getProfilesDb(currentProfileId)
     .then(profiles => {
       const found = profiles.find(
         p => p?.id === currentProfileId

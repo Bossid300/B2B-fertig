@@ -19,7 +19,7 @@ export default function ArtistStammBox({ currentProfileId, isOwner }) {
 
   // 1. Profildaten aud DB laden
   useEffect(() => {
-    getProfilesDb()
+    getProfilesDb(currentProfileId)
       .then(profiles => {
 
         const found = profiles.find(

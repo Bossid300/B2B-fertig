@@ -14,7 +14,7 @@ export default function ProfileGalleryBox({ currentProfileId, isOwner }) {
 
   // 1. DATABASE PIPELINE: Lädt die Galerie-Kacheln live 
   useEffect(() => {
-  getProfilesDb()
+  getProfilesDb(currentProfileId)
     .then(profiles => {
 
       const found = profiles.find(

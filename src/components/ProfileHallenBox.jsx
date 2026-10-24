@@ -29,7 +29,7 @@ export default function ProfileHallenBox({ currentProfileId, isOwner }) {
 
   // 1. DATABASE PIPELINE: Lädt das Hallenregister reaktiv
   useEffect(() => {
-    getProfilesDb()
+    getProfilesDb(currentProfileId)
       .then(profiles => {
 
         const found = profiles.find(

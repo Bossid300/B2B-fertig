@@ -24,24 +24,23 @@ import LocationRaeumeBox from './components/LocationRaeumeBox';
 import ProfilePassBox from './components/ProfilePassBox';
 import ProfileCard from './components/cards/ProfileCard';
 
-import { getProfilesDb } from './services/apiService';
+import { getProfileById } from './services/apiService';
 import { saveFavorite, deleteFavorite, getFavorites } from './services/apiService';
 
 export default function LocationProfile({ onBack, currentProfileId, isOwner, setView }) {
   const [profileData, setProfileData] = useState(null);
+  
   const [isFavorite, setIsFavorite] = useState(false);
-
   const ownerProfileId = localStorage.getItem('gigsda_profile_id');
-
   const favoriteKey = `gigsda_favorites_${ownerProfileId}`;
     
     // 1. DATABASE PIPELINE: Lädt die Profildaten, um Favoriten-Status zu prüfen
     useEffect(() => {
-    getProfilesDb()
-      .then(profiles => {
-        const found = profiles.find(
-          p => p?.id === currentProfileId
-        );
+    getProfileById(currentProfileId)
+      .then(({ success, profile: found }) => {
+        if (!success) {
+          throw new Error('Profil konnte nicht geladen werden.');
+        }
 
         if (found) {
           if (found?.profile_json) {

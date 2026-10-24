@@ -96,6 +96,8 @@ export async function saveProfile({
   profileId,
   profile
 }) {
+  const profileData = { ...profile };
+  delete profileData.profile_json;
 
   const response = await fetch(
     `${API_BASE}/saveProfile.php`,
@@ -106,7 +108,7 @@ export async function saveProfile({
       },
       body: JSON.stringify({
         id: profileId,
-        profile
+        profile: profileData
       })
     }
   );
@@ -114,7 +116,16 @@ export async function saveProfile({
   return await response.json();
 }
 
-export async function getProfilesDb() {
+export async function getProfilesDb(profileId) {
+  if (profileId) {
+    const data = await getProfileById(profileId);
+
+    if (data.success === false) {
+      throw new Error(data.error || 'Profil konnte nicht geladen werden.');
+    }
+
+    return data.profile ? [data.profile] : [];
+  }
 
   const response = await fetch(
     `${API_BASE}/getProfiles.php`

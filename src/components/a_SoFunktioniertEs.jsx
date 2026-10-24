@@ -27,7 +27,7 @@ const cards = [
     <section className='pt-8'>
       <div>
         <span className="max-w-6xl mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-3 gap-5 mb-6 z-10 relative">
-          // SO FUNKTIOMIERT ES.
+          // SO FUNKTIONIERT ES.
         </span>
       </div> 
       <div className="max-w-6xl mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-3 gap-5 mb-16 z-10 relative">

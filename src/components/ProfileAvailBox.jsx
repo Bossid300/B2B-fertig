@@ -17,7 +17,7 @@ const canEdit = isOwner || currentProfileId === localStorage.getItem('gigsda_pro
 
   // 1. DATABASE PIPELINE: Lädt Verfügbarkeiten live
   useEffect(() => {
-    getProfilesDb()
+    getProfilesDb(currentProfileId)
       .then(profiles => {
         const found = profiles.find(
           p => p?.id === currentProfileId

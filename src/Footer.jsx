@@ -49,6 +49,14 @@ export default function Footer({ setView }) {
                 AGB
               </button>
             </li>
+            <li>
+              <button
+                onClick={() => setView('dsa')}
+                className="hover:text-cyan-400 transition-colors"
+              >
+                DSA-Kontaktstelle
+              </button>
+            </li>
           </ul>
         </div>
 

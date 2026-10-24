@@ -176,10 +176,20 @@ export default function PricingPage({
     Werkzeuge und Systeme zu testen.
   </p>
 
+  <p className="text-slate-300 text-sm leading-relaxed mb-5">
+    Die angezeigten Tarifpreise und Tarifwechsel dienen derzeit
+    ausschließlich der Entwicklung und dem Test. Eine Tarifauswahl
+    kann als offener Auftrag vorgemerkt werden; über kostenpflichtige
+    Mitgliedschaften werden aktuell keine Zahlungen eingezogen und
+    keine automatischen Abbuchungen ausgelöst.
+  </p>
+
   <p className="text-slate-400 text-sm leading-relaxed mb-5">
     Wenn du die Weiterentwicklung von GIGSDA
     freiwillig unterstützen möchtest, kannst du
-    eine Spende über PayPal senden.
+    über den PayPal-Link eine freiwillige Unterstützung senden.
+    Diese ist unabhängig von den Mitgliedschaftstarifen und kann
+    eine echte Zahlung über PayPal auslösen.
 
     Jede Unterstützung hilft bei Hosting,
     Infrastruktur, Entwicklung und neuen Features
@@ -271,8 +281,11 @@ export default function PricingPage({
         </div>
 
         <div className="text-slate-500 text-sm font-mono">
-          Alle Preise dienen aktuell der internen Entwicklung
-          und können sich bis zum offiziellen Start ändern.
+          Alle Tarifpreise sind unverbindliche Testwerte und dienen
+          aktuell der internen Entwicklung. Eine Tarifauswahl kann
+          einen offenen Testauftrag anlegen; Abonnementzahlungen
+          werden derzeit nicht eingezogen. Preise können sich bis
+          zum offiziellen Start ändern.
         </div>
 
 
