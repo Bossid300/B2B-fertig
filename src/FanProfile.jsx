@@ -8,7 +8,7 @@ import ProfileFinanzBox from './components/ProfileFinanzBox';
 import ProfileBioTabsBox from './components/ProfileBioTabsBox';
 import ProfilePassBox from './components/ProfilePassBox';
 import ProfileCard from './components/cards/ProfileCard';
-
+import ProfileLokalBox from './components/ProfileLokalBox';
 import { getProfilesDb } from './services/apiService';
 import { saveFavorite, deleteFavorite, getFavorites } from './services/apiService';
 
@@ -145,6 +145,7 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
       <ProfileHilfeBox currentProfileId={currentProfileId} isOwner={isOwner} />
       <ProfileBewertungsBox currentProfileId={currentProfileId} isOwner={isOwner} />
       <ProfileFinanzBox currentProfileId={currentProfileId} isOwner={isOwner} />
+      <ProfileLokalBox currentProfileId={currentProfileId} isOwner={isOwner} />
       <ProfilePassBox 
         currentProfileId={currentProfileId}
         profileId={profileData?.id || 'GIGS-XXXX'}
