@@ -9,34 +9,34 @@ require_once 'db.php';
 
 require_once("cors.php");
 
+session_start();
+
+$profileId = $_SESSION['profile_id'] ?? null;
+
+if (!$profileId) {
+    http_response_code(401);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Nicht authentifiziert'
+    ]);
+    exit;
+}
+
 try {
 
-    $input = json_decode(
-        file_get_contents('php://input'),
-        true
-    );
-
-    if (
-        !$input ||
-        empty($input['id'])
-    ) {
-        throw new Exception(
-            'Profil-ID fehlt'
-        );
-    }
-
     $stmt = $pdo->prepare("
-        DELETE FROM profiles
+        UPDATE profiles
+        SET status = 'deactivated'
         WHERE id = :id
     ");
 
     $stmt->execute([
-        ':id' => $input['id']
+        ':id' => $profileId
     ]);
 
     echo json_encode([
         'success' => true,
-        'deleted_id' => $input['id']
+        'deactivated_id' => $profileId
     ]);
 
 } catch (Exception $e) {

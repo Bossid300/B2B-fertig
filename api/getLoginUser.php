@@ -47,6 +47,27 @@ try {
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
     if ($user)
     {
+        $profileStmt = $pdo->prepare("
+            SELECT status
+            FROM profiles
+            WHERE id = :profileId
+            LIMIT 1
+        ");
+        $profileStmt->execute([
+            ':profileId' => $user['profileId']
+        ]);
+        $profile = $profileStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($profile && $profile['status'] === 'deactivated')
+        {
+            http_response_code(403);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Konto deaktiviert. Bitte Support kontaktieren.'
+            ]);
+            exit;
+        }
+
         SecurityService::recordLoginAttempt(
             $email,
             $ip,
