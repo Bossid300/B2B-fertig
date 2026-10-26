@@ -6,7 +6,7 @@ import { eventService } from './services/eventService';
 import { distanceKm, geocodeAddress } from './services/geoService';
 import SearchMap from './components/maps/SearchMap';
 
-import { getProfilesDb, saveCrewRequest, getFavorites, deleteFavorite } from './services/apiService';
+import { getPublicProfiles, saveCrewRequest, getFavorites, deleteFavorite } from './services/apiService';
 
 export default function CrewFavoritenListe({ onNavigate }) {
   const [favorites, setFavorites] = useState([]);
@@ -72,7 +72,7 @@ export default function CrewFavoritenListe({ onNavigate }) {
     const currentUserName =
       localStorage.getItem('gigsda_user_name') || '';
 
-    getProfilesDb()
+    getPublicProfiles()
       .then(profiles => {
         const normalizedProfiles = profiles.map(profile => {
           let profileData = {};

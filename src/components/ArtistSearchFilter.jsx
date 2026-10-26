@@ -3,7 +3,7 @@ import {
   Search, SlidersHorizontal, Users, DollarSign, 
   MapPin, ShieldCheck, Check, RotateCcw, Music 
 } from 'lucide-react';
-import { getProfilesDb } from '../services/apiService';
+import { getPublicProfiles } from '../services/apiService';
 
 export default function ArtistSearchFilter({ onFilterResult }) {
   // Such- und Filter-States
@@ -19,7 +19,7 @@ export default function ArtistSearchFilter({ onFilterResult }) {
 
   // 1. DATEN-PIPELINE: Alle Profile laden, die Musiker/Bands sind
   useEffect(() => {
-    getProfilesDb()
+    getPublicProfiles()
       .then(profiles => {
         const artists = profiles.filter(
           p => p && (

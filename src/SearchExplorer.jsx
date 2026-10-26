@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Star, Briefcase, Calendar, ChevronRight, X, Sparkles, Filter, ShieldCheck, Heart, User, Clock, ArrowRight } from 'lucide-react';
 import ProfileCard from './components/cards/ProfileCard';
-import { getProfiles } from './services/apiService';
+import { getPublicProfiles } from './services/apiService';
 import { saveCrewRequest } from './services/apiService';
 import { eventService } from './services/eventService';
 import { distanceKm, geocodeAddress } from './services/geoService';
@@ -223,7 +223,7 @@ export default function SearchExplorer({
 
   useEffect(() => {
 
-    getProfiles()
+    getPublicProfiles()
       .then(profiles => {
 
     const normalizedProfiles = profiles.map(profile => {

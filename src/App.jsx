@@ -25,9 +25,7 @@ import CalendarPage from './CalendarPage';
 
 import GuestProjectsPage from './GuestProjectsPage';
 
-import ArtistSearchPage from './components/ArtistSearchPage';
 import UniversalSearchPage from './components/UniversalSearchPage';
-
 
 import Footer from "./Footer";
 
@@ -84,12 +82,12 @@ import CommunityAlertModal from './components/modals/CommunityAlertModal';
 import {
   createProfile,
   getCrewRequests,
-  getProfileById
+  getProfileById,
+  getPublicProfiles
 } from './services/apiService';
 
 import PricingPage from './PricingPage';
 import BillingCenter from './components/BillingCenter';
-import { getProfiles } from './services/apiService';
 
 import BudgetPlanner from './components/BudgetPlanner';
 
@@ -406,6 +404,7 @@ export default function App() {
   useEffect(() => {
 
     const loadGuestProfile = async () => {
+      setGuestProfile(null);
 
       const guestProfileId =
         localStorage.getItem(
@@ -416,14 +415,14 @@ export default function App() {
 
       try {
 
-        const result =
-          await getProfileById(
-            guestProfileId
-          );
+        const profiles = await getPublicProfiles();
+        const profile = profiles.find(
+          p => p && p.id === guestProfileId
+        );
 
-        if (result?.profile) {
+        if (profile) {
           setGuestProfile(
-            result.profile
+            profile
           );
         }
 
@@ -460,8 +459,9 @@ useEffect(() => {
     }
 
     if (!portfolioId) return;
+    setGuestProfile(null);
     const profiles =
-      await getProfiles();
+      await getPublicProfiles();
     const found = profiles.find(
       p => p && p.id === portfolioId
     );
@@ -1474,13 +1474,10 @@ useEffect(() => {
           {view === 'roadmap' && (
             <Roadmap setView={setView} />
           )}
- 
-
-
-
 
         </main>
  
+
         <Footer setView={setView} />
 
 

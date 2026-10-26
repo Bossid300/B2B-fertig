@@ -8,6 +8,7 @@ import {
   matchEquipmentFilters,
   matchCrewFilters
 } from "../utils/searchFilters";
+import { getPublicProfiles } from "../services/apiService";
 
 export const useUniversalSearch = () => {
   const [currentSector, setCurrentSector] = useState("artists");
@@ -46,9 +47,13 @@ export const useUniversalSearch = () => {
 
   // 🔹 Daten laden
   useEffect(() => {
-    const profiles = JSON.parse(localStorage.getItem("gigsda_profiles")) || [];
-
-  setAllProfiles(profiles);
+    getPublicProfiles()
+      .then(profiles => {
+        setAllProfiles(profiles);
+      })
+      .catch(error => {
+        console.error("Öffentliche Profile konnten nicht geladen werden:", error);
+      });
   }, []);
 
 

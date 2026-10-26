@@ -14,6 +14,16 @@ export async function getProfiles() {
   return data.profiles || [];
 }
 
+export async function getPublicProfiles() {
+  const response = await fetch(
+    `${API_BASE}/getPublicProfiles.php`
+  );
+
+  const data = await response.json();
+
+  return data.profiles || [];
+}
+
 export async function getEvents() {
   const response = await fetch(
     `${API_BASE}/getEvents.php`
