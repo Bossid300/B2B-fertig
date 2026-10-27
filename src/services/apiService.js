@@ -150,6 +150,12 @@ export async function getCrewRequests() {
 
   const data = await response.json();
 
+  if (!response.ok || data.success === false) {
+    throw new Error(
+      data.error || `Requests konnten nicht geladen werden (HTTP ${response.status}).`
+    );
+  }
+
   return data.requests || [];
 }
 

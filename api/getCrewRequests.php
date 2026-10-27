@@ -4,12 +4,33 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/cors.php';
 
+session_start();
+
+$profileId = $_SESSION['profile_id'] ?? null;
+
+if (!$profileId) {
+    http_response_code(401);
+
+    echo json_encode([
+        'success' => false,
+        'error' => 'Nicht angemeldet'
+    ]);
+
+    exit;
+}
+
 try {
-    $stmt = $pdo->query("
+    $stmt = $pdo->prepare("
         SELECT *
         FROM requests
+        WHERE requester_profile_id = :requester_profile_id
+           OR requested_profile_id = :requested_profile_id
         ORDER BY created_at DESC
     ");
+    $stmt->execute([
+        ':requester_profile_id' => $profileId,
+        ':requested_profile_id' => $profileId
+    ]);
 
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

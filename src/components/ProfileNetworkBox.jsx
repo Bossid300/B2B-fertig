@@ -14,7 +14,7 @@ export default function ProfileNetworkBox({ currentProfileId, isOwner }) {
   const [profileData, setProfileData] = useState(null);
   const [networkUsers, setNetworkUsers] = useState([]);
   const [showNetwork, setShowNetwork] = useState(true);
-  const [stats, setStats] = useState({ requestsCount: 0, favoritedByCount: 0 });
+  const [stats, setStats] = useState({ requestsCount: null, favoritedByCount: 0 });
 
   const loggedInUser = localStorage.getItem('gigsda_user_name') || '';
 
@@ -26,9 +26,6 @@ export default function ProfileNetworkBox({ currentProfileId, isOwner }) {
   useEffect(() => {
     const loadNetworkData = async () => {
       try {
-        const reqs =
-          await getCrewRequests();
-
         const savedFavs =
           localStorage.getItem(favoriteKey);
 
@@ -94,18 +91,29 @@ export default function ProfileNetworkBox({ currentProfileId, isOwner }) {
               (profile.category || '').trim().toLowerCase()
             ].filter(v => v !== '');
 
-            const myRequests = reqs.filter(r =>
-              r &&
-              r.requestedProfileId === currentProfileId &&
-              r.status === 'accepted'
-            );
+            let requestsCount = null;
+            if (currentProfileId === localStorage.getItem('gigsda_profile_id')) {
+              try {
+                const reqs = await getCrewRequests();
+                requestsCount = reqs.filter(r =>
+                  r &&
+                  r.requestedProfileId === currentProfileId &&
+                  r.status === 'accepted'
+                ).length;
+              } catch (e) {
+                console.error(
+                  'Eigene Buchungen konnten nicht geladen werden:',
+                  e
+                );
+              }
+            }
 
             const favoriteCount =
               await getFavoriteCount(currentProfileId);
 
 
             setStats({
-              requestsCount: myRequests.length,
+              requestsCount,
               favoritedByCount: favoriteCount
             });
           })
@@ -193,7 +201,9 @@ export default function ProfileNetworkBox({ currentProfileId, isOwner }) {
           <div className="text-[10px] text-slate-500 font-bold tracking-wider uppercase">// Netzwerk STATUS</div>
           <div className="flex items-center justify-between border-b border-slate-900/50 py-1">
             <span className="text-xs text-slate-400">Buchungen:</span>
-            <span className="text-xs text-cyan-400 font-black font-mono">{stats.requestsCount}x Aktiv</span>
+            <span className="text-xs text-cyan-400 font-black font-mono">
+              {stats.requestsCount === null ? 'Privat' : `${stats.requestsCount}x Aktiv`}
+            </span>
           </div>
           <div className="flex items-center justify-between py-1">
             <span className="text-xs text-slate-400">Favoriten-Pools:</span>
