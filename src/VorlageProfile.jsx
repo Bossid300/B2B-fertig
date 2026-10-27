@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import CrewRequestCenter from './CrewRequestCenter';
 import ProfileHeaderBox from './components/ProfileHeaderBox';
 import ProfileStammBox from './components/ProfileStammBox';
 import ProfileBioTabsBox from './components/ProfileBioTabsBox';
@@ -134,9 +133,6 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
           &lt; [ Back to Terminal ]
         </button>
       )}
-
-      {/* BOX 0: Deine Crew-Zentrale (Anfragen) */}
-      <CrewRequestCenter currentProfileId={currentProfileId} />
 
       {/* BOX 1: Deine Master-HeaderBox für den Slider */}
       <ProfileHeaderBox

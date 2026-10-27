@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { eventService } from './services/eventService';
 import {
-  getProfilesDb,
   getCrewRequests,
   updateCrewRequest,
   saveCrewRequest
@@ -17,10 +16,13 @@ const handleUpdateStatus = async (requestId, newStatus) => {
     const result = await updateCrewRequest(
       requestId,
       {
-        status: newStatus,
-        updatedAt
+        status: newStatus
       }
     );
+
+    if (!result?.success) {
+      throw new Error(result?.error || 'Request-Status konnte nicht aktualisiert werden');
+    }
 
     const request =
       incomingRequests.find(r => r.requestId === requestId) ||
@@ -36,8 +38,14 @@ const handleUpdateStatus = async (requestId, newStatus) => {
       );
 
       if (event && event.crew) {
+        const crewProfileId =
+          request.requestType === 'counter' ||
+          request.source === 'counter_offer'
+            ? request.requesterProfileId
+            : request.requestedProfileId;
+
         event.crew = event.crew.map(member =>
-          member.id === request.requestedProfileId
+          member.id === crewProfileId
             ? {
                 ...member,
                 status: newStatus,
@@ -75,61 +83,17 @@ const handleUpdateStatus = async (requestId, newStatus) => {
       new CustomEvent('route-change')
     );
 
+    return true;
   } catch (e) {
     console.error(
       'Fehler beim Status Update:',
       e
     );
+    return false;
   }
 };
 
   const [incomingRequests, setIncomingRequests] = useState([]);
-  const [allProfiles, setAllProfiles] = useState([]);
-  const [currentProfileData, setCurrentProfileData] = useState(null);
-
-  useEffect(() => {
-    const currentUserName =
-      localStorage.getItem('gigsda_user_name') || '';
-
-    getProfilesDb()
-      .then(profiles => {
-        const normalizedProfiles = profiles.map(profile => {
-          let profileData = {};
-
-          try {
-            profileData =
-              profile.profile_json
-                ? JSON.parse(profile.profile_json)
-                : {};
-          } catch (e) {
-            console.error(
-              'INCOMINGMESSAGES JSON FEHLER ❌',
-              e
-            );
-          }
-
-          return {
-            ...profile,
-            ...profileData
-          };
-        });
-
-        setAllProfiles(normalizedProfiles);
-
-        const found = normalizedProfiles.find(
-          p =>
-            p &&
-            (p.name || p.user_name || p.display_name || '')
-              .trim()
-              .toLowerCase() ===
-            currentUserName.trim().toLowerCase()
-        );
-
-        setCurrentProfileData(found || null);
-      })
-      .catch(console.error);
-  }, []);
-
   const [counterRequestId, setCounterRequestId] =
     useState(null);
 
@@ -182,9 +146,15 @@ const handleUpdateStatus = async (requestId, newStatus) => {
       loadRequests
     );
   };
-}, [currentProfileData]);
+}, []);
 
-  const handleAcceptDeal = (req) => {
+  const handleAcceptDeal = async (req) => {
+    const updated = await handleUpdateStatus(
+      req.requestId,
+      'accepted'
+    );
+    if (!updated) return;
+
     const events = eventService.getEvents();
     const updatedEvents = events.map(event => {
       if (event.title !== req.eventName) {
@@ -200,10 +170,13 @@ const handleUpdateStatus = async (requestId, newStatus) => {
 
     });
     eventService.saveEvents(updatedEvents);
-    handleUpdateStatus(
-      req.requestId,
-      'accepted'
+    const acceptedEvent = updatedEvents.find(
+      event => event.title === req.eventName
     );
+    if (acceptedEvent) {
+      await eventService.saveEvent(acceptedEvent);
+    }
+
     window.dispatchEvent(
       new CustomEvent('request-sent')
     );
@@ -215,19 +188,14 @@ const handleCounterOffer = async (
   counterText
 ) => {
   try {
-    const requesterProfile = allProfiles.find(
-      p =>
-        (p.name || '').toLowerCase() ===
-        (req.requesterName || '').toLowerCase()
-    );
-
     const now = Date.now();
 
     const newCounterRequest = {
       requestId:
-        `COUNTER-${Date.now()}`,
+        `COUNTER-${Date.now()}-${Math.floor(Math.random() * 1000000)}`,
 
       requestType: 'counter',
+      inReplyToRequestId: req.requestId,
 
       eventId:
         req.eventId || '',
@@ -248,9 +216,7 @@ const handleCounterOffer = async (
         req.requestedProfileName,
 
       requestedProfileId:
-        requesterProfile?.id ||
-        req.requesterProfileId ||
-        '',
+        req.requesterProfileId,
 
       requestedProfileName:
         req.requesterName,
@@ -274,11 +240,12 @@ const handleCounterOffer = async (
     const saveResult =
       await saveCrewRequest(newCounterRequest);
 
+    if (!saveResult?.success) {
+      throw new Error(saveResult?.error || 'Gegenangebot konnte nicht erstellt werden');
+    }
 
-    await handleUpdateStatus(
-      req.requestId,
-      'counter_offer'
-    );
+    setCounterRequestId(null);
+    setCounterText('');
 
     window.dispatchEvent(
       new CustomEvent('request-sent')
@@ -293,9 +260,7 @@ const handleCounterOffer = async (
 };
 
 const openRequests = incomingRequests.filter(
-  req =>
-    req.status === 'pending' ||
-    req.status === 'counter_offer'
+  req => req.status === 'pending'
 );
 
 
@@ -333,127 +298,61 @@ const openRequests = incomingRequests.filter(
             </div>
 
             {/* 🔥 ACTION BUTTONS */}
-              {req.requestType === "deal" ? (
-                req.status === "pending" ? (
-                  <div className="flex gap-2 pt-2">
-
-                    <button
-                      onClick={() => handleAcceptDeal(req)}
-                      className="
-                        flex-1
-                        text-[9px]
-                        font-bold
-                        bg-emerald-500/10
-                        border
-                        border-emerald-500/30
-                        text-emerald-400
-                        rounded-lg
-                        py-1
-                        hover:bg-emerald-500/20
-                      "
-                    >
-                      ✅ DEAL BESTÄTIGEN
-                    </button>
-
-                    <button
-                      className="
-                        flex-1
-                        text-[9px]
-                        font-bold
-                        bg-red-500/10
-                        border
-                        border-red-500/30
-                        text-red-400
-                        rounded-lg
-                        py-1
-                        hover:bg-red-500/20
-                      "
-                    >
-                      ❌ DEAL ABLEHNEN
-                    </button>
-
-                  </div>
-                ) : (
-                  <div className="
-                    flex-1
-                    text-[9px]
-                    font-bold
-                    bg-emerald-500/10
-                    border
-                    border-emerald-500/30
-                    text-emerald-400
-                    rounded-lg
-                    py-1
-                    text-center
-                  ">
-                    ✅ Deal bestätigt
-                  </div>
-                )
-            ) : (
-              req.status === "pending" ||
-              req.status === "counter_offer" ? (
+            {req.status === 'pending' && (
+              req.requestType === 'deal' ? (
                 <div className="flex gap-2 pt-2">
                   <button
-                    onClick={() =>
-                      handleUpdateStatus(req.requestId, 'accepted')
-                    }
+                    onClick={() => handleAcceptDeal(req)}
+                    className="flex-1 text-[9px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-lg py-1 hover:bg-emerald-500/20"
+                  >
+                    ✅ DEAL BESTÄTIGEN
+                  </button>
+                  <button
+                    onClick={() => handleUpdateStatus(req.requestId, 'declined')}
+                    className="flex-1 text-[9px] font-bold bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg py-1 hover:bg-red-500/20"
+                  >
+                    ❌ DEAL ABLEHNEN
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2 pt-2">
+                  <button
+                    onClick={() => handleUpdateStatus(req.requestId, 'accepted')}
                     className="flex-1 text-[9px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-lg py-1 hover:bg-emerald-500/20"
                   >
                     ✅ ZUSAGEN
                   </button>
                   <button
-                    onClick={() =>
-                      handleUpdateStatus(req.requestId, 'declined')
-                    }
+                    onClick={() => handleUpdateStatus(req.requestId, 'declined')}
                     className="flex-1 text-[9px] font-bold bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg py-1 hover:bg-red-500/20"
                   >
                     ❌ ABSAGEN
                   </button>
                   <button
-                    onClick={() => {
-                      setCounterRequestId(req.requestId);
-
-                    }}
+                    onClick={() => setCounterRequestId(req.requestId)}
                     className="flex-1 text-[9px] font-bold bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 rounded-lg py-1 hover:bg-cyan-500/20"
                   >
                     ⚡ COUNTER
                   </button>
                 </div>
-
-              ) : req.status === "accepted" ? (
-                <div className="
-                  flex-1
-                  text-[9px]
-                  font-bold
-                  bg-emerald-500/10
-                  border
-                  border-emerald-500/30
-                  text-emerald-400
-                  rounded-lg
-                  py-1
-                  text-center
-                ">
-                  ✅ Anfrage bestätigt
-                </div>
-              ) : (
-                <div className="
-                  flex-1
-                  text-[9px]
-                  font-bold
-                  bg-red-500/10
-                  border
-                  border-red-500/30
-                  text-red-400
-                  rounded-lg
-                  py-1
-                  text-center
-                ">
-                  ❌ Anfrage abgelehnt
-                </div>
               )
-
             )}
-            {counterRequestId === req.requestId && (
+            {req.status === 'accepted' && (
+              <div className="flex-1 text-[9px] font-bold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-lg py-1 text-center">
+                {req.requestType === 'deal' ? '✅ Deal bestätigt' : '✅ Anfrage bestätigt'}
+              </div>
+            )}
+            {req.status === 'counter_offer' && (
+              <div className="flex-1 text-[9px] font-bold bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-lg py-1 text-center">
+                ⚡ Gegenangebot gesendet – abgeschlossen
+              </div>
+            )}
+            {req.status === 'declined' && (
+              <div className="flex-1 text-[9px] font-bold bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg py-1 text-center">
+                {req.requestType === 'deal' ? '❌ Deal abgelehnt' : '❌ Anfrage abgelehnt'}
+              </div>
+            )}
+            {req.status === 'pending' && counterRequestId === req.requestId && (
 
               <div className="pt-3 space-y-2">
 

@@ -1,7 +1,4 @@
-const API_BASE =
-  window.location.hostname === 'localhost'
-    ? 'https://gigsda.com/api'
-    : '/api';
+const API_BASE = '/api';
 
 import {
   saveEvent as saveEventDb

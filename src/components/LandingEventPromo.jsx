@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import EventCard from "./cards/EventCard";
+import EventPromotionView from "./EventPromotionView";
 import { eventService } from "../services/eventService";
 
 export default function LandingEventPromo() {
   const [events, setEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   const sliderRef = useRef(null);
 
@@ -29,6 +31,13 @@ export default function LandingEventPromo() {
 
         const upcoming = (dbEvents || [])
           .filter(event => {
+            if (
+              event?.promotionData?.is_demo === true ||
+              event?.is_demo === true
+            ) {
+              return false;
+            }
+
             const date = event.date || event.event_date;
             if (!date) return false;
 
@@ -137,6 +146,7 @@ export default function LandingEventPromo() {
                 event.venue ||
                 event.city
             }}
+            onViewEvent={setSelectedEvent}
           />
           </div>
         ))}
@@ -157,6 +167,14 @@ export default function LandingEventPromo() {
       </button>
 
     </div>
+
+    {selectedEvent && (
+      <EventPromotionView
+        event={selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+      />
+    )}
+
     </div>
   );
 }

@@ -5,6 +5,13 @@ import EventHeaderBox from "./components/EventHeaderBox";
 import { eventService } from './services/eventService';
 import { getProfilesDb } from './services/apiService';
 
+const defaultSchedule = [
+  { id: 1, time: "14:00", task: "Load-In & Crew Arrival", icon: <Truck className="w-4 h-4 text-purple-400" />, note: "Daniel K. koordiniert das Sound- & Lichtsystem an der Bühne." },
+  { id: 2, time: "16:30", task: "Technical Soundcheck", icon: <Clock className="w-4 h-4 text-cyan-400" />, note: "Winston Jud Live & Unplugged – Pegel-Abgleich auf allen Kanälen." },
+  { id: 3, time: "18:30", task: "Einlass & Gates Open", icon: <MapPin className="w-4 h-4 text-amber-400" />, note: "Fan-Tickets werden über die Gigsda-App am Eingang gescannt." },
+  { id: 4, time: "20:00", task: "SHOWTIME (Live Gig)", icon: <Radio className="w-4 h-4 text-emerald-400" />, note: "Band steht auf der Bühne. Live-Countdown läuft im System." },
+];
+
 export default function EventPlanner({ onBack, progress, setProgress, onNavigateToStep, onStepSuccess, activeEvent }) {
 
 const [profiles, setProfiles] = useState([]);
@@ -39,14 +46,17 @@ const [isPlannerLocked, setIsPlannerLocked] =
 
 // Der standardmäßige Ablaufplan vor Ort für die Crew
 const [schedule, setSchedule] = useState(
-  activeEvent?.timeline || [
+  activeEvent?.timeline || defaultSchedule
+);
 
-  { id: 1, time: "14:00", task: "Load-In & Crew Arrival", icon: <Truck className="w-4 h-4 text-purple-400" />, note: "Daniel K. koordiniert das Sound- & Lichtsystem an der Bühne." },
-  { id: 2, time: "16:30", task: "Technical Soundcheck", icon: <Clock className="w-4 h-4 text-cyan-400" />, note: "Winston Jud Live & Unplugged – Pegel-Abgleich auf allen Kanälen." },
-  { id: 3, time: "18:30", task: "Einlass & Gates Open", icon: <MapPin className="w-4 h-4 text-amber-400" />, note: "Fan-Tickets werden über die Gigsda-App am Eingang gescannt." },
-  { id: 4, time: "20:00", task: "SHOWTIME (Live Gig)", icon: <Radio className="w-4 h-4 text-emerald-400" />, note: "Band steht auf der Bühne. Live-Countdown läuft im System." },
+const [productionNotes, setProductionNotes] = useState(
+  activeEvent?.productionNotes || ""
+);
 
-]);
+const activeEventTimelineKey =
+  JSON.stringify(activeEvent?.timeline ?? null);
+const activeEventProductionNotes =
+  activeEvent?.productionNotes || "";
 
 useEffect(() => {
   setIsPlannerLocked(
@@ -54,6 +64,18 @@ useEffect(() => {
   );
 
 }, [activeEvent]);
+
+useEffect(() => {
+  // Intentional prop-to-state sync for the selected event.
+  setSchedule(
+    JSON.parse(activeEventTimelineKey) || defaultSchedule
+  );
+  setProductionNotes(activeEventProductionNotes);
+}, [
+  activeEvent?.id,
+  activeEventTimelineKey,
+  activeEventProductionNotes
+]);
 
 const logistics = {
   setup: activeEvent?.logistics?.setup || false,
@@ -153,12 +175,6 @@ if (changedEvent) {
   }, 2000);
 
 };
-
-const [productionNotes, setProductionNotes] = useState(
-  activeEvent?.productionNotes || ""
-);
-
-
 
 const ownerName =
   profiles.find(

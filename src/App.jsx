@@ -63,7 +63,6 @@ import SecurityProfile from './SecurityProfile';   // 🛡️ Schaltet das Siche
 import DesignProfile from './DesignProfile';       // 🎭 Schaltet das Stage-Design- & Deko-Cockpit frei
 import FanProfile from './FanProfile'; // 👈 Schaltet die Fan-Zentrale im System frei!
 
-import CrewRequestCenter from './CrewRequestCenter'; // 👈 Das B2B-Uhrwerk laden
 import CrewFavoritenListe from './CrewFavoritenListe'; // ⭐ Schaltet die Favoriten-Matrix frei!
 import RiderZentrale from './RiderZentrale'; // 🎛️ Schaltet das geteilte B2B-Rider-Uhrwerk plattformweit frei!
 import CommunityChat from './CommunityChat';
@@ -131,6 +130,7 @@ export default function App() {
 
     // 📡 REAKTIVER CREW-ALARM EMPFÄNGER
   const [hasPendingRequests, setHasPendingRequests] = useState(false);
+  const [eventLinkError, setEventLinkError] = useState('');
   const checkPendingRequests = async () => {
     try {
       const dbRequests =
@@ -197,6 +197,8 @@ export default function App() {
 
       {/* F5 Session Recovery */}
       useEffect(() => {
+        if (new URLSearchParams(window.location.search).get('event')) return;
+
         const storedActiveEvent =
           JSON.parse(localStorage.getItem("gigsda_active_event"));
 
@@ -574,6 +576,39 @@ useEffect(() => {
     countdown: 0
   });
 
+  useEffect(() => {
+    const linkedEventId =
+      new URLSearchParams(window.location.search).get('event');
+    if (!linkedEventId) return;
+
+    const loadLinkedEvent = async () => {
+      const loadedEvents = await eventService.syncFromDb();
+      const linkedEvent = loadedEvents.find(event =>
+        [event.id, event.eventId, event._id]
+          .some(id => id != null && String(id) === linkedEventId)
+      );
+
+      if (!linkedEvent) {
+        setEventLinkError('Event nicht gefunden');
+        return;
+      }
+
+      setEvents(loadedEvents);
+      setActiveEvent(linkedEvent);
+      localStorage.setItem('gigsda_current_view', 'guestEvents');
+      setViewWithStorage('guestEvents');
+      localStorage.setItem(
+        'gigsda_active_event',
+        JSON.stringify({
+          id: linkedEvent.id || linkedEvent.eventId || linkedEvent._id,
+          title: linkedEvent.title || linkedEvent.name || ''
+        })
+      );
+    };
+
+    loadLinkedEvent();
+  }, []);
+
 
 
   useEffect(() => {
@@ -833,18 +868,15 @@ useEffect(() => {
         </header>
 
 
-       {/* 📡 AUTOMATISCHES CREW-REQUEST-CENTER (BLITZT BEI NEUEN ANFRAGEN & GEGENANGEBOTEN GANZ OBEN AUF) */}
-      {view === 'projects' && isLoggedIn && (
-        <div className="max-w-4xl mx-auto px-6 pt-4">
-          <CrewRequestCenter 
-           currentProfileId={currentProfile?.id}
-          />
-        </div>
-      )}
         {/* ========================================================================= */}
         {/* MAIN ROUTER PORT                                                          */}
         {/* ========================================================================= */}
         <main className="w-full pt-13 min-h-screen bg-[#070913] text-white">
+          {eventLinkError && (
+            <p role="alert" className="mx-auto max-w-4xl px-6 py-4 text-red-300">
+              {eventLinkError}
+            </p>
+          )}
  
           {view === 'landing' && (
             <LandingPage 
@@ -895,6 +927,7 @@ useEffect(() => {
             <GuestEvents 
               onBack={() => setView('landing')} 
               onNavigate={setView}
+              directEventId={new URLSearchParams(window.location.search).get('event')}
             />
           )}
 

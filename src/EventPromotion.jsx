@@ -112,8 +112,7 @@ useEffect(() => {
 useEffect(() => {
 
   const promo =
-    activeEvent?.promotionData;
-  if (!promo) return;
+    activeEvent?.promotionData || {};
 
     setPromoData({
     title:
@@ -122,6 +121,7 @@ useEffect(() => {
       '',
     category:
       promo.category ||
+      activeEvent?.category ||
       activeEvent?.type ||
       '',
     venueName:
@@ -161,7 +161,9 @@ useEffect(() => {
     lineup:
       promo.lineup || '',
     amenities:
-      promo.amenities || ''
+      promo.amenities || '',
+    is_demo:
+      promo.is_demo === true
   });
 
 }, [activeEvent?.id]);
@@ -396,13 +398,13 @@ return (
 
           <button
             type="button"
-            onClick={() =>
-              setPromoData({
-                ...promoData,
-                is_demo: !promoData.is_demo
-              })
-            }
+            onClick={() => setPromoData(prev => ({
+              ...prev,
+              is_demo: !prev.is_demo
+            }))}
             title={promoData.is_demo ? 'DEMO' : 'LIVE'}
+            aria-label={`Promotion auf ${promoData.is_demo ? 'LIVE' : 'DEMO'} umstellen`}
+            aria-pressed={promoData.is_demo}
             className="flex items-center"
           >
             <span

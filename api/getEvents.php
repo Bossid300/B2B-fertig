@@ -49,6 +49,9 @@ try {
             $jsonData
         );
 
+        $event['ownerId'] = $row['owner_id'];
+        $event['owner_id'] = $row['owner_id'];
+
         // Sicherheits-Fallbacks für alte Events ohne event_json
         if (!isset($event['crew'])) {
             $event['crew'] = [];

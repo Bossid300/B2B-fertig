@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import CrewRequestCenter from './CrewRequestCenter'; // Pfade an deine Ordnerstruktur anpassen!
 import ProfileHeaderBox from './components/ProfileHeaderBox';
 import ProfileStammBox from './components/ProfileStammBox';
 import ProfileBewertungsBox from './components/ProfileBewertungsBox';
@@ -111,8 +110,6 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
           &lt; [ Back to Terminal ]
         </button>
       )}
-
-      <CrewRequestCenter currentProfileId={currentProfileId} />
 
       {/* BOX 1: Deine Master-HeaderBox für den Slider */}
       <ProfileHeaderBox

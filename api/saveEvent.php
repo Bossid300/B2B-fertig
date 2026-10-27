@@ -5,6 +5,16 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/cors.php';
 
+session_start();
+
+$actorProfileId =
+    $_SESSION['profile_id']
+    ?? null;
+
+$actorAuthUserId =
+    $_SESSION['auth_user_id']
+    ?? null;
+
 $input = json_decode(file_get_contents('php://input'), true);
 
 if (!$input || empty($input['id'])) {
@@ -50,8 +60,6 @@ try {
         $input['updatedAt']
         ?? round(microtime(true) * 1000);
 
-    $eventJson = json_encode($input, JSON_UNESCAPED_UNICODE);
-
     $stmt = $pdo->prepare("
         INSERT INTO events (
             id,
@@ -73,7 +81,6 @@ try {
             :updated_at
         )
         ON DUPLICATE KEY UPDATE
-            owner_id = VALUES(owner_id),
             title = VALUES(title),
             venue = VALUES(venue),
             event_date = VALUES(event_date),
@@ -81,6 +88,76 @@ try {
             event_json = VALUES(event_json),
             updated_at = VALUES(updated_at)
     ");
+
+    $pdo->beginTransaction();
+
+    $existingStmt = $pdo->prepare("
+        SELECT owner_id, venue, event_json
+        FROM events
+        WHERE id = :id
+        LIMIT 1
+        FOR UPDATE
+    ");
+    $existingStmt->execute([
+        ':id' => $eventId
+    ]);
+    $existingEvent = $existingStmt->fetch(PDO::FETCH_ASSOC);
+
+    $isOwner = $actorProfileId !== null
+        && $existingEvent
+        && (string)$existingEvent['owner_id'] === (string)$actorProfileId;
+
+    if ($existingEvent && !$isOwner) {
+        $storedEventData = json_decode(
+            $existingEvent['event_json'] ?? '',
+            true
+        );
+        if (!is_array($storedEventData)) {
+            $storedEventData = [];
+        }
+
+        foreach ([
+            'crewIds',
+            'promotionData',
+            'venueName',
+            'street',
+            'zip',
+            'city',
+            'timeline',
+            'productionNotes',
+            'plannerLocked'
+        ] as $field) {
+            if (array_key_exists($field, $storedEventData)) {
+                $input[$field] = $storedEventData[$field];
+            } else {
+                unset($input[$field]);
+            }
+        }
+
+        $storedLogistics = is_array($storedEventData['logistics'] ?? null)
+            ? $storedEventData['logistics']
+            : [];
+        $inputLogistics = is_array($input['logistics'] ?? null)
+            ? $input['logistics']
+            : [];
+
+        foreach (['setup', 'power', 'catering', 'security'] as $field) {
+            if (array_key_exists($field, $storedLogistics)) {
+                $inputLogistics[$field] = $storedLogistics[$field];
+            } else {
+                unset($inputLogistics[$field]);
+            }
+        }
+
+        if (array_key_exists('logistics', $input) || $inputLogistics) {
+            $input['logistics'] = $inputLogistics;
+        }
+
+        $venue = $existingEvent['venue'];
+        $input['venue'] = $venue;
+    }
+
+    $eventJson = json_encode($input, JSON_UNESCAPED_UNICODE);
 
     $stmt->execute([
         ':id' => $eventId,
@@ -93,12 +170,47 @@ try {
         ':updated_at' => $updatedAt
     ]);
 
+    $stmt = $pdo->prepare("
+        SELECT owner_id
+        FROM events
+        WHERE id = :id
+    ");
+    $stmt->execute([
+        ':id' => $eventId
+    ]);
+    $storedOwnerId = $stmt->fetchColumn();
+
+    if ($storedOwnerId === false) {
+        throw new RuntimeException('Gespeichertes Event nicht gefunden');
+    }
+
+    $input['ownerId'] = $storedOwnerId;
+    $input['owner_id'] = $storedOwnerId;
+    $eventJson = json_encode($input, JSON_UNESCAPED_UNICODE);
+
+    $stmt = $pdo->prepare("
+        UPDATE events
+        SET event_json = :event_json
+        WHERE id = :id
+    ");
+    $stmt->execute([
+        ':event_json' => $eventJson,
+        ':id' => $eventId
+    ]);
+
+    $pdo->commit();
+
     echo json_encode([
         'success' => true,
-        'eventId' => $eventId
+        'eventId' => $eventId,
+        'session_detected' => !empty($actorProfileId)
     ]);
 
 } catch (Throwable $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+
     http_response_code(500);
 
     echo json_encode([

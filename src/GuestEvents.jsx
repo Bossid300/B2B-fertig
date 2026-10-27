@@ -7,7 +7,7 @@ import { getProfilesDb } from './services/apiService';
 import SearchMap from './components/maps/SearchMap';
 import EventPromotionView from './components/EventPromotionView';
 
-export default function GuestEvents({ onNavigate }) {
+export default function GuestEvents({ onNavigate, directEventId }) {
 const [viewMode, setViewMode] = useState('list');
 
 const [selectedEvent, setSelectedEvent] = useState(null);
@@ -93,11 +93,18 @@ useEffect(() => {
       try {
         const dbEvents =
           await eventService.syncFromDb();
-        setEvents(
-          dbEvents.filter(
-            evt => evt && evt.title
-          )
+        const availableEvents = dbEvents.filter(
+          evt => evt && evt.title
         );
+        setEvents(availableEvents);
+
+        if (directEventId) {
+          const directEvent = availableEvents.find(event =>
+            [event.id, event.eventId, event._id]
+              .some(id => id != null && String(id) === directEventId)
+          );
+          if (directEvent) setSelectedPromoEvent(directEvent);
+        }
       } catch (e) {
         console.error(
           'EVENT RADAR DB SYNC FEHLER',
@@ -106,7 +113,7 @@ useEffect(() => {
       }
     };
     loadEvents();
-  }, []);
+  }, [directEventId]);
 
 
 
