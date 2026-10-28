@@ -89,6 +89,7 @@ import PricingPage from './PricingPage';
 import BillingCenter from './components/BillingCenter';
 
 import BudgetPlanner from './components/BudgetPlanner';
+import MediaLibraryPage from './components/MediaLibraryPage';
 
 const PATH_VIEWS = {
   '/events': 'guestEvents',
@@ -1210,6 +1211,10 @@ useEffect(() => {
               onSaveSuccess={() => setView('profile')} 
               onBack={() => setView('profile')} 
             />
+          )}
+
+          {view === 'mediaLibrary' && isLoggedIn && (
+            <MediaLibraryPage />
           )}
  
           {view === 'projects' && isLoggedIn && (

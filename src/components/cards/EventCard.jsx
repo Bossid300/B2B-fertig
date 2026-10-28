@@ -145,8 +145,10 @@ export default function EventCard({
             </div>
             <p className="text-xs text-slate-600 uppercase mt-0.5">
               EVENT-ID: {event.id}
+            </p>
+            <p className="text-xs text-slate-600 uppercase mt-0.5">
               {event.ownerName && (
-                <> | VERANSTALTER: {event.ownerName}</>
+                <> VERANSTALTER: {event.ownerName}</>
               )}
             </p>
           </div>

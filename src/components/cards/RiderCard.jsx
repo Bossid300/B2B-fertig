@@ -121,9 +121,9 @@ export default function RiderCard({
                     border-slate-800
                 "
                 >
-                {member?.avatarUrl ? (
+                {member?.avatarMediaUrl || member?.avatarUrl ? (
                     <img
-                    src={member.avatarUrl}
+                    src={member.avatarMediaUrl || member.avatarUrl}
                     alt={member?.name}
                     className="w-full h-full object-cover"
                     />

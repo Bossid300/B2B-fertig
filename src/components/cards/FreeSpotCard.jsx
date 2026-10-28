@@ -17,7 +17,7 @@ export default function FreeSpotCard({
   if (!spot) return null;
 
   const bannerImage = owner?.slide1_url || owner?.bannerUrl;
-  const avatarImage = owner?.avatarUrl;
+  const avatarImage = owner?.avatarMediaUrl || owner?.avatarUrl;
   const ownerName =
     owner?.klarname ||
     owner?.name ||

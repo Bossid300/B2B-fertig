@@ -164,15 +164,6 @@ export default function PrivacyPage({ setView }) {
           support@gigsda.com
         </a>
       </p>
-      <p>
-        Datenschutz:{" "}
-        <a
-          href="mailto:datenschutz@gigsda.com"
-          className="text-cyan-400 hover:text-cyan-300"
-        >
-          datenschutz@gigsda.com
-        </a>
-      </p>
     </div>
 
     <p>

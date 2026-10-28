@@ -93,7 +93,7 @@ export default function ArtistAudioBox({ currentProfileId, isOwner }) {
           loadedAlbums.push({
             index: index,
             title: currentProfile[`album${index}_title`] || (index === 1 ? "Haupt Releases / Demos" : `Zusatz Album ${index}`),
-            cover: currentProfile[`album${index}_cover`] || currentProfile[`avatarUrl`] || '', // Fallback auf avatarUrl aus deinen Daten
+            cover: currentProfile[`album${index}_cover`] || currentProfile.avatarMediaUrl || currentProfile.avatarUrl || '',
             limit: parseInt(currentProfile[`album${index}_limit`]) || 30,
             tracks: [
               { name: t1_name, url: t1_url },

@@ -9,10 +9,26 @@ require_once 'db.php';
 try {
 
     $stmt = $pdo->query("
-        SELECT *
-        FROM profiles
-        WHERE status = 'active'
-        ORDER BY created_at DESC
+        SELECT
+            p.*,
+            (
+                SELECT ma.id
+                FROM media_usages mu
+                INNER JOIN media_assets ma ON ma.id = mu.media_asset_id
+                WHERE mu.entity_type = 'profile'
+                  AND mu.entity_id = p.id
+                  AND mu.usage_role = 'avatar'
+                  AND mu.visibility = 'public'
+                  AND mu.deleted_at IS NULL
+                  AND ma.media_type = 'image'
+                  AND ma.status = 'ready'
+                  AND ma.deleted_at IS NULL
+                ORDER BY mu.created_at DESC
+                LIMIT 1
+            ) AS avatar_media_id
+        FROM profiles p
+        WHERE p.status = 'active'
+        ORDER BY p.created_at DESC
     ");
 
     $profiles = $stmt->fetchAll(PDO::FETCH_ASSOC);

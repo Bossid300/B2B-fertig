@@ -66,8 +66,8 @@ export default function ArtistSearchCard({ artist }) {
         
         {/* Quadratischer Avatar (w-14 h-14) im bündigen Look */}
         <div className="w-14 h-14 bg-[#070b12] rounded-lg border border-slate-800/80 overflow-hidden shrink-0 relative">
-          {artist.avatarUrl ? (
-            <img src={artist.avatarUrl} alt={artist.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
+          {artist.avatarMediaUrl || artist.avatarUrl ? (
+            <img src={artist.avatarMediaUrl || artist.avatarUrl} alt={artist.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-slate-700 text-lg">👤</div>
           )}

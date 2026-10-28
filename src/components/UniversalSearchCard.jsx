@@ -94,8 +94,8 @@ export default function UniversalSearchCard({ profile, currentSector, viewMode, 
         <div className={`bg-[#070b12] rounded border border-slate-800 overflow-hidden shrink-0 flex items-center justify-center transition-all ${
           isCompact ? 'w-8 h-8' : 'w-14 h-14 rounded-lg'
         }`}>
-          {profile.avatarUrl || profile.room1_img ? (
-            <img src={profile.avatarUrl || profile.room1_img} alt="Avatar" className="w-full h-full object-cover" />
+          {profile.avatarMediaUrl || profile.avatarUrl || profile.room1_img ? (
+            <img src={profile.avatarMediaUrl || profile.avatarUrl || profile.room1_img} alt="Avatar" className="w-full h-full object-cover" />
           ) : (
             <span className="text-slate-600 text-xs">{currentSector === 'artists' ? '🎤' : '🏢'}</span>
           )}

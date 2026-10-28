@@ -1,5 +1,30 @@
 const API_BASE = '/api';
 
+function addAvatarMedia(profile) {
+  if (!profile || typeof profile !== 'object') return profile;
+
+  const avatarMediaUrl = profile.avatar_media_id
+    ? `/api/media.php?avatar_asset=${encodeURIComponent(profile.avatar_media_id)}`
+    : '';
+  let enrichedProfile = { ...profile, avatarMediaUrl };
+
+  if (typeof profile.profile_json === 'string') {
+    try {
+      const profileData = JSON.parse(profile.profile_json);
+      if (profileData && typeof profileData === 'object' && !Array.isArray(profileData)) {
+        enrichedProfile.profile_json = JSON.stringify({
+          ...profileData,
+          avatarMediaUrl
+        });
+      }
+    } catch {
+      return enrichedProfile;
+    }
+  }
+
+  return enrichedProfile;
+}
+
 
 export async function getProfiles() {
   const response = await fetch(
@@ -8,7 +33,7 @@ export async function getProfiles() {
 
   const data = await response.json();
 
-  return data.profiles || [];
+  return (data.profiles || []).map(addAvatarMedia);
 }
 
 export async function getPublicProfiles() {
@@ -18,7 +43,7 @@ export async function getPublicProfiles() {
 
   const data = await response.json();
 
-  return data.profiles || [];
+  return (data.profiles || []).map(addAvatarMedia);
 }
 
 export async function getEvents() {
@@ -96,7 +121,11 @@ export async function getProfileById(id) {
     }
   );
 
-  return await response.json();
+  const data = await response.json();
+  return {
+    ...data,
+    profile: data.profile ? addAvatarMedia(data.profile) : data.profile
+  };
 }
 
 export async function saveProfile({
@@ -105,6 +134,9 @@ export async function saveProfile({
 }) {
   const profileData = { ...profile };
   delete profileData.profile_json;
+  delete profileData.avatar_media_id;
+  delete profileData.avatarMediaId;
+  delete profileData.avatarMediaUrl;
 
   const response = await fetch(
     `${API_BASE}/saveProfile.php`,
@@ -140,7 +172,7 @@ export async function getProfilesDb(profileId) {
 
   const data = await response.json();
 
-  return data.profiles || [];
+  return (data.profiles || []).map(addAvatarMedia);
 }
 
 export async function getCrewRequests() {

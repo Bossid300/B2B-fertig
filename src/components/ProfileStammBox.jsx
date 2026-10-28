@@ -1,8 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Pencil, Save, User, Eye, EyeOff } from 'lucide-react';
+import { Pencil, Save, User, Eye, EyeOff, Image, Check } from 'lucide-react';
 import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
 import { geocodeAddress } from '../services/geoService';
+import {
+  getMediaAssets,
+  getMediaAvatarUrl,
+  getMediaPreviewUrl,
+  setProfileAvatar
+} from '../services/mediaService';
 
 export default function ProfileStammBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -10,6 +16,12 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
   const [profile, setProfile] = useState(null);
 
   const [formData, setFormData] = useState({});
+  const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
+  const [avatarImages, setAvatarImages] = useState([]);
+  const [selectedAvatarId, setSelectedAvatarId] = useState('');
+  const [isLoadingAvatarImages, setIsLoadingAvatarImages] = useState(false);
+  const [isSettingAvatar, setIsSettingAvatar] = useState(false);
+  const [avatarPickerError, setAvatarPickerError] = useState('');
 
   const canEdit = isOwner || currentProfileId === localStorage.getItem( 'gigsda_profile_id' );
 
@@ -47,6 +59,8 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
         setFormData({
           role: mergedProfile.role || 'Künstler',
           avatarUrl: mergedProfile.avatarUrl || '',
+          avatarMediaId: found.avatar_media_id || '',
+          avatarMediaUrl: mergedProfile.avatarMediaUrl || '',
           category: mergedProfile.category || mergedProfile.project_name || '',
           Klarname: mergedProfile.Klarname || '',
           name: mergedProfile.name || '',
@@ -99,6 +113,49 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
     setFormData(prev => ({ ...prev, [fieldName]: !prev[fieldName] }));
   };
 
+  const openAvatarPicker = async () => {
+    setIsAvatarPickerOpen(true);
+    setAvatarPickerError('');
+    setSelectedAvatarId(formData.avatarMediaId || '');
+    setIsLoadingAvatarImages(true);
+
+    try {
+      const assets = await getMediaAssets();
+      setAvatarImages(assets.filter(asset => asset.media_type === 'image'));
+    } catch (error) {
+      setAvatarPickerError(error.message || 'Bilder konnten nicht geladen werden.');
+    } finally {
+      setIsLoadingAvatarImages(false);
+    }
+  };
+
+  const handleSetAvatar = async () => {
+    if (!selectedAvatarId || isSettingAvatar) return;
+
+    setAvatarPickerError('');
+    setIsSettingAvatar(true);
+    try {
+      const result = await setProfileAvatar(selectedAvatarId);
+      const avatarMediaUrl = result.avatar_url || getMediaAvatarUrl(selectedAvatarId);
+      setFormData(prev => ({
+        ...prev,
+        avatarMediaId: selectedAvatarId,
+        avatarMediaUrl
+      }));
+      setProfile(prev => ({
+        ...prev,
+        avatar_media_id: selectedAvatarId,
+        avatarMediaId: selectedAvatarId,
+        avatarMediaUrl
+      }));
+      setIsAvatarPickerOpen(false);
+    } catch (error) {
+      setAvatarPickerError(error.message || 'Avatar konnte nicht gesetzt werden.');
+    } finally {
+      setIsSettingAvatar(false);
+    }
+  };
+
   // 2. SAVE PIPELINE: Brennt Daten & Augen-Zustände sicher in die DB
   const handleSave = async (e) => {
     e.preventDefault();
@@ -112,6 +169,9 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
           `${formData.vorname || ''} ${formData.nachname || ''}`.trim();
 
         delete updatedProfile.project_name;
+        delete updatedProfile.avatar_media_id;
+        delete updatedProfile.avatarMediaId;
+        delete updatedProfile.avatarMediaUrl;
 
         const geo =
           await geocodeAddress(
@@ -156,7 +216,7 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
   }
 
   const { 
-    category, Klarname, name, vorname, nachname, plz, city, street, phone, email, website, genre, id, description, avatarUrl,
+    category, Klarname, name, vorname, nachname, plz, city, street, phone, email, website, genre, id, description, avatarUrl, avatarMediaUrl,
     show_category, show_Klarname, show_name, show_name_real, show_phone, show_email, show_address, show_website, show_genre, show_description, show_avatarUrl
   } = formData;
 
@@ -220,7 +280,7 @@ const displayName =
             <div className="relative w-16 h-16 shrink-0 rounded-full p-[2px] bg-gradient-to-r from-cyan-500 to-pink-500 shadow-[0_0_15px_rgba(6,182,212,0.4)] transform transition-transform duration-300 group-hover:scale-105">
               <div className="w-full h-full rounded-full overflow-hidden bg-slate-950">
                 <img 
-                  src={(typeof avatarUrl === 'string' && avatarUrl.trim() !== "") ? avatarUrl : "https://unsplash.com"} 
+                  src={avatarMediaUrl || ((typeof avatarUrl === 'string' && avatarUrl.trim() !== "") ? avatarUrl : "https://unsplash.com")} 
                   alt="Profil Avatar" 
                   className="w-full h-full object-cover"
                 />
@@ -454,13 +514,89 @@ const displayName =
                 </div>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-slate-600 font-bold">AVATAR-BILD (URL-STREAM)</span>
+                <span className="text-[10px] text-slate-600 font-bold">AVATAR</span>
+                <button
+                  type="button"
+                  onClick={openAvatarPicker}
+                  className="flex items-center justify-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-2 text-xs font-bold text-cyan-300 transition hover:border-cyan-400"
+                >
+                  <Image size={14} />
+                  Aus Medienbibliothek wählen
+                </button>
+                {avatarMediaUrl && (
+                  <p className="text-[10px] text-emerald-400">Medienbibliotheks-Avatar aktiv</p>
+                )}
+                <span className="mt-1 text-[10px] text-slate-600 font-bold">LEGACY-FALLBACK-URL</span>
                 <div className="flex gap-2">
                   <input type="text" name="avatarUrl" value={avatarUrl || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-slate-500 text-[10px] focus:outline-none focus:border-slate-700 font-mono" />
                   <EyeToggle active={show_avatarUrl} flagName="show_avatarUrl" />
                 </div>
               </div>
             </div>
+
+            {isAvatarPickerOpen && (
+              <div className="mt-4 rounded-2xl border border-cyan-500/20 bg-slate-950 p-4">
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-bold text-white">Bild aus Medienbibliothek wählen</h3>
+                    <p className="mt-1 text-[10px] text-slate-500">Es werden nur deine eigenen Bildmedien angezeigt.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsAvatarPickerOpen(false)}
+                    className="rounded-lg border border-slate-700 px-3 py-1 text-xs text-slate-400 hover:text-white"
+                  >
+                    Schließen
+                  </button>
+                </div>
+
+                {avatarPickerError && (
+                  <p role="alert" className="mb-3 text-xs text-rose-300">{avatarPickerError}</p>
+                )}
+                {isLoadingAvatarImages ? (
+                  <p role="status" className="py-4 text-xs text-slate-400">Bilder werden geladen …</p>
+                ) : avatarImages.length === 0 ? (
+                  <p className="py-4 text-xs text-slate-400">Noch keine eigenen Bilder vorhanden. Lade zuerst ein Bild in „Meine Medien“ hoch.</p>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {avatarImages.map(asset => (
+                      <button
+                        key={asset.id}
+                        type="button"
+                        onClick={() => setSelectedAvatarId(asset.id)}
+                        aria-pressed={selectedAvatarId === asset.id}
+                        className={`overflow-hidden rounded-xl border text-left transition ${
+                          selectedAvatarId === asset.id
+                            ? 'border-cyan-400 ring-2 ring-cyan-500/30'
+                            : 'border-slate-800 hover:border-slate-600'
+                        }`}
+                      >
+                        <img
+                          src={getMediaPreviewUrl(asset.id)}
+                          alt={asset.original_filename}
+                          className="aspect-square w-full bg-slate-900 object-cover"
+                        />
+                        <span className="block truncate p-2 text-[10px] text-slate-300">
+                          {asset.original_filename}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleSetAvatar}
+                    disabled={!selectedAvatarId || isSettingAvatar}
+                    className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-xs font-black text-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <Check size={14} />
+                    {isSettingAvatar ? 'Wird gesetzt …' : 'Als Avatar verwenden'}
+                  </button>
+                </div>
+              </div>
+            )}
 
           </div> {/* Schließt das grid-cols-2 div exakt ab! */}
 

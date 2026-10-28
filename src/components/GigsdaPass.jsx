@@ -56,7 +56,7 @@ const memberLabel =
                             shadow-[0_0_20px_rgba(34,211,238,0.35)]"
                 >
                     <img
-                    src={profile.avatarUrl}
+                    src={profile.avatarMediaUrl || profile.avatarUrl}
                     alt={profile.name}
                     className="w-40 h-40 rounded-full mx-auto object-cover"
                     />

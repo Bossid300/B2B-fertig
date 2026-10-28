@@ -645,7 +645,8 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
                   NOCH KEIN GIGSDA-KONTO?
                 </h3>
                 <p className="text-[12px] text-slate-400 leading-relaxed">
-                  Tritt dem zweiseitigen Marktplatz bei und verbinde dich direkt mit der Industrie.
+                  Tritt dem zweiseitigen Marktplatz bei und verbinde dich direkt.
+                  Die Plattformfür alle, die Live-Events möglich machen.
                 </p>
               </div>
 

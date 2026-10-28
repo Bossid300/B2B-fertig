@@ -73,8 +73,8 @@ export default function FavoritenCard({
         {/* AVATARBILD */}
         <div className="absolute top-12 left-4 z-20">
         <div className="w-16 h-16 rounded-full border-2 border-slate-950 overflow-hidden bg-slate-900 shadow-xl">
-            {fav.avatarUrl ? (
-            <img src={fav.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+            {fav.avatarMediaUrl || fav.avatarUrl ? (
+            <img src={fav.avatarMediaUrl || fav.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
             <div className="w-full h-full flex items-center justify-center text-xs font-black text-slate-600 bg-slate-900">
                 {fav.name?.substring(0, 2).toUpperCase()}

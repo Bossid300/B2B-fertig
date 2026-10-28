@@ -231,9 +231,9 @@ export default function ProfileNetworkBox({ currentProfileId, isOwner }) {
                   >
                     {/* AVATAR */}
                     <div className="w-7 h-7 rounded-full overflow-hidden border border-slate-800 bg-slate-950 shrink-0">
-                      {user.avatarUrl ? (
+                      {user.avatarMediaUrl || user.avatarUrl ? (
                       <img 
-                        src={user.avatarUrl} 
+                        src={user.avatarMediaUrl || user.avatarUrl} 
                         alt="Avatar" 
                         className="w-full h-full object-cover" 
                       />

@@ -1,6 +1,7 @@
 const API_BASE = '/api';
 
 import {
+  getProfilesDb,
   saveEvent as saveEventDb
 } from './apiService';
 
@@ -41,6 +42,28 @@ const prepareEventForDb = (event) => {
     updatedAt:
       Date.now()
   };
+};
+
+const isMissingOwnerName = (name) =>
+  typeof name !== 'string' ||
+  !name.trim() ||
+  name.trim().toLowerCase() === 'unbekannt';
+
+const getProfileData = (profile) => {
+  if (!profile?.profile_json) return profile || {};
+
+  try {
+    const data = typeof profile.profile_json === 'string'
+      ? JSON.parse(profile.profile_json)
+      : profile.profile_json;
+
+    return {
+      ...profile,
+      ...(data || {})
+    };
+  } catch {
+    return profile;
+  }
 };
 
 export const eventService = {
@@ -134,12 +157,59 @@ export const eventService = {
       const dbEvents =
         data.events || [];
 
-      localStorage.setItem(
-        EVENTS_KEY,
-        JSON.stringify(dbEvents)
+      const eventsNeedingOwnerName = dbEvents.some(event =>
+        isMissingOwnerName(event.ownerName) &&
+        (event.ownerId || event.owner_id)
       );
 
-      return dbEvents;
+      let profilesById = new Map();
+      if (eventsNeedingOwnerName) {
+        try {
+          const profiles = await getProfilesDb();
+          profilesById = new Map(
+            profiles
+              .filter(profile => profile?.id != null)
+              .map(profile => [
+                String(profile.id),
+                getProfileData(profile)
+              ])
+          );
+        } catch (e) {
+          console.error(
+            'EVENT OWNER PROFILE LOOKUP FEHLER',
+            e
+          );
+        }
+      }
+
+      const eventsWithOwnerNames = dbEvents.map(event => {
+        if (!isMissingOwnerName(event.ownerName)) return event;
+
+        const ownerId = event.ownerId || event.owner_id;
+        const ownerProfile = ownerId != null
+          ? profilesById.get(String(ownerId))
+          : null;
+        const ownerName =
+          ownerProfile?.name ||
+          ownerProfile?.display_name ||
+          ownerProfile?.Klarname ||
+          ownerProfile?.user_name ||
+          ownerProfile?.project_name;
+
+        return ownerName
+          ? {
+              ...event,
+              ownerName
+            }
+          : event;
+      });
+
+      localStorage.setItem(
+        EVENTS_KEY,
+        JSON.stringify(eventsWithOwnerNames)
+      );
+
+      return eventsWithOwnerNames;
 
     } catch (e) {
       console.error(

@@ -515,7 +515,7 @@ const [videoMuted, setVideoMuted] = useState(true);
               Die Bühne für Künstler!
             </div>
             <p className="text-slate-400 text-xm font-sans leading-relaxed">
-              In erster Linie wollen wir Brücken erstellen, um Bands oder Künstler zu unterstützen, damit Ihr Mehrwert wieder ansteigt. Einmal das Profil informativ ausgefüllt, und jeder Veranstalter sieht auf einen Blick, welche Anforderungen ihr habt (Technical Rider).
+              In erster Linie wollen wir Brücken erstellen, um Bands oder Künstler zu unterstützen, damit Bands und Künstler mehr aus ihrenAuftritten machen. Einmal das Profil informativ ausgefüllt, und jeder Veranstalter sieht auf einen Blick, welche Anforderungen ihr habt (Technical Rider).
             </p>
           </div>
           <p className="text-xs text-slate-500 italic font-sans leading-relaxed pt-2">

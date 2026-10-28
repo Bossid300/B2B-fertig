@@ -117,9 +117,9 @@ export default function ProfileCard({
       {/* AVATARBILD */}
       <div className="absolute top-12 left-4 z-20">
         <div className="w-16 h-16 rounded-full border-2 border-slate-950 overflow-hidden bg-slate-900 shadow-xl">
-          {user.avatarUrl ? (
+          {user.avatarMediaUrl || user.avatarUrl ? (
             <img 
-              src={user.avatarUrl} 
+              src={user.avatarMediaUrl || user.avatarUrl} 
               alt="Avatar" 
               className="w-full h-full object-cover" 
             />
@@ -141,7 +141,7 @@ export default function ProfileCard({
             {user.name}
           </h3>
           <p className="text-[11px] uppercase mt-0.5">
-            <span className="text-slate-600">// MEMBER-ID:</span>{" "}
+            <span className="text-slate-600">MEMBER-ID:</span>{" "}
             <span className={idClass}>{user.id || "N/A"}</span>
           </p>
         </div>

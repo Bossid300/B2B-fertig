@@ -44,6 +44,7 @@ export default function GlobalNavigation({ view, setView, onLogout }) {
         setProfileData(profile);
 
         setAvatarUrl(
+          profile.avatarMediaUrl ||
           profile.avatarUrl ||
           profile.avatar_url ||
           'https://via.placeholder.com/32'
@@ -194,6 +195,12 @@ useEffect(() => {
           📁 PROJEKTE
         </span>
         <span
+          onClick={() => triggerNav('mediaLibrary')}
+          className={`${desktopBase} ${view === 'mediaLibrary' ? activeClass : inactiveClass}`}
+        >
+          🖼️ Meine Medien
+        </span>
+        <span
           onClick={() => triggerNav('pricing')}
           className={`${desktopBase} ${
             view === 'pricing'
@@ -340,6 +347,13 @@ useEffect(() => {
 
           <button onClick={() => triggerNav('projects')} className={`${mobileBase} ${view === 'projects' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
             📁 PROJEKTE
+          </button>
+
+          <button
+            onClick={() => triggerNav('mediaLibrary')}
+            className={`${mobileBase} ${view === 'mediaLibrary' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}
+          >
+            🖼️ Meine Medien
           </button>
 
           <button

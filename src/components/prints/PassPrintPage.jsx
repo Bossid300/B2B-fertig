@@ -126,7 +126,7 @@ export default function PassPrintPage() {
             <div className="flex flex-col items-center justify-center pr-1">
               <div className="w-[19mm] h-[19mm] rounded-full p-[1px] bg-gradient-to-r from-cyan-400 to-fuchsia-500 shadow-[0_0_8px_rgba(34,211,238,0.35)] flex items-center justify-center">
                 <img
-                  src={profile.avatarUrl}
+                  src={profile.avatarMediaUrl || profile.avatarUrl}
                   alt={profile.name}
                   className="w-[18mm] h-[18mm] rounded-full object-cover"
                 />

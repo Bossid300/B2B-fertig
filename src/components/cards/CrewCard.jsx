@@ -70,8 +70,8 @@ const roleClass =
         {/* AVATARBILD */}
         <div className="absolute top-12 left-4 z-20">
         <div className="w-16 h-16 rounded-full border-2 border-slate-950 overflow-hidden bg-slate-900 shadow-xl">
-            {member.avatarUrl ? (
-            <img src={member.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+            {member.avatarMediaUrl || member.avatarUrl ? (
+            <img src={member.avatarMediaUrl || member.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
             <div className="w-full h-full flex items-center justify-center text-xs font-black text-slate-600 bg-slate-900">
                 {member.name?.substring(0, 2).toUpperCase()}

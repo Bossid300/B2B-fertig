@@ -16,7 +16,7 @@ export default function GuestPass({ onEnterCenter }) {
   return (
     <div className="bg-slate-950/80 backdrop-blur-md border border-slate-900 p-5 rounded-2xl shadow-xl space-y-4 font-mono text-xs max-w-sm mx-auto my-4">
       <div className="flex justify-between items-center border-b border-slate-900 pb-2">
-        <span className="text-[9px] text-cyan-400 font-bold tracking-widest uppercase">// GIGSDA GAST-PASS ACCES</span>
+        <span className="text-[9px] text-cyan-400 font-bold tracking-widest uppercase">// GIGSDA GAST-PASS ACCESS</span>
         <Ticket className="w-3.5 h-3.5 text-cyan-400" />
       </div>
       
