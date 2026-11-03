@@ -21,9 +21,11 @@ import ProfileHilfeBox from './components/ProfileHilfeBox';
 import ArtistAudioBox from './components/ArtistAudioBox';
 import ProfilePassBox from './components/ProfilePassBox';
 import ProfileCard from './components/cards/ProfileCard';
+import ProfileMapBox from './components/ProfileMapBox';
 
 import { getProfilesDb } from './services/apiService';
 import { saveFavorite, deleteFavorite, getFavorites } from './services/apiService';
+import ProfileSectionTabs from './components/ProfileSectionTabs';
 
 export default function UserProfile({ onBack, currentProfileId, isOwner, setView }) {
   const [profileData, setProfileData] = useState(null);
@@ -128,45 +130,62 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
         localFields={profileData} 
         isFavorite={isFavorite}
         handleToggleFavorite={handleToggleFavorite}
+        isOwner={isOwner}
         setView={setView}
         // 🚨 HIER FEHLEN DIE BEIDEN KABEL FÜR DEN SLIDER!
       />
 
-      <ProfileStammBox currentProfileId={currentProfileId} isOwner={isOwner}/>
-      <ProfileStatusMatrix currentProfileId={currentProfileId} />
-
-      <div className="bg-slate-900/40 border border-cyan-500/20 rounded-2xl p-4 mb-4">
-        <h3 className="text-xs font-black uppercase text-cyan-400 tracking-wider">
-          🔍 // Live-Vorschau SearchExplorer
-        </h3>
-
-        <p className="text-xs text-slate-500 mt-1">
-          So erscheint dein Profil aktuell in der Partnersuche.
-        </p>        
-        <p className="text-xs text-slate-500 mt-1">
-          Button "PROFIL" & "ANFRAGEN" haben hier keine Funktion!
-        </p>
-      </div>
-
-      <ProfileCard user={profileData} />
-
-      <ProfileBioTabsBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileSkillBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileComplianceBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ArtistAudioBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileGalleryBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileNetworkBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileProjekteBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileEquipmentBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileVertretungBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileBewertungsBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileFinanzBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileLokalBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      
-      <ProfilePassBox 
+      <ProfileSectionTabs
         currentProfileId={currentProfileId}
-        profileId={profileData?.id || 'GIGS-XXXX'}
-        onBackToDashboard={onBack}
+        isOwner={isOwner}
+        profile={
+          <>
+            <ProfileStammBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfileBioTabsBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfileMapBox profile={profileData} />
+          </>
+        }
+        portfolio={
+          <>
+            <ArtistAudioBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfileGalleryBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfileNetworkBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfileProjekteBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfileBewertungsBox currentProfileId={currentProfileId} isOwner={isOwner} />
+          </>
+        }
+        offer={
+          <>
+            <ProfileSkillBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfileEquipmentBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfileVertretungBox currentProfileId={currentProfileId} isOwner={isOwner} />
+          </>
+        }
+        management={
+          <>
+            <ProfileStatusMatrix currentProfileId={currentProfileId} />
+            <ProfileComplianceBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfileFinanzBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfileLokalBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfilePassBox
+              currentProfileId={currentProfileId}
+              profileId={profileData.id || currentProfileId}
+              setView={setView}
+            />
+            <div className="bg-slate-900/40 border border-cyan-500/20 rounded-2xl p-4">
+              <h3 className="text-xs font-black uppercase text-cyan-400 tracking-wider">
+                Live-Vorschau SearchExplorer
+              </h3>
+              <p className="text-xs text-slate-500 mt-1">
+                So erscheint dein Profil aktuell in der Partnersuche.
+              </p>
+              <p className="text-xs text-slate-500 mt-1">
+                Die Buttons „PROFIL“ und „ANFRAGEN“ haben hier keine Funktion.
+              </p>
+            </div>
+            <ProfileCard user={profileData} />
+          </>
+        }
       />
     </div>
   );

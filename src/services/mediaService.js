@@ -65,3 +65,15 @@ export function getMediaPreviewUrl(assetId) {
 export function getMediaAvatarUrl(assetId) {
   return `${MEDIA_API}?avatar_asset=${encodeURIComponent(assetId)}`;
 }
+
+export async function deleteMediaAsset(assetId) {
+  const response = await fetch(
+    `${MEDIA_API}?id=${encodeURIComponent(assetId)}`,
+    {
+      method: 'DELETE',
+      credentials: 'same-origin'
+    }
+  );
+
+  return readResponse(response);
+}

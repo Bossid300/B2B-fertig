@@ -8,6 +8,17 @@ export default function ProfileFinanzBox({ currentProfileId, isOwner }) {
   const [profile, setProfile] = useState(null);
   const [profileData, setProfileData] = useState(null);
   const [showFinance, setShowFinance] = useState(false);
+  const [fieldVisibility, setFieldVisibility] = useState({
+    rate_hour: true,
+    rate_day: true,
+    payment_terms: true,
+    tax_type: true,
+    company_uid: false,
+    steuernummer: false,
+    gage_min: true,
+    gage_max: true,
+    duration_max: true
+  });
   const [formData, setFormData] = useState({
     rate_hour: '',
     rate_day: '',
@@ -40,6 +51,17 @@ export default function ProfileFinanzBox({ currentProfileId, isOwner }) {
       setShowFinance(
         profile.show_finance === true
       );
+      setFieldVisibility({
+        rate_hour: profile.show_rate_hour !== false,
+        rate_day: profile.show_rate_day !== false,
+        payment_terms: profile.show_payment_terms !== false,
+        tax_type: profile.show_tax_type !== false,
+        company_uid: profile.show_company_uid === true,
+        steuernummer: profile.show_steuernummer === true,
+        gage_min: profile.show_gage_min !== false,
+        gage_max: profile.show_gage_max !== false,
+        duration_max: profile.show_duration_max !== false
+      });
       setFormData({
         company_uid:
           profile.company_uid ||
@@ -90,7 +112,10 @@ export default function ProfileFinanzBox({ currentProfileId, isOwner }) {
         gage_max: formData.gage_max,
         duration_max: formData.duration_max,
 
-        show_finance: showFinance
+        show_finance: showFinance,
+        ...Object.fromEntries(
+          Object.entries(fieldVisibility).map(([field, visible]) => [`show_${field}`, visible])
+        )
       };
       
       const saveProfileId =
@@ -129,6 +154,26 @@ export default function ProfileFinanzBox({ currentProfileId, isOwner }) {
   if (!isVisible) return null;
 
 const { company_uid, steuernummer, tax_type, rate_hour, rate_day, payment_terms, gage_min, gage_max, duration_max } = formData;
+const canShowField = (field) => canEdit || fieldVisibility[field];
+const hasVisibleFinanceField = Object.entries(formData).some(
+  ([field, value]) => value && canShowField(field)
+);
+if (!canEdit && !hasVisibleFinanceField) return null;
+
+const toggleFieldVisibility = (field) => {
+  setFieldVisibility(prev => ({ ...prev, [field]: !prev[field] }));
+};
+const renderFieldToggle = (field) => (
+  <button
+    type="button"
+    onClick={() => toggleFieldVisibility(field)}
+    aria-label={`Sichtbarkeit ${field} umschalten`}
+    title={fieldVisibility[field] ? 'Für andere sichtbar' : 'Für andere ausgeblendet'}
+    className="text-slate-400 hover:text-white"
+  >
+    {fieldVisibility[field] ? <Eye size={12} /> : <EyeOff size={12} />}
+  </button>
+);
 
   const getTaxTypeLabel = (type) => {
     if (type === 'klein') return 'Kleinunternehmer-Regelung (§ 19 UStG)';
@@ -195,7 +240,7 @@ const { company_uid, steuernummer, tax_type, rate_hour, rate_day, payment_terms,
           {canEdit && !isEditing && (
             <button 
               type="button" 
-              onClick={() => setIsEditing(true)} 
+              data-profile-edit-trigger onClick={() => setIsEditing(true)}
               className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-amber-400 text-[10px] font-black tracking-wider uppercase hover:border-amber-500 transition-all cursor-pointer"
             >
               ✏️ Konditionen
@@ -209,58 +254,60 @@ const { company_uid, steuernummer, tax_type, rate_hour, rate_day, payment_terms,
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-400">
           
       {/* TARIFSÄTZE */}
-      <div className="space-y-2 p-3 bg-slate-900/10 border border-slate-900 rounded-2xl">
+      {(canShowField('rate_hour') || canShowField('rate_day') || canShowField('gage_min') || canShowField('gage_max') || canShowField('duration_max') || canShowField('payment_terms')) && <div className="space-y-2 p-3 bg-slate-900/10 border border-slate-900 rounded-2xl">
         <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider border-b border-slate-900/50 pb-1 flex items-center gap-1">
           <DollarSign size={10} /> Honorar & Kalkulationsbasis
         </div>
         
-        <div className="flex justify-between py-1 border-b border-slate-900/30">
+        {canShowField('rate_hour') && <div className="flex justify-between py-1 border-b border-slate-900/30">
           <span className="text-slate-500">Stundensatz (B2B Basis):</span>
           <span className="text-white font-bold">{rate_hour ? `${rate_hour} ,- EUR` : 'Auf Anfrage'}</span>
-        </div>
+        </div>}
         
-        <div className="flex justify-between py-1 border-b border-slate-900/30">
+        {canShowField('rate_day') && <div className="flex justify-between py-1 border-b border-slate-900/30">
           <span className="text-slate-500">Tagessatz / Dry-Hire:</span>
           <span className="text-amber-400 font-black">{rate_day ? `${rate_day} ,- EUR` : 'Auf Anfrage'}</span>
-        </div>
+        </div>}
 
-        <div className="flex justify-between py-1 border-b border-slate-900/30">
+        {(canShowField('gage_min') || canShowField('gage_max')) && <div className="flex justify-between py-1 border-b border-slate-900/30">
           <span className="text-slate-500">Gagen-Spanne (Live):</span>
           <span className="text-emerald-400 font-bold">
-            {gage_min || gage_max ? `${gage_min || 0} - ${gage_max || '∞'} EUR` : 'Auf Anfrage'}
+            {canShowField('gage_min') || canShowField('gage_max')
+              ? `${canShowField('gage_min') ? gage_min || 0 : 'Privat'} - ${canShowField('gage_max') ? gage_max || '∞' : 'Privat'} EUR`
+              : 'Auf Anfrage'}
           </span>
-        </div>
+        </div>}
 
-        <div className="flex justify-between py-1 border-b border-slate-900/30">
+        {canShowField('duration_max') && <div className="flex justify-between py-1 border-b border-slate-900/30">
           <span className="text-slate-500">Max. Spieldauer:</span>
           <span className="text-white font-medium">{duration_max ? `${duration_max} Min.` : 'Nicht spezifiziert'}</span>
-        </div>
+        </div>}
         
-        <div className="flex justify-between py-1">
+        {canShowField('payment_terms') && <div className="flex justify-between py-1">
           <span className="text-slate-500">Zahlungsziel / Fälligkeit:</span>
           <span className="text-white font-medium">{getPaymentTermsLabel(payment_terms)}</span>
-        </div>
-      </div>
+        </div>}
+      </div>}
 
 
           {/* BUSINESS CREDENTIALS */}
-          <div className="space-y-2 p-3 bg-slate-900/10 border border-slate-900 rounded-2xl">
+          {(canShowField('company_uid') || canShowField('steuernummer') || canShowField('tax_type')) && <div className="space-y-2 p-3 bg-slate-900/10 border border-slate-900 rounded-2xl">
             <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider border-b border-slate-900/50 pb-1 flex items-center gap-1">
               <FileText size={10} /> Fiskalische Stammdaten
             </div>
-            <div className="flex justify-between py-1 border-b border-slate-900/30">
+            {canShowField('company_uid') && <div className="flex justify-between py-1 border-b border-slate-900/30">
               <span className="text-slate-500">Umsatzsteuer-ID (UID):</span> 
               <span className="text-white font-mono">{company_uid || 'Nicht hinterlegt'}</span>
-            </div>
-            <div className="flex justify-between py-1 border-b border-slate-900/30">
+            </div>}
+            {canShowField('steuernummer') && <div className="flex justify-between py-1 border-b border-slate-900/30">
               <span className="text-slate-500">Steuernummer (Finanzamt):</span> 
               <span className="text-white font-mono">{steuernummer || 'Intern verankert'}</span>
-            </div>
-            <div className="flex justify-between py-1">
+            </div>}
+            {canShowField('tax_type') && <div className="flex justify-between py-1">
               <span className="text-slate-500">Steuerliche Verrechnung:</span> 
               <span className="text-slate-300 font-medium truncate max-w-[60%]">{getTaxTypeLabel(tax_type)}</span>
-            </div>
-          </div>
+            </div>}
+          </div>}
 
         </div>
       ) : (
@@ -272,16 +319,16 @@ const { company_uid, steuernummer, tax_type, rate_hour, rate_day, payment_terms,
               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest block">// KALKULATIONS-INPUTS</span>
               <div className="grid grid-cols-2 gap-2">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-slate-500 font-bold">// STUNDENSATZ (EUR)</span>
+                  <div className="flex items-center justify-between"><span className="text-[10px] text-slate-500 font-bold">// STUNDENSATZ (EUR)</span>{renderFieldToggle('rate_hour')}</div>
                   <input type="number" name="rate_hour" value={rate_hour || ''} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-amber-500 font-mono" placeholder="e.g. 65" />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-slate-500 font-bold">// TAGESSATZ (EUR)</span>
+                  <div className="flex items-center justify-between"><span className="text-[10px] text-slate-500 font-bold">// TAGESSATZ (EUR)</span>{renderFieldToggle('rate_day')}</div>
                   <input type="number" name="rate_day" value={rate_day || ''} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-amber-400 focus:outline-none focus:border-amber-500 font-mono" placeholder="e.g. 500" />
                 </div>
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-bold">// ZAHLUNGSZIEL</span>
+                <div className="flex items-center justify-between"><span className="text-[10px] text-slate-500 font-bold">// ZAHLUNGSZIEL</span>{renderFieldToggle('payment_terms')}</div>
                 <select name="payment_terms" value={payment_terms || '14_netto'} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-amber-500 font-mono cursor-pointer">
                   <option value="14_netto">14 Tage rein netto</option>
                   <option value="sofort">Sofort nach Erhalt ohne Abzug</option>
@@ -292,7 +339,7 @@ const { company_uid, steuernummer, tax_type, rate_hour, rate_day, payment_terms,
                         {/* EVENT- & LIVE-KALKULATION */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pt-2">
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] text-slate-500 font-bold">// MINDESTGAGE (EUR)</span>
+              <div className="flex items-center justify-between"><span className="text-[10px] text-slate-500 font-bold">// MINDESTGAGE (EUR)</span>{renderFieldToggle('gage_min')}</div>
               <input 
                 type="number" 
                 name="gage_min" 
@@ -303,7 +350,7 @@ const { company_uid, steuernummer, tax_type, rate_hour, rate_day, payment_terms,
               />
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] text-slate-500 font-bold">// MAXIMALGAGE (EUR)</span>
+              <div className="flex items-center justify-between"><span className="text-[10px] text-slate-500 font-bold">// MAXIMALGAGE (EUR)</span>{renderFieldToggle('gage_max')}</div>
               <input 
                 type="number" 
                 name="gage_max" 
@@ -314,7 +361,7 @@ const { company_uid, steuernummer, tax_type, rate_hour, rate_day, payment_terms,
               />
             </div>
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] text-slate-500 font-bold">// MAX. SPIELDAUER (MIN)</span>
+              <div className="flex items-center justify-between"><span className="text-[10px] text-slate-500 font-bold">// MAX. SPIELDAUER (MIN)</span>{renderFieldToggle('duration_max')}</div>
               <input 
                 type="number" 
                 name="duration_max" 
@@ -332,15 +379,15 @@ const { company_uid, steuernummer, tax_type, rate_hour, rate_day, payment_terms,
             <div className="space-y-3 p-3 bg-slate-900/20 border border-slate-900 rounded-2xl">
               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest block">// RECHTLICHE COMPLIANCE</span>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-bold">// UMSATZSTEUER-ID (UID)</span>
+                <div className="flex items-center justify-between"><span className="text-[10px] text-slate-500 font-bold">// UMSATZSTEUER-ID (UID)</span>{renderFieldToggle('company_uid')}</div>
                 <input type="text" name="company_uid" value={company_uid || ''} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-amber-500 font-mono uppercase" placeholder="e.g. ATU12345678" />
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-bold">// STEUERNUMMER</span>
+                <div className="flex items-center justify-between"><span className="text-[10px] text-slate-500 font-bold">// STEUERNUMMER</span>{renderFieldToggle('steuernummer')}</div>
                 <input type="text" name="steuernummer" value={steuernummer || ''} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-amber-500 font-mono" placeholder="e.g. 12 345/6789" />
               </div>
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-bold">// STEUERLICHE EINSTUFUNG</span>
+                <div className="flex items-center justify-between"><span className="text-[10px] text-slate-500 font-bold">// STEUERLICHE EINSTUFUNG</span>{renderFieldToggle('tax_type')}</div>
                 <select name="tax_type" value={tax_type || 'regel'} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-amber-500 font-mono cursor-pointer">
                   <option value="regel">Regenbesteuerung (zzgl. MwSt.)</option>
                   <option value="klein">Kleinunternehmer (§ 19 UStG)</option>
@@ -353,8 +400,8 @@ const { company_uid, steuernummer, tax_type, rate_hour, rate_day, payment_terms,
 
           {/* CONTROL STRIP */}
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-900">
-            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
-            <button type="submit" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-amber-500 text-slate-950 hover:bg-amber-400 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(251,191,36,0.3)]"><Save size={12} /> Konditionen Einbrennen ✓</button>
+            <button type="button" data-profile-action="cancel" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
+            <button type="submit" data-profile-action="save" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-amber-500 text-slate-950 hover:bg-amber-400 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(251,191,36,0.3)]"><Save size={12} /> Speichern</button>
           </div>
         </form>
       )}

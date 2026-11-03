@@ -8,6 +8,11 @@ export default function ProfileLogistikBox({ currentProfileId, isOwner }) {
   const [profile, setProfile] = useState(null);
   const [profileData, setProfileData] = useState(null);
   const [showLogistik, setShowLogistik] = useState(true);
+  const [fieldVisibility, setFieldVisibility] = useState({
+    travel_radius: true,
+    mobility_status: true,
+    travel_expenses: true
+  });
   const [formData, setFormData] = useState({
     travel_radius: '100',
     mobility_status: '',
@@ -49,6 +54,11 @@ export default function ProfileLogistikBox({ currentProfileId, isOwner }) {
         travel_expenses:
           profile.travel_expenses || ''
       });
+      setFieldVisibility({
+        travel_radius: profile.show_travel_radius !== false,
+        mobility_status: profile.show_mobility_status !== false,
+        travel_expenses: profile.show_travel_expenses !== false
+      });
 
     })
     .catch(console.error);
@@ -74,7 +84,10 @@ export default function ProfileLogistikBox({ currentProfileId, isOwner }) {
         mobility_status: formData.mobility_status,
         travel_expenses: formData.travel_expenses,
 
-        show_logistik: showLogistik
+        show_logistik: showLogistik,
+        ...Object.fromEntries(
+          Object.entries(fieldVisibility).map(([field, visible]) => [`show_${field}`, visible])
+        )
       };
 
       const saveProfileId =
@@ -117,6 +130,22 @@ export default function ProfileLogistikBox({ currentProfileId, isOwner }) {
 
   const isVisible = showLogistik || canEdit;
   if (!isVisible) return null;
+  const canShowField = (field) => canEdit || fieldVisibility[field];
+  if (!canEdit && !Object.keys(fieldVisibility).some(field => canShowField(field) && formData[field])) return null;
+  const toggleFieldVisibility = (field) => {
+    setFieldVisibility(prev => ({ ...prev, [field]: !prev[field] }));
+  };
+  const renderFieldToggle = (field) => (
+    <button
+      type="button"
+      onClick={() => toggleFieldVisibility(field)}
+      aria-label={`Sichtbarkeit ${field} umschalten`}
+      title={fieldVisibility[field] ? 'Für andere sichtbar' : 'Für andere ausgeblendet'}
+      className="text-slate-400 hover:text-white"
+    >
+      {fieldVisibility[field] ? <Eye size={12} /> : <EyeOff size={12} />}
+    </button>
+  );
 
   const { travel_radius, mobility_status, travel_expenses } = formData;
 
@@ -151,7 +180,7 @@ export default function ProfileLogistikBox({ currentProfileId, isOwner }) {
           {canEdit && !isEditing && (
             <button 
               type="button" 
-              onClick={() => setIsEditing(true)} 
+              data-profile-edit-trigger onClick={() => setIsEditing(true)}
               className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-emerald-400 text-[10px] font-black tracking-wider uppercase hover:border-emerald-500 transition-all cursor-pointer"
             >
               ✏️ Logistik
@@ -165,28 +194,28 @@ export default function ProfileLogistikBox({ currentProfileId, isOwner }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-400">
           
           {/* RADIUS KACHEL */}
-          <div className="p-3 bg-slate-900/10 border border-slate-900 rounded-2xl flex flex-col justify-center items-center text-center space-y-1">
+          {canShowField('travel_radius') && <div className="p-3 bg-slate-900/10 border border-slate-900 rounded-2xl flex flex-col justify-center items-center text-center space-y-1">
             <MapPin size={16} className="text-emerald-400 animate-pulse" />
             <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">// OPERATION RANGE</span>
-            <span className="text-white font-black text-xs uppercase tracking-wide px-2 py-0.5 bg-emerald-950/20 border border-emerald-500/20 rounded-md mt-1">
+            {canShowField('travel_radius') && <span className="text-white font-black text-xs uppercase tracking-wide px-2 py-0.5 bg-emerald-950/20 border border-emerald-500/20 rounded-md mt-1">
               {travel_radius === 'europe' || travel_radius === 'worldwide' ? 'UNLIMITIERT' : `${travel_radius} KM`}
-            </span>
-          </div>
+            </span>}
+          </div>}
 
           {/* LOGISTIK DETAILS */}
           <div className="md:col-span-2 space-y-2 p-3 bg-slate-900/10 border border-slate-900 rounded-2xl">
-            <div className="flex justify-between py-1 border-b border-slate-900/30">
+            {canShowField('travel_radius') && <div className="flex justify-between py-1 border-b border-slate-900/30">
               <span className="text-slate-500 flex items-center gap-1"><Navigation size={11} /> Aktionsradius:</span> 
               <span className="text-slate-200 font-bold">{getRadiusLabel(travel_radius)}</span>
-            </div>
-            <div className="flex justify-between py-1 border-b border-slate-900/30">
+            </div>}
+            {canShowField('mobility_status') && <div className="flex justify-between py-1 border-b border-slate-900/30">
               <span className="text-slate-500 flex items-center gap-1"><Truck size={11} /> Fuhrpark & Mobilität:</span> 
               <span className="text-white font-medium uppercase truncate max-w-[60%]">{mobility_status || 'Eigenes KFZ / Standard'}</span>
-            </div>
-            <div className="flex justify-between py-1">
+            </div>}
+            {canShowField('travel_expenses') && <div className="flex justify-between py-1">
               <span className="text-slate-500 flex items-center gap-1"><DollarSign size={11} /> Reisespesen-Konditionen:</span> 
               <span className="text-emerald-400 font-bold font-mono truncate max-w-[60%]">{travel_expenses || 'Auf Anfrage / Nach Aufwand'}</span>
-            </div>
+            </div>}
           </div>
 
         </div>
@@ -196,7 +225,7 @@ export default function ProfileLogistikBox({ currentProfileId, isOwner }) {
             
             {/* RADIUS DROPDOWN */}
             <div className="flex flex-col gap-1.5 justify-center">
-              <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">// REISERADIUS WAHLEN</span>
+              <div className="flex items-center justify-between"><span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">// REISERADIUS WAHLEN</span>{renderFieldToggle('travel_radius')}</div>
               <select 
                 name="travel_radius" 
                 value={travel_radius || '100'} 
@@ -213,7 +242,7 @@ export default function ProfileLogistikBox({ currentProfileId, isOwner }) {
 
             {/* FUHRPARK INPUT */}
             <div className="flex flex-col gap-1.5 justify-center">
-              <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">// TRANSPORTMITTEL / SCHEINE</span>
+              <div className="flex items-center justify-between"><span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">// TRANSPORTMITTEL / SCHEINE</span>{renderFieldToggle('mobility_status')}</div>
               <input 
                 type="text" 
                 name="mobility_status" 
@@ -226,7 +255,7 @@ export default function ProfileLogistikBox({ currentProfileId, isOwner }) {
 
             {/* SPESEN INPUT */}
             <div className="flex flex-col gap-1.5 justify-center">
-              <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">// SPESEN & PREIS PRO KM</span>
+              <div className="flex items-center justify-between"><span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">// SPESEN & PREIS PRO KM</span>{renderFieldToggle('travel_expenses')}</div>
               <input 
                 type="text" 
                 name="travel_expenses" 
@@ -241,8 +270,8 @@ export default function ProfileLogistikBox({ currentProfileId, isOwner }) {
 
           {/* CONTROL STRIP */}
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-900">
-            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
-            <button type="submit" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-emerald-600 text-slate-950 hover:bg-emerald-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.3)]"><Save size={12} /> Logistik Einbrennen ✓</button>
+            <button type="button" data-profile-action="cancel" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
+            <button type="submit" data-profile-action="save" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-emerald-600 text-slate-950 hover:bg-emerald-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.3)]"><Save size={12} /> Speichern</button>
           </div>
         </form>
       )}

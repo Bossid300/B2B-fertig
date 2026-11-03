@@ -3,7 +3,9 @@ import { Download, FileAudio, FileImage, FileText, FileVideo, Upload } from 'luc
 import {
   getMediaAssets,
   getMediaDownloadUrl,
-  uploadMediaFile
+  uploadMediaFile,
+  getMediaPreviewUrl,
+  deleteMediaAsset
 } from '../services/mediaService';
 
 const MEDIA_LABELS = {
@@ -94,6 +96,27 @@ export default function MediaLibraryPage() {
     }
   };
 
+  const handleDelete = async (assetId) => {
+    if (
+      !window.confirm(
+        'Datei wirklich löschen?'
+      )
+    ) {
+      return;
+    }
+    try {
+      await deleteMediaAsset(assetId);
+      setAssets(prev =>
+        prev.filter(
+          asset => asset.id !== assetId
+        )
+      );
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
       <header className="mb-8">
@@ -161,28 +184,84 @@ export default function MediaLibraryPage() {
           {assets.map((asset) => (
             <li
               key={asset.id}
-              className="flex min-w-0 items-center gap-3 rounded-xl border border-slate-800 bg-slate-950/70 p-4"
+              className="overflow-hidden rounded-xl border border-slate-800 bg-slate-950/70"
             >
-              <MediaIcon type={asset.media_type} />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold text-white" title={asset.original_filename}>
+
+              {asset.media_type === 'image' && (
+                <img
+                  src={getMediaPreviewUrl(asset.id)}
+                  alt={asset.original_filename}
+                  className="h-48 w-full object-contain bg-slate-900"
+                />
+              )}
+
+              <div className="p-3">
+
+                <p
+                  className="truncate text-sm font-bold text-white"
+                  title={asset.original_filename}
+                >
                   {asset.original_filename}
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
-                  {MEDIA_LABELS[asset.media_type] || asset.media_type} · {formatFileSize(Number(asset.size_bytes))}
+
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {asset.isAvatar && (
+                    <span className="rounded bg-cyan-500/20 px-2 py-1 text-[10px] text-cyan-300">
+                      Avatar
+                    </span>
+                  )}
+
+                  {asset.slider1 && (
+                    <span className="rounded bg-amber-500/20 px-2 py-1 text-[10px] text-amber-300">
+                      Slider 1
+                    </span>
+                  )}
+
+                  {asset.slider2 && (
+                    <span className="rounded bg-amber-500/20 px-2 py-1 text-[10px] text-amber-300">
+                      Slider 2
+                    </span>
+                  )}
+
+                  {asset.slider3 && (
+                    <span className="rounded bg-amber-500/20 px-2 py-1 text-[10px] text-amber-300">
+                      Slider 3
+                    </span>
+                  )}
+
+                  {asset.slider4 && (
+                    <span className="rounded bg-amber-500/20 px-2 py-1 text-[10px] text-amber-300">
+                      Slider 4
+                    </span>
+                  )}
+                </div>
+
+
+                <p className="text-xs text-slate-400">
+                  {asset.media_type} • {formatFileSize(Number(asset.size_bytes))}
                 </p>
-                <p className="mt-1 text-[11px] text-slate-600">
-                  {new Date(`${asset.created_at.replace(' ', 'T')}Z`).toLocaleDateString()}
-                </p>
+
+                <div className="mt-3 flex justify-between">
+
+                  <a
+                    href={getMediaDownloadUrl(asset.id)}
+                    className="rounded-lg border border-slate-700 px-3 py-1 text-xs text-slate-300"
+                  >
+                    Download
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(asset.id)}
+                    className="rounded-lg border border-red-700 px-3 py-1 text-xs text-red-300"
+                  >
+                    Löschen
+                  </button>
+
+                </div>
+
               </div>
-              <a
-                href={getMediaDownloadUrl(asset.id)}
-                className="rounded-lg border border-slate-700 p-2 text-slate-400 transition hover:border-cyan-500/50 hover:text-cyan-300"
-                aria-label={`Datei ${asset.original_filename} herunterladen`}
-                title="Herunterladen"
-              >
-                <Download size={15} aria-hidden="true" />
-              </a>
+
             </li>
           ))}
         </ul>

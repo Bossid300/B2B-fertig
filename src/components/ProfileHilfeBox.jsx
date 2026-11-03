@@ -20,6 +20,13 @@ export default function ProfileHilfeBox({ currentProfileId, isOwner }) {
     logistik: false,
     abbau: false
   });
+  const [fieldVisibility, setFieldVisibility] = useState({
+    hilfe_status: true,
+    aufbau: true,
+    flyer: true,
+    logistik: true,
+    abbau: true
+  });
 
   const canEdit = isOwner || currentProfileId === localStorage.getItem( 'gigsda_profile_id' );
 
@@ -52,6 +59,13 @@ export default function ProfileHilfeBox({ currentProfileId, isOwner }) {
             abbau: false
           }
         );
+        setFieldVisibility({
+          hilfe_status: profile.show_hilfe_status !== false,
+          aufbau: profile.show_hilfe_aufbau !== false,
+          flyer: profile.show_hilfe_flyer !== false,
+          logistik: profile.show_hilfe_logistik !== false,
+          abbau: profile.show_hilfe_abbau !== false
+        });
       })
       .catch((e) => {
         console.error(
@@ -75,7 +89,12 @@ export default function ProfileHilfeBox({ currentProfileId, isOwner }) {
         ...profileData,
         hilfe_status: hilfeStatus,
         hilfe_categories: categories,
-        show_hilfe: showHilfe
+        show_hilfe: showHilfe,
+        show_hilfe_status: fieldVisibility.hilfe_status,
+        show_hilfe_aufbau: fieldVisibility.aufbau,
+        show_hilfe_flyer: fieldVisibility.flyer,
+        show_hilfe_logistik: fieldVisibility.logistik,
+        show_hilfe_abbau: fieldVisibility.abbau
       };
 
       const saveProfileId =
@@ -147,6 +166,22 @@ export default function ProfileHilfeBox({ currentProfileId, isOwner }) {
 
   const isVisible = showHilfe || canEdit;
   if (!isVisible) return null;
+  const canShowField = (field) => canEdit || fieldVisibility[field];
+  if (!canEdit && !Object.keys(fieldVisibility).some(field => canShowField(field))) return null;
+  const toggleFieldVisibility = (field) => {
+    setFieldVisibility(prev => ({ ...prev, [field]: !prev[field] }));
+  };
+  const renderFieldToggle = (field) => (
+    <button
+      type="button"
+      onClick={() => toggleFieldVisibility(field)}
+      aria-label={`Sichtbarkeit ${field} umschalten`}
+      title={fieldVisibility[field] ? 'Für andere sichtbar' : 'Für andere ausgeblendet'}
+      className="text-slate-400 hover:text-white"
+    >
+      {fieldVisibility[field] ? <Eye size={12} /> : <EyeOff size={12} />}
+    </button>
+  );
 
 
 
@@ -174,7 +209,7 @@ export default function ProfileHilfeBox({ currentProfileId, isOwner }) {
           {canEdit && !isEditing && (
             <button 
               type="button" 
-              onClick={() => setIsEditing(true)} 
+              data-profile-edit-trigger onClick={() => setIsEditing(true)}
               className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-amber-400 text-[10px] font-black tracking-wider uppercase hover:border-amber-500 transition-all cursor-pointer"
             >
               ✏️ Optionen
@@ -188,7 +223,7 @@ export default function ProfileHilfeBox({ currentProfileId, isOwner }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           
           {/* HELP AMPEL */}
-          <div className="p-3 bg-slate-900/30 border border-slate-900 rounded-2xl flex flex-col justify-center items-center text-center space-y-2">
+          {canShowField('hilfe_status') && <div className="p-3 bg-slate-900/30 border border-slate-900 rounded-2xl flex flex-col justify-center items-center text-center space-y-2">
             <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">// B2B OPERATIONAL STATUS</span>
             {hilfeStatus === 'ready' ? (
               <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/30 border border-emerald-500/40 text-emerald-400 font-black text-xs uppercase animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.2)]">
@@ -199,22 +234,22 @@ export default function ProfileHilfeBox({ currentProfileId, isOwner }) {
                 <XCircle size={12} /> NUR CORE-BUSINESS
               </div>
             )}
-          </div>
+          </div>}
 
           {/* SATELLITEN TÄTIGKEITEN */}
-          <div className="md:col-span-2 space-y-2">
+          {(canShowField('aufbau') || canShowField('flyer') || canShowField('logistik') || canShowField('abbau')) && <div className="md:col-span-2 space-y-2">
             <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest block">// UNTERSTÜTZUNG BEI FOLGENDEN TÄTIGKEITEN</span>
-            {hilfeStatus !== 'ready' ? (
+            {canShowField('hilfe_status') && hilfeStatus !== 'ready' ? (
               <div className="p-4 bg-slate-900/10 border border-slate-900 rounded-xl text-center text-xs text-slate-600 font-mono uppercase tracking-wide">// USER STEHT AKTUELL NUR FÜR SEINE HAUPTROLLE ZUR VERFÜGUNG</div>
             ) : (
               <div className="grid grid-cols-2 gap-2 text-center">
-                <div className={`p-2 rounded-xl border text-[10px] font-black uppercase ${categories.aufbau ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-400' : 'bg-slate-900/40 border-slate-900 text-slate-600 line-through'}`}>🏗️ Bühnenaufbau / Hand</div>
-                <div className={`p-2 rounded-xl border text-[10px] font-black uppercase ${categories.flyer ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-400' : 'bg-slate-900/40 border-slate-900 text-slate-600 line-through'}`}>📄 Flyer / Promotion</div>
-                <div className={`p-2 rounded-xl border text-[10px] font-black uppercase ${categories.logistik ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-400' : 'bg-slate-900/40 border-slate-900 text-slate-600 line-through'}`}>🚚 Logistik-Hilfe</div>
-                <div className={`p-2 rounded-xl border text-[10px] font-black uppercase ${categories.abbau ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-400' : 'bg-slate-900/40 border-slate-900 text-slate-600 line-through'}`}>🧼 Abbau / Gastro</div>
+                {canShowField('aufbau') && <div className={`p-2 rounded-xl border text-[10px] font-black uppercase ${categories.aufbau ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-400' : 'bg-slate-900/40 border-slate-900 text-slate-600 line-through'}`}>🏗️ Bühnenaufbau / Hand</div>}
+                {canShowField('flyer') && <div className={`p-2 rounded-xl border text-[10px] font-black uppercase ${categories.flyer ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-400' : 'bg-slate-900/40 border-slate-900 text-slate-600 line-through'}`}>📄 Flyer / Promotion</div>}
+                {canShowField('logistik') && <div className={`p-2 rounded-xl border text-[10px] font-black uppercase ${categories.logistik ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-400' : 'bg-slate-900/40 border border-slate-900 text-slate-600 line-through'}`}>🚚 Logistik-Hilfe</div>}
+                {canShowField('abbau') && <div className={`p-2 rounded-xl border text-[10px] font-black uppercase ${categories.abbau ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-400' : 'bg-slate-900/40 border border-slate-900 text-slate-600 line-through'}`}>🧼 Abbau / Gastro</div>}
               </div>
             )}
-          </div>
+          </div>}
 
         </div>
       ) : (
@@ -223,7 +258,7 @@ export default function ProfileHilfeBox({ currentProfileId, isOwner }) {
             
             {/* DROPDOWN STATUS */}
             <div className="flex flex-col gap-1.5 justify-center">
-              <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">// GLOBALEN HELFER-STATUS EINSTELLEN</span>
+              <div className="flex items-center justify-between"><span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest">// GLOBALEN HELFER-STATUS EINSTELLEN</span>{renderFieldToggle('hilfe_status')}</div>
               <select value={hilfeStatus} onChange={(e) => setHilfeStatus(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-amber-500 font-mono cursor-pointer">
                 <option value="ready">🟢 BEREIT ALS HELFENDE HAND (AUFBAU/PROMO)</option>
                 <option value="none">⚪ KEINE HILFSTÄTIGKEITEN</option>
@@ -234,10 +269,10 @@ export default function ProfileHilfeBox({ currentProfileId, isOwner }) {
             <div className="md:col-span-2 space-y-2">
               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest block">// ANKLICKEN (GRÜN = DA BIN ICH DABEI / GRAU = NEIN)</span>
               <div className="grid grid-cols-2 gap-2 text-center">
-                <button type="button" onClick={() => toggleCategory('aufbau')} className={`p-2 rounded-xl border text-[10px] font-black transition-all cursor-pointer uppercase ${categories.aufbau ? 'bg-emerald-950/30 border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:bg-emerald-900/40' : 'bg-slate-900 border-slate-800 text-slate-600 line-through hover:border-slate-700'}`}>🏗️ Bühnenaufbau / Hand</button>
-                <button type="button" onClick={() => toggleCategory('flyer')} className={`p-2 rounded-xl border text-[10px] font-black transition-all cursor-pointer uppercase ${categories.flyer ? 'bg-emerald-950/30 border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:bg-emerald-900/40' : 'bg-slate-900 border-slate-800 text-slate-600 line-through hover:border-slate-700'}`}>📄 Flyer / Promotion</button>
-                <button type="button" onClick={() => toggleCategory('logistik')} className={`p-2 rounded-xl border text-[10px] font-black transition-all cursor-pointer uppercase ${categories.logistik ? 'bg-emerald-950/30 border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:bg-emerald-900/40' : 'bg-slate-900 border-slate-800 text-slate-600 line-through hover:border-slate-700'}`}>🚚 Logistik-Hilfe</button>
-                <button type="button" onClick={() => toggleCategory('abbau')} className={`p-2 rounded-xl border text-[10px] font-black transition-all cursor-pointer uppercase ${categories.abbau ? 'bg-emerald-950/30 border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:bg-emerald-900/40' : 'bg-slate-900 border-slate-800 text-slate-600 line-through hover:border-slate-700'}`}>🧼 Abbau / Gastro</button>
+                <div className="flex items-center gap-1"><button type="button" onClick={() => toggleCategory('aufbau')} className={`flex-1 p-2 rounded-xl border text-[10px] font-black transition-all cursor-pointer uppercase ${categories.aufbau ? 'bg-emerald-950/30 border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:bg-emerald-900/40' : 'bg-slate-900 border-slate-800 text-slate-600 line-through hover:border-slate-700'}`}>🏗️ Bühnenaufbau / Hand</button>{renderFieldToggle('aufbau')}</div>
+                <div className="flex items-center gap-1"><button type="button" onClick={() => toggleCategory('flyer')} className={`flex-1 p-2 rounded-xl border text-[10px] font-black transition-all cursor-pointer uppercase ${categories.flyer ? 'bg-emerald-950/30 border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:bg-emerald-900/40' : 'bg-slate-900 border-slate-800 text-slate-600 line-through hover:border-slate-700'}`}>📄 Flyer / Promotion</button>{renderFieldToggle('flyer')}</div>
+                <div className="flex items-center gap-1"><button type="button" onClick={() => toggleCategory('logistik')} className={`flex-1 p-2 rounded-xl border text-[10px] font-black transition-all cursor-pointer uppercase ${categories.logistik ? 'bg-emerald-950/30 border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:bg-emerald-900/40' : 'bg-slate-900 border-slate-800 text-slate-600 line-through hover:border-slate-700'}`}>🚚 Logistik-Hilfe</button>{renderFieldToggle('logistik')}</div>
+                <div className="flex items-center gap-1"><button type="button" onClick={() => toggleCategory('abbau')} className={`flex-1 p-2 rounded-xl border text-[10px] font-black transition-all cursor-pointer uppercase ${categories.abbau ? 'bg-emerald-950/30 border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)] hover:bg-emerald-900/40' : 'bg-slate-900 border-slate-800 text-slate-600 line-through hover:border-slate-700'}`}>🧼 Abbau / Gastro</button>{renderFieldToggle('abbau')}</div>
               </div>
             </div>
 
@@ -245,8 +280,8 @@ export default function ProfileHilfeBox({ currentProfileId, isOwner }) {
 
           {/* CONTROL STRIP */}
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-900">
-            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
-            <button type="submit" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-amber-500 text-slate-950 hover:bg-amber-400 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.3)]"><Save size={12} /> Support Einbrennen ✓</button>
+            <button type="button" data-profile-action="cancel" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
+            <button type="submit" data-profile-action="save" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-amber-500 text-slate-950 hover:bg-amber-400 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.3)]"><Save size={12} /> Speichern</button>
           </div>
         </form>
       )}

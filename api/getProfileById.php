@@ -5,6 +5,9 @@ header('Content-Type: application/json');
 require_once 'db.php';
 
 require_once("cors.php");
+require_once 'profileVisibility.php';
+
+session_start();
 
 $data = json_decode(file_get_contents("php://input"), true);
 
@@ -38,6 +41,9 @@ try {
     ]);
 
     $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($profile && (string) ($profile['id'] ?? '') !== (string) ($_SESSION['profile_id'] ?? '')) {
+        $profile = sanitizePublicProfileRow($profile);
+    }
 
     echo json_encode([
         'success' => true,

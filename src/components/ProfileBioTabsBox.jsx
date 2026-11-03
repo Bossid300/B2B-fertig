@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { FileText, Save, Eye, EyeOff, BookOpen, Briefcase, User } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { FileText, Save, BookOpen, Briefcase, User, Eye, EyeOff } from 'lucide-react';
 import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
 
@@ -7,6 +7,11 @@ export default function ProfileBioTabsBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
   const [showBio, setShowBio] = useState(true);
+  const [fieldVisibility, setFieldVisibility] = useState({
+    einleitung: true,
+    karriere: true,
+    privates: true
+  });
 
   // Dreigeteilte Text-Matrix für die Wikipedia-Struktur
   const [textMatrix, setTextMatrix] = useState({
@@ -35,6 +40,11 @@ export default function ProfileBioTabsBox({ currentProfileId, isOwner }) {
         setShowBio(
           profileData.show_bio !== false
         );
+        setFieldVisibility({
+          einleitung: profileData.show_bio_einleitung !== false,
+          karriere: profileData.show_bio_karriere !== false,
+          privates: profileData.show_bio_privates !== false
+        });
         setTextMatrix({
           einleitung:
             profileData.bio_einleitung || '',
@@ -61,7 +71,10 @@ export default function ProfileBioTabsBox({ currentProfileId, isOwner }) {
         bio_einleitung: textMatrix.einleitung,
         bio_karriere: textMatrix.karriere,
         bio_privates: textMatrix.privates,
-        show_bio: showBio
+        show_bio: showBio,
+        show_bio_einleitung: fieldVisibility.einleitung,
+        show_bio_karriere: fieldVisibility.karriere,
+        show_bio_privates: fieldVisibility.privates
       };
       const profileId =
         updatedProfile.id ||
@@ -83,63 +96,91 @@ export default function ProfileBioTabsBox({ currentProfileId, isOwner }) {
     }
   };
 
+  const toggleFieldVisibility = (field) => {
+    setFieldVisibility(prev => ({ ...prev, [field]: !prev[field] }));
+  };
+  const visibleToOthers = (field) => canEdit || fieldVisibility[field];
+  const hasVisibleBio = [
+    visibleToOthers('einleitung') && textMatrix.einleitung,
+    visibleToOthers('karriere') && textMatrix.karriere,
+    visibleToOthers('privates') && textMatrix.privates
+  ].some(Boolean);
+
+  if (!canEdit && (!showBio || !hasVisibleBio)) return null;
+
   return (
-    <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
-      {/* HEADER */}
-      <div className="flex justify-between items-center mb-6 border-b border-slate-800/60 pb-3">
-        <h2 className="text-xs font-bold text-white tracking-widest uppercase flex items-center gap-2">
-          <BookOpen className="w-4 h-4 text-amber-400" /> // Biografie & Karriere
-        </h2>
+    <div className="profile-bio w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl text-white mt-4">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-5 border-b border-slate-800/80 pb-4">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-400/10 text-violet-300">
+            <BookOpen className="h-[18px] w-[18px]" />
+          </span>
+          <div>
+            <h2 className="text-base font-semibold tracking-wide text-white">Biografie & Karriere</h2>
+            <p className="mt-0.5 text-xs text-slate-400">Persönliche Einblicke und Werdegang</p>
+          </div>
+        </div>
         {!isEditing && canEdit && (
           <button
-            onClick={() => setIsEditing(true)}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 text-[10px] font-bold rounded-xl uppercase tracking-wider transition-all border border-slate-700"
+            data-profile-edit-trigger onClick={() => setIsEditing(true)}
+            className="flex items-center gap-1.5"
           >
-            <FileText size={10} /> Texte bearbeiten
+            <FileText size={14} /> Bearbeiten
+          </button>
+        )}
+        {isEditing && canEdit && (
+          <button
+            type="button"
+            onClick={() => setShowBio(!showBio)}
+            aria-label={showBio ? 'Biografie für andere ausblenden' : 'Biografie für andere anzeigen'}
+            title={showBio ? 'Biografie für andere sichtbar' : 'Biografie privat'}
+            className="rounded-lg border border-slate-700 p-2 text-slate-300"
+          >
+            {showBio ? <Eye size={14} /> : <EyeOff size={14} />}
           </button>
         )}
       </div>
 
       {!isEditing ? (
-        // --- ANZEIGE-MODUS: Alle 3 Sektionen fest untereinander für perfekten Print-Export ---
-        <div className="space-y-6">
-          
-          {/* SEKTION 1: EINLEITUNG */}
-          <div className="p-4 bg-slate-900/10 border border-slate-800/40 rounded-xl space-y-2">
-            <div className="text-[10px] text-amber-400 font-bold uppercase tracking-wider flex items-center gap-1.5 font-mono">
-              <FileText size={12} /> // Einleitung
+        <div className="space-y-4">
+          {visibleToOthers('einleitung') && textMatrix.einleitung && <div className="rounded-xl border border-slate-700/60 bg-slate-900/40 p-4 sm:p-5">
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-violet-200">
+              <FileText size={15} /> Einleitung
             </div>
-            <p className="text-slate-300 text-xs leading-relaxed whitespace-pre-wrap font-sans">
-              {textMatrix.einleitung || 'Keine Einleitung hinterlegt.'}
+            <p className="whitespace-pre-wrap text-sm leading-7 text-slate-300">
+              {textMatrix.einleitung}
             </p>
-          </div>
+          </div>}
 
-          {/* SEKTION 2: KARRIERE */}
-          <div className="p-4 bg-slate-900/10 border border-slate-800/40 rounded-xl space-y-2">
-            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5 font-mono">
-              <Briefcase size={12} /> // Karriere
+          {visibleToOthers('karriere') && textMatrix.karriere && <div className="rounded-xl border border-slate-700/60 bg-slate-900/40 p-4 sm:p-5">
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-200">
+              <Briefcase size={15} /> Karriere
             </div>
-            <p className="text-slate-300 text-xs leading-relaxed whitespace-pre-wrap font-sans">
-              {textMatrix.karriere || 'Keine Karriere-Details angegeben.'}
+            <p className="whitespace-pre-wrap text-sm leading-7 text-slate-300">
+              {textMatrix.karriere}
             </p>
-          </div>
+          </div>}
 
-          {/* SEKTION 3: PRIVATES */}
-          <div className="p-4 bg-slate-900/10 border border-slate-800/40 rounded-xl space-y-2">
-            <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5 font-mono">
-              <User size={12} /> // Privates
+          {visibleToOthers('privates') && textMatrix.privates && <div className="rounded-xl border border-slate-700/60 bg-slate-900/40 p-4 sm:p-5">
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-200">
+              <User size={15} /> Persönliches
             </div>
-            <p className="text-slate-300 text-xs leading-relaxed whitespace-pre-wrap font-sans">
-              {textMatrix.privates || 'Keine privaten Zusatz-Infos vorhanden.'}
+            <p className="whitespace-pre-wrap text-sm leading-7 text-slate-300">
+              {textMatrix.privates}
             </p>
-          </div>
+          </div>}
 
         </div>
       ) : (
         // --- BEARBEITUNGS-MODUS: Alle 3 Textbereiche übersichtlich untereinander ---
         <form onSubmit={handleSave} className="space-y-4">
           <div>
-            <label className="block text-[10px] font-bold text-amber-400 uppercase mb-1.5 font-mono">// EINLEITUNG TEXT</label>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="block text-[10px] font-bold text-amber-400 uppercase font-mono">// EINLEITUNG TEXT</label>
+              <button type="button" onClick={() => toggleFieldVisibility('einleitung')} aria-label="Sichtbarkeit Einleitung umschalten" title="Sichtbarkeit Einleitung umschalten" className="text-slate-300">
+                {fieldVisibility.einleitung ? <Eye size={14} /> : <EyeOff size={14} />}
+              </button>
+            </div>
             <textarea
               value={textMatrix.einleitung}
               onChange={(e) => handleTextChange('einleitung', e.target.value)}
@@ -150,7 +191,12 @@ export default function ProfileBioTabsBox({ currentProfileId, isOwner }) {
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 font-mono">// KARRIERE DETAILS</label>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase font-mono">// KARRIERE DETAILS</label>
+              <button type="button" onClick={() => toggleFieldVisibility('karriere')} aria-label="Sichtbarkeit Karriere umschalten" title="Sichtbarkeit Karriere umschalten" className="text-slate-300">
+                {fieldVisibility.karriere ? <Eye size={14} /> : <EyeOff size={14} />}
+              </button>
+            </div>
             <textarea
               value={textMatrix.karriere}
               onChange={(e) => handleTextChange('karriere', e.target.value)}
@@ -161,7 +207,12 @@ export default function ProfileBioTabsBox({ currentProfileId, isOwner }) {
           </div>
 
           <div>
-            <label className="block text-[10px] font-bold text-slate-400 uppercase mb-1.5 font-mono">// PRIVATES / INSIDE INFOS</label>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase font-mono">// PRIVATES / INSIDE INFOS</label>
+              <button type="button" onClick={() => toggleFieldVisibility('privates')} aria-label="Sichtbarkeit Persönliches umschalten" title="Sichtbarkeit Persönliches umschalten" className="text-slate-300">
+                {fieldVisibility.privates ? <Eye size={14} /> : <EyeOff size={14} />}
+              </button>
+            </div>
             <textarea
               value={textMatrix.privates}
               onChange={(e) => handleTextChange('privates', e.target.value)}
@@ -175,17 +226,15 @@ export default function ProfileBioTabsBox({ currentProfileId, isOwner }) {
           <div className="flex justify-end space-x-3 pt-3 border-t border-slate-800/60">
             <button
               type="button"
-              onClick={() => setIsEditing(false)}
+              data-profile-action="cancel" onClick={() => setIsEditing(false)}
               className="flex items-center gap-1 px-4 py-1.5 border border-slate-700 text-slate-300 text-[10px] font-bold rounded-xl uppercase tracking-wider hover:bg-slate-800/40 transition-colors"
             >
               Abbrechen
             </button>
             <button
-              type="submit"
+              type="submit" data-profile-action="save"
               className="flex items-center gap-1 px-5 py-1.5 bg-[#4f46e5] hover:bg-[#4338ca] text-white text-[10px] font-bold rounded-xl uppercase tracking-wider transition-colors shadow-md"
-            >
-              <Save size={10} /> Speichern
-            </button>
+            ><Save size={12} /> Speichern</button>
           </div>
         </form>
       )}

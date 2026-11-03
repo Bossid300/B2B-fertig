@@ -159,7 +159,7 @@ useEffect(() => {
                   : inactiveClass
               }`}
             >
-              🔮 MATRIX
+              MATRIX
             </span>
 
           )
@@ -170,13 +170,13 @@ useEffect(() => {
           onClick={() => triggerNav('radar')}
           className={`${desktopBase} ${view === 'radar' ? activeClass : inactiveClass}`}
         >
-          🗣 Portfolios
+          Portfolios
         </span>
         <span
           onClick={() => triggerNav('guestEvents')}
           className={`${desktopBase} ${view === 'guestEvents' ? activeClass : inactiveClass}`}
         >
-          📅 Events
+          Events
         </span>
         <span
           onClick={() => triggerNav('calendar')}
@@ -186,19 +186,19 @@ useEffect(() => {
               : inactiveClass
           }`}
         >
-          📅 KALENDER
+          KALENDER
         </span>
         <span
           onClick={() => triggerNav('projects')}
           className={`${desktopBase} ${view === 'projects' ? activeClass : inactiveClass}`}
         >
-          📁 PROJEKTE
+          PROJEKTE
         </span>
         <span
           onClick={() => triggerNav('mediaLibrary')}
           className={`${desktopBase} ${view === 'mediaLibrary' ? activeClass : inactiveClass}`}
         >
-          🖼️ Meine Medien
+          Meine Medien
         </span>
         <span
           onClick={() => triggerNav('pricing')}
@@ -208,7 +208,7 @@ useEffect(() => {
               : inactiveClass
           }`}
         >
-          💎 PREISE
+          PREISE
         </span>     
       </div>
 

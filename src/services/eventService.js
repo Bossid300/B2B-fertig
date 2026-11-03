@@ -59,7 +59,8 @@ const getProfileData = (profile) => {
 
     return {
       ...profile,
-      ...(data || {})
+      ...(data || {}),
+      id: profile.id
     };
   } catch {
     return profile;

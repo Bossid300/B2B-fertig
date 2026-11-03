@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Eye, EyeOff, Edit3, Check, Plus, Trash2, 
   FileText, Image as ImageIcon, Users, MapPin, DollarSign, Activity 
@@ -6,6 +6,14 @@ import {
 import { getProfilesDb } from '../services/apiService';
 import { saveProfile } from '../services/apiService';
 import { eventService } from '../services/eventService';
+import {
+  getMediaAssets,
+  getMediaPreviewUrl,
+  getMediaDownloadUrl,
+  uploadMediaFile
+} from '../services/mediaService';
+
+
 
 const POWER_SUPPLY_LABELS = {
   'cee 63a': 'CEE 63A (Großbühne)',
@@ -23,80 +31,144 @@ export default function LocationRaeumeBox({ currentProfileId, isOwner, selectedR
   const [isEditing, setIsEditing] = useState(false);
   const [rooms, setRooms] = useState([]);
   const canEdit = isOwner || currentProfileId === localStorage.getItem('gigsda_profile_id');
-  
+
+  const [roomAssets, setRoomAssets] = useState([]);
+  const [selectedRoomAssetId, setSelectedRoomAssetId] = useState('');
+  const [selectedRoomSlot, setSelectedRoomSlot] = useState(null);
+  const [isRoomChooserOpen, setRoomChooserOpen] = useState(false);
+  const roomFileInputRef = useRef(null);
+
+  const [techPlanAssets, setTechPlanAssets] = useState([]);
+  const [selectedTechPlanAssetId, setSelectedTechPlanAssetId] = useState('');
+  const [selectedTechPlanRoom, setSelectedTechPlanRoom] = useState(null);
+  const [isTechPlanChooserOpen, setTechPlanChooserOpen] = useState(false);
+  const techPlanFileInputRef = useRef(null);
+
+
+
+  const handleRoomUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const asset =
+        await uploadMediaFile(file);
+      const assets =
+        await getMediaAssets();
+      setRoomAssets(
+        assets.filter(
+          asset => asset.media_type === 'image'
+        )
+      );
+      setSelectedRoomAssetId(
+        asset.id
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleTechPlanUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const uploadedAsset =
+        await uploadMediaFile(file);
+      const assets =
+        await getMediaAssets();
+      setTechPlanAssets(
+        assets.filter(
+          asset =>
+            asset.media_type === 'image' ||
+            asset.media_type === 'document'
+        )
+      );
+      setSelectedTechPlanAssetId(
+        uploadedAsset.id
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   // Hilfsfunktion zum Prüfen, ob ein Link ein Bild ist
   const isImageUrl = (url) => {
+
     if (!url) return false;
-    return url.match(/\.(jpeg|jpg|gif|png|webp|svg)/i) != null || url.startsWith('data:image/');
+
+    return (
+      url.includes('/api/media.php?preview=')
+      ||
+      url.match(/\.(jpeg|jpg|gif|png|webp|svg)/i) != null
+      ||
+      url.startsWith('data:image/')
+    );
   };
 
   // 2. DATEN-PIPELINE: Lädt Räume passend zur Arena Braunau Struktur
-useEffect(() => {
-  getProfilesDb(currentProfileId)
-    .then(profiles => {
-      const found = profiles.find(
-        p => String(p?.id) === String(currentProfileId)
-      );
+  useEffect(() => {
+    getProfilesDb(currentProfileId)
+      .then(profiles => {
+        const found = profiles.find(
+          p => String(p?.id) === String(currentProfileId)
+        );
 
-      if (!found) return;
+        if (!found) return;
 
-      console.log("FOUND", found);
+        const profileData =
+          found?.profile_json
+            ? JSON.parse(found.profile_json)
+            : found;
 
-      const profileData =
-        found?.profile_json
-          ? JSON.parse(found.profile_json)
-          : found;
+        const loadedRooms = [];
+        let index = 1;
 
-      const loadedRooms = [];
-      let index = 1;
+        while (
+          profileData[`room${index}_name`] !== undefined ||
+          profileData[`room${index}_img`] !== undefined ||
+          index <= 1
+        ) {
+          loadedRooms.push({
+            index,
+            name:
+              profileData[`room${index}_name`] ||
+              `Raum ${index}`,
+            img:
+              profileData[`room${index}_img`] || '',
+            tech_plan:
+              profileData[`room${index}_tech_plan`] || '',
+            bankett:
+              profileData[`room${index}_bankett`] || '',
+            steh:
+              profileData[`room${index}_steh`] || '',
+            theater:
+              profileData[`room${index}_theater`] || '',
+            uform:
+              profileData[`room${index}_uform`] || '',
+            area:
+              profileData[`room${index}_area`] || '',
+            power_supply:
+              profileData[`room${index}_power_supply`] || 'schuko',
+            curfew_time:
+              profileData[`room${index}_curfew_time`] || '',
+            opening_hours:
+              profileData[`room${index}_opening_hours`] || '',
+            equipment:
+              profileData[`room${index}_equipment`] || '',
+            opnv:
+              profileData[`room${index}_opnv`] || '',
+            konditionen:
+              profileData[`room${index}_konditionen`] || '',
+            isPublic:
+              profileData[`room${index}_visibility`] !== false
+          });
 
-      while (
-        profileData[`room${index}_name`] !== undefined ||
-        profileData[`room${index}_img`] !== undefined ||
-        index <= 1
-      ) {
-        loadedRooms.push({
-          index,
-          name:
-            profileData[`room${index}_name`] ||
-            `Raum ${index}`,
-          img:
-            profileData[`room${index}_img`] || '',
-          tech_plan:
-            profileData[`room${index}_tech_plan`] || '',
-          bankett:
-            profileData[`room${index}_bankett`] || '',
-          steh:
-            profileData[`room${index}_steh`] || '',
-          theater:
-            profileData[`room${index}_theater`] || '',
-          uform:
-            profileData[`room${index}_uform`] || '',
-          area:
-            profileData[`room${index}_area`] || '',
-          power_supply:
-            profileData[`room${index}_power_supply`] || 'schuko',
-          curfew_time:
-            profileData[`room${index}_curfew_time`] || '',
-          opening_hours:
-            profileData[`room${index}_opening_hours`] || '',
-          equipment:
-            profileData[`room${index}_equipment`] || '',
-          opnv:
-            profileData[`room${index}_opnv`] || '',
-          konditionen:
-            profileData[`room${index}_konditionen`] || '',
-          isPublic:
-            profileData[`room${index}_visibility`] !== false
-        });
+          index++;
+        }
 
-        index++;
-      }
-
-      setRooms(loadedRooms);
-    })
-    .catch(console.error);
-}, [currentProfileId]);
+        setRooms(loadedRooms);
+      })
+      .catch(console.error);
+  }, [currentProfileId]);
 
 
   // Input Handler
@@ -238,7 +310,7 @@ if (changedEvent) {
   };
 
   return (
-    <div className="bg-[#0b111e] rounded-2xl border border-slate-800/80 shadow-2xl p-6 mb-8 text-slate-200 font-sans">
+    <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
       
       {/* Box Header-Zeile */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/60 pb-5 mb-6">
@@ -251,17 +323,32 @@ if (changedEvent) {
 
         {/* CanEdit Weiche aus deiner Stammbox gesteuert */}
         {canEdit && (
-          <button
-            onClick={isEditing ? handleSave : () => setIsEditing(true)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all duration-200 border shadow-md ${
-              isEditing 
-                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20' 
-                : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/20'
-            }`}
-          >
-            {isEditing ? <Check size={14} /> : <Edit3 size={14} />}
-            {isEditing ? 'Änderungen Speichern' : 'Bearbeiten'}
-          </button>
+          isEditing ? (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                data-profile-action="cancel"
+                onClick={() => setIsEditing(false)}
+              >
+                Abbrechen
+              </button>
+              <button
+                type="button"
+                data-profile-action="save"
+                onClick={handleSave}
+              >
+                <Check size={14} /> Speichern
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              data-profile-edit-trigger
+              onClick={() => setIsEditing(true)}
+            >
+              <Edit3 size={14} /> Bearbeiten
+            </button>
+          )
         )}
       </div>
 
@@ -344,6 +431,7 @@ if (changedEvent) {
                   )}
                 </div>
                 {isEditing && (
+                  <>
                   <input 
                     type="text"
                     placeholder="Bild-URL einfügen (https://...)"
@@ -351,6 +439,29 @@ if (changedEvent) {
                     onChange={(e) => handleInputChange(room.index, 'img', e.target.value)}
                     className="bg-[#070b12] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-cyan-500 w-full"
                   />
+                  <button
+                    type="button"
+                    onClick={async () => {
+
+                      setSelectedRoomSlot(room.index);
+
+                    const assets =
+                      await getMediaAssets();
+
+                      setRoomAssets(
+                        assets.filter(
+                          a => a.media_type === 'image'
+                        )
+                      );
+
+                      setRoomChooserOpen(true);
+
+                    }}
+                    className="w-full rounded-lg border border-pink-500/30 p-2 text-pink-400"
+                  >
+                    Bild wählen
+                  </button>  
+                  </>                
                 )}
               </div>
 
@@ -358,6 +469,7 @@ if (changedEvent) {
               <div className="flex flex-col gap-2">
                 <span className="text-xs font-semibold text-slate-400 flex items-center gap-1.5"><FileText size={12} /> Bühnenplan & Stromnetz-Matrix</span>
                 <div className="bg-[#070b12] rounded-xl border border-slate-800/80 overflow-hidden h-64 flex items-center justify-center relative">
+
                   {room.tech_plan ? (
                     isImageUrl(room.tech_plan) ? (
                       <img src={room.tech_plan} alt="Technischer Plan" className="w-full h-full object-contain bg-black/20" />
@@ -387,6 +499,7 @@ if (changedEvent) {
                   )}
                 </div>
                 {isEditing && (
+                  <>
                   <input 
                     type="text"
                     placeholder="Plan-URL (Bild oder PDF-Link) einfügen (https://...)"
@@ -394,6 +507,31 @@ if (changedEvent) {
                     onChange={(e) => handleInputChange(room.index, 'tech_plan', e.target.value)}
                     className="bg-[#070b12] border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-cyan-500 w-full"
                   />
+                  <button
+                    type="button"
+                    onClick={async () => {
+
+                      setSelectedTechPlanRoom(room.index);
+
+                      const assets =
+                        await getMediaAssets();
+
+                      setTechPlanAssets(
+                        assets.filter(
+                          asset =>
+                            asset.media_type === 'image' ||
+                            asset.media_type === 'document'
+                        )
+                      );
+
+                      setTechPlanChooserOpen(true);
+
+                    }}
+                    className="w-full rounded-lg border border-pink-500/30 p-2 text-pink-400"
+                  >
+                    Plan wählen
+                  </button>
+                  </>
                 )}
               </div>
             </div>
@@ -538,6 +676,239 @@ if (changedEvent) {
           </div>
         ))}
       </div>
+
+
+      {isRoomChooserOpen && (
+      <div className="fixed inset-0 z-[10000] bg-black/70 backdrop-blur-sm flex items-center justify-center">
+
+        <div className="bg-slate-950 border border-cyan-500/30 rounded-3xl p-6">
+
+          <h3 className="text-white text-xl mb-4">
+            Galeriebild wählen
+          </h3>
+
+          <input
+            ref={roomFileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleRoomUpload}
+          />
+
+          <button
+            type="button"
+            onClick={() => roomFileInputRef.current?.click()}
+            className="w-full rounded-xl border border-cyan-500/40 p-3 text-cyan-300 mb-6"
+          >
+            Neues Bild hochladen
+          </button>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+            {roomAssets.map(asset => (
+
+              <button
+                key={asset.id}
+                type="button"
+                onClick={() =>
+                  setSelectedRoomAssetId(asset.id)
+                }
+                className={`overflow-hidden rounded-xl border ${
+                  selectedRoomAssetId === asset.id
+                    ? 'border-cyan-400'
+                    : 'border-slate-800'
+                }`}
+              >
+
+                <img
+                  src={getMediaPreviewUrl(asset.id)}
+                  alt={asset.original_filename}
+                  className="aspect-square w-full object-cover"
+                />
+
+                <span className="block truncate p-2 text-[10px] text-slate-300">
+                  {asset.original_filename}
+                </span>
+
+              </button>
+
+            ))}
+          </div>
+          <div className="mt-6 flex justify-end gap-3">
+
+            <button
+              type="button"
+              onClick={() =>
+                setRoomChooserOpen(false)
+              }
+              className="rounded-xl border border-slate-700 px-4 py-2"
+            >
+              Schließen
+            </button>
+            <button
+              type="button"
+              disabled={!selectedRoomAssetId}
+              onClick={() => {
+
+                const asset =
+                  roomAssets.find(
+                    a => a.id === selectedRoomAssetId
+                  );
+
+                if (!asset) return;
+
+                const mediaUrl =
+                  getMediaPreviewUrl(asset.id);
+
+                  setRooms(prev =>
+                    prev.map((item) =>
+                      item.index === selectedRoomSlot
+                        ? {
+                            ...item,
+                            img: mediaUrl
+                          }
+                        : item
+                    )
+                  );
+
+                  setRoomChooserOpen(false);
+
+              }}
+              className="rounded-xl bg-cyan-500 px-4 py-2 text-slate-950 font-bold"
+            >
+              Übernehmen
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+      )}      
+
+      {isTechPlanChooserOpen && (
+      <div className="fixed inset-0 z-[10000] bg-black/70 backdrop-blur-sm flex items-center justify-center">
+
+        <div className="bg-slate-950 border border-cyan-500/30 rounded-3xl p-6">
+
+          <h3 className="text-white text-xl mb-4">
+            Technischen Plan wählen
+          </h3>
+          <input
+            ref={techPlanFileInputRef}
+            type="file"
+            accept="image/*,.pdf,.doc,.docx"
+            className="hidden"
+            onChange={handleTechPlanUpload}
+          />
+
+          <button
+            type="button"
+            onClick={() =>
+              techPlanFileInputRef.current?.click()
+            }
+            className="w-full rounded-xl border border-cyan-500/40 p-3 text-cyan-300 mb-6"
+          >
+            Neue Datei hochladen
+          </button>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+            {techPlanAssets.map(asset => (
+
+              <button
+                key={asset.id}
+                type="button"
+                onClick={() =>
+                  setSelectedTechPlanAssetId(asset.id)
+                }
+                className={`overflow-hidden rounded-xl border ${
+                  selectedTechPlanAssetId === asset.id
+                    ? 'border-cyan-400'
+                    : 'border-slate-800'
+                }`}
+              >
+
+                <div className="aspect-square flex items-center justify-center bg-slate-900">
+
+                  {asset.media_type === 'image' ? (
+
+                    <img
+                      src={getMediaPreviewUrl(asset.id)}
+                      alt={asset.original_filename}
+                      className="w-full h-full object-cover"
+                    />
+
+                  ) : (
+
+                    <div className="text-cyan-400 text-xs font-bold">
+                      PDF / DOC
+                    </div>
+
+                  )}
+
+                </div>
+
+                <span className="block truncate p-2 text-[10px] text-slate-300">
+                  {asset.original_filename}
+                </span>
+
+              </button>
+
+            ))}
+
+          </div>
+
+          <div className="mt-6 flex justify-end gap-3">
+
+            <button
+              type="button"
+              onClick={() =>
+                setTechPlanChooserOpen(false)
+              }
+              className="rounded-xl border border-slate-700 px-4 py-2"
+            >
+              Schließen
+            </button>
+            <button
+              type="button"
+              disabled={!selectedTechPlanAssetId}
+              onClick={() => {
+
+                const asset =
+                  techPlanAssets.find(
+                    a => a.id === selectedTechPlanAssetId
+                  );
+
+                if (!asset) return;
+
+                const mediaUrl =
+                  asset.media_type === 'image'
+                    ? getMediaPreviewUrl(asset.id)
+                    : getMediaDownloadUrl(asset.id);
+
+                setRooms(prev =>
+                  prev.map(item =>
+                    item.index === selectedTechPlanRoom
+                      ? {
+                          ...item,
+                          tech_plan: mediaUrl
+                        }
+                      : item
+                  )
+                );
+
+                setTechPlanChooserOpen(false);
+
+              }}
+              className="rounded-xl bg-cyan-500 px-4 py-2 text-slate-950 font-bold"
+            >
+              Übernehmen
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+      )}
 
       {/* Plus-Button unten */}
       {isEditing && (

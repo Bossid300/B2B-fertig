@@ -6,9 +6,12 @@ import { saveCrewRequest } from './services/apiService';
 import { eventService } from './services/eventService';
 import { distanceKm, geocodeAddress } from './services/geoService';
 import SearchMap from './components/maps/SearchMap';
+import PortfolioRouter from './components/portfolio/PortfolioRouter';
+import LocationProfile from './LocationProfile';
 
 export default function SearchExplorer({
   onNavigate,
+  onOpenProfile,
   onOpenPortfolio,
   setFavorites,
   setActiveChat,
@@ -27,6 +30,9 @@ export default function SearchExplorer({
   const [profileView, setProfileView] = useState('live');
   const [viewMode, setViewMode] = useState('list');
   const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedProfile, setSelectedProfile] = useState(null);
+  const [selectedPortfolio, setSelectedPortfolio] = useState(null);
+
   useEffect(() => {
   }, [selectedUser]);
 
@@ -635,34 +641,24 @@ return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredUsers.length > 0 ? (
             filteredUsers.map((user, index) => (
-              <ProfileCard
-                key={`${user.id || 'user'}-${index}`}
-                user={user}
-                isGuest={!isLoggedIn}
-/*                 
-                onProfile={() => {
-                  localStorage.setItem(
-                    'gigsda_active_guest_profile_id',
-                    user.id
-                  );
-                  if (typeof setFavorites === 'function') {
-                    setFavorites(user);
-                  }
-                }}
 
- */
-onProfile={() => {
-  handleOpenPortfolio(user);
-}}
+            <ProfileCard
+              key={`${user.id || 'user'}-${index}`}
+              user={user}
+              isGuest={!isLoggedIn}
 
+              onProfile={() => setSelectedProfile(user)}
 
-                onRequest={() => {
-                  setActiveRequestUser(user);
-                  setRequestText(
-                    `Hallo ${user.name}, wir hätten Interesse an einer B2B-Zusammenarbeit für ein anstehendes Event in Region Gigsda!`
-                  );
-                }}
-              />
+              onPortfolio={() => setSelectedPortfolio(user)}
+
+              onRequest={() => {
+                setActiveRequestUser(user);
+                setRequestText(
+                  `Hallo ${user.name}, wir hätten Interesse an einer B2B-Zusammenarbeit für ein anstehendes Event in Region Gigsda!`
+                );
+              }}
+            />
+
             ))
           ) : (
             <div className="col-span-full bg-slate-900/10 border border-dashed border-slate-900 rounded-2xl p-12 text-center text-sm text-slate-600 font-mono">
@@ -718,22 +714,10 @@ onProfile={() => {
                     <ProfileCard
                       user={selectedUser}
                       isGuest={!isLoggedIn}
-/*                       
-                      onProfile={() => {
-                        localStorage.setItem(
-                          'gigsda_active_guest_profile_id',
-                          selectedUser.id
-                        );
 
-                        if (typeof setFavorites === 'function') {
-                          setFavorites(selectedUser);
-                        }
-                      }}
+                      onProfile={() => onOpenProfile(selectedUser.id)}
 
- */
-onProfile={() => {
-  handleOpenPortfolio(selectedUser);
-}}
+                      onPortfolio={() => onOpenPortfolio(selectedUser.id)}
 
                       onRequest={() => {
                         setActiveRequestUser(selectedUser);
@@ -819,6 +803,47 @@ onProfile={() => {
             </div>
 
           </div>
+        </div>
+      )}
+
+      {selectedPortfolio && (
+        <div className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-6">
+
+          <button
+            onClick={() => setSelectedPortfolio(null)}
+            className="absolute top-4 right-4 z-[10000] bg-slate-900 border border-cyan-500/30 rounded-full w-10 h-10"
+          >
+            ✕
+          </button>
+
+          <div className="w-full h-full overflow-auto rounded-2xl">
+            <PortfolioRouter
+              profileId={selectedPortfolio.id}
+            />
+          </div>
+
+        </div>
+      )}
+
+      {selectedProfile && (
+        <div className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center p-6">
+
+          <button
+            onClick={() => setSelectedProfile(null)}
+            className="absolute top-4 right-4 z-[10000] bg-slate-900 border border-cyan-500/30 rounded-full w-10 h-10"
+          >
+            ✕
+          </button>
+
+          <div className="w-full h-full max-w-6xl overflow-auto rounded-2xl">
+            
+            <LocationProfile
+              currentProfileId={selectedProfile.id}
+              isOwner={false}
+            />
+
+          </div>
+
         </div>
       )}
 

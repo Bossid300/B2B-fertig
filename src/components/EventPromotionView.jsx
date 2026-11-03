@@ -271,6 +271,17 @@ export default function EventPromotionView({
       "
       onClick={onClose}
     >
+
+        {/* SCHLIESSEN */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Eventansicht schließen"
+          className="absolute top-4 right-4 z-[10000] bg-slate-900 border border-cyan-500/30 rounded-full w-10 h-10"
+        >
+          ✕
+        </button>   
+
       <div
         role="dialog"
         aria-modal="true"
@@ -290,42 +301,25 @@ export default function EventPromotionView({
         onClick={(e) => e.stopPropagation()}
       >
 
-        {/* SCHLIESSEN */}
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Eventansicht schließen"
-          className="
-            absolute
-            top-4
-            right-4
-            z-30
-            w-10
-            h-10
-            rounded-full
-            bg-slate-950/90
-            border
-            border-slate-700
-            text-slate-300
-            hover:text-white
-            hover:border-cyan-400
-            transition
-          "
-        >
-          ×
-        </button>
+
 
 
         {/* HERO */}
         <section className="relative overflow-hidden rounded-t-2xl">
 
-          {image ? (
-            <img
-              src={image}
-              alt={title}
-              className="w-full h-[380px] sm:h-[500px] object-cover"
+        {image ? (
+          <div className="relative w-full h-[300px] sm:h-[540px]">
+            {/* Das eigentliche Bild */}
+            <img 
+              src={image} 
+              alt={title} 
+              className="w-full object-cover"
             />
-          ) : (
+            {/* Dunkler Übergang/Verlauf von unten nach oben */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/100 via-black/40 to-transparent" />
+          </div>
+        ) : (
+
             <div
               className="
                 w-full
@@ -349,18 +343,24 @@ export default function EventPromotionView({
               sm:p-10
             "
           >
-            <div
-              className="
-                text-[10px]
-                uppercase
-                tracking-[0.3em]
-                text-cyan-400
-                font-black
-                mb-3
-              "
-            >
-              GIGSDA EVENT
-            </div>
+          <div
+            className="
+              text-[10px]
+              uppercase
+              tracking-[0.3em]
+              text-cyan-400
+              font-black
+              mb-3
+            "
+            style={{
+              textShadow: `
+                0 2px 4px rgba(0,0,0,.9),
+                0 4px 12px rgba(0,0,0,.8)
+              `
+            }}
+          >
+            GIGSDA EVENT
+          </div>
 
             <h2
               id="event-promotion-title"
@@ -371,6 +371,12 @@ export default function EventPromotionView({
                 text-white
                 leading-tight
               "
+              style={{
+                textShadow: `
+                  0 2px 4px rgba(0,0,0,.9),
+                  0 4px 12px rgba(0,0,0,.8)
+                `
+              }}
             >
               {title}
             </h2>

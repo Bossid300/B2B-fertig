@@ -10,6 +10,8 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
   const [profileData, setProfileData] = useState(null);
   const [skills, setSkills] = useState([]);
   const [certificates, setCertificates] = useState([]);
+  const [skillVisibility, setSkillVisibility] = useState([]);
+  const [certificateVisibility, setCertificateVisibility] = useState([]);
   const [showSkills, setShowSkills] = useState(true);
   const [showCertificates, setShowCertificates] = useState(true);
 
@@ -48,6 +50,16 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
             ? profile.certificates
             : []
         );
+        setSkillVisibility(
+          Array.isArray(profile.skills_visibility)
+            ? profile.skills_visibility
+            : (profile.skills || []).map(() => true)
+        );
+        setCertificateVisibility(
+          Array.isArray(profile.certificate_visibility)
+            ? profile.certificate_visibility
+            : (profile.certificates || []).map(() => true)
+        );
 
         setShowSkills(
           profile.show_skills !== false
@@ -66,6 +78,7 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
     if (!newSkill.trim()) return;
     if (!skills.includes(newSkill.trim())) {
       setSkills(prev => [...prev, newSkill.trim()]);
+      setSkillVisibility(prev => [...prev, true]);
     }
     setNewSkill('');
   };
@@ -74,16 +87,19 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
     if (!newCert.trim()) return;
     if (!certificates.includes(newCert.trim())) {
       setCertificates(prev => [...prev, newCert.trim()]);
+      setCertificateVisibility(prev => [...prev, true]);
     }
     setNewCert('');
   };
 
   const removeSkill = (indexToRemove) => {
     setSkills(prev => prev.filter((_, idx) => idx !== indexToRemove));
+    setSkillVisibility(prev => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
   const removeCert = (indexToRemove) => {
     setCertificates(prev => prev.filter((_, idx) => idx !== indexToRemove));
+    setCertificateVisibility(prev => prev.filter((_, idx) => idx !== indexToRemove));
   };
 
   // 2. SAVE PIPELINE: Sichert die Änderungen
@@ -96,6 +112,8 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
 
         skills,
         certificates,
+        skills_visibility: skillVisibility,
+        certificate_visibility: certificateVisibility,
 
         show_skills: showSkills,
         show_certificates: showCertificates
@@ -137,6 +155,12 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
     );
   }
 
+  const showPublicSkills = showSkills || canEdit;
+  const showPublicCertificates = showCertificates || canEdit;
+  const visibleSkills = skills.filter((_, index) => canEdit || (showSkills && skillVisibility[index] !== false));
+  const visibleCertificates = certificates.filter((_, index) => canEdit || (showCertificates && certificateVisibility[index] !== false));
+  if (!canEdit && visibleSkills.length === 0 && visibleCertificates.length === 0) return null;
+
   return (
     <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
       
@@ -150,7 +174,7 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
         {canEdit && !isEditing && (
           <button 
             type="button" 
-            onClick={() => setIsEditing(true)} 
+            data-profile-edit-trigger onClick={() => setIsEditing(true)}
             className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-cyan-400 text-[10px] font-black tracking-wider uppercase hover:border-cyan-500 transition-all cursor-pointer"
           >
             ✏️ Bearbeiten
@@ -163,43 +187,35 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
           {/* SKILLS DISPLAY */}
-          <div className="space-y-2">
+          {showPublicSkills && visibleSkills.length > 0 && <div className="space-y-2">
             <div className="flex justify-between items-center border-b border-slate-900 pb-1">
               <span className="text-[10px] text-slate-500 font-bold uppercase">// Kompetenzen</span>
               {canEdit && (showSkills ? <Eye size={12} className="text-cyan-500/50" /> : <EyeOff size={12} className="text-slate-700" />)}
             </div>
             <div className="flex flex-wrap gap-1.5 pt-1">
-              {skills.length > 0 ? (
-                skills.map((s, idx) => (
+              {visibleSkills.map((s, idx) => (
                   <span key={idx} className="px-2.5 py-1 text-[12px] bg-slate-900 border border-slate-800 text-slate-300 rounded-md font-bold uppercase tracking-wide">
                     ⚡ {s}
                   </span>
-                ))
-              ) : (
-                <span className="text-xs text-slate-600 font-mono">// KEINE SKILLS HINTERLEGT</span>
-              )}
+                ))}
             </div>
-          </div>
+          </div>}
 
           {/* CERTIFICATES DISPLAY */}
-          <div className="space-y-2">
+          {showPublicCertificates && visibleCertificates.length > 0 && <div className="space-y-2">
             <div className="flex justify-between items-center border-b border-slate-900 pb-1">
               <span className="text-[10px] text-slate-500 font-bold uppercase">// NACHWEISE</span>
               {canEdit && (showCertificates ? <Eye size={12} className="text-cyan-500/50" /> : <EyeOff size={12} className="text-slate-700" />)}
             </div>
             <div className="flex flex-col gap-1.5 pt-1">
-              {certificates.length > 0 ? (
-                certificates.map((c, idx) => (
+              {visibleCertificates.map((c, idx) => (
                   <div key={idx} className="flex items-center gap-2 p-2 bg-slate-900/40 border border-slate-800 rounded-xl text-xs text-cyan-400">
                     <ShieldAlert size={12} className="text-cyan-500/70" />
                     <span className="font-bold tracking-wide uppercase">{c}</span>
                   </div>
-                ))
-              ) : (
-                <span className="text-xs text-slate-600 font-mono">// KEINE ZERTIFIKATE HINTERLEGT</span>
-              )}
+                ))}
             </div>
-          </div>
+          </div>}
 
         </div>
       ) : (
@@ -234,6 +250,7 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
                 {skills.map((s, idx) => (
                   <div key={idx} className="flex items-center gap-1 px-2 py-1 text-[10px] bg-slate-900 border border-cyan-900/30 text-slate-200 rounded-md font-bold uppercase">
                     <span>{s}</span>
+                    <button type="button" onClick={() => setSkillVisibility(prev => prev.map((visible, itemIndex) => itemIndex === idx ? !visible : visible))} aria-label="Sichtbarkeit Kompetenz umschalten" title={skillVisibility[idx] === false ? 'Für andere ausgeblendet' : 'Für andere sichtbar'} className="text-slate-400 hover:text-white">{skillVisibility[idx] === false ? <EyeOff size={11} /> : <Eye size={11} />}</button>
                     <button type="button" onClick={() => removeSkill(idx)} className="text-slate-500 hover:text-rose-400 ml-1 cursor-pointer"><X size={10} /></button>
                   </div>
                 ))}
@@ -273,7 +290,7 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
                       <ShieldAlert size={12} className="text-cyan-500/40" />
                       <span className="uppercase font-bold tracking-wide">{c}</span>
                     </div>
-                    <button type="button" onClick={() => removeCert(idx)} className="text-slate-500 hover:text-rose-400 cursor-pointer"><X size={12} /></button>
+                    <div className="flex items-center gap-2"><button type="button" onClick={() => setCertificateVisibility(prev => prev.map((visible, itemIndex) => itemIndex === idx ? !visible : visible))} aria-label="Sichtbarkeit Nachweis umschalten" title={certificateVisibility[idx] === false ? 'Für andere ausgeblendet' : 'Für andere sichtbar'} className="text-slate-400 hover:text-white">{certificateVisibility[idx] === false ? <EyeOff size={11} /> : <Eye size={11} />}</button><button type="button" onClick={() => removeCert(idx)} className="text-slate-500 hover:text-rose-400 cursor-pointer"><X size={12} /></button></div>
                   </div>
                 ))}
               </div>
@@ -283,8 +300,8 @@ export default function ProfileSkillBox({ currentProfileId, isOwner }) {
 
           {/* CONTROL STRIP */}
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-900">
-            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
-            <button type="submit" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-cyan-600 text-slate-950 hover:bg-cyan-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.3)]"><Save size={12} /> Einbrennen ✓</button>
+            <button type="button" data-profile-action="cancel" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
+            <button type="submit" data-profile-action="save" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-cyan-600 text-slate-950 hover:bg-cyan-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.3)]"><Save size={12} /> Speichern</button>
           </div>
         </form>
       )}

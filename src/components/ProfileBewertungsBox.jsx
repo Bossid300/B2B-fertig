@@ -190,6 +190,7 @@ const profileName =
   const averageStars = reviewsList.length > 0 
     ? (reviewsList.reduce((acc, r) => acc + r.stars, 0) / reviewsList.length).toFixed(1) 
     : '0.0';
+  if (!isVisible || (!canEditPrivacy && reviewsList.length === 0)) return null;
 
   return (
     <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
@@ -225,7 +226,7 @@ const profileName =
               </div>
               <button 
                 type="button" 
-                onClick={() => setIsEditing(true)} 
+                data-profile-edit-trigger onClick={() => setIsEditing(true)}
                 className="px-3 py-1 rounded-xl bg-emerald-500 text-slate-950 text-[10px] font-black tracking-wider uppercase hover:bg-emerald-400 transition-all cursor-pointer shrink-0"
               >
                 ★ Jetzt Bewerten
@@ -234,9 +235,7 @@ const profileName =
           )}
 
           {/* REZENSIONEN LISTE (BEGRENZT AUF DIE NEUESTEN 3) */}
-          {!isVisible ? (
-            <div className="p-4 bg-slate-900/10 border border-slate-900 rounded-xl text-center text-xs text-slate-600 font-mono uppercase tracking-wide">// REZENSIONEN VOM INHABER AUSGEBLENDET</div>
-          ) : (
+          {isVisible && (
             <div className="space-y-2.5">
               {reviewsList.length > 0 ? (
                 reviewsList.slice(0, 3).map((rev, idx) => (
@@ -287,8 +286,8 @@ const profileName =
 
           {/* CONTROL STRIP */}
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-900">
-            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
-            <button type="submit" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-amber-400 text-slate-950 hover:bg-amber-300 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(251,191,36,0.3)]"><Save size={12} /> Bewertung Einbrennen ✓</button>
+            <button type="button" data-profile-action="cancel" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
+            <button type="submit" data-profile-action="save" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-amber-400 text-slate-950 hover:bg-amber-300 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(251,191,36,0.3)]"><Save size={12} /> Speichern</button>
           </div>
         </form>
       )}

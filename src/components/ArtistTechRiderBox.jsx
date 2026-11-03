@@ -230,15 +230,32 @@ export default function ArtistTechRiderBox({ currentProfileId, isOwner }) {
         </div>
 
         {canEdit && (
-          <button
-            onClick={isEditing ? handleSave : () => setIsEditing(true)}
-            className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider border ${
-              isEditing ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
-            }`}
-          >
-            {isEditing ? <Check size={10} /> : <Edit3 size={10} />}
-            {isEditing ? 'Speichern' : 'Bearbeiten'}
-          </button>
+          isEditing ? (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                data-profile-action="cancel"
+                onClick={() => setIsEditing(false)}
+              >
+                Abbrechen
+              </button>
+              <button
+                type="button"
+                data-profile-action="save"
+                onClick={handleSave}
+              >
+                <Check size={10} /> Speichern
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              data-profile-edit-trigger
+              onClick={() => setIsEditing(true)}
+            >
+              <Edit3 size={10} /> Bearbeiten
+            </button>
+          )
         )}
       </div>
 

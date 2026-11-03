@@ -32,15 +32,12 @@ const canEditPrivacy = isOwner || currentProfileId === localStorage.getItem( 'gi
         setShowProjects(
           profile.show_projects !== false
         );
-        if (found) {
-          setProfile(found);
-          setShowProjects(found.show_projects !== false);
 
           // Alle denkbaren Namensvariationen des aktuellen Profils sammeln
           const nameVariations = [
-            (found.name || '').trim().toLowerCase(),
-            (found.Klarname || '').trim().toLowerCase(),
-            (found.project_name || '').trim().toLowerCase()
+            (profile.name || '').trim().toLowerCase(),
+            (profile.Klarname || '').trim().toLowerCase(),
+            (profile.project_name || '').trim().toLowerCase()
           ].filter(v => v !== '');
 
           const allEvents = eventService.getEvents();
@@ -76,7 +73,6 @@ const canEditPrivacy = isOwner || currentProfileId === localStorage.getItem( 'gi
           }
           setProjects(joinedProjects);
           setCrewCounts(counts);
-        }   // <-- schließt if(found)
       })
       .catch((e) => {
         console.error(
@@ -125,6 +121,7 @@ const toggleProjectPrivacy = async () => {
   }
 
   const isVisible = showProjects || canEditPrivacy;
+  if (!isVisible || (!canEditPrivacy && projects.length === 0)) return null;
 
   return (
     <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
@@ -148,9 +145,7 @@ const toggleProjectPrivacy = async () => {
       </div>
 
       {/* TIMELINE LISTE */}
-      {!isVisible ? (
-        <div className="p-4 bg-slate-900/10 border border-slate-900 rounded-xl text-center text-xs text-slate-600 font-mono uppercase tracking-wide">// PROJEKTMATRIZ VOM PROTOKOLL-INHABER GESPERRT (NDA)</div>
-      ) : (
+      {isVisible && (
         <div className="space-y-2.5">
           {projects.length > 0 ? (
             projects.map((prj, idx) => {

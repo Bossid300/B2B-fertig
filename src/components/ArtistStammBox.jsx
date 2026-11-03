@@ -129,7 +129,7 @@ export default function ArtistStammBox({ currentProfileId, isOwner }) {
         </h2>
         {!isEditing && isOwner && (
           <button
-            onClick={() => setIsEditing(true)}
+            data-profile-edit-trigger onClick={() => setIsEditing(true)}
             className="flex items-center gap-1.5 px-4 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold rounded uppercase tracking-wider transition-all border border-slate-700"
           >
             <Edit2 size={10} /> Bearbeiten
@@ -313,17 +313,15 @@ export default function ArtistStammBox({ currentProfileId, isOwner }) {
           <div className="flex justify-end space-x-3 pt-4 border-t border-slate-800/60">
             <button
               type="button"
-              onClick={() => setIsEditing(false)}
+              data-profile-action="cancel" onClick={() => setIsEditing(false)}
               className="flex items-center gap-1 px-4 py-1.5 border border-slate-700 text-slate-300 text-[10px] font-bold rounded uppercase tracking-wider hover:bg-slate-800/40 transition-colors"
             >
               <X size={10} /> Abbrechen
             </button>
             <button
-              type="submit"
+              type="submit" data-profile-action="save"
               className="flex items-center gap-1 px-5 py-1.5 bg-[#4f46e5] hover:bg-[#4338ca] text-white text-[10px] font-bold rounded uppercase tracking-wider transition-colors shadow-md"
-            >
-              <Save size={10} /> Speichern
-            </button>
+            ><Save size={12} /> Speichern</button>
           </div>
         </form>
       )}

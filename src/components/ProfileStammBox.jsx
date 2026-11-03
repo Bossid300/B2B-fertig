@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Pencil, Save, User, Eye, EyeOff, Image, Check } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Pencil, Save, User, Eye, EyeOff, Image } from 'lucide-react';
 import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
 import { geocodeAddress } from '../services/geoService';
@@ -7,7 +7,8 @@ import {
   getMediaAssets,
   getMediaAvatarUrl,
   getMediaPreviewUrl,
-  setProfileAvatar
+  setProfileAvatar,
+  uploadMediaFile
 } from '../services/mediaService';
 
 export default function ProfileStammBox({ currentProfileId, isOwner }) {
@@ -16,12 +17,17 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
   const [profile, setProfile] = useState(null);
 
   const [formData, setFormData] = useState({});
-  const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
   const [avatarImages, setAvatarImages] = useState([]);
   const [selectedAvatarId, setSelectedAvatarId] = useState('');
   const [isLoadingAvatarImages, setIsLoadingAvatarImages] = useState(false);
   const [isSettingAvatar, setIsSettingAvatar] = useState(false);
   const [avatarPickerError, setAvatarPickerError] = useState('');
+
+  const [isAvatarChooserOpen,
+        setIsAvatarChooserOpen] =
+        useState(false);
+
+  const fileInputRef = useRef(null);
 
   const canEdit = isOwner || currentProfileId === localStorage.getItem( 'gigsda_profile_id' );
 
@@ -51,6 +57,7 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
         const mergedProfile = {
           ...profileFields,
           ...profileData,
+          id: found.id,
           role: found.role,
           type: found.type
         };
@@ -81,13 +88,19 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
           show_Klarname: mergedProfile.show_Klarname !== false,
           show_name: mergedProfile.show_name !== false,
           show_name_real: mergedProfile.show_name_real !== false,
+          show_vorname: mergedProfile.show_vorname !== false && mergedProfile.show_name_real !== false,
+          show_nachname: mergedProfile.show_nachname !== false && mergedProfile.show_name_real !== false,
           show_phone: mergedProfile.show_phone !== false,
           show_email: mergedProfile.show_email !== false,
           show_address: mergedProfile.show_address !== false,
+          show_street: mergedProfile.show_street !== false && mergedProfile.show_address !== false,
+          show_plz: mergedProfile.show_plz !== false && mergedProfile.show_address !== false,
+          show_city: mergedProfile.show_city !== false && mergedProfile.show_address !== false,
           show_website: mergedProfile.show_website !== false,
           show_genre: mergedProfile.show_genre !== false,
           show_description: mergedProfile.show_description !== false,
           show_avatarUrl: mergedProfile.show_avatarUrl !== false,
+          show_stamm: mergedProfile.show_stamm !== false,
 
           is_demo: mergedProfile.is_demo === true
         });
@@ -110,24 +123,22 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   const toggleVisibility = (fieldName) => {
-    setFormData(prev => ({ ...prev, [fieldName]: !prev[fieldName] }));
+    setFormData(prev => {
+      const next = { ...prev, [fieldName]: !prev[fieldName] };
+      if (next[fieldName] && fieldName !== 'show_stamm') {
+        next.show_stamm = true;
+      }
+      if (next[fieldName] && ['show_vorname', 'show_nachname'].includes(fieldName)) {
+        next.show_name_real = true;
+      }
+      if (next[fieldName] && ['show_street', 'show_plz', 'show_city'].includes(fieldName)) {
+        next.show_address = true;
+      }
+      return next;
+    });
   };
 
-  const openAvatarPicker = async () => {
-    setIsAvatarPickerOpen(true);
-    setAvatarPickerError('');
-    setSelectedAvatarId(formData.avatarMediaId || '');
-    setIsLoadingAvatarImages(true);
 
-    try {
-      const assets = await getMediaAssets();
-      setAvatarImages(assets.filter(asset => asset.media_type === 'image'));
-    } catch (error) {
-      setAvatarPickerError(error.message || 'Bilder konnten nicht geladen werden.');
-    } finally {
-      setIsLoadingAvatarImages(false);
-    }
-  };
 
   const handleSetAvatar = async () => {
     if (!selectedAvatarId || isSettingAvatar) return;
@@ -148,7 +159,7 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
         avatarMediaId: selectedAvatarId,
         avatarMediaUrl
       }));
-      setIsAvatarPickerOpen(false);
+      setIsAvatarChooserOpen(false);
     } catch (error) {
       setAvatarPickerError(error.message || 'Avatar konnte nicht gesetzt werden.');
     } finally {
@@ -160,9 +171,20 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
   const handleSave = async (e) => {
     e.preventDefault();
       try {
+        const profileId = String(
+      currentProfileId ||
+      profile?.id ||
+          localStorage.getItem('gigsda_profile_id') ||
+          ''
+        );
+        if (!profileId) {
+          throw new Error('Profil-ID fehlt; Stammdaten können nicht gespeichert werden.');
+        }
+
         const updatedProfile = {
           ...profile,
-          ...formData
+          ...formData,
+          id: profileId
         };
 
         updatedProfile.name =
@@ -181,13 +203,6 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
           updatedProfile.lat = geo.lat;
           updatedProfile.lng = geo.lng;
         }
-
-        const profileId =
-          updatedProfile.id ||
-          updatedProfile.profileId ||
-          localStorage.getItem(
-            'gigsda_profile_id'
-          );
 
         await saveProfile({
           profileId,
@@ -216,22 +231,24 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
   }
 
   const { 
-    category, Klarname, name, vorname, nachname, plz, city, street, phone, email, website, genre, id, description, avatarUrl, avatarMediaUrl,
-    show_category, show_Klarname, show_name, show_name_real, show_phone, show_email, show_address, show_website, show_genre, show_description, show_avatarUrl
+    category, Klarname, vorname, nachname, plz, city, street, phone, email, website, genre, id, description, avatarUrl, avatarMediaUrl,
+    show_category, show_Klarname, show_vorname, show_nachname, show_phone, show_email, show_address, show_street, show_plz, show_city, show_website, show_genre, show_description, show_avatarUrl, show_stamm
   } = formData;
 
 
 
-const displayName =
-  `${vorname || ''} ${nachname || ''}`.trim() ||
-  "User";
+  const displayName =
+    `${(show_vorname || canEdit) ? vorname || '' : ''} ${(show_nachname || canEdit) ? nachname || '' : ''}`.trim() ||
+    'User';
 
 
 
-  const EyeToggle = ({ active, flagName }) => (
+  const renderEyeToggle = (active, flagName) => (
     <button
       type="button"
       onClick={() => toggleVisibility(flagName)}
+      aria-label={active ? 'Feld öffentlich sichtbar' : 'Feld privat geschaltet'}
+      title={active ? 'Für andere sichtbar' : 'Für andere ausgeblendet'}
       className={`p-2 rounded-xl border transition-all cursor-pointer ${
         active 
           ? 'bg-purple-950/20 border-purple-500/40 text-purple-400 hover:text-purple-300' 
@@ -242,381 +259,429 @@ const displayName =
     </button>
   );
 
+  if (!canEdit && show_stamm === false) return null;
+
+  const canShowField = (isVisible) => canEdit || isVisible !== false;
+  const hasPublicStammData = [
+    canShowField(show_avatarUrl) && (avatarMediaUrl || avatarUrl),
+    (canShowField(show_vorname) && vorname) || (canShowField(show_nachname) && nachname),
+    canShowField(show_Klarname) && Klarname,
+    canShowField(show_category) && category,
+    canShowField(show_genre) && genre,
+    canShowField(show_phone) && phone,
+    canShowField(show_email) && email,
+    canShowField(show_website) && website,
+    canShowField(show_address) && (
+      (canShowField(show_street) && street) ||
+      (canShowField(show_plz) && plz) ||
+      (canShowField(show_city) && city)
+    ),
+    canShowField(show_description) && description
+  ].some(Boolean);
+
+  if (!canEdit && !hasPublicStammData) return null;
 
 
+  const handleAvatarUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const asset =
+        await uploadMediaFile(file);
+
+      await setProfileAvatar(asset.id);
+
+      setFormData(prev => ({
+        ...prev,
+        avatarMediaUrl:
+          getMediaPreviewUrl(asset.id)
+      }));
+
+      setIsAvatarChooserOpen(false);
+
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
 
   return (
-    <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white relative select-none">
-      
-      {/* HEADER DER MATRIX */}
-      <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">
-        <div className="flex items-center gap-2">
-          <User size={14} className="text-purple-400" />
-          <span className="text-xs font-black tracking-widest uppercase">
-            // STAMMDATEN REGISTER (KONTOTYP: {formData.role})
+    <div className="profile-stamm w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl text-white relative">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-4 mb-5">
+        <div className="flex items-center gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300">
+            <User size={18} />
           </span>
+          <div>
+            <h2 className="text-base font-semibold tracking-wide text-white">Profilinformationen</h2>
+            <p className="mt-0.5 text-xs text-slate-400">Öffentliche Angaben und Kontakt</p>
+          </div>
         </div>
-        
+
         {canEdit && !isEditing && (
-          <button 
-            type="button" 
-            onClick={() => setIsEditing(true)} 
-            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-purple-400 text-[10px] font-black tracking-wider uppercase hover:border-purple-500 transition-all cursor-pointer"
+          <button
+            type="button"
+            data-profile-edit-trigger onClick={() => setIsEditing(true)}
+            className="flex items-center gap-1.5"
           >
-            ✏️ Bearbeiten
+            <Pencil size={14} /> Bearbeiten
           </button>
         )}
+        {canEdit && isEditing && renderEyeToggle(show_stamm, 'show_stamm')}
       </div>
 
-      {/* ── SEITE A: DIE REINE DISPLAY-ANSICHT (JETZT MIT LIVE-AVATAR BILD!) ── */}
       {!isEditing ? (
-        <div className="space-y-4">
-          
-          {/* ── CYBER-AVATAR STREAM (RUND & LOGO-NEON-GLOW) ── */}
-          <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-slate-900/20 border border-slate-900 rounded-2xl mb-2 relative overflow-hidden group">
-            
-            {/* RUNDER NEON-FRAME (FARBVERLAUF AUS DEM LOGO MIT DEZENTEM GLOW-EFFEKT) */}
-            <div className="relative w-16 h-16 shrink-0 rounded-full p-[2px] bg-gradient-to-r from-cyan-500 to-pink-500 shadow-[0_0_15px_rgba(6,182,212,0.4)] transform transition-transform duration-300 group-hover:scale-105">
-              <div className="w-full h-full rounded-full overflow-hidden bg-slate-950">
-                <img 
-                  src={avatarMediaUrl || ((typeof avatarUrl === 'string' && avatarUrl.trim() !== "") ? avatarUrl : "https://unsplash.com")} 
-                  alt="Profil Avatar" 
-                  className="w-full h-full object-cover"
-                />
+        <div className="space-y-5">
+          <div className="profile-stamm-identity flex flex-col sm:flex-row items-center gap-5 rounded-2xl bg-cyan-300 border border-slate-700/70 bg-gradient-to-br from-slate-900 to-slate-900/50 p-5">
+            <div className="h-26 w-26 shrink-0 rounded-full bg-gradient-to-br from-cyan-400 to-violet-500 p-[2px]">
+              <div className="h-full w-full overflow-hidden rounded-full bg-slate-950">
+                {canShowField(show_avatarUrl) && (
+                  <img
+                    src={avatarMediaUrl || ((typeof avatarUrl === 'string' && avatarUrl.trim() !== "") ? avatarUrl : "https://unsplash.com")}
+                    alt="Profil Avatar"
+                    className="w-full h-full object-cover"
+                  />
+                )}
               </div>
             </div>
 
-            <div className="flex flex-col text-center sm:text-left z-10">
-              <span className="text-4xl bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent">
+            <div className="min-w-0 flex-1 text-center sm:text-left">
+              <h3 className="break-words text-2xl font-semibold tracking-tight text-white sm:text-3xl">
                 {displayName}
-              </span>
-              <span className="text-yellow-400 text-xs font-mono tracking-widest uppercase">
-                GIGSDA-ID ({id || 'SYS-NEW'})
-              </span>
-              
-              {canEdit && (
-                <div className="flex items-center gap-1.5 mt-1 text-xs text-slate-400 justify-center sm:justify-start">
-                  {show_avatarUrl 
-                  ? <Eye size={10} className="text-purple-400" /> 
-                  : <EyeOff size={10} className="text-slate-600" />}
-                  <span className="font-mono tracking-wide">
-                    {show_avatarUrl 
-                    ? "IM NETZWERK SICHTBAR" 
-                    : "PRIVAT / AUSGEBLENDET"
-                    }
+              </h3>
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                {category && canShowField(show_category) && (
+                  <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-medium text-cyan-200">
+                    {category}
                   </span>
+                )}
+                {genre && canShowField(show_genre) && (
+                  <span className="rounded-full border border-slate-600 bg-slate-800/70 px-3 py-1 text-xs text-slate-300">
+                    {genre}
+                  </span>
+                )}
+              </div>
+              <p className="mt-2 text-xs text-slate-400">
+                GIGSDA-ID <span className="text-slate-300">{id || 'SYS-NEW'}</span>
+              </p>
+              {canEdit && (
+                <div className="mt-2 flex items-center justify-center gap-1.5 text-xs text-slate-400 sm:justify-start">
+                  {show_avatarUrl
+                    ? <Eye size={13} className="text-emerald-400" />
+                    : <EyeOff size={13} className="text-slate-500" />}
+                  <span>{show_avatarUrl ? 'Im Netzwerk sichtbar' : 'Privat / ausgeblendet'}</span>
                 </div>
               )}
             </div>
-          
           </div>
 
-          {/* Stamm Daten */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-xs text-slate-400">
-            <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
-              <span className="text-slate-500">KATEGORIE / BERUF:</span> 
-              <div className="flex items-center gap-2">
-                <span className="text-purple-400 font-bold uppercase">{category || 'Nicht hinterlegt'}</span>
-                {canEdit && (show_category ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
+          <div className="profile-stamm-grid grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            {canShowField(show_Klarname) && (Klarname || canEdit) && <div className="profile-stamm-field">
+              <span className="profile-stamm-label">Firmen- / Künstlername</span>
+              <div className="profile-stamm-value">
+                <span>{Klarname || 'Nicht hinterlegt'}</span>
+                {canEdit && (show_Klarname ? <Eye size={14} /> : <EyeOff size={14} />)}
               </div>
-            </div>
-            <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
-              <span className="text-slate-500">TELEFON:</span> 
-              <div className="flex items-center gap-2">
-                <span className="text-cyan-400">{phone || 'Nicht hinterlegt'}</span>
-                {canEdit && (show_phone ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
+            </div>}
+            {canShowField(show_phone) && (phone || canEdit) && <div className="profile-stamm-field">
+              <span className="profile-stamm-label">Telefon</span>
+              <div className="profile-stamm-value">
+                <span>{phone || 'Nicht hinterlegt'}</span>
+                {canEdit && (show_phone ? <Eye size={14} /> : <EyeOff size={14} />)}
               </div>
-            </div>
-
-            <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
-              <span className="text-slate-500">FIRMEN / KÜNSTLERNAME:</span> 
-              <div className="flex items-center gap-2">
-                <span className="text-white font-bold">{Klarname || 'Nicht hinterlegt'}</span>
-                {canEdit && (show_Klarname ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
+            </div>}
+            {canShowField(show_email) && (email || canEdit) && <div className="profile-stamm-field">
+              <span className="profile-stamm-label">E-Mail</span>
+              <div className="profile-stamm-value">
+                <span className="break-all">{email || 'Nicht hinterlegt'}</span>
+                {canEdit && (show_email ? <Eye size={14} /> : <EyeOff size={14} />)}
               </div>
-            </div>
-            <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
-              <span className="text-slate-500">E-MAIL:</span> 
-              <div className="flex items-center gap-2">
-                <span className="text-purple-400">{email || 'Nicht hinterlegt'}</span>
-                {canEdit && (show_email ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
+            </div>}
+            {canShowField(show_website) && (website || canEdit) && <div className="profile-stamm-field">
+              <span className="profile-stamm-label">Website</span>
+              <div className="profile-stamm-value">
+              {website ? <a href={website} target="_blank" rel="noreferrer" className="break-all text-cyan-200 hover:text-cyan-100 hover:underline">{website}</a> : <span>Nicht hinterlegt</span>}
+                {canEdit && (show_website ? <Eye size={14} /> : <EyeOff size={14} />)}
               </div>
-            </div>
-
-            <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
-              <span className="text-slate-500">VORNAME / NACHNAME:</span> 
-              <div className="flex items-center gap-2">
-                <span className="text-white font-bold">{displayName}</span>
-                {canEdit && (show_name_real ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
+            </div>}
+            {canShowField(show_address) && (
+              (canShowField(show_street) && street) ||
+              (canShowField(show_plz) && plz) ||
+              (canShowField(show_city) && city) ||
+              canEdit
+            ) && <div className="profile-stamm-field">
+              <span className="profile-stamm-label">Adresse</span>
+              <div className="profile-stamm-value">
+                <span>
+                  {[
+                    canShowField(show_street) ? street : '',
+                    [canShowField(show_plz) ? plz : '', canShowField(show_city) ? city : ''].filter(Boolean).join(' ')
+                  ].filter(Boolean).join(', ') || 'Nicht hinterlegt'}
+                </span>
+                {canEdit && (show_address ? <Eye size={14} /> : <EyeOff size={14} />)}
               </div>
-            </div>
-
-            <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
-              <span className="text-slate-500">WEBSEITE:</span> 
-              <div className="flex items-center gap-2">
-                <a href={website} target="_blank" rel="noreferrer" className="text-purple-400 hover:underline">{website || 'Nicht hinterlegt'}</a>
-                {canEdit && (show_website ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
-              </div>
-            </div>
-
-            {genre && (
-              <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
-                <span className="text-slate-500">GENRE / CORE-AUSRICHTUNG:</span> 
-                <div className="flex items-center gap-2">
-                  <span className="text-emerald-400 font-bold uppercase">{genre}</span>
-                  {canEdit && (show_genre ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
-                </div>
-              </div>
-            )}
-            
-            <div className="flex justify-between items-center py-1 border-b border-slate-900/50">
-              <span className="text-slate-500">ADRESSE:</span> 
-              <div className="flex items-center gap-2">
-                <span className="text-white">
-                  {street ? `${street}, ${plz} ${city}` : 'Nicht hinterlegt'}</span>
-                {canEdit && (show_address ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
-              </div>
-            </div>
+            </div>}
           </div>
 
-          {description && (
-            <div className="p-3 bg-slate-900/30 border border-slate-900 rounded-xl mt-2 relative">
-              <div className="flex justify-between items-center mb-1">
-                <div className="text-[10px] text-slate-500 font-bold mb-1">BIOGRAFIE / BESCHREIBUNG</div>
-                {canEdit && (show_description ? <Eye size={11} className="text-purple-500/50" /> : <EyeOff size={11} className="text-slate-700" />)}
+          {description && canShowField(show_description) && (
+            <div className="profile-stamm-description">
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <h4 className="text-sm font-semibold text-slate-200">Über uns</h4>
+                {canEdit && (show_description ? <Eye size={14} className="text-slate-400" /> : <EyeOff size={14} className="text-slate-500" />)}
               </div>
-              <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-line">{description}</p>
+              <p className="whitespace-pre-line text-sm leading-7 text-slate-300">{description}</p>
             </div>
           )}
         </div>
       ) : (
-        <form onSubmit={handleSave} className="space-y-4 text-xs">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            {/* LINKER BLOCK */}
-            <div className="space-y-3">
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-bold">KATEGORIE / BERUFSBEZEICHNUNG</span>
-                <div className="flex gap-2">
-                  <input type="text" name="category" value={category || ''} onChange={handleChange} 
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono" 
-                  placeholder="e.g. Musiker/Songwriter" />
-                  <EyeToggle active={show_category} flagName="show_category" 
-                  />
+        <form onSubmit={handleSave} className="profile-stamm-form space-y-5">
+          <section className="profile-stamm-edit-section">
+            <div className="profile-stamm-section-heading">
+              <div>
+                <h3>Identität</h3>
+                <p>Name, Kategorie und Profilbild</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFormData(prev => ({ ...prev, is_demo: !prev.is_demo }))}
+                title={formData.is_demo ? 'DEMO' : 'LIVE'}
+                className={`profile-stamm-mode ${formData.is_demo ? 'is-demo' : 'is-live'}`}
+              >
+                <span />
+                {formData.is_demo ? 'Demo-Profil' : 'Live-Profil'}
+              </button>
+            </div>
+
+            <div className="profile-stamm-edit-grid">
+              <div className="profile-stamm-edit-field">
+                <label htmlFor="profile-category">Kategorie / Beruf</label>
+                <div className="profile-stamm-input-row">
+                  <input id="profile-category" type="text" name="category" value={category || ''} onChange={handleChange} className="profile-stamm-input" placeholder="z. B. Musiker / Songwriter" />
+                  {renderEyeToggle(show_category, 'show_category')}
                 </div>
               </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-bold">FIRMEN / KÜNSTLERNAME:</span>
-                <div className="flex gap-2">
-                  <input type="text" name="Klarname" value={Klarname || ''} onChange={handleChange} 
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono" 
-                  placeholder="e.g. Bruce Wayne" 
-                  />
-                  <EyeToggle active={show_Klarname} flagName="show_Klarname" />
+              <div className="profile-stamm-edit-field">
+                <label htmlFor="profile-klarname">Firmen- / Künstlername</label>
+                <div className="profile-stamm-input-row">
+                  <input id="profile-klarname" type="text" name="Klarname" value={Klarname || ''} onChange={handleChange} className="profile-stamm-input" placeholder="Name des Unternehmens oder Projekts" />
+                  {renderEyeToggle(show_Klarname, 'show_Klarname')}
                 </div>
               </div>
-              <div className="flex flex-col gap-1">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] text-slate-500 font-bold">VORNAME / NACHNAME:</span>
-                  <EyeToggle active={show_name_real} flagName="show_name_real" />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <input type="text" name="vorname" 
-                  placeholder="Vorname" value={vorname || ''} onChange={handleChange} 
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono" 
-                  />
-                  <input type="text" name="nachname" 
-                  placeholder="Nachname" value={nachname || ''} onChange={handleChange} 
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono" 
-                  />
+              <div className="profile-stamm-edit-field">
+                <label htmlFor="profile-vorname">Vorname / Nachname</label>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <div className="profile-stamm-input-row">
+                    <input id="profile-vorname" type="text" name="vorname" placeholder="Vorname" value={vorname || ''} onChange={handleChange} className="profile-stamm-input" />
+                    {renderEyeToggle(show_vorname, 'show_vorname')}
+                  </div>
+                  <div className="profile-stamm-input-row">
+                    <input id="profile-nachname" type="text" name="nachname" placeholder="Nachname" value={nachname || ''} onChange={handleChange} className="profile-stamm-input" />
+                    {renderEyeToggle(show_nachname, 'show_nachname')}
+                  </div>
                 </div>
               </div>
-              <div className="flex flex-col gap-1">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] text-slate-500 font-bold">STANDORT-ADRESSE</span>
-                  <EyeToggle active={show_address} flagName="show_address" />
-                </div>
-                <input type="text" name="street" 
-                placeholder="Straße / Hausnr." value={street || ''} onChange={handleChange} 
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono mb-2" 
-                />
-                <div className="grid grid-cols-3 gap-2">
-                  <input type="text" name="plz" 
-                  placeholder="PLZ" value={plz || ''} onChange={handleChange} 
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono" 
-                  />
-                  <input type="text" name="city" 
-                  placeholder="Stadt" value={city || ''} onChange={handleChange} 
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-white focus:outline-none focus:border-purple-500 font-mono col-span-2" 
-                  />
+              <div className="profile-stamm-edit-field">
+                <label htmlFor="profile-genre">Genre / Ausrichtung</label>
+                <div className="profile-stamm-input-row">
+                  <input id="profile-genre" type="text" name="genre" value={genre || ''} onChange={handleChange} className="profile-stamm-input" placeholder="z. B. Rock, Metal" />
+                  {renderEyeToggle(show_genre, 'show_genre')}
                 </div>
               </div>
             </div>
 
-            {/* RECHTER BLOCK */}
-            <div className="space-y-3">
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-bold">TELEFON DATENSTREAM</span>
-                <div className="flex gap-2">
-                  <input type="text" name="phone" value={phone || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-cyan-400 focus:outline-none focus:border-cyan-500 font-mono" placeholder="+43 ..." />
-                  <EyeToggle active={show_phone} flagName="show_phone" />
-                </div>
+            <div className="profile-stamm-avatar-tools">
+              <div>
+                <span className="profile-stamm-label">Profilbild</span>
+                <p>
+                  {isLoadingAvatarImages
+                    ? 'Bilder werden geladen ...'
+                    : avatarMediaUrl
+                      ? 'Profilbild aus der Medienbibliothek aktiv'
+                      : 'Wähle ein Bild aus deiner Medienbibliothek.'}
+                </p>
+                {avatarPickerError && <p className="text-rose-300">{avatarPickerError}</p>}
               </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-bold">E-MAIL PORTAL</span>
-                <div className="flex gap-2">
-                  <input type="email" name="email" value={email || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-purple-400 focus:outline-none focus:border-purple-500 font-mono" />
-                  <EyeToggle active={show_email} flagName="show_email" />
-                </div>
+              <button
+                type="button"
+                disabled={isLoadingAvatarImages}
+                onClick={async () => {
+                  setIsAvatarChooserOpen(true);
+                  setAvatarPickerError('');
+                  setIsLoadingAvatarImages(true);
+                  try {
+                    const assets = await getMediaAssets();
+                    setAvatarImages(assets.filter(asset => asset.media_type === 'image'));
+                  } catch (error) {
+                    setAvatarPickerError(error.message || 'Bilder konnten nicht geladen werden.');
+                  } finally {
+                    setIsLoadingAvatarImages(false);
+                  }
+                }}
+                className="profile-stamm-secondary-button disabled:cursor-wait disabled:opacity-60"
+              >
+                <Image size={15} /> {isLoadingAvatarImages ? 'Lädt ...' : 'Avatar wählen'}
+              </button>
+            </div>
+            <div className="profile-stamm-edit-field mt-4">
+              <label htmlFor="profile-avatar-url">Bild-URL (Fallback)</label>
+              <div className="profile-stamm-input-row">
+                <input id="profile-avatar-url" type="url" name="avatarUrl" value={avatarUrl || ''} onChange={handleChange} className="profile-stamm-input" placeholder="https://..." />
+                {renderEyeToggle(show_avatarUrl, 'show_avatarUrl')}
               </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-bold">WEBSEITE (URL)</span>
-                <div className="flex gap-2">
-                  <input type="text" name="website" value={website || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-purple-400 focus:outline-none focus:border-purple-500 font-mono" placeholder="https://..." />
-                  <EyeToggle active={show_website} flagName="show_website" />
-                </div>
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-bold">GENRE / CORE-AUSRICHTUNG</span>
-                <div className="flex gap-2">
-                  <input type="text" name="genre" value={genre || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-emerald-400 focus:outline-none focus:border-emerald-500 font-mono" placeholder="e.g. Rock / Metal" />
-                  <EyeToggle active={show_genre} flagName="show_genre" />
-                </div>
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-slate-500 font-bold">
-                  PROFILMODUS
-                </span>
+            </div>
+          </section>
 
-                <div className="flex gap-2">
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setFormData(prev => ({
-                        ...prev,
-                        is_demo: !prev.is_demo
-                      }))
-                    }
-                    title={formData.is_demo ? 'DEMO' : 'LIVE'}
-                    className="flex items-center"
-                  >
-                    <span
-                      className={
-                        formData.is_demo
-                          ? 'w-4 h-4 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.8)]'
-                          : 'w-4 h-4 rounded-full bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.8)]'
-                      }
-                    />
-                  </button>
-
+          <section className="profile-stamm-edit-section">
+            <div className="profile-stamm-section-heading">
+              <div>
+                <h3>Kontakt & Standort</h3>
+                <p>So erreichst du das Profil</p>
+              </div>
+            </div>
+            <div className="profile-stamm-edit-grid">
+              <div className="profile-stamm-edit-field">
+                <label htmlFor="profile-phone">Telefon</label>
+                <div className="profile-stamm-input-row">
+                  <input id="profile-phone" type="tel" name="phone" value={phone || ''} onChange={handleChange} className="profile-stamm-input" placeholder="+43 ..." />
+                  {renderEyeToggle(show_phone, 'show_phone')}
                 </div>
               </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-[10px] text-slate-600 font-bold">AVATAR</span>
+              <div className="profile-stamm-edit-field">
+                <label htmlFor="profile-email">E-Mail</label>
+                <div className="profile-stamm-input-row">
+                  <input id="profile-email" type="email" name="email" value={email || ''} onChange={handleChange} className="profile-stamm-input" placeholder="name@beispiel.at" />
+                  {renderEyeToggle(show_email, 'show_email')}
+                </div>
+              </div>
+              <div className="profile-stamm-edit-field">
+                <label htmlFor="profile-website">Website</label>
+                <div className="profile-stamm-input-row">
+                  <input id="profile-website" type="url" name="website" value={website || ''} onChange={handleChange} className="profile-stamm-input" placeholder="https://..." />
+                  {renderEyeToggle(show_website, 'show_website')}
+                </div>
+              </div>
+              <div className="profile-stamm-edit-field">
+                <div className="profile-stamm-label-row">
+                  <label htmlFor="profile-street">Adresse</label>
+                  {renderEyeToggle(show_address, 'show_address')}
+                </div>
+                <div className="profile-stamm-input-row">
+                  <input id="profile-street" type="text" name="street" placeholder="Straße / Hausnummer" value={street || ''} onChange={handleChange} className="profile-stamm-input" />
+                  {renderEyeToggle(show_street, 'show_street')}
+                </div>
+                <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <div className="profile-stamm-input-row">
+                    <input type="text" name="plz" placeholder="PLZ" value={plz || ''} onChange={handleChange} className="profile-stamm-input" />
+                    {renderEyeToggle(show_plz, 'show_plz')}
+                  </div>
+                  <div className="profile-stamm-input-row">
+                    <input type="text" name="city" placeholder="Ort" value={city || ''} onChange={handleChange} className="profile-stamm-input" />
+                    {renderEyeToggle(show_city, 'show_city')}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {isAvatarChooserOpen && (
+            <div className="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center">
+
+              <div className="w-full max-w-3xl rounded-3xl border border-cyan-500/30 bg-slate-950 p-6">
+
+                <h3 className="text-xl text-white mb-4">
+                  Avatar wählen
+                </h3>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarUpload}
+                />
+
                 <button
                   type="button"
-                  onClick={openAvatarPicker}
-                  className="flex items-center justify-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-2 text-xs font-bold text-cyan-300 transition hover:border-cyan-400"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full rounded-xl border border-cyan-500/40 p-3 text-cyan-300 mb-6"
                 >
-                  <Image size={14} />
-                  Aus Medienbibliothek wählen
+                  Neues Bild hochladen
                 </button>
-                {avatarMediaUrl && (
-                  <p className="text-[10px] text-emerald-400">Medienbibliotheks-Avatar aktiv</p>
-                )}
-                <span className="mt-1 text-[10px] text-slate-600 font-bold">LEGACY-FALLBACK-URL</span>
-                <div className="flex gap-2">
-                  <input type="text" name="avatarUrl" value={avatarUrl || ''} onChange={handleChange} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-slate-500 text-[10px] focus:outline-none focus:border-slate-700 font-mono" />
-                  <EyeToggle active={show_avatarUrl} flagName="show_avatarUrl" />
-                </div>
-              </div>
-            </div>
 
-            {isAvatarPickerOpen && (
-              <div className="mt-4 rounded-2xl border border-cyan-500/20 bg-slate-950 p-4">
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <div>
-                    <h3 className="text-sm font-bold text-white">Bild aus Medienbibliothek wählen</h3>
-                    <p className="mt-1 text-[10px] text-slate-500">Es werden nur deine eigenen Bildmedien angezeigt.</p>
-                  </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+                  {avatarImages.map(asset => (
+
+                    <button
+                      key={asset.id}
+                      type="button"
+                      onClick={() => setSelectedAvatarId(asset.id)}
+                      className={`overflow-hidden rounded-xl border ${
+                        selectedAvatarId === asset.id
+                          ? 'border-cyan-400'
+                          : 'border-slate-800'
+                      }`}
+                    >
+
+                      <img
+                        src={getMediaPreviewUrl(asset.id)}
+                        alt={asset.original_filename}
+                        className="aspect-square w-full object-cover"
+                      />
+
+                      <span className="block truncate p-2 text-[10px] text-slate-300">
+                        {asset.original_filename}
+                      </span>
+
+                    </button>
+
+                  ))}
+
+                </div>
+
+                <div className="mt-6 flex justify-between">
+
                   <button
                     type="button"
-                    onClick={() => setIsAvatarPickerOpen(false)}
-                    className="rounded-lg border border-slate-700 px-3 py-1 text-xs text-slate-400 hover:text-white"
+                    onClick={() => setIsAvatarChooserOpen(false)}
+                    className="rounded-xl border border-slate-700 px-4 py-2"
                   >
-                    Schließen
+                    Abbrechen
                   </button>
-                </div>
 
-                {avatarPickerError && (
-                  <p role="alert" className="mb-3 text-xs text-rose-300">{avatarPickerError}</p>
-                )}
-                {isLoadingAvatarImages ? (
-                  <p role="status" className="py-4 text-xs text-slate-400">Bilder werden geladen …</p>
-                ) : avatarImages.length === 0 ? (
-                  <p className="py-4 text-xs text-slate-400">Noch keine eigenen Bilder vorhanden. Lade zuerst ein Bild in „Meine Medien“ hoch.</p>
-                ) : (
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    {avatarImages.map(asset => (
-                      <button
-                        key={asset.id}
-                        type="button"
-                        onClick={() => setSelectedAvatarId(asset.id)}
-                        aria-pressed={selectedAvatarId === asset.id}
-                        className={`overflow-hidden rounded-xl border text-left transition ${
-                          selectedAvatarId === asset.id
-                            ? 'border-cyan-400 ring-2 ring-cyan-500/30'
-                            : 'border-slate-800 hover:border-slate-600'
-                        }`}
-                      >
-                        <img
-                          src={getMediaPreviewUrl(asset.id)}
-                          alt={asset.original_filename}
-                          className="aspect-square w-full bg-slate-900 object-cover"
-                        />
-                        <span className="block truncate p-2 text-[10px] text-slate-300">
-                          {asset.original_filename}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                <div className="mt-4 flex justify-end">
                   <button
                     type="button"
                     onClick={handleSetAvatar}
-                    disabled={!selectedAvatarId || isSettingAvatar}
-                    className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-xs font-black text-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+                    disabled={!selectedAvatarId}
+                    className="rounded-xl bg-cyan-500 px-4 py-2 text-slate-950 font-bold"
                   >
-                    <Check size={14} />
-                    {isSettingAvatar ? 'Wird gesetzt …' : 'Als Avatar verwenden'}
+                    Als Avatar verwenden
                   </button>
+
                 </div>
+
               </div>
-            )}
 
-          </div> {/* Schließt das grid-cols-2 div exakt ab! */}
-
-          {/* PROFIL-BESCHREIBUNG & AUGE */}
-          <div className="flex flex-col gap-1 mt-3">
-            <div className="flex justify-between items-center">
-              <span className="text-[10px] text-slate-500 font-bold">INFO-TEXT / PROFIL-BESCHREIBUNG</span>
-              <EyeToggle active={show_description} flagName="show_description" />
             </div>
-            <textarea name="description" value={description || ''} onChange={handleChange} rows={6} className="w-full bg-slate-900 border border-slate-800 rounded-xl p-2 text-slate-300 focus:outline-none focus:border-purple-500 font-mono text-xs resize-y" placeholder="Beschreibe dein B2B-Profil für das Gigsda-Netzwerk..." />
-          </div>
+          )}
+
+          <section className="profile-stamm-edit-section">
+            <div className="profile-stamm-section-heading">
+              <div>
+                <h3>Über uns</h3>
+                <p>Die Beschreibung, die im Profil angezeigt wird</p>
+              </div>
+              {renderEyeToggle(show_description, 'show_description')}
+            </div>
+            <textarea id="profile-description" name="description" value={description || ''} onChange={handleChange} rows={6} className="profile-stamm-input min-h-36 resize-y" placeholder="Beschreibe dein Profil für das GIGSDA-Netzwerk..." />
+          </section>
 
           {/* CONTROL STRIP */}
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-900">
-            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">
+            <button type="button" data-profile-action="cancel" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">
               Abbrechen
             </button>
-            <button type="submit" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(147,51,234,0.3)]"><Save size={12} /> 
-              Speichern ✓
-            </button>
+            <button type="submit" data-profile-action="save" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(147,51,234,0.3)]"><Save size={12} /> Speichern</button>
           </div>
         </form>
       )}

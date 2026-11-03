@@ -6,11 +6,12 @@ import {
 import ReportContentLink from '../ReportContentLink';
 
 export default function ProfileCard({
- user,
- onProfile,
- onRequest,
- isGuest = false,
- favoriteCount = 0
+  user,
+  onProfile,
+  onPortfolio,
+  onRequest,
+  isGuest = false,
+  favoriteCount = 0
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -162,6 +163,12 @@ export default function ProfileCard({
               className="bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-sm font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center"
             >
               Details
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onPortfolio();}}
+              className="bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-sm font-bold uppercase py-2 rounded-xl transition-all duration-300 cursor-pointer text-center"
+            >
+              PORTFOLIO
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); onRequest(); }}

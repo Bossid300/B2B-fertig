@@ -14,6 +14,7 @@ function addAvatarMedia(profile) {
       if (profileData && typeof profileData === 'object' && !Array.isArray(profileData)) {
         enrichedProfile.profile_json = JSON.stringify({
           ...profileData,
+          id: profile.id,
           avatarMediaUrl
         });
       }
@@ -133,6 +134,7 @@ export async function saveProfile({
   profile
 }) {
   const profileData = { ...profile };
+  profileData.id = profileId;
   delete profileData.profile_json;
   delete profileData.avatar_media_id;
   delete profileData.avatarMediaId;
@@ -451,3 +453,165 @@ export async function deleteFavorite(
 
   return await response.json();
 }
+
+export const createPassChallenge = async (data) => {
+  const response = await fetch(
+    `${API_BASE}/createPassChallenge.php`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    }
+  );
+
+  return await response.json();
+};
+
+export const getPassChallenges = async (locationProfileId) => {
+  const response = await fetch(
+    `${API_BASE}/getPassChallenges.php?location_profile_id=${locationProfileId}`
+  );
+
+  return await response.json();
+};
+
+export const getPassChallenge = async (challengeId) => {
+  const response = await fetch(
+    `${API_BASE}/getPassChallenge.php?id=${challengeId}`
+  );
+
+  console.log(response);
+
+  return await response.json();
+};
+
+export const submitPassChallenge = async (
+  challengeId
+) => {
+
+  let browserToken =
+    localStorage.getItem("browser_token");
+
+  if (!browserToken) {
+
+    browserToken =
+      crypto.randomUUID();
+
+    localStorage.setItem(
+      "browser_token",
+      browserToken
+    );
+  }
+
+  const response = await fetch(
+    `${API_BASE}/submitPassChallenge.php`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        challengeId,
+        browserToken,
+      }),
+    }
+  );
+
+  return await response.json();
+};
+
+export const getPassChallengeEntries = async (
+  challengeId
+) => {
+
+  const response = await fetch(
+    `${API_BASE}/getPassChallengeEntries.php?challenge_id=${challengeId}`
+  );
+
+  return await response.json();
+};
+
+export const savePassChallengeWinner = async (
+  challengeId,
+  ticketNumber
+) => {
+
+  const response = await fetch(
+    `${API_BASE}/savePassChallengeWinner.php`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        challengeId,
+        ticketNumber,
+      }),
+    }
+  );
+
+  return await response.json();
+};
+
+export const togglePassChallenge = async (
+  challengeId,
+  isActive
+) => {
+
+  const response = await fetch(
+    `${API_BASE}/togglePassChallenge.php`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        challengeId,
+        isActive,
+      }),
+    }
+  );
+
+  return await response.json();
+};
+
+export const updatePassChallenge = async (
+  challenge
+) => {
+
+  const response = await fetch(
+    `${API_BASE}/updatePassChallenge.php`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(challenge),
+    }
+  );
+
+  return await response.json();
+};
+
+export const deletePassChallenge = async (
+  challengeId
+) => {
+
+  const response = await fetch(
+    `${API_BASE}/deletePassChallenge.php`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        challengeId,
+      }),
+    }
+  );
+
+  return await response.json();
+
+};

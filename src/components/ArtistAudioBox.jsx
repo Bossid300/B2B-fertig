@@ -284,18 +284,32 @@ export default function ArtistAudioBox({ currentProfileId, isOwner }) {
         </div>
 
         {canEdit && (
-          // Kompakterer Bearbeiten-Button: px-3 py-1 statt px-4 py-2, kleinere Schrift
-          <button
-            onClick={isEditing ? handleSave : () => setIsEditing(true)}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-200 border ${
-              isEditing 
-                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/30' 
-                : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/30'
-            }`}
-          >
-            {isEditing ? <Check size={11} /> : <Edit3 size={11} />}
-            {isEditing ? 'Speichern' : 'Bearbeiten'}
-          </button>
+          isEditing ? (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                data-profile-action="cancel"
+                onClick={() => setIsEditing(false)}
+              >
+                Abbrechen
+              </button>
+              <button
+                type="button"
+                data-profile-action="save"
+                onClick={handleSave}
+              >
+                <Check size={11} /> Speichern
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              data-profile-edit-trigger
+              onClick={() => setIsEditing(true)}
+            >
+              <Edit3 size={11} /> Bearbeiten
+            </button>
+          )
         )}
       </div>
 

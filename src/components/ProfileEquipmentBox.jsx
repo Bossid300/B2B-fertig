@@ -57,7 +57,8 @@ export default function ProfileEquipmentBox({ currentProfileId, isOwner }) {
       { 
         item: newItem.trim(), 
         detail: newDetail.trim() || 'Vorhanden', 
-        rental: isForRental === 'true' 
+        rental: isForRental === 'true',
+        visible: true
       }
     ]);
     setNewItem('');
@@ -110,6 +111,9 @@ export default function ProfileEquipmentBox({ currentProfileId, isOwner }) {
   }
 
   const isVisible = showEquipment || canEdit;
+  const visibleEquipment = equipmentList.filter(item => canEdit || item.visible !== false);
+  if (!canEdit && (!showEquipment || visibleEquipment.length === 0)) return null;
+  if (!canEdit && (!showEquipment || equipmentList.length === 0)) return null;
 
   return (
     <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
@@ -134,7 +138,7 @@ export default function ProfileEquipmentBox({ currentProfileId, isOwner }) {
           {canEdit && !isEditing && (
             <button 
               type="button" 
-              onClick={() => setIsEditing(true)} 
+              data-profile-edit-trigger onClick={() => setIsEditing(true)}
               className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-cyan-400 text-[10px] font-black tracking-wider uppercase hover:border-cyan-500 transition-all cursor-pointer"
             >
               ✏️ Inventar
@@ -146,12 +150,10 @@ export default function ProfileEquipmentBox({ currentProfileId, isOwner }) {
       {/* TERNARY WEICHE: ANZEIGE ODER EDITIEREN */}
       {!isEditing ? (
         <div className="space-y-2">
-          {!isVisible ? (
-            <div className="p-4 bg-slate-900/10 border border-slate-900 rounded-xl text-center text-xs text-slate-600 font-mono uppercase tracking-wide">// INVENTARLISTE VOM PROTOKOLL-INHABER GESPERRT</div>
-          ) : (
+          {isVisible && (
             <div className="flex flex-col gap-1.5">
-              {equipmentList.length > 0 ? (
-                equipmentList.map((item, idx) => (
+              {visibleEquipment.length > 0 ? (
+                visibleEquipment.map((item, idx) => (
                   <div key={idx} className="p-2.5 bg-slate-900/40 border border-slate-900 rounded-xl flex items-center justify-between text-xs group hover:border-cyan-500/30 transition-all">
                     <div className="flex items-center gap-2.5 min-w-0">
                       <Wrench size={12} className="text-slate-500 shrink-0" />
@@ -166,7 +168,7 @@ export default function ProfileEquipmentBox({ currentProfileId, isOwner }) {
                   </div>
                 ))
               ) : (
-                <div className="p-4 bg-slate-900/10 border border-slate-900 rounded-xl text-center text-xs text-slate-600 font-mono">// AKTUELL KEIN SPEZIFISCHES B2B-EQUIPMENT REGISTRIERT</div>
+                <div className="p-4 bg-slate-900/10 border border-slate-900 rounded-xl text-center text-xs text-slate-600 font-mono">// AKTUELL KEIN SPEZIFISCHES EQUIPMENT REGISTRIERT</div>
               )}
             </div>
           )}
@@ -211,20 +213,30 @@ export default function ProfileEquipmentBox({ currentProfileId, isOwner }) {
             {equipmentList.map((item, idx) => (
               <div key={idx} className="p-2 bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2 truncate">
-                  <span className="uppercase font-bold text-slate-200 truncate">{item.item}</span>
-                  <span className="text-[10px] text-slate-500 font-mono shrink-0">({item.detail})</span>
-                  {item.rental && <span className="text-[8px] font-mono text-cyan-400 font-black tracking-widest">// B2B RENTAL</span>}
+                  <span className="uppercase font-bold text-slate-200 truncate">
+                    {item.item}
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-mono shrink-0">
+                    ({item.detail})
+                  </span>
+                  {item.rental && 
+                  <span className="text-[8px] font-mono text-cyan-400 font-black tracking-widest">
+                    // RENTAL
+                  </span>}
                 </div>
-                <button type="button" onClick={() => removeItem(idx)} className="text-slate-500 hover:text-rose-400 cursor-pointer shrink-0 ml-2">
-                  <X size={12} />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setEquipmentList(prev => prev.map((entry, itemIndex) => itemIndex === idx ? { ...entry, visible: entry.visible === false } : entry))} aria-label="Sichtbarkeit dieses Ausrüstungsgegenstands umschalten" title={item.visible === false ? 'Für andere ausgeblendet' : 'Für andere sichtbar'} className="text-slate-400 hover:text-white">{item.visible === false ? <EyeOff size={12} /> : <Eye size={12} />}</button>
+                  <button type="button" onClick={() => removeItem(idx)} className="text-slate-500 hover:text-rose-400 cursor-pointer shrink-0 ml-2">
+                    <X size={12} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
 
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-900">
-            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
-            <button type="submit" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-cyan-600 text-slate-950 hover:bg-cyan-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.3)]"><Save size={12} /> Inventar Einbrennen ✓</button>
+            <button type="button" data-profile-action="cancel" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
+            <button type="submit" data-profile-action="save" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-cyan-600 text-slate-950 hover:bg-cyan-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.3)]"><Save size={12} /> Speichern</button>
           </div>
         </form>
       )}

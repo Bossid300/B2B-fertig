@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Plus, X, Save, Eye, EyeOff, FileCheck, ShieldAlert } from 'lucide-react';
-import { eventService } from '../services/eventService';
 import { getProfilesDb, saveProfile } from '../services/apiService';
 
 export default function ProfileComplianceBox({ currentProfileId, isOwner }) {
@@ -8,20 +7,16 @@ export default function ProfileComplianceBox({ currentProfileId, isOwner }) {
   const [profile, setProfile] = useState(null);
   const [showCompliance, setShowCompliance] = useState(false); // Standardmäßig STRENG GEHEIM!
   const [complianceList, setComplianceList] = useState([]);
-  const [isVerifiedPartner, setIsVerifiedPartner] = useState(false);
 
   // Temporäre Zustände für das Hinzufügen
   const [newType, setNewType] = useState('Haftpflicht');
   const [newDetail, setNewDetail] = useState('');
   const [newValidity, setNewValidity] = useState('');
 
-  const loggedInUser = localStorage.getItem('gigsda_user_name') || '';
   const canEdit = isOwner || currentProfileId === localStorage.getItem('gigsda_profile_id');
 
   // 1. DATABASE & VERIFICATION PIPELINE
   useEffect(() => {
-  const savedEvents = eventService.getEvents();
-
   getProfilesDb(currentProfileId)
     .then(profiles => {
       const found = profiles.find(
@@ -33,12 +28,6 @@ export default function ProfileComplianceBox({ currentProfileId, isOwner }) {
           ? JSON.parse(found.profile_json)
           : found;
 
-const profileName =
-  (profile?.name || '')
-    .trim()
-    .toLowerCase();
-
-
       setProfile(profile);
       setShowCompliance(
         profile.show_compliance === true
@@ -48,43 +37,6 @@ const profileName =
           ? profile.compliance
           : []
       );
-      if (
-        loggedInUser &&
-        profileName !==
-        loggedInUser.toLowerCase()
-      ) {
-        const isContractPartner =
-          savedEvents.some(ev => {
-            if (!ev || !Array.isArray(ev.crew))
-              return false;
-            const namesInCrew =
-              ev.crew.map(
-                m => m && m.name
-                  ? m.name.trim().toLowerCase()
-                  : ''
-              );
-            const memberStatus =
-              ev.crew.find(
-                m =>
-                  m &&
-                  m.name &&
-                  m.name.trim().toLowerCase() ===
-                  profileName
-              )?.status;
-            return (
-              namesInCrew.includes(
-                loggedInUser.trim().toLowerCase()
-              ) &&
-              (
-                memberStatus === 'accepted' ||
-                memberStatus === 'confirmed'
-              )
-            );
-          });
-        setIsVerifiedPartner(
-          isContractPartner
-        );
-      }
     })
     .catch(e => {
       console.error(
@@ -92,7 +44,7 @@ const profileName =
         e
       );
     });
-  }, [currentProfileId, isEditing, loggedInUser]);
+  }, [currentProfileId, isEditing]);
 
   const addComplianceItem = () => {
     if (!newDetail.trim()) return;
@@ -101,7 +53,8 @@ const profileName =
       {
         type: newType,
         detail: newDetail.trim(),
-        valid_until: newValidity.trim() || 'Unbegrenzt'
+        valid_until: newValidity.trim() || 'Unbegrenzt',
+        visible: true
       }
     ]);
     setNewDetail('');
@@ -151,9 +104,10 @@ const profileName =
     );
   }
 
-  // Schranke: Sichtbar wenn Inhaber es erlaubt ODER Betrachter der Inhaber selbst ist ODER verifizierter Event-Partner!
-  const isAccessible = showCompliance || canEdit || isVerifiedPartner;
+  const isAccessible = showCompliance || canEdit;
   if (!isAccessible) return null;
+  const visibleCompliance = complianceList.filter(item => canEdit || item.visible !== false);
+  if (!canEdit && visibleCompliance.length === 0) return null;
 
   return (
     <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
@@ -202,7 +156,7 @@ const profileName =
           {canEdit && !isEditing && (
             <button 
               type="button" 
-              onClick={() => setIsEditing(true)} 
+              data-profile-edit-trigger onClick={() => setIsEditing(true)}
               className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-rose-400 text-[10px] font-black tracking-wider uppercase hover:border-rose-500 transition-all cursor-pointer"
             >
               ✏️ Audit Nachweise
@@ -214,8 +168,8 @@ const profileName =
       {/* TERNARY WEICHE: ANZEIGE ODER EDITIEREN */}
       {!isEditing ? (
         <div className="space-y-2">
-          {complianceList.length > 0 ? (
-            complianceList.map((item, idx) => (
+          {visibleCompliance.length > 0 ? (
+            visibleCompliance.map((item, idx) => (
               <div key={idx} className="p-3 bg-slate-900/40 border border-slate-900 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-rose-500/30 transition-all group">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-xl bg-rose-950/20 border border-rose-900/30 flex items-center justify-center text-rose-400 shrink-0 group-hover:border-rose-500/50 transition-all">
@@ -303,13 +257,16 @@ const profileName =
                   <span className="uppercase font-bold text-slate-200 truncate">{item.detail}</span>
                   <span className="text-[10px] text-slate-500 font-mono shrink-0">({item.type})</span>
                 </div>
-                <button 
-                  type="button" 
-                  onClick={() => removeComplianceItem(idx)} 
-                  className="text-slate-500 hover:text-rose-400 cursor-pointer shrink-0 ml-2"
-                >
-                  <X size={12} />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => setComplianceList(prev => prev.map((entry, itemIndex) => itemIndex === idx ? { ...entry, visible: entry.visible === false } : entry))} aria-label="Sichtbarkeit dieses Nachweises umschalten" title={item.visible === false ? 'Für andere ausgeblendet' : 'Für andere sichtbar'} className="text-slate-400 hover:text-white">{item.visible === false ? <EyeOff size={12} /> : <Eye size={12} />}</button>
+                  <button 
+                    type="button" 
+                    onClick={() => removeComplianceItem(idx)} 
+                    className="text-slate-500 hover:text-rose-400 cursor-pointer shrink-0 ml-2"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -318,17 +275,15 @@ const profileName =
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-900">
             <button 
               type="button" 
-              onClick={() => setIsEditing(false)} 
+              data-profile-action="cancel" onClick={() => setIsEditing(false)}
               className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer"
             >
               Abbrechen
             </button>
             <button 
-              type="submit" 
+              type="submit" data-profile-action="save"
               className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-rose-600 text-white hover:bg-rose-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(244,63,94,0.3)]"
-            >
-              <Save size={12} /> Audit Einbrennen ✓
-            </button>
+            ><Save size={12} /> Speichern</button>
           </div>
         </form>
       )}

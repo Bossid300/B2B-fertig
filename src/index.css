@@ -3,6 +3,282 @@
 /* ========================================================================= */
 @import "tailwindcss";
 
+.profile-box-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.profile-box-content > [hidden] {
+  display: none !important;
+}
+
+.profile-box-content > :not([hidden]) > div {
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 0;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  color: #f1f5f9;
+  background-color: #0b1220;
+  border: 1px solid rgb(51 65 85 / 65%);
+  border-radius: 1.25rem;
+  box-shadow: 0 16px 36px rgb(0 0 0 / 18%);
+}
+
+.profile-box-content > :not([hidden]) > div,
+.profile-box-content > :not([hidden]) > div * {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+.profile-box-header > div:nth-child(-n + 2) {
+  border-radius: 1.25rem;
+  border-color: rgb(51 65 85 / 65%);
+}
+
+.profile-box-header,
+.profile-box-header * {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+}
+
+.profile-stamm-field {
+  min-width: 0;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgb(51 65 85 / 55%);
+  border-radius: 0.9rem;
+  background: rgb(15 23 42 / 65%);
+}
+
+.profile-stamm-label {
+  display: block;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+.profile-stamm-value {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.45rem;
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.profile-stamm-value svg {
+  flex: none;
+  margin-top: 0.15rem;
+  color: #7c8ba1;
+}
+
+.profile-stamm-description {
+  padding: 1.1rem 1.2rem;
+  border: 1px solid rgb(51 65 85 / 55%);
+  border-radius: 1rem;
+  background: linear-gradient(135deg, rgb(15 23 42 / 75%), rgb(15 23 42 / 35%));
+}
+
+.profile-stamm-edit-section {
+  padding: 1.1rem;
+  border: 1px solid rgb(51 65 85 / 55%);
+  border-radius: 1rem;
+  background: rgb(15 23 42 / 45%);
+}
+
+.profile-stamm-section-heading,
+.profile-stamm-label-row,
+.profile-stamm-input-row,
+.profile-stamm-avatar-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.profile-stamm-section-heading {
+  margin-bottom: 1rem;
+}
+
+.profile-stamm-section-heading h3 {
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.profile-stamm-section-heading p,
+.profile-stamm-avatar-tools p {
+  margin-top: 0.2rem;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.profile-stamm-edit-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.profile-stamm-edit-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.profile-stamm-edit-field label {
+  color: #cbd5e1;
+  font-size: 0.78rem;
+  font-weight: 550;
+}
+
+.profile-stamm-input-row > .profile-stamm-input {
+  min-width: 0;
+}
+
+.profile-stamm-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid #334155;
+  border-radius: 0.7rem;
+  background: #0b1220;
+  padding: 0.65rem 0.8rem;
+  color: #f1f5f9;
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.profile-stamm-input::placeholder {
+  color: #64748b;
+}
+
+.profile-stamm-input:focus {
+  border-color: #22d3ee;
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(34 211 238 / 12%);
+}
+
+.profile-stamm-avatar-tools {
+  margin-top: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgb(51 65 85 / 55%);
+  border-radius: 0.8rem;
+  background: rgb(2 6 23 / 35%);
+}
+
+.profile-stamm-secondary-button,
+.profile-stamm-mode {
+  display: inline-flex;
+  min-height: 2.5rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid rgb(34 211 238 / 35%);
+  border-radius: 0.7rem;
+  background: rgb(8 145 178 / 10%);
+  padding: 0 0.9rem;
+  color: #a5f3fc;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.profile-stamm-secondary-button:hover,
+.profile-stamm-mode:hover {
+  border-color: #22d3ee;
+  background: rgb(8 145 178 / 20%);
+}
+
+.profile-stamm-mode {
+  min-height: 2.1rem;
+  font-size: 0.72rem;
+}
+
+.profile-stamm-mode span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: #34d399;
+  box-shadow: 0 0 10px rgb(52 211 153 / 55%);
+}
+
+.profile-stamm-mode.is-demo span {
+  background: #fb7185;
+  box-shadow: 0 0 10px rgb(251 113 133 / 55%);
+}
+
+@media (max-width: 640px) {
+  .profile-stamm-edit-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .profile-stamm-edit-section {
+    padding: 0.9rem;
+  }
+
+  .profile-stamm-avatar-tools {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+[data-profile-edit-trigger],
+button[data-profile-action] {
+  box-sizing: border-box;
+  display: inline-flex;
+  min-width: 9rem;
+  height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  border: 1px solid #155e75;
+  border-radius: 0.75rem;
+  color: #a5f3fc;
+  background-color: rgb(8 145 178 / 12%);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+[data-profile-edit-trigger]:hover,
+button[data-profile-action="save"]:hover {
+  border-color: #22d3ee;
+  color: #ecfeff;
+  background-color: rgb(8 145 178 / 28%);
+}
+
+button[data-profile-action="cancel"] {
+  border-color: #475569;
+  color: #cbd5e1;
+  background-color: rgb(51 65 85 / 30%);
+}
+
+button[data-profile-action="cancel"]:hover {
+  border-color: #94a3b8;
+  color: #fff;
+  background-color: rgb(51 65 85 / 60%);
+}
+
+[data-profile-edit-trigger]:focus-visible,
+button[data-profile-action]:focus-visible {
+  outline: 2px solid #22d3ee;
+  outline-offset: 2px;
+}
+
 /* ========================================================================= */
 /* GLOBALES CYBERPUNK BASE STYLING (DEIN ORIGINAL-STAND)                     */
 /* ========================================================================= */
@@ -10,7 +286,7 @@
   html, body {
     background-color: #020617; /* Tiefdunkles Slate-Blau als Fundament */
     color: #f1f5f9;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     overflow-x: hidden;
     scroll-behavior: smooth;
   }

@@ -22,6 +22,7 @@ import ProfilePassBox from './components/ProfilePassBox';
 
 import { getProfilesDb } from './services/apiService';
 import { saveFavorite, deleteFavorite, getFavorites } from './services/apiService';
+import ProfileSectionTabs from './components/ProfileSectionTabs';
 
 export default function UserProfile({ onBack, currentProfileId, isOwner, setView }) {
   const [profileData, setProfileData] = useState(null);
@@ -132,20 +133,40 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
         // 🚨 HIER FEHLEN DIE BEIDEN KABEL FÜR DEN SLIDER!
       />
 
-      <ProfileStammBox currentProfileId={currentProfileId} isOwner={isOwner}/>
-      <ProfileStatusMatrix currentProfileId={currentProfileId} />
-      <ProfileBioTabsBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileSkillBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileGalleryBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileNetworkBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileFinanzBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileProjekteBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileBewertungsBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfileLokalBox currentProfileId={currentProfileId} isOwner={isOwner} />
-      <ProfilePassBox 
+      <ProfileSectionTabs
         currentProfileId={currentProfileId}
-        profileId={profileData?.id || 'GIGS-XXXX'}
-        onBackToDashboard={onBack}
+        isOwner={isOwner}
+        profile={
+          <>
+            <ProfileStammBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfileBioTabsBox currentProfileId={currentProfileId} isOwner={isOwner} />
+          </>
+        }
+        portfolio={
+          <>
+            <ProfileGalleryBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfileProjekteBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfileBewertungsBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfileNetworkBox currentProfileId={currentProfileId} isOwner={isOwner} />
+          </>
+        }
+        offer={
+          <>
+            <ProfileSkillBox currentProfileId={currentProfileId} isOwner={isOwner} />
+          </>
+        }
+        management={
+          <>
+            <ProfileStatusMatrix currentProfileId={currentProfileId} />
+            <ProfileFinanzBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfileLokalBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfilePassBox
+              currentProfileId={currentProfileId}
+              profileId={profileData.id || currentProfileId}
+              setView={setView}
+            />
+          </>
+        }
       />
     </div>
   );

@@ -172,6 +172,10 @@ export default function ProfileNetworkBox({ currentProfileId, isOwner }) {
   }
 
   const isNetworkVisible = showNetwork || canEditPrivacy;
+  const hasNetworkContent = networkUsers.length > 0 ||
+    (stats.requestsCount || 0) > 0 ||
+    stats.favoritedByCount > 0;
+  if (!isNetworkVisible || (!canEditPrivacy && !hasNetworkContent)) return null;
 
   return (
     <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
@@ -217,11 +221,7 @@ export default function ProfileNetworkBox({ currentProfileId, isOwner }) {
             // Matching
           </div>
 
-          {!isNetworkVisible ? (
-            <div className="p-4 bg-slate-900/10 border border-slate-900 rounded-xl text-center text-xs text-slate-600 font-mono">
-              // PARTNERLISTE VOM INHABER AUSGEBLENDET
-            </div>
-          ) : (
+          {isNetworkVisible && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               {networkUsers.length > 0 ? (
                 networkUsers.map((user, idx) => (

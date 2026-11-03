@@ -1,15 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Pencil, X, Shield, Music, Landmark, Briefcase, MessageSquare, Eye, EyeOff } from 'lucide-react';
 import { eventService } from '../services/eventService';
-import { saveProfile, getProfilesDb, saveCrewRequest} from '../services/apiService';
+import { saveProfile, getProfilesDb, saveCrewRequest } from '../services/apiService';
 import { subscriptionService } from '../../moduls/subscriptions/subscriptionService';
 import { achievementService } from '../../moduls/achievements/achievementService';
+import { getMediaAssets, getMediaPreviewUrl, uploadMediaFile } from '../services/mediaService';
 
-export default function ProfileHeaderBox({ 
+const TICKER_VISIBILITY_FIELDS = [
+  'slide1_image', 'slide1_line1', 'slide1_line2',
+  'slide2_image', 'slide2_line1', 'slide2_line2',
+  'slide3_image', 'slide3_line1', 'slide3_line2',
+  'slide4_image', 'slide4_line1', 'slide4_line2'
+];
+
+export default function ProfileHeaderBox({
   currentProfileId, 
   localFields, 
   isFavorite,
   handleToggleFavorite,
+  isOwner,
   setView 
 }) {
   
@@ -21,13 +30,80 @@ export default function ProfileHeaderBox({
 
   const [isSliderEditorOpen, setIsSliderEditorOpen] = useState(false);
 
+  const [isSliderPickerOpen, setIsSliderPickerOpen] = useState(false);
+  const [isLoadingSliderAssets, setIsLoadingSliderAssets] = useState(false);
+  const [sliderPickerError, setSliderPickerError] = useState('');
+
+  const [isSliderChooserOpen, setIsSliderChooserOpen] = useState(false);
+  const [sliderAssets, setSliderAssets] = useState([]);
+  const [selectedSliderAssetId, setSelectedSliderAssetId] = useState('');
+  const [selectedSlide, setSelectedSlide] = useState(null);
+
+  const sliderFileInputRef = useRef(null);
+
+  const openSliderPicker = async (position) => {
+    try {
+      setSelectedSlide(position);
+      const assets = await getMediaAssets();
+      setSliderAssets(
+        assets.filter(
+          a => a.media_type === 'image'
+        )
+      );
+      setIsSliderPickerOpen(true);
+    } catch (err) {
+      console.error('SLIDER PICKER ERROR', err);
+    }
+  };
+
+  const handleSliderUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const asset =
+        await uploadMediaFile(file);
+      const assets =
+        await getMediaAssets();
+      setSliderAssets(
+        assets.filter(
+          asset => asset.media_type === 'image'
+        )
+      );
+      setSelectedSliderAssetId(
+        asset.id
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // Eigerer Zustand für das flache Mitschreiben der Ticker-Inputs
   const [tickerFields, setTickerFields] = useState({
-    slide1_url: '', slide1_line1: '', slide1_line2: '',
-    slide2_url: '', slide2_line1: '', slide2_line2: '',
-    slide3_url: '', slide3_line1: '', slide3_line2: '',
-    slide4_url: '', slide4_line1: '', slide4_line2: '',
+    slide1_url: '',
+    slide1_media_url: '',
+    slide1_line1: '',
+    slide1_line2: '',
+
+    slide2_url: '',
+    slide2_media_url: '',
+    slide2_line1: '',
+    slide2_line2: '',
+
+    slide3_url: '',
+    slide3_media_url: '',
+    slide3_line1: '',
+    slide3_line2: '',
+
+    slide4_url: '',
+    slide4_media_url: '',
+    slide4_line1: '',
+    slide4_line2: '',
+  });
+  const [tickerVisibility, setTickerVisibility] = useState({
+    slide1_image: true, slide1_line1: true, slide1_line2: true,
+    slide2_image: true, slide2_line1: true, slide2_line2: true,
+    slide3_image: true, slide3_line1: true, slide3_line2: true,
+    slide4_image: true, slide4_line1: true, slide4_line2: true
   });
 
   const displayName = localStorage.getItem('gigsda_user_name') || '';
@@ -69,6 +145,7 @@ export default function ProfileHeaderBox({
         setProfileData({
           ...profileFields,
           ...profileData,
+          id: found.id,
           role: found.role,
           type: found.type
         });
@@ -88,18 +165,31 @@ export default function ProfileHeaderBox({
     if (isSliderMaskOpen && activeFields) {
       setTickerFields({
         slide1_url: activeFields.slide1_url || '',
+        slide1_media_url: activeFields.slide1_media_url || '',
         slide1_line1: activeFields.slide1_line1 || '',
         slide1_line2: activeFields.slide1_line2 || '',
+
         slide2_url: activeFields.slide2_url || '',
+        slide2_media_url: activeFields.slide2_media_url || '',
         slide2_line1: activeFields.slide2_line1 || '',
         slide2_line2: activeFields.slide2_line2 || '',
+
         slide3_url: activeFields.slide3_url || '',
+        slide3_media_url: activeFields.slide3_media_url || '',
         slide3_line1: activeFields.slide3_line1 || '',
         slide3_line2: activeFields.slide3_line2 || '',
+
         slide4_url: activeFields.slide4_url || '',
+        slide4_media_url: activeFields.slide4_media_url || '',
         slide4_line1: activeFields.slide4_line1 || '',
         slide4_line2: activeFields.slide4_line2 || '',
       });
+      setTickerVisibility(Object.fromEntries(
+        TICKER_VISIBILITY_FIELDS.map(field => [
+          field,
+          activeFields[`show_${field}`] !== false
+        ])
+      ));
     }
   }, [isSliderMaskOpen, profileData]);
 
@@ -136,21 +226,41 @@ const myEvents = savedEvents.filter(
     const { name, value } = e.target;
     setTickerFields(prev => ({ ...prev, [name]: value }));
   };
+  const toggleTickerVisibility = (field) => {
+    setTickerVisibility(prev => ({ ...prev, [field]: !prev[field] }));
+  };
+  const renderTickerToggle = (field) => (
+    <button
+      type="button"
+      onClick={() => toggleTickerVisibility(field)}
+      aria-label={`Sichtbarkeit ${field} umschalten`}
+      title={tickerVisibility[field] ? 'Für andere sichtbar' : 'Für andere ausgeblendet'}
+      className="text-slate-400 hover:text-white"
+    >
+      {tickerVisibility[field] ? <Eye size={13} /> : <EyeOff size={13} />}
+    </button>
+  );
 
   // 2. SAVE PIPELINE: Brennt Daten autark in die DB ein
   const handleTickerSave = async (e) => {
     e.preventDefault();
     try {
       const baseProfile = profileData || localFields || {};
-      const profileId =
+      const profileId = String(
+        currentProfileId ||
         baseProfile.id ||
         baseProfile.profileId ||
-        currentProfileId ||
-        localStorage.getItem('gigsda_profile_id');
+        localStorage.getItem('gigsda_profile_id') ||
+        ''
+      );
 
       const updatedProfile = {
         ...baseProfile,
-        ...tickerFields
+        ...tickerFields,
+        ...Object.fromEntries(
+          Object.entries(tickerVisibility).map(([field, visible]) => [`show_${field}`, visible])
+        ),
+        id: profileId
       };
 
       if (!profileId) {
@@ -418,17 +528,29 @@ const submitB2BRequest = async (project) => {
 
   const badge = getRoleBadge(activeFields.role || activeFields.user_type);
   
-  const slides = [
-    { url: activeFields.slide1_url || 'https://unsplash.com', l1: activeFields.slide1_line1 || 'WILLKOMMEN AUF MEINEM PROFIL', l2: activeFields.slide1_line2 || 'GIGSDA LIVE PROTOCOL 2026' },
-    { url: activeFields.slide2_url || 'https://unsplash.com', l1: activeFields.slide2_line1 || 'LIVE IMPRESSIONEN', l2: activeFields.slide2_line2 || 'FESTIVAL TOURNEE 2026' },
-    { url: activeFields.slide3_url || 'https://unsplash.com', l1: activeFields.slide3_line1 || 'BOOKING & ANFRAGEN', l2: activeFields.slide3_line2 || 'JETZT TERMIN SICHERN' },
-    { url: activeFields.slide4_url || 'https://unsplash.com', l1: activeFields.slide4_line1 || 'NEXT GIGS', l2: activeFields.slide4_line2 || 'CHECK DEN EVENT RADAR' }
-  ];
-
+  const slides = [1, 2, 3, 4].map((slideNumber, index) => {
+    const defaults = [
+      ['WILLKOMMEN AUF MEINEM PROFIL', 'GIGSDA LIVE PROTOCOL 2026'],
+      ['LIVE IMPRESSIONEN', 'FESTIVAL TOURNEE 2026'],
+      ['BOOKING & ANFRAGEN', 'JETZT TERMIN SICHERN'],
+      ['NEXT GIGS', 'CHECK DEN EVENT RADAR']
+    ][index];
+    return {
+      url: activeFields[`show_slide${slideNumber}_image`] === false
+        ? ''
+        : activeFields[`slide${slideNumber}_media_url`] || activeFields[`slide${slideNumber}_url`] || 'https://unsplash.com',
+      l1: activeFields[`show_slide${slideNumber}_line1`] === false
+        ? ''
+        : activeFields[`slide${slideNumber}_line1`] || defaults[0],
+      l2: activeFields[`show_slide${slideNumber}_line2`] === false
+        ? ''
+        : activeFields[`slide${slideNumber}_line2`] || defaults[1]
+    };
+  });
 
 
   return (
-    <div className="w-full mx-auto space-y-3 mb-6 text-white select-none font-mono">
+    <div className="profile-box-header w-full mx-auto space-y-3 mb-6 text-white select-none font-mono">
       
       {/* CONTROLLER BAR */}
       <div className="w-full bg-slate-950 border border-slate-900 p-3 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xl">
@@ -454,7 +576,7 @@ const submitB2BRequest = async (project) => {
         <div className="px-3 py-1.5 rounded-xl border border-amber-500/30 bg-slate-950 text-amber-300 text-[10px] font-mono uppercase tracking-widest">
           {currentAchievement.badge}
         </div>
-
+          {isOwner && (
           <button
             type="button"
             onClick={() => setView('billing')}
@@ -462,7 +584,7 @@ const submitB2BRequest = async (project) => {
           >
             📄 BILLING
           </button>
-
+          )}
           <button type="button" onClick={() => setIsRequestMaskOpen(true)} 
             className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-purple-950/40 border border-purple-900/50 text-purple-400 text-[10px] 
             font-mono hover:border-purple-500 transition-all cursor-pointer shadow-md uppercase font-black tracking-wider whitespace-nowrap">
@@ -476,14 +598,14 @@ const submitB2BRequest = async (project) => {
           ${isFavorite ? 'bg-amber-950/40 border-amber-500 text-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.1)]' : 'bg-slate-900/50 border-slate-800 text-slate-400 hover:border-slate-700'}`}>
             <span>{isFavorite ? '★' : '☆'}</span> {isFavorite ? 'Aktiv' : 'Favorit'}
           </button>
-
+          {isOwner && (
           <button type="button" onClick={() => { localStorage.setItem('gigsda_current_view', 'crewfavoriten'); 
             if (typeof setView === 'function') { setView('crewfavoriten'); } window.location.reload(); }} 
             className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-cyan-900/50 bg-cyan-950/20 text-cyan-400 
             text-[10px] font-mono hover:border-cyan-500 transition-all cursor-pointer shadow-md uppercase font-black tracking-wider whitespace-nowrap">
               ⭐ Pool
           </button>
-
+          )}
 
           <button
             onClick={() => {
@@ -524,7 +646,7 @@ const submitB2BRequest = async (project) => {
       {/* SLIDER BLOCK */}
       <div className="relative w-full bg-slate-950 border border-slate-900 rounded-3xl overflow-hidden shadow-2xl">
         <div className="relative h-[550px] w-full bg-slate-900 group">
-          <img src={slides[currentSlide].url} alt="Banner" className="w-full h-full object-cover opacity-60 transition-all duration-500" />
+          {slides[currentSlide].url && <img src={slides[currentSlide].url} alt="Banner" className="w-full h-full object-cover opacity-60 transition-all duration-500" />}
           <div className="absolute inset-0 flex flex-col justify-end p-8 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent pointer-events-none space-y-2">
             <p className="text-cyan-400 text-xs tracking-widest uppercase">{slides[currentSlide].l1}</p>
             <h1 className="text-white font-black text-2xl md:text-3xl tracking-tight uppercase leading-tight">{slides[currentSlide].l2}</h1>
@@ -536,7 +658,7 @@ const submitB2BRequest = async (project) => {
           <button type="button" onClick={() => setCurrentSlide(p => (p + 1) % slides.length)} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-slate-950/60 border border-slate-800 text-white hover:bg-slate-900 opacity-0 group-hover:opacity-100 z-20 cursor-pointer">&gt;</button>
 
           {canEditSlider && !isSliderMaskOpen && (
-            <button type="button" onClick={() => { setIsRequestMaskOpen(false); setIsSliderMaskOpen(true); }} 
+            <button type="button" data-profile-edit-trigger onClick={() => { setIsRequestMaskOpen(false); setIsSliderMaskOpen(true); }}
               className="absolute top-4 right-4 flex items-center gap-2 px-4 py-2 rounded-full bg-slate-900/80 
               border border-slate-700 text-cyan-400 text-xs hover:border-cyan-500 shadow-lg backdrop-blur-sm z-30 cursor-pointer"
               >
@@ -564,11 +686,6 @@ const submitB2BRequest = async (project) => {
           </div>
         )}
 
-
-
-
-
-
         {/* CLOUD-TICKER MASK (DIREKTE, FEHLERFREIE ZUWEISUNG AN tickerFields) */}
         {isSliderMaskOpen && canEditSlider && (
           <div
@@ -593,9 +710,32 @@ const submitB2BRequest = async (project) => {
               <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl space-y-2">
                 <div className="text-cyan-400 text-[9px] tracking-wide font-bold">// SLIDE 1 PARAMETER</div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                  <input type="text" name="slide1_url" placeholder="Bild URL" value={tickerFields.slide1_url || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
-                  <input type="text" name="slide1_line1" placeholder="WILLKOMMEN AUF MEINEM PROFIL" value={tickerFields.slide1_line1 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
-                  <input type="text" name="slide1_line2" placeholder="GIGSDA LIVE PROTOCOL 2026" value={tickerFields.slide1_line2 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
+                  <div className="flex gap-1"><input type="text" name="slide1_url" placeholder="Bild URL" value={tickerFields.slide1_url || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />{renderTickerToggle('slide1_image')}</div>
+                  <div className="flex gap-1"><input type="text" name="slide1_line1" placeholder="WILLKOMMEN AUF MEINEM PROFIL" value={tickerFields.slide1_line1 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />{renderTickerToggle('slide1_line1')}</div>
+                  <div className="flex gap-1"><input type="text" name="slide1_line2" placeholder="GIGSDA LIVE PROTOCOL 2026" value={tickerFields.slide1_line2 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />{renderTickerToggle('slide1_line2')}</div>
+                  <input name="slide1_url"/>
+                  <button
+                    type="button"
+                    onClick={async () => {
+
+                      setSelectedSlide(1);
+
+                      const assets =
+                        await getMediaAssets();
+
+                      setSliderAssets(
+                        assets.filter(
+                          a => a.media_type === 'image'
+                        )
+                      );
+
+                      setIsSliderChooserOpen(true);
+
+                    }}
+                  >
+                    Bild wählen
+                  </button>
+
                 </div>
               </div>
 
@@ -603,9 +743,32 @@ const submitB2BRequest = async (project) => {
               <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl space-y-2">
                 <div className="text-cyan-400 text-[9px] tracking-wide font-bold">// SLIDE 2 PARAMETER</div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                  <input type="text" name="slide2_url" placeholder="Bild URL" value={tickerFields.slide2_url || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
-                  <input type="text" name="slide2_line1" placeholder="LIVE IMPRESSIONEN" value={tickerFields.slide2_line1 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
-                  <input type="text" name="slide2_line2" placeholder="FESTIVAL TOURNEE 2026" value={tickerFields.slide2_line2 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
+                  <div className="flex gap-1"><input type="text" name="slide2_url" placeholder="Bild URL" value={tickerFields.slide2_url || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />{renderTickerToggle('slide2_image')}</div>
+                  <div className="flex gap-1"><input type="text" name="slide2_line1" placeholder="LIVE IMPRESSIONEN" value={tickerFields.slide2_line1 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />{renderTickerToggle('slide2_line1')}</div>
+                  <div className="flex gap-1"><input type="text" name="slide2_line2" placeholder="FESTIVAL TOURNEE 2026" value={tickerFields.slide2_line2 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />{renderTickerToggle('slide2_line2')}</div>
+                  <input name="slide2_url"/>
+                  <button
+                    type="button"
+                    onClick={async () => {
+
+                      setSelectedSlide(2);
+
+                      const assets =
+                        await getMediaAssets();
+
+                      setSliderAssets(
+                        assets.filter(
+                          a => a.media_type === 'image'
+                        )
+                      );
+
+                      setIsSliderChooserOpen(true);
+
+                    }}
+                  >
+                    Bild wählen
+                  </button>
+
                 </div>
               </div>
 
@@ -613,9 +776,31 @@ const submitB2BRequest = async (project) => {
               <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl space-y-2">
                 <div className="text-cyan-400 text-[9px] tracking-wide font-bold">// SLIDE 3 PARAMETER</div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                  <input type="text" name="slide3_url" placeholder="Bild URL" value={tickerFields.slide3_url || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
-                  <input type="text" name="slide3_line1" placeholder="BOOKING & ANFRAGEN" value={tickerFields.slide3_line1 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
-                  <input type="text" name="slide3_line2" placeholder="JETZT TERMIN SICHERN" value={tickerFields.slide3_line2 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
+                  <div className="flex gap-1"><input type="text" name="slide3_url" placeholder="Bild URL" value={tickerFields.slide3_url || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />{renderTickerToggle('slide3_image')}</div>
+                  <div className="flex gap-1"><input type="text" name="slide3_line1" placeholder="BOOKING & ANFRAGEN" value={tickerFields.slide3_line1 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />{renderTickerToggle('slide3_line1')}</div>
+                  <div className="flex gap-1"><input type="text" name="slide3_line2" placeholder="JETZT TERMIN SICHERN" value={tickerFields.slide3_line2 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />{renderTickerToggle('slide3_line2')}</div>
+                  <input name="slide3_url"/>
+                  <button
+                    type="button"
+                    onClick={async () => {
+
+                      setSelectedSlide(3);
+
+                      const assets =
+                        await getMediaAssets();
+
+                      setSliderAssets(
+                        assets.filter(
+                          a => a.media_type === 'image'
+                        )
+                      );
+
+                      setIsSliderChooserOpen(true);
+
+                    }}
+                  >
+                    Bild wählen
+                  </button>
                 </div>
               </div>
 
@@ -623,23 +808,169 @@ const submitB2BRequest = async (project) => {
               <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl space-y-2">
                 <div className="text-cyan-400 text-[9px] tracking-wide font-bold">// SLIDE 4 PARAMETER</div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                  <input type="text" name="slide4_url" placeholder="Bild URL" value={tickerFields.slide4_url || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
-                  <input type="text" name="slide4_line1" placeholder="NEXT GIGS" value={tickerFields.slide4_line1 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
-                  <input type="text" name="slide4_line2" placeholder="CHECK DEN EVENT RADAR" value={tickerFields.slide4_line2 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />
+                  <div className="flex gap-1"><input type="text" name="slide4_url" placeholder="Bild URL" value={tickerFields.slide4_url || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />{renderTickerToggle('slide4_image')}</div>
+                  <div className="flex gap-1"><input type="text" name="slide4_line1" placeholder="NEXT GIGS" value={tickerFields.slide4_line1 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />{renderTickerToggle('slide4_line1')}</div>
+                  <div className="flex gap-1"><input type="text" name="slide4_line2" placeholder="CHECK DEN EVENT RADAR" value={tickerFields.slide4_line2 || ''} onChange={handleTickerChange} className="w-full bg-slate-950 border border-slate-800 rounded p-1.5 text-xs text-white focus:outline-none focus:border-cyan-500" />{renderTickerToggle('slide4_line2')}</div>
+                  <input name="slide4_url"/>
+                  <button
+                    type="button"
+                    onClick={async () => {
+
+                      setSelectedSlide(4);
+
+                      const assets =
+                        await getMediaAssets();
+
+                      setSliderAssets(
+                        assets.filter(
+                          a => a.media_type === 'image'
+                        )
+                      );
+
+                      setIsSliderChooserOpen(true);
+
+                    }}
+                  >
+                    Bild wählen
+                  </button>
                 </div>
               </div>
 
               <div className="sticky bottom-0 flex justify-end gap-3 px-6 py-4 border-t border-slate-800 bg-slate-950">
-                <button type="button" onClick={() => setIsSliderMaskOpen(false)} className="px-4 py-2 rounded border border-slate-800 text-slate-400 text-xs uppercase hover:text-white cursor-pointer">Abbrechen</button>
-                <button type="submit" className="px-5 py-2 rounded bg-amber-400 text-slate-950 text-xs font-black uppercase tracking-wider hover:bg-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.3)] cursor-pointer">SLIDER SPEICHERN</button>
+                <button type="button" data-profile-action="cancel" onClick={() => setIsSliderMaskOpen(false)} className="px-4 py-2 rounded border border-slate-800 text-slate-400 text-xs uppercase hover:text-white cursor-pointer">Abbrechen</button>
+                <button type="submit" data-profile-action="save" className="px-5 py-2 rounded bg-amber-400 text-slate-950 text-xs font-black uppercase tracking-wider hover:bg-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.3)] cursor-pointer">Speichern</button>
               </div>
             </form>
+
+            {isSliderChooserOpen && (
+            <div className="fixed inset-0 z-[10000] bg-black/70 backdrop-blur-sm flex items-center justify-center">
+
+              <div className="bg-slate-950 border border-cyan-500/30 rounded-3xl p-6">
+
+                <h3 className="text-white text-xl mb-4">
+                  Sliderbild wählen
+                </h3>
+
+                <input
+                  ref={sliderFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleSliderUpload}
+                />
+
+                <button
+                  type="button"
+                  onClick={() => sliderFileInputRef.current?.click()}
+                  className="w-full rounded-xl border border-cyan-500/40 p-3 text-cyan-300 mb-6"
+                >
+                  Neues Bild hochladen
+                </button>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+                  {sliderAssets.map(asset => (
+
+                    <button
+                      key={asset.id}
+                      type="button"
+                      onClick={() =>
+                        setSelectedSliderAssetId(asset.id)
+                      }
+                      className={`overflow-hidden rounded-xl border ${
+                        selectedSliderAssetId === asset.id
+                          ? 'border-cyan-400'
+                          : 'border-slate-800'
+                      }`}
+                    >
+                      <img
+                        src={getMediaPreviewUrl(asset.id)}
+                        alt={asset.original_filename}
+                        className="aspect-square w-full object-cover"
+                      />
+
+                      <span className="block truncate p-2 text-[10px] text-slate-300">
+                        {asset.original_filename}
+                      </span>
+
+                    </button>
+
+                  ))}
+
+                </div>
+                <div className="mt-6 flex justify-end gap-3">
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setIsSliderChooserOpen(false)
+                    }
+                    className="rounded-xl border border-slate-700 px-4 py-2"
+                  >
+                    Schließen
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!selectedSliderAssetId}
+                    onClick={() => {
+
+                      const asset =
+                        sliderAssets.find(
+                          a => a.id === selectedSliderAssetId
+                        );
+
+                      if (!asset) return;
+
+                      const mediaUrl =
+                        getMediaPreviewUrl(asset.id);
+
+                      setTickerFields(prev => ({
+                        ...prev,
+
+                        ...(selectedSlide === 1 && {
+                          slide1_media_url: mediaUrl,
+                          slide1_url: mediaUrl
+                        }),
+
+                        ...(selectedSlide === 2 && {
+                          slide2_media_url: mediaUrl,
+                          slide2_url: mediaUrl
+                        }),
+
+                        ...(selectedSlide === 3 && {
+                          slide3_media_url: mediaUrl,
+                          slide3_url: mediaUrl
+                        }),
+
+                        ...(selectedSlide === 4 && {
+                          slide4_media_url: mediaUrl,
+                          slide4_url: mediaUrl
+                        })
+
+                      }));
+
+                      setIsSliderChooserOpen(false);
+
+                    }}
+                    className="rounded-xl bg-cyan-500 px-4 py-2 text-slate-950 font-bold"
+                  >
+                    Übernehmen
+                  </button>
+                </div>
+
+              </div>
+
+            </div>
+
+            )}
+
+
           </div>
           </div>
         )}
 
-
       </div>
+
     </div>
   );
 }

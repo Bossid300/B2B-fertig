@@ -102,7 +102,7 @@ export default function ProfilePassBox({ currentProfileId, profileId, setView, s
       )}
 
       {/* DIE HAUPT-CARD */}
-      <div className="bg-[#0b111e] border border-slate-800/80 p-6 rounded-2xl shadow-2xl flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="bg-[#0b111e] border border-slate-800/80 p-6 rounded-2xl shadow-2xl flex flex-col md:flex-row justify-between items-center gap-6 mb-6">
         
         {/* Linke Seite: Infos und Reflink */}
         <div className="flex-1 space-y-3">

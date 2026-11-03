@@ -144,9 +144,13 @@ const profileName =
   }
 
   const isBoxVisible = showDocs || canEdit;
+  const accessibleDocs = docsList.filter(
+    doc => doc.security === 'public' || canEdit || isCrewMember
+  );
+  if (!canEdit && (!showDocs || accessibleDocs.length === 0)) return null;
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
+    <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
       
       {/* HEADER DER BOX */}
       <div className="flex items-center justify-between border-b border-slate-900 pb-3 mb-4">
@@ -168,7 +172,7 @@ const profileName =
           {canEdit && !isEditing && (
             <button 
               type="button" 
-              onClick={() => setIsEditing(true)} 
+              data-profile-edit-trigger onClick={() => setIsEditing(true)}
               className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-purple-400 text-[10px] font-black tracking-wider uppercase hover:border-purple-500 transition-all cursor-pointer"
             >
               ✏️ Dokumente
@@ -180,16 +184,13 @@ const profileName =
       {/* TERNARY WEICHE: ANZEIGE ODER EDITIEREN */}
       {!isEditing ? (
         <div className="space-y-2">
-          {!isBoxVisible ? (
-            <div className="p-4 bg-slate-900/10 border border-slate-900 rounded-xl text-center text-xs text-slate-600 font-mono uppercase tracking-wide">// DOKUMENTENARCHIV VOM INHABER GESPERRT</div>
-          ) : (
+          {isBoxVisible && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {docsList.length > 0 ? (
-                docsList.map((doc, idx) => {
-                  const hasAccess = doc.security === 'public' || canEdit || isCrewMember;
-                  if (!hasAccess) return null;
+              {docsList.map((doc, idx) => {
+                const hasAccess = doc.security === 'public' || canEdit || isCrewMember;
+                if (!hasAccess) return null;
 
-                  return (
+                return (
                     <a 
                       key={idx} 
                       href={doc.url} 
@@ -202,16 +203,13 @@ const profileName =
                         <div className="flex flex-col truncate">
                           <span className="text-xs text-white font-bold uppercase tracking-wide truncate group-hover:text-purple-400 transition-all">{doc.name}</span>
                           <span className="text-[8px] text-slate-500 font-mono uppercase tracking-widest mt-0.5">
-                            {doc.security === 'public' ? '🌐 Öffentlich' : '🔒 Interne Crew'}
+                            {doc.security === 'public' ? '🌐 Öffentlich' : doc.security === 'crew' ? '🔒 Interne Crew' : '🔐 Privat'}
                           </span>
                         </div>
                       </div>
                     </a>
-                  );
-                })
-              ) : (
-                <div className="sm:col-span-2 p-4 bg-slate-900/10 border border-slate-900 rounded-xl text-center text-xs text-slate-600 font-mono">// AKTUELL KEINE SPEZIFISCHEN B2B-DOKUMENTE HINTERLEGT</div>
-              )}
+                );
+              })}
             </div>
           )}
         </div>
@@ -243,6 +241,7 @@ const profileName =
                 >
                   <option value="public">🌐 Netzwerk (Öffentlich)</option>
                   <option value="crew">🔒 Nur verifizierte Crew</option>
+                  <option value="private">🔐 Nur ich</option>
                 </select>
                 <button type="button" onClick={addDocument} className="px-4 rounded-xl bg-slate-900 border border-slate-800 text-purple-400 hover:border-purple-500 cursor-pointer flex items-center justify-center shrink-0">
                   <Plus size={14} />
@@ -258,7 +257,7 @@ const profileName =
                 <div className="flex items-center gap-2 truncate">
                   <span className="uppercase font-bold text-slate-200 truncate">{doc.name}</span>
                   <span className="text-[10px] text-slate-500 font-mono shrink-0">
-                    {doc.security === 'public' ? '(🌐 Öffentlich)' : '(🔒 Crew Only)'}
+                    {doc.security === 'public' ? '(🌐 Öffentlich)' : doc.security === 'crew' ? '(🔒 Crew Only)' : '(🔐 Privat)'}
                   </span>
                 </div>
                 <button type="button" onClick={() => removeDocument(idx)} className="text-slate-500 hover:text-rose-400 cursor-pointer shrink-0 ml-2">
@@ -270,8 +269,8 @@ const profileName =
 
           {/* CONTROL STRIP */}
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-900">
-            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
-            <button type="submit" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(147,51,234,0.3)]"><Save size={12} /> Dokumente Einbrennen ✓</button>
+            <button type="button" data-profile-action="cancel" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
+            <button type="submit" data-profile-action="save" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(147,51,234,0.3)]"><Save size={12} /> Speichern</button>
           </div>
         </form>
       )}

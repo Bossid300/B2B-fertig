@@ -8,22 +8,7 @@ export default function ProfileHallenBox({ currentProfileId, isOwner }) {
   const [profile, setProfile] = useState(null);
   const [showHallen, setShowHallen] = useState(true);
   
-  // Startet laut Protokoll mit genau 1 Raum zum Beginn
-  const [rooms, setRooms] = useState([
-    { 
-      id: '1', 
-      name: 'GROSSER SAAL / HAUPTFLÄCHE', 
-      size: '250',
-      pax_bankett: '120',
-      pax_steh: '200',
-      pax_theater: '180',
-      pax_uform: '40',
-      img: 'https://unsplash.com',
-      has_sound: true,
-      has_light: true,
-      has_video: false
-    }
-  ]);
+  const [rooms, setRooms] = useState([]);
 
   const canEdit = isOwner || currentProfileId === localStorage.getItem('gigsda_profile_id');
 
@@ -84,7 +69,8 @@ export default function ProfileHallenBox({ currentProfileId, isOwner }) {
         img: '',
         has_sound: false,
         has_light: false,
-        has_video: false
+        has_video: false,
+        visible: true
       }
     ]);
   };
@@ -139,6 +125,11 @@ export default function ProfileHallenBox({ currentProfileId, isOwner }) {
 
   const isVisible = showHallen || canEdit;
   if (!isVisible) return null;
+  const visibleRooms = rooms.filter(room =>
+    canEdit ||
+    (room.visible !== false && (room.name || room.size || room.img))
+  );
+  if (!canEdit && visibleRooms.length === 0) return null;
 
   return (
     <div className="w-full max-w-4xl mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
@@ -165,7 +156,7 @@ export default function ProfileHallenBox({ currentProfileId, isOwner }) {
           {canEdit && !isEditing && (
             <button 
               type="button" 
-              onClick={() => setIsEditing(true)} 
+              data-profile-edit-trigger onClick={() => setIsEditing(true)}
               className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-cyan-400 text-[10px] font-black tracking-wider uppercase hover:border-cyan-500 transition-all cursor-pointer"
             >
               ✏️ Bearbeiten
@@ -177,7 +168,7 @@ export default function ProfileHallenBox({ currentProfileId, isOwner }) {
       {/* TERNARY WEICHE: ANZEIGE ODER EDITIEREN */}
       {!isEditing ? (
         <div className="space-y-4">
-          {rooms.map((room, idx) => (
+          {visibleRooms.map((room, idx) => (
             <div key={idx} className="p-4 bg-slate-900/10 border border-slate-900 rounded-2xl flex flex-col md:flex-row gap-5 items-center justify-between hover:border-slate-800 transition-all">
               
               {/* LINKE SEITE: DETAILS & BESTUHLUNGS-GRID */}
@@ -263,6 +254,7 @@ export default function ProfileHallenBox({ currentProfileId, isOwner }) {
                 )}
 
                 <span className="text-[9px] text-cyan-400 font-bold uppercase tracking-widest block">// CONFIGURATION MATRIZ FOR AREA #{idx + 1}</span>
+                <button type="button" onClick={() => handleRoomChange(idx, 'visible', room.visible === false)} aria-label="Sichtbarkeit dieses Raums umschalten" title={room.visible === false ? 'Für andere ausgeblendet' : 'Für andere sichtbar'} className="absolute top-4 right-12 text-slate-400 hover:text-white">{room.visible === false ? <EyeOff size={12} /> : <Eye size={12} />}</button>
                 
                 {/* STAMMDATEN DES RAUMS */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -337,8 +329,8 @@ export default function ProfileHallenBox({ currentProfileId, isOwner }) {
 
           {/* CONTROL STRIP */}
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-900">
-            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
-            <button type="submit" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-cyan-600 text-slate-950 hover:bg-cyan-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.3)]"><Save size={12} /> Register Einbrennen ✓</button>
+            <button type="button" data-profile-action="cancel" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
+            <button type="submit" data-profile-action="save" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-cyan-600 text-slate-950 hover:bg-cyan-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.3)]"><Save size={12} /> Speichern</button>
           </div>
         </form>
       )}

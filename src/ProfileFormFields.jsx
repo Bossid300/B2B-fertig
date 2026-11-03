@@ -1,7 +1,7 @@
-import React from 'react';
-import { Eye, EyeOff, User, Mail, Lock, Landmark, Link, Calendar, Award, Layers } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function ProfileFormFields({ formData = {}, setFormData }) {
+  const privateByDefaultFields = ['bank_name', 'bank_iban', 'bank_bic', 'tax_id'];
   
   // Zentrale Änderungsfunktion für Texte
   const handleChange = (e) => {
@@ -14,16 +14,35 @@ export default function ProfileFormFields({ formData = {}, setFormData }) {
   // 👁️ Zentrale Umschaltfunktion für die Sichtbarkeits-Augen
   const toggleVisibility = (fieldName) => {
     if (typeof setFormData === 'function') {
-      setFormData(prev => ({ 
-        ...prev, 
-        [`${fieldName}_visible`]: prev[`${fieldName}_visible`] === false ? true : false 
+      setFormData(prev => ({
+        ...prev,
+        [`${fieldName}_visible`]: !isFieldVisible(fieldName, prev)
       }));
     }
   };
 
   // Hilfsfunktion: Prüft Sichtbarkeitsstatus
-  const isFieldVisible = (fieldName) => {
-    return formData[`${fieldName}_visible`] !== false;
+  const isFieldVisible = (fieldName, values = formData) => {
+    if (privateByDefaultFields.includes(fieldName)) {
+      return values[`${fieldName}_visible`] === true;
+    }
+    return values[`${fieldName}_visible`] !== false;
+  };
+  const renderVisibilityToggle = (fieldName) => {
+    const visible = isFieldVisible(fieldName);
+    return (
+      <button
+        type="button"
+        onClick={() => toggleVisibility(fieldName)}
+        aria-label={visible ? `${fieldName} öffentlich sichtbar` : `${fieldName} privat`}
+        title={visible ? 'Für andere sichtbar' : 'Für andere ausgeblendet'}
+        className="shrink-0 rounded-lg p-1.5 text-slate-500 transition-colors hover:text-cyan-400"
+      >
+        {visible
+          ? <Eye className="h-3.5 w-3.5 text-cyan-400" />
+          : <EyeOff className="h-3.5 w-3.5 text-slate-600" />}
+      </button>
+    );
   };
 
   return (
@@ -120,26 +139,38 @@ export default function ProfileFormFields({ formData = {}, setFormData }) {
 
           {/* Genre */}
           <div className="sm:col-span-2 space-y-1">
-            <label className="text-[10px] text-slate-500 uppercase">Genre</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] text-slate-500 uppercase">Genre</label>
+              {renderVisibilityToggle('genre')}
+            </div>
             <input type="text" name="genre" value={formData.genre || ''} onChange={handleChange} placeholder="ROCK" className="w-full bg-slate-950/40 border border-slate-900/60 rounded-xl px-3 py-2 text-slate-200 font-mono text-xs focus:outline-none focus:border-cyan-500/40" />
           </div>
 
           {/* ⚡ DEINE GEODATEN-REIHE IN EINER LINIE (TIEFDUNKLER PREMIUM STYLE) */}
           {/* 1. PLZ */}
           <div className="sm:col-span-2 space-y-1">
-            <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">PLZ</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">PLZ</label>
+              {renderVisibilityToggle('plz')}
+            </div>
             <input type="text" name="plz" value={formData.plz || ''} onChange={handleChange} placeholder="5280" className="w-full bg-slate-950/40 border border-slate-900 rounded-xl px-3 py-2 text-slate-300 font-mono text-xs focus:outline-none focus:border-cyan-500/40 focus:bg-slate-950 transition-all" />
           </div>
 
           {/* 2. Stadt */}
           <div className="sm:col-span-3 space-y-1">
-            <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Stadt</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Stadt</label>
+              {renderVisibilityToggle('location')}
+            </div>
             <input type="text" name="location" value={formData.location || ''} onChange={handleChange} placeholder="Braunau" className="w-full bg-slate-950/40 border border-slate-900 rounded-xl px-3 py-2 text-slate-300 font-mono text-xs focus:outline-none focus:border-cyan-500/40 focus:bg-slate-950 transition-all" />
           </div>
 
           {/* 3. Straße & Hausnummer */}
           <div className="sm:col-span-5 space-y-1">
-            <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Straße & Hausnummer</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Straße & Hausnummer</label>
+              {renderVisibilityToggle('street')}
+            </div>
             <div className="relative">
               <input type="text" name="street" value={formData.street || ''} onChange={handleChange} placeholder="Musterstraße 42" className="w-full bg-slate-950/40 border border-slate-900 rounded-xl pl-3 pr-10 py-2 text-slate-300 font-mono text-xs focus:outline-none focus:border-cyan-500/40 focus:bg-slate-950 transition-all" />
               <button type="button" onClick={() => toggleVisibility('street')} className="absolute right-3 top-2.5 text-slate-600 hover:text-cyan-400 transition-colors cursor-pointer">
@@ -158,15 +189,24 @@ export default function ProfileFormFields({ formData = {}, setFormData }) {
         <div className="text-purple-400 font-black text-[9px] uppercase tracking-widest border-b border-slate-900 pb-2">// ▲ B. BIOGRAFIE-SEKTOREN</div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-1">
-            <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Einleitung</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Einleitung</label>
+              {renderVisibilityToggle('einleitung')}
+            </div>
             <textarea name="einleitung" value={formData.einleitung || ''} onChange={handleChange} placeholder="Das Wichtigste in ein bis zwei Sätzen..." className="w-full bg-slate-950/40 border border-slate-900 rounded-xl px-3 py-2 text-slate-300 font-mono text-xs focus:outline-none focus:border-cyan-500/40 focus:bg-slate-950 transition-all h-16 resize-none leading-relaxed" />
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Kontext / Karriere</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Kontext / Karriere</label>
+              {renderVisibilityToggle('karriere')}
+            </div>
             <textarea name="karriere" value={formData.karriere || ''} onChange={handleChange} placeholder="Je nach Bedeutung des Musikers..." className="w-full bg-slate-950/40 border border-slate-900 rounded-xl px-3 py-2 text-slate-300 font-mono text-xs focus:outline-none focus:border-cyan-500/40 focus:bg-slate-950 transition-all h-16 resize-none leading-relaxed" />
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Prozess / Privates</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Prozess / Privates</label>
+              {renderVisibilityToggle('privates')}
+            </div>
             <textarea name="privates" value={formData.privates || ''} onChange={handleChange} placeholder="Kurze Beschreibung des privaten Lebens..." className="w-full bg-slate-950/40 border border-slate-900 rounded-xl px-3 py-2 text-slate-300 font-mono text-xs focus:outline-none focus:border-cyan-500/40 focus:bg-slate-950 transition-all h-16 resize-none leading-relaxed" />
           </div>
         </div>
@@ -267,21 +307,37 @@ export default function ProfileFormFields({ formData = {}, setFormData }) {
         {/* Diskografie & Rider Zeilen */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-900">
           <div className="space-y-1">
-            <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Diskografie</label>
-            <input type="text" name="diskografie" value={formData.diskografie || ''} onChange={handleChange} placeholder="Demo Album 2025 // Live EP 2026" className="w-full bg-slate-950/40 border border-slate-900 rounded-xl px-3 py-2 text-slate-300 font-mono text-xs focus:outline-none focus:border-cyan-400/40 focus:bg-slate-950 transition-all" />
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Diskografie</label>
+              {renderVisibilityToggle('diskografie')}
+            </div>
+            <div className="flex items-center gap-1">
+              <input type="text" name="diskografie" value={formData.diskografie || ''} onChange={handleChange} placeholder="Demo Album 2025 // Live EP 2026" className="min-w-0 flex-1 bg-slate-950/40 border border-slate-900 rounded-xl px-3 py-2 text-slate-300 font-mono text-xs focus:outline-none focus:border-cyan-400/40 focus:bg-slate-950 transition-all" />
+            </div>
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Referenzen & Support-Gigs</label>
-            <input type="text" name="referenzen" value={formData.referenzen || ''} onChange={handleChange} placeholder="Support-Gig bei Rock am Inn // Gewinner Bandcontest..." className="w-full bg-slate-950/40 border border-slate-900 rounded-xl px-3 py-2 text-slate-300 font-mono text-xs focus:outline-none focus:border-cyan-400/40 focus:bg-slate-950 transition-all" />
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Referenzen & Support-Gigs</label>
+              {renderVisibilityToggle('referenzen')}
+            </div>
+            <div className="flex items-center gap-1">
+              <input type="text" name="referenzen" value={formData.referenzen || ''} onChange={handleChange} placeholder="Support-Gig bei Rock am Inn // Gewinner Bandcontest..." className="min-w-0 flex-1 bg-slate-950/40 border border-slate-900 rounded-xl px-3 py-2 text-slate-300 font-mono text-xs focus:outline-none focus:border-cyan-400/40 focus:bg-slate-950 transition-all" />
+            </div>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
           <div className="space-y-1">
-            <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Bandaufstellung (Rider)</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Bandaufstellung (Rider)</label>
+              {renderVisibilityToggle('bandaufstellung')}
+            </div>
             <input type="text" name="bandaufstellung" value={formData.bandaufstellung || ''} onChange={handleChange} placeholder="Drums Center, Lead-Vocals vorne Mitte." className="w-full bg-slate-950/40 border border-slate-900 rounded-xl px-3 py-2 text-slate-300 font-mono text-xs focus:outline-none focus:border-cyan-400/40 focus:bg-slate-950 transition-all" />
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Backline</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] text-slate-500 uppercase font-mono tracking-wider">Backline</label>
+              {renderVisibilityToggle('backline')}
+            </div>
             <input type="text" name="backline" value={formData.backline || ''} onChange={handleChange} placeholder="Marshall JCM800 Gitarren-Amp, Ampeg SVT Bass-Rig." className="w-full bg-slate-950/40 border border-slate-900 rounded-xl px-3 py-2 text-slate-300 font-mono text-xs focus:outline-none focus:border-cyan-400/40 focus:bg-slate-950 transition-all" />
           </div>
         </div>
@@ -297,29 +353,53 @@ export default function ProfileFormFields({ formData = {}, setFormData }) {
           {/* SLIDE 1 */}
           <div className="bg-slate-950 border border-slate-900/60 p-3 rounded-xl space-y-2">
             <span className="text-cyan-400 text-[8px] block font-black font-mono">// SLIDE 1 (Hauptbanner)</span>
-            <input type="text" name="slide1_line1" value={formData.slide1_line1 || ''} onChange={handleChange} placeholder="// op-input.html" className="w-full bg-slate-900/40 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-cyan-500/40 focus:bg-slate-900 transition-all" />
-            <input type="text" name="slide1_line2" value={formData.slide1_line2 || ''} onChange={handleChange} placeholder="Spezialisiert: HOG4 Operator" className="w-full bg-slate-900/40 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-cyan-500/40 focus:bg-slate-900 transition-all" />
+            <div className="flex items-center gap-1">
+              <input type="text" name="slide1_line1" value={formData.slide1_line1 || ''} onChange={handleChange} placeholder="// op-input.html" className="min-w-0 flex-1 bg-slate-900/40 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-cyan-500/40 focus:bg-slate-900 transition-all" />
+              {renderVisibilityToggle('slide1_line1')}
+            </div>
+            <div className="flex items-center gap-1">
+              <input type="text" name="slide1_line2" value={formData.slide1_line2 || ''} onChange={handleChange} placeholder="Spezialisiert: HOG4 Operator" className="min-w-0 flex-1 bg-slate-900/40 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-cyan-500/40 focus:bg-slate-900 transition-all" />
+              {renderVisibilityToggle('slide1_line2')}
+            </div>
           </div>
           
           {/* SLIDE 2 */}
           <div className="bg-slate-950 border border-slate-900/60 p-3 rounded-xl space-y-2">
             <span className="text-cyan-400 text-[8px] block font-black font-mono">// SLIDE 2 (Live 1)</span>
-            <input type="text" name="slide2_line1" value={formData.slide2_line1 || ''} onChange={handleChange} placeholder="Live-Produktion" className="w-full bg-slate-900/40 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-cyan-500/40 focus:bg-slate-900 transition-all" />
-            <input type="text" name="slide2_line2" value={formData.slide2_line2 || ''} onChange={handleChange} placeholder="Großbühnen & Licht-Design" className="w-full bg-slate-900/40 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-cyan-400" />
+            <div className="flex items-center gap-1">
+              <input type="text" name="slide2_line1" value={formData.slide2_line1 || ''} onChange={handleChange} placeholder="Live-Produktion" className="min-w-0 flex-1 bg-slate-900/40 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-cyan-500/40 focus:bg-slate-900 transition-all" />
+              {renderVisibilityToggle('slide2_line1')}
+            </div>
+            <div className="flex items-center gap-1">
+              <input type="text" name="slide2_line2" value={formData.slide2_line2 || ''} onChange={handleChange} placeholder="Großbühnen & Licht-Design" className="min-w-0 flex-1 bg-slate-900/40 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-cyan-400" />
+              {renderVisibilityToggle('slide2_line2')}
+            </div>
           </div>
           
           {/* SLIDE 3 */}
           <div className="bg-slate-950 border border-slate-900/60 p-3 rounded-xl space-y-2">
             <span className="text-cyan-400 text-[8px] block font-black font-mono">// SLIDE 3 (Live 2)</span>
-            <input type="text" name="slide3_line1" value={formData.slide3_line1 || ''} onChange={handleChange} placeholder="Gala & Club-Betreuung" className="w-full bg-slate-900/40 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-cyan-500/40 focus:bg-slate-900 transition-all" />
-            <input type="text" name="slide3_line2" value={formData.slide3_line2 || ''} onChange={handleChange} placeholder="Perfekter Sound & Atmosphäre" className="w-full bg-slate-900/40 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-cyan-500/40 focus:bg-slate-900 transition-all" />
+            <div className="flex items-center gap-1">
+              <input type="text" name="slide3_line1" value={formData.slide3_line1 || ''} onChange={handleChange} placeholder="Gala & Club-Betreuung" className="min-w-0 flex-1 bg-slate-900/40 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-cyan-500/40 focus:bg-slate-900 transition-all" />
+              {renderVisibilityToggle('slide3_line1')}
+            </div>
+            <div className="flex items-center gap-1">
+              <input type="text" name="slide3_line2" value={formData.slide3_line2 || ''} onChange={handleChange} placeholder="Perfekter Sound & Atmosphäre" className="min-w-0 flex-1 bg-slate-900/40 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-cyan-500/40 focus:bg-slate-900 transition-all" />
+              {renderVisibilityToggle('slide3_line2')}
+            </div>
           </div>
           
           {/* SLIDE 4 */}
           <div className="bg-slate-950 border border-slate-900/60 p-3 rounded-xl space-y-2">
             <span className="text-cyan-400 text-[8px] block font-black font-mono">// SLIDE 4 (Live 3)</span>
-            <input type="text" name="slide4_line1" value={formData.slide4_line1 || ''} onChange={handleChange} placeholder="Festival Setup" className="w-full bg-slate-900/40 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-cyan-500/40 focus:bg-slate-900 transition-all" />
-            <input type="text" name="slide4_line2" value={formData.slide4_line2 || ''} onChange={handleChange} placeholder="Zuverlässige Systemtechnik" className="w-full bg-slate-900/40 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-cyan-500/40 focus:bg-slate-900 transition-all" />
+            <div className="flex items-center gap-1">
+              <input type="text" name="slide4_line1" value={formData.slide4_line1 || ''} onChange={handleChange} placeholder="Festival Setup" className="min-w-0 flex-1 bg-slate-900/40 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-cyan-500/40 focus:bg-slate-900 transition-all" />
+              {renderVisibilityToggle('slide4_line1')}
+            </div>
+            <div className="flex items-center gap-1">
+              <input type="text" name="slide4_line2" value={formData.slide4_line2 || ''} onChange={handleChange} placeholder="Zuverlässige Systemtechnik" className="min-w-0 flex-1 bg-slate-900/40 border border-slate-800 rounded-lg px-2.5 py-1 text-slate-300 text-[11px] focus:outline-none focus:border-cyan-500/40 focus:bg-slate-900 transition-all" />
+              {renderVisibilityToggle('slide4_line2')}
+            </div>
           </div>
           
         </div>

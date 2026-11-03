@@ -58,6 +58,17 @@ try {
         ]);
         $profile = $profileStmt->fetch(PDO::FETCH_ASSOC);
 
+        if (!$profile)
+        {
+            http_response_code(404);
+            echo json_encode([
+                'success' => false,
+                'error' => 'Profil zum Konto nicht gefunden.',
+                'user' => null
+            ]);
+            exit;
+        }
+
         if ($profile && $profile['status'] === 'deactivated')
         {
             http_response_code(403);

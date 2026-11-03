@@ -9,6 +9,12 @@ export default function ProfileVertretungBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState(null);
   const [showRepresentation, setShowRepresentation] = useState(true);
+  const [fieldVisibility, setFieldVisibility] = useState({
+    representation_type: true,
+    agent_name: true,
+    agent_email: true,
+    agent_phone: true
+  });
   const [formData, setFormData] = useState({
     representation_type: 'self',
     agent_name: '',
@@ -46,6 +52,12 @@ export default function ProfileVertretungBox({ currentProfileId, isOwner }) {
           agent_phone:
             profile.agent_phone || ''
         });
+        setFieldVisibility({
+          representation_type: profile.show_representation_type !== false,
+          agent_name: profile.show_agent_name !== false,
+          agent_email: profile.show_agent_email !== false,
+          agent_phone: profile.show_agent_phone !== false
+        });
       })
       .catch(e => {
         console.error(
@@ -68,7 +80,10 @@ export default function ProfileVertretungBox({ currentProfileId, isOwner }) {
         ...profile,
         ...formData,
         show_representation:
-          showRepresentation
+          showRepresentation,
+        ...Object.fromEntries(
+          Object.entries(fieldVisibility).map(([field, visible]) => [`show_${field}`, visible])
+        )
       };
       const saveProfileId =
         profile.id ||
@@ -101,6 +116,22 @@ export default function ProfileVertretungBox({ currentProfileId, isOwner }) {
 
   const isVisible = showRepresentation || canEdit;
   if (!isVisible) return null;
+  const canShowField = (field) => canEdit || fieldVisibility[field];
+  if (!canEdit && !Object.keys(fieldVisibility).some(field => canShowField(field) && formData[field])) return null;
+  const toggleFieldVisibility = (field) => {
+    setFieldVisibility(prev => ({ ...prev, [field]: !prev[field] }));
+  };
+  const renderFieldToggle = (field) => (
+    <button
+      type="button"
+      onClick={() => toggleFieldVisibility(field)}
+      aria-label={`Sichtbarkeit ${field} umschalten`}
+      title={fieldVisibility[field] ? 'Für andere sichtbar' : 'Für andere ausgeblendet'}
+      className="text-slate-400 hover:text-white"
+    >
+      {fieldVisibility[field] ? <Eye size={12} /> : <EyeOff size={12} />}
+    </button>
+  );
 
   const { representation_type, agent_name, agent_email, agent_phone } = formData;
 
@@ -135,7 +166,7 @@ export default function ProfileVertretungBox({ currentProfileId, isOwner }) {
           {canEdit && !isEditing && (
             <button 
               type="button" 
-              onClick={() => setIsEditing(true)} 
+              data-profile-edit-trigger onClick={() => setIsEditing(true)}
               className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-cyan-400 text-[10px] font-black tracking-wider uppercase hover:border-cyan-500 transition-all cursor-pointer"
             >
               ✏️ Vertretung
@@ -149,35 +180,35 @@ export default function ProfileVertretungBox({ currentProfileId, isOwner }) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-400">
           
           {/* STATUS KACHEL */}
-          <div className="p-3 bg-slate-900/10 border border-slate-900 rounded-2xl flex flex-col justify-center items-center text-center space-y-1">
+          {canShowField('representation_type') && <div className="p-3 bg-slate-900/10 border border-slate-900 rounded-2xl flex flex-col justify-center items-center text-center space-y-1">
             <UserCheck size={16} className="text-cyan-400 animate-pulse" />
             <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider">// AUTHORITY TYPE</span>
             <span className="text-white font-black text-[10px] uppercase tracking-wide px-2 py-0.5 bg-cyan-950/20 border border-cyan-500/20 rounded-md mt-1 truncate max-w-full">
               {representation_type === 'self' ? 'DIRECT DEAL' : 'PREMIUM CONTRACT'}
             </span>
-          </div>
+          </div>}
 
           {/* AGENTUR DETAILS */}
           <div className="md:col-span-2 space-y-2 p-3 bg-slate-900/10 border border-slate-900 rounded-2xl">
-            <div className="flex justify-between py-1 border-b border-slate-900/30">
+            {canShowField('representation_type') && <div className="flex justify-between py-1 border-b border-slate-900/30">
               <span className="text-slate-500 flex items-center gap-1"><UserCheck size={11} /> Struktur:</span> 
               <span className="text-slate-200 font-bold">{getTypeLabel(representation_type)}</span>
-            </div>
-            <div className="flex justify-between py-1 border-b border-slate-900/30">
+            </div>}
+            {canShowField('agent_name') && <div className="flex justify-between py-1 border-b border-slate-900/30">
               <span className="text-slate-500 flex items-center gap-1"><ShieldCheck size={11} /> Name / Agentur:</span> 
               <span className="text-white font-medium uppercase truncate max-w-[60%]">{agent_name || 'Direktkontakt / Keine Agentur'}</span>
-            </div>
-            {representation_type !== 'self' && (
-              <>
-                <div className="flex justify-between py-1 border-b border-slate-900/30">
-                  <span className="text-slate-500 flex items-center gap-1"><Mail size={11} /> Agentur E-Mail:</span> 
-                  <span className="text-cyan-400 font-bold font-mono truncate max-w-[60%]">{agent_email || 'Nicht hinterlegt'}</span>
-                </div>
-                <div className="flex justify-between py-1">
-                  <span className="text-slate-500 flex items-center gap-1"><Phone size={11} /> Agentur Telefon:</span> 
-                  <span className="text-white font-mono truncate max-w-[60%]">{agent_phone || 'Nicht hinterlegt'}</span>
-                </div>
-              </>
+            </div>}
+            {representation_type !== 'self' && canShowField('agent_email') && (
+              <div className="flex justify-between py-1 border-b border-slate-900/30">
+                <span className="text-slate-500 flex items-center gap-1"><Mail size={11} /> Agentur E-Mail:</span> 
+                <span className="text-cyan-400 font-bold font-mono truncate max-w-[60%]">{agent_email || 'Nicht hinterlegt'}</span>
+              </div>
+            )}
+            {representation_type !== 'self' && canShowField('agent_phone') && (
+              <div className="flex justify-between py-1">
+                <span className="text-slate-500 flex items-center gap-1"><Phone size={11} /> Agentur Telefon:</span>
+                <span className="text-white font-mono truncate max-w-[60%]">{agent_phone || 'Nicht hinterlegt'}</span>
+              </div>
             )}
           </div>
 
@@ -190,7 +221,7 @@ export default function ProfileVertretungBox({ currentProfileId, isOwner }) {
             <div className="space-y-3 p-3 bg-slate-900/20 border border-slate-900 rounded-2xl">
               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest block">// CONTRACT STRUCTURE</span>
               <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] text-slate-500 font-bold">// VERTRETUNGS-TYP</span>
+                <div className="flex items-center justify-between"><span className="text-[10px] text-slate-500 font-bold">// VERTRETUNGS-TYP</span>{renderFieldToggle('representation_type')}</div>
                 <select 
                   name="representation_type" 
                   value={representation_type || 'self'} 
@@ -204,7 +235,7 @@ export default function ProfileVertretungBox({ currentProfileId, isOwner }) {
                 </select>
               </div>
               <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] text-slate-500 font-bold">// NAME DER VERTRETUNG / AGENT</span>
+                <div className="flex items-center justify-between"><span className="text-[10px] text-slate-500 font-bold">// NAME DER VERTRETUNG / AGENT</span>{renderFieldToggle('agent_name')}</div>
                 <input 
                   type="text" 
                   name="agent_name" 
@@ -220,7 +251,7 @@ export default function ProfileVertretungBox({ currentProfileId, isOwner }) {
             <div className="space-y-3 p-3 bg-slate-900/20 border border-slate-900 rounded-2xl">
               <span className="text-[9px] text-slate-500 font-bold uppercase tracking-widest block">// PREMIUM CONTACT CREDENTIALS</span>
               <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] text-slate-500 font-bold">// AGENTUR E-MAIL</span>
+                <div className="flex items-center justify-between"><span className="text-[10px] text-slate-500 font-bold">// AGENTUR E-MAIL</span>{renderFieldToggle('agent_email')}</div>
                 <input 
                   type="email" 
                   name="agent_email" 
@@ -232,7 +263,7 @@ export default function ProfileVertretungBox({ currentProfileId, isOwner }) {
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] text-slate-500 font-bold">// AGENTUR TELEFON</span>
+                <div className="flex items-center justify-between"><span className="text-[10px] text-slate-500 font-bold">// AGENTUR TELEFON</span>{renderFieldToggle('agent_phone')}</div>
                 <input 
                   type="text" 
                   name="agent_phone" 
@@ -249,8 +280,8 @@ export default function ProfileVertretungBox({ currentProfileId, isOwner }) {
 
           {/* CONTROL STRIP */}
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-900">
-            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
-            <button type="submit" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-cyan-600 text-slate-950 hover:bg-cyan-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.3)]"><Save size={12} /> Vertretung Einbrennen ✓</button>
+            <button type="button" data-profile-action="cancel" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
+            <button type="submit" data-profile-action="save" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-cyan-600 text-slate-950 hover:bg-cyan-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.3)]"><Save size={12} /> Speichern</button>
           </div>
         </form>
       )}

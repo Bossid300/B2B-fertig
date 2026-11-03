@@ -33,6 +33,25 @@ if ($existingUser)
 
 try {
 
+    $profileStmt = $pdo->prepare("
+        SELECT id
+        FROM profiles
+        WHERE id = :profileId
+        LIMIT 1
+    ");
+    $profileStmt->execute([
+        ':profileId' => $data['profileId']
+    ]);
+
+    if (!$profileStmt->fetch(PDO::FETCH_ASSOC))
+    {
+        echo json_encode([
+            'success' => false,
+            'error' => 'profile_not_found'
+        ]);
+        exit;
+    }
+
     $stmt = $pdo->prepare("
         INSERT INTO auth_users (
             id,
@@ -64,6 +83,18 @@ try {
             ':acceptedTermsDate' => date('Y-m-d H:i:s')
         ]);
 
+    session_set_cookie_params([
+        'httponly' => true,
+        'secure' => true,
+        'samesite' => 'Lax'
+    ]);
+    session_start();
+    session_regenerate_id(true);
+
+    $_SESSION['profile_id'] = $data['profileId'];
+    $_SESSION['auth_user_id'] = $data['id'];
+    $_SESSION['login_time'] = time();
+
 
     @mail(
         'support@gigsda.com',
@@ -77,7 +108,11 @@ try {
     );
 
     echo json_encode([
-        'success' => true
+        'success' => true,
+        'user' => [
+            'id' => $data['id'],
+            'profileId' => $data['profileId']
+        ]
     ]);
 
 } catch (Exception $e) {

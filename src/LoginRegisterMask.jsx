@@ -121,8 +121,11 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
  */
       if (typeof onLoginSuccess === "function") {
         onLoginSuccess(
-          "Winston Jud",
-          "Admin"
+          {
+            id: "GIGS-3582",
+            name: "Winston Jud",
+            role: "Admin"
+          }
         );
       }
 
@@ -156,6 +159,10 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
 
     if (!matchedProfile) {
       setErrorMsg("Profil konnte nicht geladen werden.");
+      return;
+    }
+    if (String(matchedProfile.id) !== String(matchedAuthUser.profileId)) {
+      setErrorMsg("Profilzuordnung des Kontos ist ungültig.");
       return;
     }
 
@@ -362,6 +369,11 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
       return;
     }
 
+    const authUserId = authResult.user?.id;
+    if (!authUserId) {
+      setErrorMsg("Account wurde erstellt, aber die Anmeldung konnte nicht gestartet werden.");
+      return;
+    }
 
     localStorage.setItem(
       "gigsda_profile_id",
@@ -386,7 +398,7 @@ export default function LoginRegisterMask({ isRegisteringInitial, onLoginSuccess
     localStorage.setItem(
       "gigsda_session",
       JSON.stringify({
-        authUserId: "AUTH-" + Date.now(),
+        authUserId,
         profileId: generatedId,
         loginAt: Date.now()
       })

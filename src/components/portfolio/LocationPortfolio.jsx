@@ -70,7 +70,7 @@ const powerSupply =
             alt="Hero"
             className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-black/20" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-black/20" />
             </div>
 
 
@@ -233,17 +233,43 @@ const powerSupply =
 
             {profile?.room1_tech_plan && (
               <div>
+
                 <p className="text-cyan-400 text-sm mb-3">
                   Bühnenplan & Technik
                 </p>
-                <img
-                  src={profile.room1_tech_plan}
-                  alt="Bühnenplan & Technik"
-                  className="w-full h-auto rounded-xl border border-slate-800"
-                />
-                
+
+                {profile.room1_tech_plan.includes('/api/media.php?preview=') ? (
+
+                  <img
+                    src={profile.room1_tech_plan}
+                    alt="Bühnenplan & Technik"
+                    className="w-full h-auto rounded-xl border border-slate-800"
+                  />
+
+                ) : (
+
+                  <div className="text-center p-6 rounded-xl border border-slate-800 bg-slate-900">
+
+                    <p className="text-sm text-white mb-4">
+                      Technischer Rider / Plan geladen
+                    </p>
+
+                    <a
+                      href={profile.room1_tech_plan}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-4 py-2 rounded-xl bg-cyan-500 text-slate-950 font-bold"
+                    >
+                      Dokument / PDF öffnen
+                    </a>
+
+                  </div>
+
+                )}
+
               </div>
             )}
+
 
           </div>
 

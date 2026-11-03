@@ -123,14 +123,12 @@ function mediaDownload($pdo, $profileId)
         SELECT storage_key, original_filename, mime_type, size_bytes
         FROM media_assets
         WHERE id = :id
-          AND owner_profile_id = :owner_profile_id
-          AND status = 'ready'
-          AND deleted_at IS NULL
+         AND status = 'ready'
+         AND deleted_at IS NULL
         LIMIT 1
     ");
     $stmt->execute([
-        ':id' => $id,
-        ':owner_profile_id' => $profileId
+        ':id' => $id
     ]);
     $asset = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -154,7 +152,7 @@ function mediaDownload($pdo, $profileId)
     $filename = preg_replace('/[\r\n\x00-\x1F\x7F]/', '', $asset['original_filename']);
     header('Content-Type: application/octet-stream');
     header('Content-Length: ' . filesize($filePath));
-    header('Content-Disposition: attachment; filename="download"; filename*=UTF-8\'\'' . rawurlencode($filename));
+    header('Content-Disposition: inline; filename="download"; filename*=UTF-8\'\'' . rawurlencode($filename));
     header('Cache-Control: private, no-store');
     readfile($filePath);
     exit;
@@ -187,15 +185,13 @@ function mediaServeImage($pdo, $assetId, $profileId = null, $avatarOnly = false)
             SELECT storage_key, mime_type
             FROM media_assets
             WHERE id = :id
-              AND owner_profile_id = :owner_profile_id
               AND media_type = 'image'
               AND status = 'ready'
               AND deleted_at IS NULL
             LIMIT 1
         ");
         $stmt->execute([
-            ':id' => $assetId,
-            ':owner_profile_id' => $profileId
+            ':id' => $assetId
         ]);
     }
 
@@ -241,16 +237,23 @@ function mediaSetAvatar($pdo, $profileId, $authUserId)
 
     try {
         $profileStmt = $pdo->prepare("
-            SELECT id
+            SELECT id, profile_json
             FROM profiles
             WHERE id = :profile_id
             LIMIT 1
             FOR UPDATE
         ");
         $profileStmt->execute([':profile_id' => $profileId]);
-        if (!$profileStmt->fetchColumn()) {
+        $profileRecord = $profileStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$profileRecord) {
             throw new RuntimeException('Profil nicht gefunden.');
         }
+        $profileSettings = json_decode($profileRecord['profile_json'] ?? '', true);
+        $avatarVisibility = is_array($profileSettings) &&
+            ($profileSettings['show_avatarUrl'] ?? true) !== false &&
+            ($profileSettings['show_stamm'] ?? true) !== false
+                ? 'public'
+                : 'owner';
 
         $assetStmt = $pdo->prepare("
             SELECT id
@@ -300,7 +303,7 @@ function mediaSetAvatar($pdo, $profileId, $authUserId)
                 'profile',
                 :entity_id,
                 'avatar',
-                'public',
+                :visibility,
                 :created_by_auth_user_id
             )
         ");
@@ -308,6 +311,7 @@ function mediaSetAvatar($pdo, $profileId, $authUserId)
             ':id' => mediaUuid(),
             ':media_asset_id' => $assetId,
             ':entity_id' => $profileId,
+            ':visibility' => $avatarVisibility,
             ':created_by_auth_user_id' => $authUserId
         ]);
 
@@ -364,8 +368,66 @@ try {
         ]);
     }
 
+    if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+
+        $assetId = $_GET['id'] ?? '';
+
+        if (!preg_match('/^[a-f0-9-]{36}$/i', $assetId)) {
+            mediaRespond(400, [
+                'success' => false,
+                'error' => 'Ungültige Medien-ID.'
+            ]);
+        }
+
+        $stmt = $pdo->prepare("
+            SELECT storage_key
+            FROM media_assets
+            WHERE id = :id
+            AND owner_profile_id = :owner_profile_id
+            AND deleted_at IS NULL
+            LIMIT 1
+        ");
+
+        $stmt->execute([
+            ':id' => $assetId,
+            ':owner_profile_id' => $profileId
+        ]);
+
+        $asset = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$asset) {
+            mediaRespond(404, [
+                'success' => false,
+                'error' => 'Medium nicht gefunden.'
+            ]);
+        }
+
+        $filePath =
+            mediaStorageDirectory() .
+            DIRECTORY_SEPARATOR .
+            $asset['storage_key'];
+
+        if (is_file($filePath)) {
+            unlink($filePath);
+        }
+
+        $deleteStmt = $pdo->prepare("
+            UPDATE media_assets
+            SET deleted_at = CURRENT_TIMESTAMP
+            WHERE id = :id
+        ");
+
+        $deleteStmt->execute([
+            ':id' => $assetId
+        ]);
+
+        mediaRespond(200, [
+            'success' => true
+        ]);
+    }
+
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        header('Allow: GET, POST');
+        header('Allow: GET, POST, DELETE');
         mediaRespond(405, ['success' => false, 'error' => 'Methode nicht erlaubt.']);
     }
 

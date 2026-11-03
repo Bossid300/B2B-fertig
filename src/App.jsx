@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import LandingPage from './LandingPage';
 import LoginRegisterMask from './LoginRegisterMask';
 import ResetPasswordPage from "./pages/ResetPasswordPage";
@@ -72,7 +72,11 @@ import PortfolioRouter from './components/portfolio/PortfolioRouter';
 import ArtistPortfolio from "./components/portfolio/ArtistPortfolio.jsx";
 
 import GigsdaPass from "./components/GigsdaPass";
+
+
 import PassPrintPage from './components/prints/PassPrintPage';
+import PassChallengePage from "./pages/PassChallengePage";
+import ChallengePrintPage from "./components/prints/ChallengePrintPage";
 
 import { eventService } from './services/eventService';
 import { progressService } from './services/progressService';
@@ -90,6 +94,11 @@ import BillingCenter from './components/BillingCenter';
 
 import BudgetPlanner from './components/BudgetPlanner';
 import MediaLibraryPage from './components/MediaLibraryPage';
+
+
+
+
+
 
 const PATH_VIEWS = {
   '/events': 'guestEvents',
@@ -124,12 +133,30 @@ const getPortfolioIdFromPath = (path) => {
   }
 };
 
+
+
 export default function App() {
+
+  const challengeId =
+    new URLSearchParams(window.location.search)
+      .get("challenge");
+
+  const printChallengeId =
+    new URLSearchParams(window.location.search)
+      .get("printChallenge");
+    if (printChallengeId) {
+      return (
+        <ChallengePrintPage
+          challengeId={printChallengeId}
+        />
+      );
+    }
+
   const [resetToken] = useState(
     () => new URLSearchParams(window.location.search).get('resetToken')
   );
 
-    // 📡 REAKTIVER CREW-ALARM EMPFÄNGER
+  // 📡 REAKTIVER CREW-ALARM EMPFÄNGER
   const [hasPendingRequests, setHasPendingRequests] = useState(false);
   const [eventLinkError, setEventLinkError] = useState('');
   const checkPendingRequests = async () => {
@@ -354,21 +381,53 @@ export default function App() {
   });
   const [currentProfile, setCurrentProfile] = useState(null);
   useEffect(() => {
+    let cancelled = false;
+    if (currentProfile?.id) return;
+
     const session = JSON.parse(
       localStorage.getItem("gigsda_session") || "null"
     );
     if (!session?.profileId) return;
+    const restoredProfileId = String(session.profileId);
     const loadSessionProfile = async () => {
       try {
         const profileResult = await getProfileById(
-          session.profileId
+          restoredProfileId
         );
         const loadedProfile =
           profileResult?.profile;
 
-        if (!loadedProfile) return;
+        const latestSession = JSON.parse(
+          localStorage.getItem("gigsda_session") || "null"
+        );
+        if (
+          cancelled ||
+          String(latestSession?.profileId || '') !== restoredProfileId
+        ) {
+          return;
+        }
+
+        if (!loadedProfile || String(loadedProfile.id) !== restoredProfileId) {
+          console.error(
+            "SESSION PROFILE LOAD ERROR: Wiederhergestellte Profil-ID stimmt nicht überein.",
+            restoredProfileId
+          );
+          return;
+        }
+
         setCurrentProfile(
           loadedProfile
+        );
+        localStorage.setItem(
+          "gigsda_session",
+          JSON.stringify({
+            ...latestSession,
+            profileId: restoredProfileId
+          })
+        );
+        localStorage.setItem(
+          "gigsda_profile_id",
+          restoredProfileId
         );
         setTicketName(
           loadedProfile.name
@@ -383,15 +442,20 @@ export default function App() {
           "true"
         );
       } catch (e) {
-        console.error(
-          "SESSION PROFILE LOAD ERROR",
-          e
-        );
+        if (!cancelled) {
+          console.error(
+            "SESSION PROFILE LOAD ERROR",
+            e
+          );
+        }
       }
     };
 
     loadSessionProfile();
-  }, []);
+    return () => {
+      cancelled = true;
+    };
+  }, [currentProfile]);
   
   // 🛰️ EIGENE LEITUNG FÜR DEN GAST-SUCHER (VERGISS JEDE ANDERE VARIABLE!)
 
@@ -549,6 +613,17 @@ useEffect(() => {
     setView('artistPortfolio');
   };
 
+  const openProfile = (profileId) => {
+    setActiveGuestProfileId(profileId);
+
+    localStorage.setItem(
+      'gigsda_active_guest_profile_id',
+      profileId
+    );
+
+    setView('profile');
+  };
+
   const [activeEvent, setActiveEvent] = useState(null);
   const [isRegInitial, setIsRegInitial] = useState(false);
   // 🔴 SIMULATION: Rote Billardkugel für den Dashboard-Posteingang
@@ -666,27 +741,29 @@ useEffect(() => {
   }, []);
  
   // 📡 DER FEHLENDE LOGIN-EMPFÄNGER
-  const handleLoginUser = (name, role) => {
-    const newUser = {
-      id: "USR-" + Date.now().toString().slice(-4),
-      name: name,
-      role: role || 'Veranstalter',
-      registeredAt: new Date().toLocaleDateString()
-    };
- 
-    // Nur speichern, wenn der User nicht schon existiert
-    if (!existingUsers.some(u => u.name.toLowerCase() === name.toLowerCase()))
- 
-    // 💾 SPEICHERT DIE AKTIVE SESSION FÜR DEN BROWSER
+  const handleLoginUser = (profile) => {
+    const profileId = String(profile.id);
+    const session = JSON.parse(
+      localStorage.getItem("gigsda_session") || "null"
+    );
+
+    localStorage.setItem('gigsda_profile_id', profileId);
+    localStorage.setItem(
+      'gigsda_session',
+      JSON.stringify({
+        ...session,
+        profileId
+      })
+    );
+    localStorage.setItem('gigsda_user_name', profile.name);
     localStorage.setItem('gigsda_logged_in', 'true');
-    localStorage.setItem('gigsda_user_name', name);
- 
-    setTicketName(name);
+
+    setCurrentProfile(profile);
+    setTicketName(profile.name);
     setIsLoggedIn(true);
-    setView('projects');
+    setView('userProfile');
   };
- 
- 
+
   // FUNKTION: Aktualisiert die Crew exklusiv für das aktive Event im Master-Array
   const handleUpdateCrewForEvent = (newCrewIds) => {
     if (!activeEvent) return;
@@ -879,6 +956,19 @@ useEffect(() => {
             </p>
           )}
  
+          {printChallengeId ? (
+
+            <ChallengePrintPage />
+          ) : challengeId ? (
+
+            <PassChallengePage
+              challengeId={challengeId}
+            />
+
+          ) : (
+            <>
+
+
           {view === 'landing' && (
             <LandingPage 
               onEnterCenter={(selectedCity) => {
@@ -898,22 +988,7 @@ useEffect(() => {
           {view === 'login' && !isLoggedIn && (
             <LoginRegisterMask 
               isRegisteringInitial={view === 'register'}
-              onLoginSuccess={(profile) => {
-                setCurrentProfile(profile);
-                localStorage.setItem(
-                  'gigsda_user_name',
-                  profile.name
-                );
-                localStorage.setItem(
-                  'gigsda_logged_in',
-                  'true'
-                );
-                setIsLoggedIn(true);
-                setTicketName(
-                  profile.name
-                );
-                setView('userProfile');
-              }}
+              onLoginSuccess={handleLoginUser}
             />
 
           )}
@@ -943,6 +1018,7 @@ useEffect(() => {
           {view === 'radar' && !isLoggedIn && (
             <SearchExplorer 
               onBack={() => setView('landing')} 
+              onOpenProfile={openProfile}
               onOpenPortfolio={openPortfolio}
               setFavorites={(profileId) => {
 
@@ -962,6 +1038,7 @@ useEffect(() => {
           {view === 'radar' && isLoggedIn && (
             <SearchExplorer 
               onBack={() => setView('projects')} 
+              onOpenProfile={openProfile}
               onOpenPortfolio={openPortfolio}
               setFavorites={(artistView) => {
 
@@ -1365,6 +1442,7 @@ useEffect(() => {
           {view === 'search' && (
             <SearchExplorer 
               onBack={() => setView('shortlist')} 
+              onOpenProfile={openProfile}
               onOpenPortfolio={openPortfolio}
               isGuest={!isLoggedIn} 
               onTriggerGate={triggerGate} 
@@ -1512,6 +1590,8 @@ useEffect(() => {
           {view === 'roadmap' && (
             <Roadmap setView={setView} />
           )}
+</>
+)}
 
         </main>
  

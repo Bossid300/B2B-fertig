@@ -8,6 +8,13 @@ export default function ProfileSocialBox({ currentProfileId, isOwner }) {
   const [profile, setProfile] = useState(null);
   const [profileData, setProfileData] = useState(null);
   const [showSocials, setShowSocials] = useState(true);
+  const [fieldVisibility, setFieldVisibility] = useState({
+    social_facebook: true,
+    social_instagram: true,
+    social_linkedin: true,
+    social_spotify: true,
+    social_youtube: true
+  });
   const [formData, setFormData] = useState({
     social_instagram: '',
     social_facebook: '',
@@ -37,6 +44,13 @@ export default function ProfileSocialBox({ currentProfileId, isOwner }) {
         setShowSocials(
           profile.show_socials !== false
         );
+        setFieldVisibility({
+          social_facebook: profile.show_social_facebook !== false,
+          social_instagram: profile.show_social_instagram !== false,
+          social_linkedin: profile.show_social_linkedin !== false,
+          social_spotify: profile.show_social_spotify !== false,
+          social_youtube: profile.show_social_youtube !== false
+        });
         setFormData({
           social_instagram:
             profile.social_instagram || '',
@@ -81,7 +95,10 @@ export default function ProfileSocialBox({ currentProfileId, isOwner }) {
         social_youtube:
           formData.social_youtube,
         show_socials:
-          showSocials
+          showSocials,
+        ...Object.fromEntries(
+          Object.entries(fieldVisibility).map(([field, visible]) => [`show_${field}`, visible])
+        )
       };
       
       const saveProfileId =
@@ -119,7 +136,9 @@ export default function ProfileSocialBox({ currentProfileId, isOwner }) {
   const isVisible = showSocials || canEdit;
   if (!isVisible) return null;
 
-  const hasAnyLink = formData.social_instagram || formData.social_linkedin || formData.social_spotify || formData.social_youtube;
+  const isFieldVisible = (field) => canEdit || fieldVisibility[field];
+  const hasAnyLink = Object.keys(formData).some(field => formData[field] && isFieldVisible(field));
+  if (!canEdit && !hasAnyLink) return null;
 
   return (
     <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
@@ -173,7 +192,7 @@ export default function ProfileSocialBox({ currentProfileId, isOwner }) {
           {canEdit && !isEditing && (
             <button 
               type="button" 
-              onClick={() => setIsEditing(true)} 
+              data-profile-edit-trigger onClick={() => setIsEditing(true)}
               className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-900 border border-slate-800 text-cyan-400 text-[10px] font-black tracking-wider uppercase hover:border-cyan-500 transition-all cursor-pointer"
             >
               ✏️ Kanäle
@@ -191,31 +210,31 @@ export default function ProfileSocialBox({ currentProfileId, isOwner }) {
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {formData.social_facebook && (
+              {formData.social_facebook && isFieldVisible('social_facebook') && (
                 <a href={formData.social_facebook} target="_blank" rel="noreferrer" className="p-3 bg-slate-900/40 border border-slate-900 rounded-xl flex items-center gap-2.5 group hover:border-cyan-500/40 transition-all cursor-pointer">
                   <Globe size={14} className="text-blue-500 shrink-0" />
                   <span className="text-xs font-bold uppercase tracking-wide truncate text-slate-300 group-hover:text-cyan-400 transition-all">Facebook</span>
                 </a>
               )}
-              {formData.social_instagram && (
+              {formData.social_instagram && isFieldVisible('social_instagram') && (
                 <a href={formData.social_instagram} target="_blank" rel="noreferrer" className="p-3 bg-slate-900/40 border border-slate-900 rounded-xl flex items-center gap-2.5 group hover:border-cyan-500/40 transition-all cursor-pointer">
                   <Globe size={14} className="text-pink-500 shrink-0" />
                   <span className="text-xs font-bold uppercase tracking-wide truncate text-slate-300 group-hover:text-cyan-400 transition-all">Instagram</span>
                 </a>
               )}
-              {formData.social_linkedin && (
+              {formData.social_linkedin && isFieldVisible('social_linkedin') && (
                 <a href={formData.social_linkedin} target="_blank" rel="noreferrer" className="p-3 bg-slate-900/40 border border-slate-900 rounded-xl flex items-center gap-2.5 group hover:border-cyan-500/40 transition-all cursor-pointer">
                   <Globe size={14} className="text-blue-500 shrink-0" />
                   <span className="text-xs font-bold uppercase tracking-wide truncate text-slate-300 group-hover:text-cyan-400 transition-all">LinkedIn</span>
                 </a>
               )}
-              {formData.social_spotify && (
+              {formData.social_spotify && isFieldVisible('social_spotify') && (
                 <a href={formData.social_spotify} target="_blank" rel="noreferrer" className="p-3 bg-slate-900/40 border border-slate-900 rounded-xl flex items-center gap-2.5 group hover:border-cyan-500/40 transition-all cursor-pointer">
                   <Globe size={14} className="text-emerald-500 shrink-0" />
                   <span className="text-xs font-bold uppercase tracking-wide truncate text-slate-300 group-hover:text-cyan-400 transition-all">Spotify</span>
                 </a>
               )}
-              {formData.social_youtube && (
+              {formData.social_youtube && isFieldVisible('social_youtube') && (
                 <a href={formData.social_youtube} target="_blank" rel="noreferrer" className="p-3 bg-slate-900/40 border border-slate-900 rounded-xl flex items-center gap-2.5 group hover:border-cyan-500/40 transition-all cursor-pointer">
                   <Globe size={14} className="text-rose-500 shrink-0" />
                   <span className="text-xs font-bold uppercase tracking-wide truncate text-slate-300 group-hover:text-cyan-400 transition-all">YouTube</span>
@@ -233,35 +252,35 @@ export default function ProfileSocialBox({ currentProfileId, isOwner }) {
 
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] text-slate-500 font-bold">// FACEBOOK PROFILE URL</span>
-                <input type="text" name="social_facebook" value={formData.social_facebook || ''} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" placeholder="https://facebook.com" />
+                <div className="flex gap-2"><input type="text" name="social_facebook" value={formData.social_facebook || ''} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" placeholder="https://facebook.com" /><button type="button" onClick={() => setFieldVisibility(prev => ({ ...prev, social_facebook: !prev.social_facebook }))} aria-label="Sichtbarkeit Facebook umschalten" title="Sichtbarkeit Facebook umschalten">{fieldVisibility.social_facebook ? <Eye size={14} /> : <EyeOff size={14} />}</button></div>
               </div>
 
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] text-slate-500 font-bold">// INSTAGRAM PROFILE URL</span>
-                <input type="text" name="social_instagram" value={formData.social_instagram || ''} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" placeholder="https://instagram.com" />
+                <div className="flex gap-2"><input type="text" name="social_instagram" value={formData.social_instagram || ''} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" placeholder="https://instagram.com" /><button type="button" onClick={() => setFieldVisibility(prev => ({ ...prev, social_instagram: !prev.social_instagram }))} aria-label="Sichtbarkeit Instagram umschalten" title="Sichtbarkeit Instagram umschalten">{fieldVisibility.social_instagram ? <Eye size={14} /> : <EyeOff size={14} />}</button></div>
               </div>
 
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] text-slate-500 font-bold">// LINKEDIN B2B URL</span>
-                <input type="text" name="social_linkedin" value={formData.social_linkedin || ''} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" placeholder="https://linkedin.com" />
+                <div className="flex gap-2"><input type="text" name="social_linkedin" value={formData.social_linkedin || ''} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" placeholder="https://linkedin.com" /><button type="button" onClick={() => setFieldVisibility(prev => ({ ...prev, social_linkedin: !prev.social_linkedin }))} aria-label="Sichtbarkeit LinkedIn umschalten" title="Sichtbarkeit LinkedIn umschalten">{fieldVisibility.social_linkedin ? <Eye size={14} /> : <EyeOff size={14} />}</button></div>
               </div>
 
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] text-slate-500 font-bold">// SPOTIFY ARTIST / PLAYLIST URL</span>
-                <input type="text" name="social_spotify" value={formData.social_spotify || ''} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" placeholder="https://spotify.com..." />
+                <div className="flex gap-2"><input type="text" name="social_spotify" value={formData.social_spotify || ''} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" placeholder="https://spotify.com..." /><button type="button" onClick={() => setFieldVisibility(prev => ({ ...prev, social_spotify: !prev.social_spotify }))} aria-label="Sichtbarkeit Spotify umschalten" title="Sichtbarkeit Spotify umschalten">{fieldVisibility.social_spotify ? <Eye size={14} /> : <EyeOff size={14} />}</button></div>
               </div>
 
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] text-slate-500 font-bold">// YOUTUBE CHANNEL / VIDEO URL</span>
-                <input type="text" name="social_youtube" value={formData.social_youtube || ''} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" placeholder="https://youtube.com..." />
+                <div className="flex gap-2"><input type="text" name="social_youtube" value={formData.social_youtube || ''} onChange={handleChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl p-2 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono" placeholder="https://youtube.com..." /><button type="button" onClick={() => setFieldVisibility(prev => ({ ...prev, social_youtube: !prev.social_youtube }))} aria-label="Sichtbarkeit YouTube umschalten" title="Sichtbarkeit YouTube umschalten">{fieldVisibility.social_youtube ? <Eye size={14} /> : <EyeOff size={14} />}</button></div>
               </div>
             </div>
           </div>
 
           {/* CONTROL STRIP */}
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-900">
-            <button type="button" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
-            <button type="submit" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-cyan-600 text-slate-950 hover:bg-cyan-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.3)]"><Save size={12} /> Kanäle Einbrennen ✓</button>
+            <button type="button" data-profile-action="cancel" onClick={() => setIsEditing(false)} className="px-4 py-2 rounded-xl border border-slate-800 text-slate-400 hover:text-white uppercase text-[10px] font-black cursor-pointer">Abbrechen</button>
+            <button type="submit" data-profile-action="save" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-cyan-600 text-slate-950 hover:bg-cyan-500 uppercase text-[10px] font-black tracking-wider cursor-pointer shadow-[0_0_15px_rgba(6,182,212,0.3)]"><Save size={12} /> Speichern</button>
           </div>
         </form>
       )}
