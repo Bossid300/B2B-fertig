@@ -28,18 +28,18 @@ export default function GuestNavigation({ setView, activeView }) {
         <div className="hidden sm:flex items-center gap-4 select-none ml-auto shrink-0">
           <button onClick={() => handleNavClick('whatIsGigsda')} 
           className={`${desktopBase} ${activeView === 'whatIsGigsda' ? activeClass : inactiveClass}`}>
-            🎵 Was ist gigsda?
+            Was ist gigsda?
           </button>
 
           <button 
             onClick={() => handleNavClick('radar')} 
             className={`${desktopBase} ${activeView === 'radar' ? activeClass : inactiveClass}`}>
-            🗣 Portfolios
+            SUCHE
           </button>  
 
           <button onClick={() => handleNavClick('guestEvents')} 
           className={`${desktopBase} ${activeView === 'guestEvents' ? activeClass : inactiveClass}`}>
-            📅 Events
+            EVENTS
           </button>
 
           <button
@@ -50,13 +50,13 @@ export default function GuestNavigation({ setView, activeView }) {
                 : inactiveClass
             }`}
           >
-            📆 KALENDER
+            KALENDER
           </button>
 
           <button 
             onClick={() => handleNavClick('guestProjects')} 
             className={`${desktopBase} ${activeView === 'guestProjects' ? activeClass : inactiveClass}`}>
-            📁 PROJEKTE
+            PROJEKTE
           </button>
 
           <button
@@ -67,7 +67,7 @@ export default function GuestNavigation({ setView, activeView }) {
                 : inactiveClass
             }`}
           >
-            💎 Preise
+            PREISE
           </button>
         </div>
 
@@ -99,10 +99,10 @@ export default function GuestNavigation({ setView, activeView }) {
             🎵 Was ist gigsda?
           </button>
           <button onClick={() => handleNavClick('radar')} className={`${mobileBase} ${activeView === 'radar' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
-            🗣 Portfolios
+            🗣 SUCHE
           </button>
           <button onClick={() => handleNavClick('guestEvents')} className={`${mobileBase} ${activeView === 'guestEvents' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
-            📅 Events
+            📅 EVENTS
           </button>
           <button
             onClick={() => handleNavClick('calendar')}

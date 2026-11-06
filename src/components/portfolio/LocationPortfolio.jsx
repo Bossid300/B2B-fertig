@@ -3,6 +3,7 @@ import GigsdaPass from "../GigsdaPass";
 import { eventService } from '../../services/eventService';
 import GoogleMapsConsent from '../maps/GoogleMapsConsent';
 import PortfolioActionBar from './shared/PortfolioActionBar';
+import TechLocationPortfolio from './TechLocationPortfolio';
 
 const POWER_SUPPLY_LABELS = {
   'cee 63a': 'CEE 63A (Großbühne)',
@@ -21,6 +22,7 @@ export default function LocationPortfolio({
   onBack = null,
   setView
 }) {
+  const [showStandardSheet, setShowStandardSheet] = useState(false);
 
 const loggedInProfileId =
   localStorage.getItem('gigsda_profile_id');
@@ -60,8 +62,32 @@ const powerSupply =
       return null;
     }
 
+  if (showStandardSheet) {
+    return (
+      <div className="min-h-screen bg-slate-900">
+        <div className="max-w-6xl mx-auto px-4 pt-4 flex flex-wrap items-center gap-3 print:hidden">
+          <button
+            type="button"
+            onClick={() => setShowStandardSheet(false)}
+            className="rounded-lg border border-orange-500/40 bg-orange-950/40 px-4 py-2 text-sm font-semibold text-orange-300 transition hover:bg-orange-900/50"
+          >
+            Zurück zum Location-Portfolio
+          </button>
+          <button
+            type="button"
+            onClick={handlePrintPdf}
+            className="rounded-lg border border-orange-500/40 bg-orange-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-500"
+          >
+            Als PDF drucken
+          </button>
+        </div>
+        <TechLocationPortfolio profile={profile} />
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10 space-y-12">
+    <div className="max-w-6xl mx-auto px-6 py-10 space-y-12">
       {/* 01 // HERO STAGE */}
         <section className="relative overflow-hidden rounded-3xl border border-cyan-500/20 bg-slate-950">
             <div className="relative h-[550px] overflow-hidden">
@@ -465,6 +491,19 @@ const powerSupply =
 								>
 									📄 Portfolio PDF öffnen
 								</a>
+							</div>
+
+							<div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+								<h3 className="font-semibold mb-4">
+									Location Standard Sheet testen
+								</h3>
+								<button
+									type="button"
+									onClick={() => setShowStandardSheet(true)}
+									className="text-orange-400 hover:text-orange-300 underline"
+								>
+									📄 Standard Sheet live ansehen
+								</button>
 							</div>
 					</div>
 				</section>

@@ -1,17 +1,23 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import ReportContentLink from '../ReportContentLink';
+import { distanceKm, geocodeAddress } from '../../services/geoService';
 
+const geocodeCache = new Map();
 
-  // 🗺️ DIE LIVE-ENTFERNUNGSMATRIX (Exakt identisch zum SearchExplorer von eurer Heimatbasis Braunau)
-  const getDistanceTo = (city) => {
-    const target = (city || '').toLowerCase().trim();
-    if (target.includes('braunau')) return 0;   // Direkt vor Ort
-    if (target.includes('altötting')) return 28; // ca. 28 km entfernt
-    if (target.includes('linz')) return 120;     // ca. 120 km entfernt
-    if (target.includes('wien')) return 290;     // ca. 290 km entfernt
-    return 45; // Fallback
-  };
+function getCoordinates(address) {
+  const key = address.trim().toLowerCase();
+  if (!key) return Promise.resolve(null);
 
+  if (!geocodeCache.has(key)) {
+    const request = geocodeAddress(address).catch((error) => {
+      geocodeCache.delete(key);
+      throw error;
+    });
+    geocodeCache.set(key, request);
+  }
+
+  return geocodeCache.get(key);
+}
 
 export default function EventCard({
   event,
@@ -19,6 +25,58 @@ export default function EventCard({
 }) {
 
   const [expanded, setExpanded] = useState(false);
+  const [distance, setDistance] = useState(null);
+
+  const eventLocation =
+    event?.city ||
+    event?.venue ||
+    event?.location ||
+    '';
+  const eventLat = event?.lat;
+  const eventLng = event?.lng;
+  const distanceKey =
+    eventLat != null && eventLng != null
+      ? `${eventLat},${eventLng}`
+      : eventLocation.trim().toLowerCase();
+
+  useEffect(() => {
+    let isCurrent = true;
+
+    const getDistance = async () => {
+      const latitude = Number(eventLat);
+      const longitude = Number(eventLng);
+      const hasEventCoordinates =
+        eventLat != null &&
+        eventLng != null &&
+        Number.isFinite(latitude) &&
+        Number.isFinite(longitude);
+
+      const [origin, destination] = await Promise.all([
+        getCoordinates('Braunau am Inn, Austria'),
+        hasEventCoordinates
+          ? Promise.resolve({ lat: latitude, lng: longitude })
+          : getCoordinates(eventLocation),
+      ]);
+
+      if (!origin || !destination) return;
+
+      const calculatedDistance = Math.round(
+        distanceKm(origin.lat, origin.lng, destination.lat, destination.lng)
+      );
+
+      if (isCurrent) {
+        setDistance({ key: distanceKey, kilometers: calculatedDistance });
+      }
+    };
+
+    getDistance().catch((error) => {
+      console.error('EVENT DISTANCE GEOCODING ERROR', error);
+    });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [eventLat, eventLng, eventLocation, distanceKey]);
 
   if (!event) return null;
 
@@ -176,7 +234,9 @@ export default function EventCard({
             <span>
               DISTANZ:
               <strong className="text-cyan-400 ml-1">
-                {getDistanceTo(event.city)} KM
+                {distance?.key !== distanceKey
+                  ? '—'
+                  : `${distance.kilometers} KM`}
               </strong>
             </span>
           </div>

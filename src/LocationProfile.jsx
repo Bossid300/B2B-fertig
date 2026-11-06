@@ -6,6 +6,7 @@ import ProfileGalleryBox from './components/ProfileGalleryBox';
 import ProfileNetworkBox from './components/ProfileNetworkBox';
 import ProfileAvailBox from './components/ProfileAvailBox';
 import ProfileFinanzBox from './components/ProfileFinanzBox';
+import LocationBusinessBox from './components/LocationBusinessBox';
 import ProfileProjekteBox from './components/ProfileProjekteBox';
 import ProfileEquipmentBox from './components/ProfileEquipmentBox';
 import ProfileBewertungsBox from './components/ProfileBewertungsBox';
@@ -228,6 +229,10 @@ export default function LocationProfile({ onBack, currentProfileId, isOwner, set
           <>
             <ProfileStatusMatrix currentProfileId={currentProfileId} />
             <ProfileFinanzBox
+              currentProfileId={currentProfileId}
+              isOwner={canManage}
+            />
+            <LocationBusinessBox
               currentProfileId={currentProfileId}
               isOwner={canManage}
             />

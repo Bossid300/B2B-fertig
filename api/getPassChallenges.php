@@ -4,7 +4,9 @@ header('Content-Type: application/json');
 
 require_once 'db.php';
 
-$locationProfileId = (int)($_GET['location_profile_id'] ?? 0);
+$locationProfileId = trim(
+    $_GET['location_profile_id'] ?? ''
+);
 
 $stmt = $pdo->prepare("
     SELECT

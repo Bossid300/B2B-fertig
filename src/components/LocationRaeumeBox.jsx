@@ -608,18 +608,34 @@ if (changedEvent) {
                   <div>
                     <label className="text-cyan-500 block mb-0.5 font-mono">⏱️ SPERRSTUNDE</label>
                     {isEditing ? (
-                      <input type="text" placeholder="e.g. 02:00" value={room.curfew_time} onChange={(e) => handleInputChange(room.index, 'curfew_time', e.target.value)} className="w-full bg-slate-900 border border-cyan-900/40 rounded p-1 text-white text-xs font-mono" />
+                      <input type="text" placeholder="e.g. 02:00" value={room.curfew_time} 
+                      onChange={(e) => handleInputChange(room.index, 'curfew_time', e.target.value)} 
+                      className="w-full bg-slate-900 border border-cyan-900/40 rounded p-1 text-white text-xs font-mono" />
                     ) : (
                       <span className="font-bold text-cyan-400 text-sm font-mono">{room.curfew_time || '—'}</span>
                     )}
                   </div>
 
                   <div className="col-span-2">
-                    <label className="text-cyan-500 block mb-0.5 font-mono">🕒 ÖFFNUNGSZEITEN</label>
+                    <label className="text-cyan-500 block mb-0.5 font-mono">
+                      🕒 ÖFFNUNGSZEITEN
+                    </label>
                     {isEditing ? (
-                      <input type="text" placeholder="z. B. Mo–Sa 18:00–02:00" value={room.opening_hours} onChange={(e) => handleInputChange(room.index, 'opening_hours', e.target.value)} className="w-full bg-slate-900 border border-cyan-900/40 rounded p-1 text-white text-xs font-mono" />
+                      <textarea
+                        rows={3}
+                        placeholder={`Fr: 19:00 - 02:00
+                    Sa: 19:00 - 02:00
+                    So: Nach Vereinbarung`}
+                        value={room.opening_hours}
+                        onChange={(e) =>
+                          handleInputChange(room.index, 'opening_hours', e.target.value)
+                        }
+                        className="w-full bg-slate-900 border border-cyan-900/40 rounded p-1 text-white text-xs font-mono resize-y"
+                      />
                     ) : (
-                      <span className="font-bold text-cyan-400 text-sm font-mono">{room.opening_hours || '—'}</span>
+                      <span className="font-bold text-cyan-400 text-sm font-mono whitespace-pre-line">
+                        {room.opening_hours}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -633,11 +649,11 @@ if (changedEvent) {
                 <div>
                   {isEditing ? (
                     <textarea
-                      rows={5}
+                      rows={20}
                       value={room.equipment}
                       onChange={(e) => handleInputChange(room.index, 'equipment', e.target.value)}
                       placeholder="Welche Tonanlage, Lichttechnik, Stative, Beamer oder Mischpulte sind fest installiert?"
-                      className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white text-xs focus:outline-none focus:border-cyan-500 resize-none"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white text-xs focus:outline-none focus:border-cyan-500 resize-y"
                     />
                   ) : (
                     <p className="text-xs text-slate-300 leading-relaxed whitespace-pre-wrap min-h-[90px]">

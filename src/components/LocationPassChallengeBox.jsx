@@ -82,6 +82,7 @@ const loadEntries = async (challengeId) => {
 };
 
 const handleSave = async () => {
+
   try {
     let result;
     if (editingChallenge) {

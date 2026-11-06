@@ -170,13 +170,13 @@ useEffect(() => {
           onClick={() => triggerNav('radar')}
           className={`${desktopBase} ${view === 'radar' ? activeClass : inactiveClass}`}
         >
-          Portfolios
+          SUCHE
         </span>
         <span
           onClick={() => triggerNav('guestEvents')}
           className={`${desktopBase} ${view === 'guestEvents' ? activeClass : inactiveClass}`}
         >
-          Events
+          EVENTS
         </span>
         <span
           onClick={() => triggerNav('calendar')}
@@ -198,7 +198,7 @@ useEffect(() => {
           onClick={() => triggerNav('mediaLibrary')}
           className={`${desktopBase} ${view === 'mediaLibrary' ? activeClass : inactiveClass}`}
         >
-          Meine Medien
+          MEDIEN
         </span>
         <span
           onClick={() => triggerNav('pricing')}
@@ -327,11 +327,11 @@ useEffect(() => {
           }
 
           <button onClick={() => triggerNav('radar')} className={`${mobileBase} ${view === 'radar' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
-            🗣 Portfolios
+            🗣 SUCHE
           </button>
 
           <button onClick={() => triggerNav('guestEvents')} className={`${mobileBase} ${view === 'guestEvents' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
-            📅 Events
+            📅 EVENTS
           </button>
 
           <button
@@ -353,7 +353,7 @@ useEffect(() => {
             onClick={() => triggerNav('mediaLibrary')}
             className={`${mobileBase} ${view === 'mediaLibrary' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}
           >
-            🖼️ Meine Medien
+            🖼️ MEDIEN
           </button>
 
           <button

@@ -9,7 +9,9 @@ $data = json_decode(file_get_contents("php://input"), true);
 $title = $data['title'] ?? '';
 $secretWord = $data['secretWord'] ?? '';
 $prize = $data['prize'] ?? '';
-$locationProfileId = (int)($data['locationProfileId'] ?? 0);
+$locationProfileId = trim(
+    $data['locationProfileId'] ?? ''
+);
 
 $stmt = $pdo->prepare("
     INSERT INTO pass_challenges

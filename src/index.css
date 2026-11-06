@@ -215,6 +215,43 @@
   box-shadow: 0 0 10px rgb(251 113 133 / 55%);
 }
 
+@media print {
+  @page {
+    size: A4;
+    margin: 8mm;
+  }
+
+  /* 1. Alles ausblenden, was nicht zum Dokument gehört */
+  body > *:not(#root),
+  header:not(.location-standard-sheet header),
+  nav,
+  footer:not(.location-standard-sheet footer),
+  .global-nav,
+  .global-footer,
+  button:not(.location-standard-sheet button),
+  a[href*="exit"],
+  .exit-button {
+    display: none !important;
+  }
+
+  /* 2. Dokumentenfluss für den Druck erzwingen */
+  html, body {
+    font-size: 10pt !important;
+  }
+  .location-standard-sheet {
+    margin: 10 !important;
+    padding: 10 !important;
+  }
+  /* 4. Jede Sektion und Box als unteilbare Einheit schützen */
+  .location-standard-sheet section,
+  .location-standard-sheet .location-standard-sheet-media-card,
+  .location-standard-sheet tr,
+  .location-standard-sheet img {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}
+
 @media (max-width: 640px) {
   .profile-stamm-edit-grid {
     grid-template-columns: minmax(0, 1fr);

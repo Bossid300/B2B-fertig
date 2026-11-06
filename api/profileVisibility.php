@@ -1,6 +1,6 @@
 <?php
 
-function stripPrivateProfileFields(array $profile): array
+function stripPrivateProfileFields(array $profile, string $role = ''): array
 {
     $fieldMap = [
         'show_stamm' => [
@@ -60,6 +60,15 @@ function stripPrivateProfileFields(array $profile): array
             'social_spotify', 'social_youtube'
         ]
     ];
+
+    $profileRole = strtolower((string) ($profile['role'] ?? $role));
+    if ($profileRole === '' && isset($profile['profile_type'])) {
+        $profileRole = strtolower((string) $profile['profile_type']);
+    }
+
+    if ($profileRole === 'location') {
+        unset($fieldMap['show_finance']);
+    }
 
     foreach ($fieldMap as $visibilityField => $privateFields) {
         if (($profile[$visibilityField] ?? null) === false) {
@@ -223,7 +232,10 @@ function sanitizePublicProfileRow(array $row): array
         $profile = [];
     }
 
-    $profile = stripPrivateProfileFields($profile);
+    $profile = stripPrivateProfileFields(
+        $profile,
+        (string) ($row['role'] ?? $row['profile_type'] ?? '')
+    );
     $row['profile_json'] = json_encode($profile);
 
     foreach (array_keys($row) as $key) {
