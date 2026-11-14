@@ -175,7 +175,7 @@ export default function LocationProfile({ onBack, currentProfileId, isOwner, set
             />
           </>
         }
-        portfolio={
+        medien={
           <>
             <ProfileGalleryBox
               currentProfileId={currentProfileId}

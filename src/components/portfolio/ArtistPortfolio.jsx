@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import GigsdaPass from "../GigsdaPass";
 import { eventService } from '../../services/eventService';
 import PortfolioActionBar from './shared/PortfolioActionBar';
+import ArtistSheet from '../sheets/ArtistSheet';
+import SheetRouter from '../sheets/SheetRouter';
 
 export default function ArtistPortfolio({
   profile,
@@ -9,6 +11,7 @@ export default function ArtistPortfolio({
   setView
 }) {
 
+const [showStandardSheet, setShowStandardSheet] = useState(false);
 
 const loggedInProfileId =
   localStorage.getItem('gigsda_profile_id');
@@ -16,11 +19,7 @@ const loggedInProfileId =
 const isOwner =
   String(loggedInProfileId) === String(profile?.id);
 	
-	const handlePrintPdf = () => {
-		window.print();
-		};
-
-		const events =
+	const events =
 		eventService.getEvents();
 
 		const references =
@@ -43,6 +42,19 @@ const isOwner =
 
 		if (!profile) {
 			return null;
+		}
+
+		if (showStandardSheet) {
+			return (
+				<SheetRouter
+					profile={profile}
+					SheetComponent={ArtistSheet}
+					roleLabel="Künstler"
+					backLabel="Zurück zum Artist-Portfolio"
+					onBack={() => setShowStandardSheet(false)}
+					setView={setView}
+				/>
+			);
 		}
 
 console.log(profile);
@@ -543,21 +555,32 @@ console.log(profile);
 					</h2>
 
 					<div className="grid md:grid-cols-2 gap-6">
+						<div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+						<h3 className="font-semibold mb-4">
+								Printinfo als PDF öffnen
+						</h3>
+							<a
+								href="/profiles/Artist Portfolio - Winston Jud.pdf"
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-cyan-400 hover:text-cyan-300 underline"
+							>
+								📄 Portfolio PDF öffnen
+							</a>
+						</div>
 
-							<div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+						<div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
 							<h3 className="font-semibold mb-4">
-									Printinfo als PDF öffnen
+								Artist Standard Sheet testen
 							</h3>
-								<a
-									href="/profiles/Artist Portfolio - Winston Jud.pdf"
-									target="_blank"
-									rel="noopener noreferrer"
-									className="text-cyan-400 hover:text-cyan-300 underline"
-								>
-									📄 Portfolio PDF öffnen
-								</a>
-							</div>
-
+							<button
+								type="button"
+								onClick={() => setShowStandardSheet(true)}
+								className="text-orange-400 hover:text-orange-300 underline"
+							>
+								📄 Standard Sheet live ansehen
+							</button>
+						</div>					
 					</div>
 				</section>
 

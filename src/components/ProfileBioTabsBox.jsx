@@ -66,8 +66,7 @@ export default function ProfileBioTabsBox({ currentProfileId, isOwner }) {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      const updatedProfile = {
-        ...profile,
+      const profilePatch = {
         bio_einleitung: textMatrix.einleitung,
         bio_karriere: textMatrix.karriere,
         bio_privates: textMatrix.privates,
@@ -77,16 +76,16 @@ export default function ProfileBioTabsBox({ currentProfileId, isOwner }) {
         show_bio_privates: fieldVisibility.privates
       };
       const profileId =
-        updatedProfile.id ||
-        updatedProfile.profileId ||
+        profile?.id ||
+        profile?.profileId ||
         localStorage.getItem(
           'gigsda_profile_id'
         );
       await saveProfile({
         profileId,
-        profile: updatedProfile
+        profile: profilePatch
       });
-      setProfile(updatedProfile);
+      setProfile({ ...profile, ...profilePatch, id: profileId });
       setIsEditing(false);
     } catch (e) {
       console.error(

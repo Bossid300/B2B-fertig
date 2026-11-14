@@ -1,10 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Pencil, X, Shield, Music, Landmark, Briefcase, MessageSquare, Eye, EyeOff } from 'lucide-react';
 import { eventService } from '../services/eventService';
 import { saveProfile, getProfilesDb, saveCrewRequest } from '../services/apiService';
 import { subscriptionService } from '../../moduls/subscriptions/subscriptionService';
 import { achievementService } from '../../moduls/achievements/achievementService';
 import { getMediaAssets, getMediaPreviewUrl, uploadMediaFile } from '../services/mediaService';
+import PortfolioRouter from './portfolio/PortfolioRouter';
+import SheetRouter from './sheets/SheetRouter';
+import { getRoleSheet } from './sheets/roleSheetMap';
 
 const TICKER_VISIBILITY_FIELDS = [
   'slide1_image', 'slide1_line1', 'slide1_line2',
@@ -23,6 +26,7 @@ export default function ProfileHeaderBox({
 }) {
   
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [activeProfileModal, setActiveProfileModal] = useState(null);
   const [isRequestMaskOpen, setIsRequestMaskOpen] = useState(false);
   const [isSliderMaskOpen, setIsSliderMaskOpen] = useState(false);
   const [myProjects, setMyProjects] = useState([]);
@@ -120,6 +124,23 @@ export default function ProfileHeaderBox({
     );
 
   const currentAchievement =  achievementService.getCurrentAchievement(myCompletedEvents);
+  const sheetProfile = activeFields;
+  const SheetComponent = getRoleSheet(
+    sheetProfile?.role || sheetProfile?.type
+  );
+
+  useEffect(() => {
+    if (!activeProfileModal) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setActiveProfileModal(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeProfileModal]);
 
 
   // 1. DATABASE PIPELINE: Lädt die Profildaten für Fremdprofile & befüllt die Inputs
@@ -254,13 +275,11 @@ const myEvents = savedEvents.filter(
         ''
       );
 
-      const updatedProfile = {
-        ...baseProfile,
+      const profilePatch = {
         ...tickerFields,
         ...Object.fromEntries(
           Object.entries(tickerVisibility).map(([field, visible]) => [`show_${field}`, visible])
-        ),
-        id: profileId
+        )
       };
 
       if (!profileId) {
@@ -269,14 +288,18 @@ const myEvents = savedEvents.filter(
 
       const result = await saveProfile({
         profileId,
-        profile: updatedProfile
+        profile: profilePatch
       });
 
       if (!result?.success) {
         throw new Error(result?.error || 'Slider-Angaben konnten nicht gespeichert werden.');
       }
 
-      setProfileData(updatedProfile);
+      setProfileData({
+        ...baseProfile,
+        ...profilePatch,
+        id: profileId
+      });
       alert("Slider-Angaben erfolgreich gespeichert! 💾🔥");
       setIsSliderMaskOpen(false);
 
@@ -608,19 +631,28 @@ const submitB2BRequest = async (project) => {
           )}
 
           <button
-            onClick={() => {
+            type="button"
+            onClick={() => setActiveProfileModal('sheet')}
+            className="
+              px-4 py-1.5
+              rounded-lg
+              border border-purple-500/40
+              bg-purple-500/10
+              text-purple-300
+              text-xs
+              font-bold
+              uppercase
+              tracking-wider
+              hover:bg-purple-500/20
+              transition
+            "
+          >
+            SHEET
+          </button>
 
-              const currentProfileId =
-                localStorage.getItem('gigsda_profile_id');
-
-              localStorage.setItem(
-                'gigsda_portfolio_profile',
-                currentProfileId
-              );
-
-              setView('artistPortfolio');
-
-            }}
+          <button
+            type="button"
+            onClick={() => setActiveProfileModal('portfolio')}
             className="
               px-4 py-1.5
               rounded-lg
@@ -642,6 +674,51 @@ const submitB2BRequest = async (project) => {
 
         </div>
       </div>
+
+      {activeProfileModal && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-3 sm:p-6"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setActiveProfileModal(null);
+            }
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setActiveProfileModal(null)}
+            aria-label="Ansicht schließen"
+            className="absolute right-4 top-4 z-[10000] flex h-10 w-10 items-center justify-center rounded-full border border-cyan-500/30 bg-slate-900 text-white transition hover:border-cyan-400"
+          >
+            <X size={18} />
+          </button>
+          <div className="h-full max-h-[calc(100vh-1.5rem)] w-full overflow-auto rounded-2xl sm:max-h-[calc(100vh-3rem)]">
+            {activeProfileModal === 'portfolio' ? (
+              <PortfolioRouter
+                profileId={currentProfileId}
+                onBack={() => setActiveProfileModal(null)}
+                setView={setView}
+              />
+            ) : SheetComponent ? (
+              <SheetRouter
+                profile={sheetProfile}
+                SheetComponent={SheetComponent}
+                roleLabel={sheetProfile?.role || sheetProfile?.type || 'Profil'}
+                backLabel="Zurück zum Profil"
+                onBack={() => setActiveProfileModal(null)}
+                setView={setView}
+              />
+            ) : (
+              <div className="mx-auto mt-20 max-w-lg rounded-2xl border border-slate-800 bg-slate-950 p-8 text-center">
+                <h2 className="text-lg font-semibold text-white">Sheet nicht verfügbar</h2>
+                <p className="mt-2 text-sm text-slate-400">
+                  Für diese Profilrolle ist kein Sheet hinterlegt.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* SLIDER BLOCK */}
       <div className="relative w-full bg-slate-950 border border-slate-900 rounded-3xl overflow-hidden shadow-2xl">
@@ -845,7 +922,16 @@ const submitB2BRequest = async (project) => {
             {isSliderChooserOpen && (
             <div className="fixed inset-0 z-[10000] bg-black/70 backdrop-blur-sm flex items-center justify-center">
 
-              <div className="bg-slate-950 border border-cyan-500/30 rounded-3xl p-6">
+              <div className="
+                w-full
+                max-w-5xl
+                bg-slate-950
+                border border-cyan-500/30
+                rounded-3xl
+                p-6
+                max-h-[90vh]
+                overflow-y-auto
+              ">
 
                 <h3 className="text-white text-xl mb-4">
                   Sliderbild wählen

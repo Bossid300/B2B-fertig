@@ -159,7 +159,7 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
             <ProfileMapBox profile={profileData} />
           </>
         }
-        portfolio={
+        medien={
           <>
             <ArtistAudioBox currentProfileId={currentProfileId} isOwner={isOwner} />
             <ProfileGalleryBox currentProfileId={currentProfileId} isOwner={isOwner} />

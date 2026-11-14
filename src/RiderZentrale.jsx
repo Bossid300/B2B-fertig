@@ -6,6 +6,17 @@ import ProfileEquipmentBox from "./components/ProfileEquipmentBox";
 import RiderCard from "./components/cards/RiderCard";
 import ProfileGalleryBox from "./components/ProfileGalleryBox";
 import ProfileHilfeBox from './components/ProfileHilfeBox';
+import ArtistSheet from './components/sheets/ArtistSheet';
+import LocationSheet from './components/sheets/LocationSheet';
+import TechnicianSheet from './components/sheets/TechnicianSheet';
+import OrganizerSheet from './components/sheets/OrganizerSheet';
+import CateringSheet from './components/sheets/CateringSheet';
+import VerleiherSheet from './components/sheets/VerleiherSheet';
+import MaterialSheet from './components/sheets/MaterialSheet';
+import LogisticsSheet from './components/sheets/LogisticsSheet';
+import SecuritySheet from './components/sheets/SecuritySheet';
+import DesignSheet from './components/sheets/DesignSheet';
+import FanSheet from './components/sheets/FanSheet';
 
 import { eventService } from './services/eventService';
 import { getProfilesDb} from './services/apiService';
@@ -265,28 +276,47 @@ setProfiles(allProfiles);
 
     switch (selectedMember.role) {
 
+      case "Veranstalter":
+        return <OrganizerSheet profile={selectedMember} showAllEvents />;
+
       case "Künstler":
         return (
-          <ArtistTechRiderBox
-            currentProfileId={selectedMember.id}
-            isOwner={selectedMember?.id === currentProfileId}
-          />
+        <div className="space-y-6">
+            <ArtistSheet
+              profile={selectedMember}
+              showAllEvents
+            />  
+            <ArtistTechRiderBox
+              currentProfileId={selectedMember.id}
+              isOwner={selectedMember?.id === currentProfileId}
+            />
+          </div>
         );
       
       case "Location":
       case "Halle":
       case "Venue":
         return (
-          <LocationRaeumeBox
-            currentProfileId={selectedMember.id}
-            isOwner={selectedMember?.id === currentProfileId}
-            selectedRoom={selectedRoom}
-          />
+          <div className="space-y-6">
+            <LocationSheet
+              profile={selectedMember}
+              showAllEvents
+            />            
+            <LocationRaeumeBox
+              currentProfileId={selectedMember.id}
+              isOwner={selectedMember?.id === currentProfileId}
+              selectedRoom={selectedRoom}
+            />
+          </div>
         );
 
       case "Techniker":
         return (
           <div className="space-y-6">
+            <TechnicianSheet
+              profile={selectedMember}
+              showAllEvents
+            />
             <ProfileSkillBox
               currentProfileId={selectedMember.id}
               isOwner={selectedMember?.id === currentProfileId}
@@ -300,10 +330,24 @@ setProfiles(allProfiles);
         );
 
     case "Material":
+      return (
+        <div className="space-y-6">
+          <MaterialSheet profile={selectedMember} showAllEvents />
+          <ProfileEquipmentBox
+            currentProfileId={selectedMember.id}
+            isOwner={selectedMember?.id === currentProfileId}
+          />
+          <ProfileGalleryBox
+            currentProfileId={selectedMember.id}
+            isOwner={selectedMember?.id === currentProfileId}
+          />
+        </div>
+      );
+
     case "Verleiher":
       return (
         <div className="space-y-6">
-
+          <VerleiherSheet profile={selectedMember} showAllEvents />
           <ProfileEquipmentBox
             currentProfileId={selectedMember.id}
             isOwner={selectedMember?.id === currentProfileId}
@@ -319,11 +363,28 @@ setProfiles(allProfiles);
 
     case "Fan":
       return (
-        <ProfileHilfeBox
-          currentProfileId={selectedMember.id}
-          isOwner={selectedMember?.id === currentProfileId}
-        />
+        <div className="space-y-6">
+          <FanSheet profile={selectedMember} showAllEvents />
+          <ProfileHilfeBox
+            currentProfileId={selectedMember.id}
+            isOwner={selectedMember?.id === currentProfileId}
+          />
+        </div>
       );
+
+    case "Catering":
+    case "Caterer":
+      return <CateringSheet profile={selectedMember} showAllEvents />;
+
+    case "Logistik":
+      return <LogisticsSheet profile={selectedMember} showAllEvents />;
+
+    case "Security":
+      return <SecuritySheet profile={selectedMember} showAllEvents />;
+
+    case "Design":
+    case "Deko/Stage":
+      return <DesignSheet profile={selectedMember} showAllEvents />;
 
     default:
       return (
@@ -356,11 +417,8 @@ setProfiles(allProfiles);
     <div className="max-w-6xl mx-auto p-4 space-y-6 text-white font-mono animate-fade-in">
 
       {/* HEADER */}
-
       <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
-
         <div className="flex justify-between items-center">
-
           <div>
             <span className="text-[8px] bg-cyan-500/10 border border-cyan-500 text-cyan-400 font-bold px-2 py-0.5 rounded-md uppercase tracking-widest">
               // Ebene 02: Rider-Zentrale
@@ -381,15 +439,11 @@ setProfiles(allProfiles);
           >
             ‹ Dashboard
           </button>
-
         </div>
 
         {/* PROGRESS */}
-
         <div className="mt-6">
-
           <div className="flex justify-between text-xs mb-2">
-
             <span className="text-slate-400">
               {confirmedCount} von {crewMembers.length} bestätigt
             </span>
@@ -397,7 +451,6 @@ setProfiles(allProfiles);
             <span className="font-black text-cyan-400">
               {progress}%
             </span>
-
           </div>
 
           <div className="w-full h-3 rounded-full bg-slate-950 overflow-hidden border border-slate-800">
@@ -408,13 +461,10 @@ setProfiles(allProfiles);
               }}
             />
           </div>
-
         </div>
-
       </div>
 
       {/* CREW-KARTEN */}
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
         {crewMembers.map((member) => {
@@ -461,32 +511,24 @@ setProfiles(allProfiles);
       </div>
 
       {/* DETAILBEREICH */}
-
       {selectedMember && (
         <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
-
           <div className="flex justify-between items-start">
-
             <div>
-
               <span className="text-[8px] uppercase tracking-widest text-cyan-400">
                 // Aktiver Rider
               </span>
-
               <h2 className="text-xl font-black mt-2">
                 {selectedMember?.name}
               </h2>
-
               <div className="text-slate-500 text-sm">
                 {selectedMember?.role}
               </div>
-
                 {selectedMember?.role === "Location" && (
                   <div className="mt-3 flex items-center gap-3">
                     <span className="text-xs text-slate-400 uppercase">
                       Aktiver Raum
                     </span>
-
                     <select
                       value={selectedRoom}
                       onChange={(e) =>
@@ -494,7 +536,6 @@ setProfiles(allProfiles);
                           Number(e.target.value)
                         )
                       }
-
                       className="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1 text-white text-xs"
                     >
                       <option value={1}>Raum 1</option>
@@ -503,14 +544,11 @@ setProfiles(allProfiles);
                     </select>
                   </div>
                 )}
-
             </div>
 
 
             {!riderCenter?.[selectedMember.id]?.confirmed &&
             selectedMember?.id === currentProfileId && (
-
-
               <button
                 onClick={handleConfirm}
                 className="px-4 py-2 rounded-xl border border-emerald-500 bg-emerald-500/10 text-emerald-400 hover:text-white transition-all"
@@ -518,39 +556,30 @@ setProfiles(allProfiles);
                 ✅ Rider bestätigen
               </button>
             )}
-
           </div>
 
           <div className="mt-6 border-t border-slate-800 pt-6">
-
             <div className="text-slate-400 text-sm mb-4">
               {renderRiderContent()}
             </div>
-
             <div className="grid sm:grid-cols-2 gap-3">
-
               <div className="bg-slate-950 border border-slate-800 rounded-xl p-3">
                 <div className="text-[8px] uppercase text-slate-500">
                   Name
                 </div>
-
                 <div className="text-white font-bold mt-1">
                   {selectedMember?.name}
                 </div>
               </div>
-
               <div className="bg-slate-950 border border-slate-800 rounded-xl p-3">
                 <div className="text-[8px] uppercase text-slate-500">
                   Rolle
                 </div>
-
                 <div className="text-cyan-400 font-bold mt-1">
                   {selectedMember?.role}
                 </div>
               </div>
-
             </div>
-
           </div>
 
         </div>

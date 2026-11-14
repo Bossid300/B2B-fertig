@@ -147,7 +147,7 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
             <ProfileMapBox profile={profileData} />
           </>
         }
-        portfolio={
+        medien={
           <>
             <ProfileGalleryBox currentProfileId={currentProfileId} isOwner={isOwner} />
             <ProfileNetworkBox currentProfileId={currentProfileId} isOwner={isOwner} />
@@ -158,6 +158,7 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
         offer={
           <>
             <ProfileSkillBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <ProfileEquipmentBox currentProfileId={currentProfileId} isOwner={isOwner} />
             <ProfileLogistikBox currentProfileId={currentProfileId} isOwner={isOwner} />
           </>
         }

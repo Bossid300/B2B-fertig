@@ -69,7 +69,8 @@ import CommunityChat from './CommunityChat';
 
 import { initialUsers, initialProfiles } from './data/mockData';
 import PortfolioRouter from './components/portfolio/PortfolioRouter';
-import ArtistPortfolio from "./components/portfolio/ArtistPortfolio.jsx";
+import SheetRouter from './components/sheets/SheetRouter';
+import { getRoleSheet } from './components/sheets/roleSheetMap';
 
 import GigsdaPass from "./components/GigsdaPass";
 
@@ -94,6 +95,7 @@ import BillingCenter from './components/BillingCenter';
 
 import BudgetPlanner from './components/BudgetPlanner';
 import MediaLibraryPage from './components/MediaLibraryPage';
+import ProjectWorkspace from './experimental/workspace/ProjectWorkspace.jsx';
 
 
 
@@ -103,6 +105,7 @@ import MediaLibraryPage from './components/MediaLibraryPage';
 const PATH_VIEWS = {
   '/events': 'guestEvents',
   '/portfolios': 'radar',
+  '/calendar': 'calendar',
   '/impressum': 'impressum',
   '/datenschutz': 'privacy',
   '/agb': 'agb',
@@ -113,6 +116,7 @@ const VIEW_PATHS = {
   landing: '/',
   guestEvents: '/events',
   radar: '/portfolios',
+  calendar: '/calendar',
   impressum: '/impressum',
   privacy: '/datenschutz',
   agb: '/agb',
@@ -133,9 +137,36 @@ const getPortfolioIdFromPath = (path) => {
   }
 };
 
+const getSheetIdFromPath = (path) => {
+  const match = normalizePath(path).match(/^\/sheet\/([^/]+)$/);
+  if (!match) return null;
+
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return null;
+  }
+};
+
 
 
 export default function App() {
+  const [pathname, setPathname] = useState(window.location.pathname);
+
+  useEffect(() => {
+    const handlePopState = () => setPathname(window.location.pathname);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  if (pathname === '/workspace-test') {
+    return <ProjectWorkspace />;
+  }
+
+  return <GigsdaApp />;
+}
+
+function GigsdaApp() {
 
   const challengeId =
     new URLSearchParams(window.location.search)
@@ -380,6 +411,8 @@ export default function App() {
     return localStorage.getItem('gigsda_logged_in') === 'true';
   });
   const [currentProfile, setCurrentProfile] = useState(null);
+  const [sheetProfile, setSheetProfile] = useState(null);
+  const [sheetProfileError, setSheetProfileError] = useState(false);
   useEffect(() => {
     let cancelled = false;
     if (currentProfile?.id) return;
@@ -550,7 +583,7 @@ useEffect(() => {
         'gigsda_portfolio_profile',
         found.id
       );
-      setView('artistPortfolio');
+      setView('portfolioRouter');
     }
   };
   loadProfileFromQr();
@@ -579,10 +612,16 @@ useEffect(() => {
  
   // 🔒 INTELLIGENTER ROUTER-SPEICHER: Merkt sich den Bildschirm auch bei F5!
   const [view, setViewWithStorage] = useState(() => {
+    const sheetId = getSheetIdFromPath(window.location.pathname);
+    if (sheetId) {
+      localStorage.setItem('gigsda_sheet_profile', sheetId);
+      return 'sheetRouter';
+    }
+
     const portfolioId = getPortfolioIdFromPath(window.location.pathname);
     if (portfolioId) {
       localStorage.setItem('gigsda_portfolio_profile', portfolioId);
-      return 'artistPortfolio';
+      return 'portfolioRouter';
     }
 
     return (
@@ -595,9 +634,12 @@ useEffect(() => {
   const setView = (newView) => {
     localStorage.setItem('gigsda_current_view', newView);
     const portfolioId = localStorage.getItem('gigsda_portfolio_profile');
+    const sheetId = localStorage.getItem('gigsda_sheet_profile');
     const path =
-      newView === 'artistPortfolio' && portfolioId
+      newView === 'portfolioRouter' && portfolioId
         ? `/portfolio/${encodeURIComponent(portfolioId)}`
+        : newView === 'sheetRouter' && sheetId
+          ? `/sheet/${encodeURIComponent(sheetId)}`
         : VIEW_PATHS[newView] || '/';
     if (
       window.location.pathname !== path ||
@@ -608,21 +650,74 @@ useEffect(() => {
     setViewWithStorage(newView);
   };
 
+  useEffect(() => {
+    if (view !== 'sheetRouter') return;
+
+    let cancelled = false;
+    const profileId =
+      getSheetIdFromPath(window.location.pathname) ||
+      localStorage.getItem('gigsda_sheet_profile');
+    setSheetProfile(null);
+    setSheetProfileError(false);
+
+    if (!profileId) {
+      setSheetProfileError(true);
+      return;
+    }
+
+    const loadSheetProfile = async () => {
+      try {
+        const result = await getProfileById(profileId);
+        const row = result?.profile;
+        if (!row || String(row.id) !== String(profileId)) {
+          throw new Error('Das Profil für das Sheet wurde nicht gefunden.');
+        }
+
+        const profileData = row.profile_json
+          ? JSON.parse(row.profile_json)
+          : {};
+        const loadedProfile = {
+          ...row,
+          ...profileData,
+          id: row.id,
+          role: row.role || profileData.role,
+          type: row.type || profileData.type
+        };
+        delete loadedProfile.profile_json;
+
+        if (!cancelled) setSheetProfile(loadedProfile);
+      } catch (error) {
+        console.error('SHEET PROFILE LOAD ERROR', error);
+        if (!cancelled) setSheetProfileError(true);
+      }
+    };
+
+    loadSheetProfile();
+    return () => {
+      cancelled = true;
+    };
+  }, [view]);
+
+
+  const openSheet = (profileId) => {
+    localStorage.setItem('gigsda_sheet_profile', profileId);
+    setView('sheetRouter');
+  };
+
   const openPortfolio = (profileId) => {
     localStorage.setItem('gigsda_portfolio_profile', profileId);
-    setView('artistPortfolio');
+    setView('portfolioRouter');
   };
 
   const openProfile = (profileId) => {
     setActiveGuestProfileId(profileId);
 
-    localStorage.setItem(
-      'gigsda_active_guest_profile_id',
-      profileId
-    );
-
+    localStorage.setItem('gigsda_active_guest_profile_id',profileId);
     setView('profile');
   };
+
+
+
 
   const [activeEvent, setActiveEvent] = useState(null);
   const [isRegInitial, setIsRegInitial] = useState(false);
@@ -723,13 +818,20 @@ useEffect(() => {
   // Keep browser back/forward navigation in sync with the active view.
   useEffect(() => {
     const handlePopState = (event) => {
+      const sheetId = getSheetIdFromPath(window.location.pathname);
+      if (sheetId) {
+        localStorage.setItem('gigsda_sheet_profile', sheetId);
+      }
+
       const portfolioId = getPortfolioIdFromPath(window.location.pathname);
       if (portfolioId) {
         localStorage.setItem('gigsda_portfolio_profile', portfolioId);
       }
 
-      const nextView = portfolioId
-        ? 'artistPortfolio'
+      const nextView = sheetId
+        ? 'sheetRouter'
+        : portfolioId
+          ? 'portfolioRouter'
         : event.state?.view ||
           PATH_VIEWS[normalizePath(window.location.pathname)] ||
           'landing';
@@ -869,6 +971,13 @@ useEffect(() => {
       freshActiveEvent
     );
 
+  const isStandaloneSheetRoute =
+    view === 'sheetRouter' &&
+    Boolean(getSheetIdFromPath(window.location.pathname));
+  const isSheetPrintRoute =
+    isStandaloneSheetRoute &&
+    new URLSearchParams(window.location.search).get('print') === '1';
+
 
 
 useEffect(() => {
@@ -886,16 +995,19 @@ useEffect(() => {
       selection:text-slate-950 antialiased overflow-x-hidden flex flex-col justify-between font-mono">
  
       {/* BACKGROUND GLOW */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-[-10%] left-[-20%] w-[60%] aspect-square rounded-full bg-purple-900/10 blur-[120px]" />
-        <div className="absolute top-[20%] right-[-20%] w-[50%] aspect-square rounded-full bg-cyan-900/10 blur-[120px]" />
-      </div>
+      {!isSheetPrintRoute && (
+        <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none z-0 overflow-hidden">
+          <div className="absolute top-[-10%] left-[-20%] w-[60%] aspect-square rounded-full bg-purple-900/10 blur-[120px]" />
+          <div className="absolute top-[20%] right-[-20%] w-[50%] aspect-square rounded-full bg-cyan-900/10 blur-[120px]" />
+        </div>
+      )}
       <div className="relative z-10 w-full min-h-screen flex flex-col justify-between">
  
         {/* ========================================================================= */}
         {/* NAVIGATIONSMENÜ & LOGO-HEADER                                             */}
         {/* ========================================================================= */}
         {/* 🌌 TEMPORÄRER VERGLEICHS-HEADER: KOMPLETT FLACH UND TIEFSCHWARZ OHNE NEON-RAHMEN */}
+        {!isStandaloneSheetRoute && (
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#0b0f19] border-b border-slate-900/60 shadow-lg font-mono">
           <div className="w-full bg-[#0b0f19]/95 backdrop-blur-md rounded-b-[14px]">
             {/* 🚨 DANIELS ORIGINALER ZENTRIER-CONTAINER: REPARIERT DAS LAYOUT DER RESTLICHEN SEITE! */}
@@ -944,12 +1056,13 @@ useEffect(() => {
             </div>
           </div>
         </header>
+        )}
 
 
         {/* ========================================================================= */}
         {/* MAIN ROUTER PORT                                                          */}
         {/* ========================================================================= */}
-        <main className="w-full pt-13 min-h-screen bg-[#070913] text-white">
+        <main className={`w-full ${isStandaloneSheetRoute ? '' : 'pt-13'} min-h-screen bg-[#070913] text-white`}>
           {eventLinkError && (
             <p role="alert" className="mx-auto max-w-4xl px-6 py-4 text-red-300">
               {eventLinkError}
@@ -1485,7 +1598,64 @@ useEffect(() => {
             />
           )}
 
-          {view === 'artistPortfolio' && (
+          {view === 'sheetRouter' && (
+            sheetProfile ? (
+              (() => {
+                const SheetComponent = getRoleSheet(
+                  sheetProfile.role || sheetProfile.type
+                );
+
+                return SheetComponent ? (
+                  <SheetRouter
+                    profile={sheetProfile}
+                    SheetComponent={SheetComponent}
+                    roleLabel={sheetProfile.role || sheetProfile.type || 'Profil'}
+                    printMode={isSheetPrintRoute}
+                    backLabel="Zurück zum Profil"
+                    onBack={() =>
+                      setView(
+                        localStorage.getItem('gigsda_sheet_return_view') ||
+                          'userProfile'
+                      )
+                    }
+                    setView={setView}
+                  />
+                ) : (
+                  <div className="min-h-[50vh] bg-slate-900 px-4 py-12">
+                    <div className="mx-auto max-w-3xl rounded-2xl border border-slate-800 bg-slate-950 p-8 text-center text-slate-300">
+                      Für diese Profilrolle ist kein Sheet verfügbar.
+                    </div>
+                  </div>
+                );
+              })()
+            ) : (
+              <div className="min-h-[50vh] flex items-center justify-center px-4">
+                <div className="max-w-lg rounded-2xl border border-slate-800 bg-slate-950 p-8 text-center shadow-xl">
+                  <h1 className="text-xl font-bold text-white">
+                    {sheetProfileError
+                      ? 'Profil konnte nicht geladen werden'
+                      : 'Profil wird geladen'}
+                  </h1>
+                  {sheetProfileError && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setView(
+                          localStorage.getItem('gigsda_sheet_return_view') ||
+                            'userProfile'
+                        )
+                      }
+                      className="mt-6 rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-5 py-2.5 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-500/20"
+                    >
+                      Zurück zum Profil
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          )}
+
+          {view === 'portfolioRouter' && (
             <PortfolioRouter
               onBack={() => setView('radar')}
               setView={setView}
@@ -1528,7 +1698,15 @@ useEffect(() => {
           )}
 
           {view === "resetPassword" && (
-            <ResetPasswordPage resetToken={resetToken} />
+            <ResetPasswordPage
+              resetToken={resetToken}
+              onLogin={() => {
+                const url = new URL(window.location.href);
+                url.searchParams.delete('resetToken');
+                window.history.replaceState({}, '', url);
+                setView('login');
+              }}
+            />
           )}
 
           {/* ========================================================================= */}
@@ -1596,16 +1774,18 @@ useEffect(() => {
         </main>
  
 
-        <Footer setView={setView} />
+        {!isStandaloneSheetRoute && <Footer setView={setView} />}
 
 
         {/* ========================================================================= */}
         {/* FOOTER                                                                    */}
         {/* ========================================================================= */}
+        {!isStandaloneSheetRoute && (
         <footer className="w-full border-t border-slate-900/60 bg-slate-950 py-3 text-center text-xm text-slate-600 mt-12">
           GIGSDA PROTOCOL V1.0 // OPERATOR: 
           <span className="text-cyan-400 font-bold"> {ticketName} </span> 
         </footer>
+        )}
       </div>
  
 

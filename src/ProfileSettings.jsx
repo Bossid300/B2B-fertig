@@ -60,9 +60,14 @@ export default function ProfileSettings({ onBack, currentData, onSaveSuccess }) 
       if (!isReady) {
         throw new Error('Profildaten sind nicht vollständig geladen; Änderungen wurden nicht gespeichert.');
       }
+      const profilePatch = Object.fromEntries(
+        Object.entries(formData).filter(([key, value]) =>
+          JSON.stringify(value) !== JSON.stringify(profile[key])
+        )
+      );
       const result = await saveProfile({
         profileId,
-        profile: { ...profile, ...formData, id: profileId }
+        profile: profilePatch
       });
       if (result?.success !== true) {
         throw new Error(result?.error || 'Änderungen konnten nicht gespeichert werden.');

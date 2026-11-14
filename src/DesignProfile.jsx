@@ -12,6 +12,11 @@ import ProfilePassBox from './components/ProfilePassBox';
 import ProfileCard from './components/cards/ProfileCard';
 import ProfileMapBox from './components/ProfileMapBox';
 import ProfileSectionTabs from './components/ProfileSectionTabs';
+import DesignerBusinessBox from './components/boxes/DesignerBusinessBox';
+import ProfileFinanzBox from './components/ProfileFinanzBox';
+
+import ProfileStatusMatrix from './components/ProfileStatusMatrix';
+
 
 import { getProfilesDb } from './services/apiService';
 import { saveFavorite, deleteFavorite, getFavorites } from './services/apiService';
@@ -138,7 +143,7 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
             <ProfileMapBox profile={profileData} />
           </>
         }
-        portfolio={
+        medien={
           <>
             <ProfileGalleryBox currentProfileId={currentProfileId} isOwner={isOwner} />
             <ProfileProjekteBox currentProfileId={currentProfileId} isOwner={isOwner} />
@@ -147,12 +152,18 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
         }
         offer={
           <>
+            <DesignerBusinessBox
+              currentProfileId={currentProfileId}
+              isOwner={isOwner}
+            />
             <ProfileSkillBox currentProfileId={currentProfileId} isOwner={isOwner} />
             <ProfileEquipmentBox currentProfileId={currentProfileId} isOwner={isOwner} />
           </>
         }
         management={
           <>
+            <ProfileStatusMatrix currentProfileId={currentProfileId} />
+            <ProfileFinanzBox currentProfileId={currentProfileId} isOwner={isOwner} />          
             <ProfilePassBox
               currentProfileId={currentProfileId}
               profileId={profileData.id || currentProfileId}

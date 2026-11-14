@@ -3,7 +3,8 @@ import GigsdaPass from "../GigsdaPass";
 import { eventService } from '../../services/eventService';
 import GoogleMapsConsent from '../maps/GoogleMapsConsent';
 import PortfolioActionBar from './shared/PortfolioActionBar';
-import TechLocationPortfolio from './TechLocationPortfolio';
+import LocationSheet from '../sheets/LocationSheet';
+import SheetRouter from '../sheets/SheetRouter';
 
 const POWER_SUPPLY_LABELS = {
   'cee 63a': 'CEE 63A (Großbühne)',
@@ -22,7 +23,8 @@ export default function LocationPortfolio({
   onBack = null,
   setView
 }) {
-  const [showStandardSheet, setShowStandardSheet] = useState(false);
+
+const [showStandardSheet, setShowStandardSheet] = useState(false);
 
 const loggedInProfileId =
   localStorage.getItem('gigsda_profile_id');
@@ -33,10 +35,6 @@ const isOwner =
 const powerSupply =
   getPowerSupplyLabel(profile?.room1_power_supply);
   
-  const handlePrintPdf = () => {
-    window.print();
-    };
-
     const events =
     eventService.getEvents();
 
@@ -62,29 +60,18 @@ const powerSupply =
       return null;
     }
 
-  if (showStandardSheet) {
-    return (
-      <div className="min-h-screen bg-slate-900">
-        <div className="max-w-6xl mx-auto px-4 pt-4 flex flex-wrap items-center gap-3 print:hidden">
-          <button
-            type="button"
-            onClick={() => setShowStandardSheet(false)}
-            className="rounded-lg border border-orange-500/40 bg-orange-950/40 px-4 py-2 text-sm font-semibold text-orange-300 transition hover:bg-orange-900/50"
-          >
-            Zurück zum Location-Portfolio
-          </button>
-          <button
-            type="button"
-            onClick={handlePrintPdf}
-            className="rounded-lg border border-orange-500/40 bg-orange-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-500"
-          >
-            Als PDF drucken
-          </button>
-        </div>
-        <TechLocationPortfolio profile={profile} />
-      </div>
-    );
-  }
+    if (showStandardSheet) {
+      return (
+        <SheetRouter
+          profile={profile}
+          SheetComponent={LocationSheet}
+          roleLabel="Location"
+          backLabel="Zurück zum Location-Portfolio"
+          onBack={() => setShowStandardSheet(false)}
+          setView={setView}
+        />
+      );
+    }
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10 space-y-12">
@@ -478,36 +465,34 @@ const powerSupply =
 					</h2>
 
 					<div className="grid md:grid-cols-2 gap-6">
+            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+            <h3 className="font-semibold mb-4">
+                Printinfo als PDF öffnen
+            </h3>
+              <a
+                href="/profiles/Location Portfolio - Tanz Arena Kirchdorf.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cyan-400 hover:text-cyan-300 underline"
+              >
+                📄 Portfolio PDF öffnen
+              </a>
+            </div>
 
-							<div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
-							<h3 className="font-semibold mb-4">
-									Printinfo als PDF öffnen
-							</h3>
-								<a
-									href="/profiles/Location Portfolio - Tanz Arena Kirchdorf.pdf"
-									target="_blank"
-									rel="noopener noreferrer"
-									className="text-cyan-400 hover:text-cyan-300 underline"
-								>
-									📄 Portfolio PDF öffnen
-								</a>
-							</div>
-
-							<div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
-								<h3 className="font-semibold mb-4">
-									Location Standard Sheet testen
-								</h3>
-								<button
-									type="button"
-									onClick={() => setShowStandardSheet(true)}
-									className="text-orange-400 hover:text-orange-300 underline"
-								>
-									📄 Standard Sheet live ansehen
-								</button>
-							</div>
+            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+              <h3 className="font-semibold mb-4">
+                Location Standard Sheet testen
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowStandardSheet(true)}
+                className="text-orange-400 hover:text-orange-300 underline"
+              >
+                📄 Standard Sheet live ansehen
+              </button>
+            </div>
 					</div>
 				</section>
-
 
         {/* GIGSDAPASS - NUR FÜR OWNER */}
         {isOwner && (

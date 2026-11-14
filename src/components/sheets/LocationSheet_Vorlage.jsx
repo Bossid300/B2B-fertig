@@ -57,7 +57,7 @@ function ProfileValue({ label, value, children }) {
   );
 }
 
-export default function TechLocationPortfolio({ profile }) {
+export default function LocationSheet({ profile }) {
   if (!profile || profile.show_stamm === false) return null;
 
   const canShow = (field) =>

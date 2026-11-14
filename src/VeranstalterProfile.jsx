@@ -19,6 +19,7 @@ import ProfileLokalBox from './components/ProfileLokalBox';
 import ProfileStatusMatrix from './components/ProfileStatusMatrix';
 import ProfileHilfeBox from './components/ProfileHilfeBox';
 import ProfilePassBox from './components/ProfilePassBox';
+import OrganizerBusinessBox from './components/boxes/OrganizerBusinessBox';
 
 import { getProfilesDb } from './services/apiService';
 import { saveFavorite, deleteFavorite, getFavorites } from './services/apiService';
@@ -142,7 +143,7 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
             <ProfileBioTabsBox currentProfileId={currentProfileId} isOwner={isOwner} />
           </>
         }
-        portfolio={
+        medien={
           <>
             <ProfileGalleryBox currentProfileId={currentProfileId} isOwner={isOwner} />
             <ProfileProjekteBox currentProfileId={currentProfileId} isOwner={isOwner} />
@@ -152,6 +153,10 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
         }
         offer={
           <>
+            <OrganizerBusinessBox
+              currentProfileId={currentProfileId}
+              isOwner={isOwner}
+            />
             <ProfileSkillBox currentProfileId={currentProfileId} isOwner={isOwner} />
           </>
         }

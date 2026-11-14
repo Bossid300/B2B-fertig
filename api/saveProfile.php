@@ -31,9 +31,42 @@ if (!is_array($profile)) {
     exit;
 }
 
+$profilePatch = $profile;
 $profile['id'] = $profileId;
 
 try {
+    $pdo->beginTransaction();
+
+    $profileStmt = $pdo->prepare("
+        SELECT profile_json
+        FROM profiles
+        WHERE id = :id
+        FOR UPDATE
+    ");
+    $profileStmt->execute([
+        ':id' => $profileId
+    ]);
+    $storedProfileJson = $profileStmt->fetchColumn();
+
+    if ($storedProfileJson === false) {
+        $pdo->rollBack();
+        http_response_code(404);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Profil nicht gefunden'
+        ]);
+        exit;
+    }
+
+    $storedProfile = $storedProfileJson
+        ? json_decode($storedProfileJson, true)
+        : [];
+    if (!is_array($storedProfile)) {
+        throw new RuntimeException('Gespeicherte Profildaten sind ungültig.');
+    }
+
+    $profile = array_replace($storedProfile, $profile);
+    $profile['id'] = $profileId;
 
     $stmt = $pdo->prepare("
         UPDATE profiles
@@ -46,7 +79,9 @@ try {
         ':profileJson' => json_encode($profile)
     ]);
 
-    if (array_key_exists('show_avatarUrl', $profile) || array_key_exists('show_stamm', $profile)) {
+    $pdo->commit();
+
+    if (array_key_exists('show_avatarUrl', $profilePatch) || array_key_exists('show_stamm', $profilePatch)) {
         $avatarVisibility = (
             ($profile['show_avatarUrl'] ?? true) !== false &&
             ($profile['show_stamm'] ?? true) !== false
@@ -70,6 +105,9 @@ try {
     ]);
 
 } catch (Exception $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
 
     echo json_encode([
         'success' => false,

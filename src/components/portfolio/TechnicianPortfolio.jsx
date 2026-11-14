@@ -1,12 +1,15 @@
-import React from 'react';
+import { useState } from 'react';
 import GigsdaPass from "../GigsdaPass";
 import { eventService } from '../../services/eventService';
 import PortfolioActionBar from './shared/PortfolioActionBar';
+import TechnicianSheet from '../sheets/TechnicianSheet';
+import SheetRouter from '../sheets/SheetRouter';
 export default function TechnicianPortfolio({
   profile,
   onBack = null,
   setView
 }) {
+const [showStandardSheet, setShowStandardSheet] = useState(false);
 
 const loggedInProfileId =
   localStorage.getItem('gigsda_profile_id');
@@ -14,10 +17,6 @@ const loggedInProfileId =
 const isOwner =
   String(loggedInProfileId) === String(profile?.id);
   
-  const handlePrintPdf = () => {
-    window.print();
-    };
-
     const events =
     eventService.getEvents();
 
@@ -43,6 +42,18 @@ const isOwner =
       return null;
     }
 
+        if (showStandardSheet) {
+            return (
+                <SheetRouter
+                    profile={profile}
+                    SheetComponent={TechnicianSheet}
+                    roleLabel="Techniker"
+                    backLabel="Zurück zum Technician-Portfolio"
+                    onBack={() => setShowStandardSheet(false)}
+                    setView={setView}
+                />
+            );
+        }
 
     console.log(profile);
 
@@ -373,6 +384,19 @@ const isOwner =
                     >
                         📄 Portfolio PDF öffnen
                     </a>
+                </div>
+
+                <div className="rounded-2xl bg-slate-900 border border-slate-800 p-6">
+                    <h3 className="font-semibold mb-4">
+                        Technician Standard Sheet testen
+                    </h3>
+                    <button
+                        type="button"
+                        onClick={() => setShowStandardSheet(true)}
+                        className="text-purple-400 hover:text-purple-300 underline"
+                    >
+                        Standard Sheet live ansehen
+                    </button>
                 </div>
             </div>
         </section>

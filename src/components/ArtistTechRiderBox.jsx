@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Edit3, Check, FileText, Image as ImageIcon, 
-  Plus, Trash2, Sliders, Radio, Activity, LayoutList 
+  Plus, Trash2, Sliders, Radio, Activity, LayoutList, Eye, EyeOff
 } from 'lucide-react';
 import { saveProfile } from '../services/apiService';
 import { getProfilesDb } from '../services/apiService';
@@ -11,6 +11,7 @@ export default function ArtistTechRiderBox({ currentProfileId, isOwner }) {
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState(null);
   const [channels, setChannels] = useState([]);
+  const [showRider, setShowRider] = useState(true);
   
   // Technische Rider-Links & Monitore initialisieren
   const [techData, setTechData] = useState({
@@ -42,6 +43,7 @@ export default function ArtistTechRiderBox({ currentProfileId, isOwner }) {
             ? JSON.parse(found.profile_json)
             : found;
         setProfileData(currentProfile);
+        setShowRider(currentProfile.show_rider !== false);
         setTechData({
           rider_pdf_url:
             currentProfile.rider_pdf_url || '',
@@ -112,6 +114,7 @@ export default function ArtistTechRiderBox({ currentProfileId, isOwner }) {
     if (!currentProfileId || !profileData) return;
     const updatedProfile = {
       ...profileData,
+      show_rider: showRider,
       rider_pdf_url: techData.rider_pdf_url,
       rider_stageplot_url: techData.rider_stageplot_url,
       rider_monitors: techData.rider_monitors,
@@ -219,6 +222,31 @@ export default function ArtistTechRiderBox({ currentProfileId, isOwner }) {
     setIsEditing(false);
     };
 
+  const handleToggleRiderVisibility = async () => {
+    if (!profileData) return;
+
+    const nextVisibility = !showRider;
+    const updatedProfile = {
+      ...profileData,
+      show_rider: nextVisibility
+    };
+    const profileId =
+      updatedProfile.id ||
+      updatedProfile.profileId ||
+      currentProfileId;
+
+    try {
+      await saveProfile({
+        profileId,
+        profile: updatedProfile
+      });
+      setProfileData(updatedProfile);
+      setShowRider(nextVisibility);
+    } catch (error) {
+      console.error('Fehler beim Ändern der Rider-Sichtbarkeit:', error);
+    }
+  };
+
   return (
     <div className="w-full mx-auto bg-slate-950 border border-slate-900 p-6 rounded-3xl shadow-xl font-mono text-white select-none mt-4">
       
@@ -248,13 +276,23 @@ export default function ArtistTechRiderBox({ currentProfileId, isOwner }) {
               </button>
             </div>
           ) : (
-            <button
-              type="button"
-              data-profile-edit-trigger
-              onClick={() => setIsEditing(true)}
-            >
-              <Edit3 size={10} /> Bearbeiten
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={handleToggleRiderVisibility}
+                aria-label={showRider ? 'Rider im Sheet ausblenden' : 'Rider im Sheet anzeigen'}
+                title={showRider ? 'Rider im Sheet sichtbar' : 'Rider im Sheet ausgeblendet'}
+              >
+                {showRider ? <Eye size={12} /> : <EyeOff size={12} />}
+              </button>
+              <button
+                type="button"
+                data-profile-edit-trigger
+                onClick={() => setIsEditing(true)}
+              >
+                <Edit3 size={10} /> Bearbeiten
+              </button>
+            </div>
           )
         )}
       </div>
@@ -330,7 +368,8 @@ export default function ArtistTechRiderBox({ currentProfileId, isOwner }) {
       {/* 3. UNTERE ZEILE: INPUT-PATCH-MATRIX (Volle Breite) */}
       <div className="space-y-1 w-full mb-4">
         <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1 opacity-40 mb-0.5">
-          <LayoutList size={9} className="text-cyan-500" /> INPUT-PATCH-MATRIX & KANALBELEGUNG
+          <LayoutList size={9} className="text-cyan-500" /> 
+          INPUT-PATCH-MATRIX & KANALBELEGUNG
         </span>
 
         <div className="bg-[#070b12]/30 border border-slate-800/30 rounded-lg overflow-hidden flex flex-col justify-between min-h-[160px]">

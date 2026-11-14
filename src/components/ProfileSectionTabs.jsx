@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 const TABS = [
   { id: 'profil', label: 'Profil' },
-  { id: 'portfolio', label: 'Portfolio' },
+  { id: 'medien', label: 'Medien' },
   { id: 'angebot', label: 'Angebot' },
   { id: 'verwaltung', label: 'Verwaltung' }
 ];
@@ -11,7 +11,7 @@ export default function ProfileSectionTabs({
   currentProfileId,
   isOwner,
   profile,
-  portfolio,
+  medien,
   offer,
   management
 }) {
@@ -58,7 +58,7 @@ export default function ProfileSectionTabs({
         className="space-y-6"
       >
         <div className="profile-box-content" hidden={selectedTab !== 'profil'}>{profile}</div>
-        <div className="profile-box-content" hidden={selectedTab !== 'portfolio'}>{portfolio}</div>
+        <div className="profile-box-content" hidden={selectedTab !== 'medien'}>{medien}</div>
         <div className="profile-box-content" hidden={selectedTab !== 'angebot'}>{offer}</div>
         {canManage && management && (
           <div className="profile-box-content" hidden={selectedTab !== 'verwaltung'}>{management}</div>

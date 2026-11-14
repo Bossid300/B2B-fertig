@@ -7,7 +7,16 @@ import { eventService } from './services/eventService';
 import { distanceKm, geocodeAddress } from './services/geoService';
 import SearchMap from './components/maps/SearchMap';
 import PortfolioRouter from './components/portfolio/PortfolioRouter';
+import UserProfile from './UserProfile';
 import LocationProfile from './LocationProfile';
+import VerleiherProfile from './VerleiherProfile';
+import TechnikerProfile from './TechnikerProfile';
+import CaterProfile from './CaterProfile';
+import VeranstalterProfile from './VeranstalterProfile';
+import LogistikProfile from './LogistikProfile';
+import SecurityProfile from './SecurityProfile';
+import DesignProfile from './DesignProfile';
+import FanProfile from './FanProfile';
 
 export default function SearchExplorer({
   onNavigate,
@@ -836,12 +845,57 @@ return (
           </button>
 
           <div className="w-full h-full max-w-6xl overflow-auto rounded-2xl">
-            
-            <LocationProfile
-              currentProfileId={selectedProfile.id}
-              isOwner={false}
-            />
+            {(() => {
+              const profileProps = {
+                currentProfileId: selectedProfile.id,
+                isOwner: false,
+                onBack: () => setSelectedProfile(null)
+              };
 
+              if (selectedProfile.role === 'Location') {
+                return <LocationProfile {...profileProps} />;
+              }
+
+              if (selectedProfile.role === 'Fan') {
+                return <FanProfile {...profileProps} />;
+              }
+
+              if (
+                selectedProfile.role === 'Material' ||
+                selectedProfile.role === 'Verleiher'
+              ) {
+                return <VerleiherProfile {...profileProps} />;
+              }
+
+              if (selectedProfile.role === 'Techniker') {
+                return <TechnikerProfile {...profileProps} />;
+              }
+
+              if (selectedProfile.role === 'Catering') {
+                return <CaterProfile {...profileProps} />;
+              }
+
+              if (selectedProfile.role === 'Veranstalter') {
+                return <VeranstalterProfile {...profileProps} />;
+              }
+
+              if (selectedProfile.role === 'Logistik') {
+                return <LogistikProfile {...profileProps} />;
+              }
+
+              if (selectedProfile.role === 'Security') {
+                return <SecurityProfile {...profileProps} />;
+              }
+
+              if (
+                selectedProfile.role === 'Design' ||
+                selectedProfile.role === 'Deko'
+              ) {
+                return <DesignProfile {...profileProps} />;
+              }
+
+              return <UserProfile {...profileProps} />;
+            })()}
           </div>
 
         </div>

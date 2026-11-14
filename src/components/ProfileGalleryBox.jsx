@@ -113,9 +113,7 @@ export default function ProfileGalleryBox({ currentProfileId, isOwner }) {
 
     try {
 
-      const updatedProfile = {
-        ...profileData,
-
+      const profilePatch = {
         gallery_slot1_url: gallery[0].url,
         gallery_slot1_title: gallery[0].title,
         gallery_slot1_visible: gallery[0].visible,
@@ -135,13 +133,13 @@ export default function ProfileGalleryBox({ currentProfileId, isOwner }) {
       };
 
       const saveProfileId =
-        updatedProfile.id ||
-        updatedProfile.profileId ||
+        profileData.id ||
+        profileData.profileId ||
         currentProfileId;
 
       await saveProfile({
         profileId: saveProfileId,
-        profile: updatedProfile
+        profile: profilePatch
       });
 
       alert("B2B Medien-Portfolio erfolgreich eingebrannt! 🖼️🎞️");

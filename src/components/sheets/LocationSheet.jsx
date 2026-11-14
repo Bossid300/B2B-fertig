@@ -74,7 +74,7 @@ function ProfileValue({ label, value, children }) {
   );
 }
 
-export default function TechLocationPortfolio({ profile }) {
+export default function LocationSheet({ profile, showAllEvents = false }) {
   const [visibleEventCount, setVisibleEventCount] = useState(4);
 
   if (!profile || profile.show_stamm === false) return null;
@@ -138,7 +138,9 @@ export default function TechLocationPortfolio({ profile }) {
     return ownerId != null && String(ownerId) === String(profile.id);
   });
 
-  const visibleLocationEvents = locationEvents.slice(0, visibleEventCount);
+  const visibleLocationEvents = showAllEvents
+    ? locationEvents
+    : locationEvents.slice(0, visibleEventCount);
 
   const usageHighlights = [
     { key: 'location_rental_possible', label: 'Vermietung möglich' },
@@ -524,7 +526,7 @@ export default function TechLocationPortfolio({ profile }) {
                 </tbody>
               </table>
             </div>
-            {visibleEventCount < locationEvents.length && (
+            {!showAllEvents && visibleEventCount < locationEvents.length && (
               <button
                 type="button"
                 onClick={() => setVisibleEventCount((count) => count + 4)}

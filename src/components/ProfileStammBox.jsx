@@ -181,35 +181,39 @@ export default function ProfileStammBox({ currentProfileId, isOwner }) {
           throw new Error('Profil-ID fehlt; Stammdaten können nicht gespeichert werden.');
         }
 
-        const updatedProfile = {
-          ...profile,
+        const profilePatch = {
           ...formData,
-          id: profileId
         };
 
-        updatedProfile.name =
+        profilePatch.name =
           `${formData.vorname || ''} ${formData.nachname || ''}`.trim();
 
-        delete updatedProfile.project_name;
-        delete updatedProfile.avatar_media_id;
-        delete updatedProfile.avatarMediaId;
-        delete updatedProfile.avatarMediaUrl;
+        delete profilePatch.id;
+        delete profilePatch.project_name;
+        delete profilePatch.avatar_media_id;
+        delete profilePatch.avatarMediaId;
+        delete profilePatch.avatarMediaUrl;
+        delete profilePatch.is_demo;
 
         const geo =
           await geocodeAddress(
             `${formData.street || ''} ${formData.plz || ''} ${formData.city || ''}`
           );
         if (geo) {
-          updatedProfile.lat = geo.lat;
-          updatedProfile.lng = geo.lng;
+          profilePatch.lat = geo.lat;
+          profilePatch.lng = geo.lng;
         }
 
         await saveProfile({
           profileId,
-          profile: updatedProfile
+          profile: profilePatch
         });
 
-        setProfile(updatedProfile);
+        setProfile({
+          ...profile,
+          ...profilePatch,
+          id: profileId
+        });
         alert(
           "Stammdaten & Sichtbarkeiten erfolgreich eingeregelt! 💾"
         );

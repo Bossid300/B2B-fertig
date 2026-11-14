@@ -4,6 +4,15 @@ import { getPublicProfiles } from "../../services/apiService";
 import ArtistPortfolio from './ArtistPortfolio';
 import LocationPortfolio from './LocationPortfolio';
 import TechnicianPortfolio from './TechnicianPortfolio';
+import CateringPortfolio from './CateringPortfolio';
+import DesignPortfolio from './DesignPortfolio';
+import FanPortfolio from './FanPortfolio';
+import LogisticsPortfolio from './LogisticsPortfolio';
+import MaterialPortfolio from './MaterialPortfolio';
+import OrganizerPortfolio from './OrganizerPortfolio';
+import SecurityPortfolio from './SecurityPortfolio';
+import VerleiherPortfolio from './VerleiherPortfolio';
+import { getRoleSheet } from '../sheets/roleSheetMap';
 
 export default function PortfolioRouter({
   profileId = null,
@@ -79,41 +88,90 @@ export default function PortfolioRouter({
           </button>
         </div>
       </div>
+      
     );
   }
 
   const role =
-    profile?.role?.toLowerCase();
+    String(profile?.role || '').trim().toLowerCase();
 
-  switch(role) {
-
-    case 'location':
-      return (
-        <LocationPortfolio
-          profile={profile}
-          onBack={onBack}
-          setView={setView}
-        />
-      );
-
-    case 'techniker':
-      return (
-        <TechnicianPortfolio
-          profile={profile}
-          onBack={onBack}
-          setView={setView}
-        />
-      );
-
-    default:
-      return (
-        <ArtistPortfolio
-          profile={profile}
-          onBack={onBack}
-          setView={setView}
-        />
-      );
+  if (role === 'location' || role === 'halle' || role === 'venue') {
+    return (
+      <LocationPortfolio
+        profile={profile}
+        onBack={onBack}
+        setView={setView}
+      />
+    );
   }
 
+  if (role === 'techniker' || role === 'technician' || role === 'tech') {
+    return (
+      <TechnicianPortfolio
+        profile={profile}
+        onBack={onBack}
+        setView={setView}
+      />
+    );
+  }
 
+  if (role === 'künstler' || role === 'kuenstler' || role === 'artist') {
+    return (
+      <ArtistPortfolio
+        profile={profile}
+        onBack={onBack}
+        setView={setView}
+      />
+    );
+  }
+
+  const rolePortfolioMap = {
+    catering: CateringPortfolio,
+    caterer: CateringPortfolio,
+    design: DesignPortfolio,
+    deko: DesignPortfolio,
+    'deko/stage': DesignPortfolio,
+    fan: FanPortfolio,
+    logistik: LogisticsPortfolio,
+    logistics: LogisticsPortfolio,
+    material: MaterialPortfolio,
+    veranstalter: OrganizerPortfolio,
+    organizer: OrganizerPortfolio,
+    security: SecurityPortfolio,
+    verleiher: VerleiherPortfolio,
+    rental: VerleiherPortfolio,
+  };
+  const RolePortfolio = rolePortfolioMap[role];
+
+  if (RolePortfolio) {
+    return (
+      <RolePortfolio
+        profile={profile}
+        onBack={onBack}
+        setView={setView}
+      />
+    );
+  }
+
+  const SheetComponent = getRoleSheet(role);
+
+  if (SheetComponent) {
+    return (
+      <SheetRouter
+        profile={profile}
+        onBack={onBack}
+        setView={setView}
+        SheetComponent={SheetComponent}
+        roleLabel={profile.role || 'Profil'}
+      />
+    );
+  }
+
+  return (
+    <ArtistPortfolio
+      profile={profile}
+      onBack={onBack}
+      setView={setView}
+    />
+  );
 }

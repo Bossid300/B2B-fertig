@@ -9,6 +9,7 @@ import ProfilePassBox from './components/ProfilePassBox';
 import ProfileCard from './components/cards/ProfileCard';
 import ProfileMapBox from './components/ProfileMapBox';
 import ProfileLokalBox from './components/ProfileLokalBox';
+import FanCommunityBox from './components/boxes/FanCommunityBox';
 import { getProfilesDb } from './services/apiService';
 import { saveFavorite, deleteFavorite, getFavorites } from './services/apiService';
 import ProfileSectionTabs from './components/ProfileSectionTabs';
@@ -134,11 +135,14 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
             <ProfileMapBox profile={profileData} />
           </>
         }
-        portfolio={
+        medien={
           <ProfileBewertungsBox currentProfileId={currentProfileId} isOwner={isOwner} />
         }
         offer={
-          <ProfileHilfeBox currentProfileId={currentProfileId} isOwner={isOwner} />
+          <>
+            <ProfileHilfeBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            <FanCommunityBox currentProfileId={currentProfileId} isOwner={isOwner} />
+          </>
         }
         management={
           <>
