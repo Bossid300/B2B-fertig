@@ -72,7 +72,7 @@ export default function FanSheet({ profile }) {
     }))
     .filter((slide) => hasValue(slide.image));
 
-     console.log(profile); 
+
      
   return (
     <div className="min-h-screen bg-slate-950 px-4 py-8 font-sans text-slate-100 print:min-h-0 print:bg-slate-950 print:p-0">

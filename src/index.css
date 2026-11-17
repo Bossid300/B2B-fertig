@@ -2,6 +2,7 @@
 /* TAILWIND CSS V4 MASTER ENGINE ANBINDUNG                                   */
 /* ========================================================================= */
 @import "tailwindcss";
+@import "./experimental/stage-planner/styles.css";
 
 .profile-box-content {
   display: flex;
@@ -13,7 +14,7 @@
   display: none !important;
 }
 
-.profile-box-content > :not([hidden]) > div {
+.profile-box-content > :not([hidden]):not(.group) > div {
   box-sizing: border-box;
   width: 100%;
   margin-top: 0;
@@ -25,8 +26,8 @@
   box-shadow: 0 16px 36px rgb(0 0 0 / 18%);
 }
 
-.profile-box-content > :not([hidden]) > div,
-.profile-box-content > :not([hidden]) > div * {
+.profile-box-content > :not([hidden]):not(.group) > div,
+.profile-box-content > :not([hidden]):not(.group) > div * {
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
 }
 
@@ -418,6 +419,7 @@ button[data-profile-action]:focus-visible {
 }
 
 .no-spinner {
+  appearance: textfield;
   -moz-appearance: textfield;
 }
 

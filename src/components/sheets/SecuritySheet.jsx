@@ -111,7 +111,7 @@ export default function SecuritySheet({ profile, showAllEvents = false }) {
 
 
 
-   console.log(profile); 
+
 
 
   return (

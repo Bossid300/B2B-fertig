@@ -603,6 +603,21 @@ const eventOpenRequests = requests.filter(r =>
                       🎛️ Rider & Gewerke
                     </button>
 
+                    <button
+                      type="button"
+                      onClick={() => {
+                        localStorage.setItem('gigsda_active_event', JSON.stringify({
+                          id: evt.id || evt.eventId || evt._id,
+                          title: evt.title || evt.name || 'B2B Event'
+                        }));
+                        onSelectEvent?.(evt);
+                        setView('workspaceTest');
+                      }}
+                      className="px-3 py-1.5 bg-gradient-to-r from-cyan-600/20 to-purple-600/20 border border-purple-500/40 hover:border-purple-400 text-purple-300 hover:text-white text-[9px] font-bold uppercase tracking-wider rounded-xl transition-all cursor-pointer font-mono"
+                    >
+                      Arbeitsplatz
+                    </button>
+
                     {/* DEIN ECHTER LÖSCH-HEBEL PRO EVENT */}
                     {isOwner  && (                    
                     <button

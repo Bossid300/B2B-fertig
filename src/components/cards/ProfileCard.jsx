@@ -117,7 +117,7 @@ export default function ProfileCard({
 
       {/* AVATARBILD */}
       <div className="absolute top-12 left-4 z-20">
-        <div className="w-16 h-16 rounded-full border-2 border-slate-950 overflow-hidden bg-slate-900 shadow-xl">
+        <div className="w-18 h-18 rounded-full border-2 border-slate-950 overflow-hidden bg-slate-900 shadow-xl">
           {user.avatarMediaUrl || user.avatarUrl ? (
             <img 
               src={user.avatarMediaUrl || user.avatarUrl} 

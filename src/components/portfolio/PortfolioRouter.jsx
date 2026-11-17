@@ -15,9 +15,10 @@ import VerleiherPortfolio from './VerleiherPortfolio';
 import { getRoleSheet } from '../sheets/roleSheetMap';
 
 export default function PortfolioRouter({
-  profileId = null,
+profileId = null,
   onBack,
-  setView
+  setView,
+  printMode = false
 }) {
 
   const [profile, setProfile] = useState(null);

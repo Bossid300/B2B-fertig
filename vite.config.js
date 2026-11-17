@@ -4,6 +4,9 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  define: {
+    'global': 'window', // Behebt das Buffer-Problem im Browser
+  },
   base: '/',
   server: {
     proxy: {

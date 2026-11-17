@@ -96,6 +96,7 @@ import BillingCenter from './components/BillingCenter';
 import BudgetPlanner from './components/BudgetPlanner';
 import MediaLibraryPage from './components/MediaLibraryPage';
 import ProjectWorkspace from './experimental/workspace/ProjectWorkspace.jsx';
+import StagePlannerTest from './pages/StagePlannerTest.jsx';
 
 
 
@@ -106,6 +107,8 @@ const PATH_VIEWS = {
   '/events': 'guestEvents',
   '/portfolios': 'radar',
   '/calendar': 'calendar',
+  '/workspace-test': 'workspaceTest',
+  '/stage-planner-test': 'stagePlannerTest',
   '/impressum': 'impressum',
   '/datenschutz': 'privacy',
   '/agb': 'agb',
@@ -117,6 +120,8 @@ const VIEW_PATHS = {
   guestEvents: '/events',
   radar: '/portfolios',
   calendar: '/calendar',
+  workspaceTest: '/workspace-test',
+  stagePlannerTest: '/stage-planner-test',
   impressum: '/impressum',
   privacy: '/datenschutz',
   agb: '/agb',
@@ -151,18 +156,6 @@ const getSheetIdFromPath = (path) => {
 
 
 export default function App() {
-  const [pathname, setPathname] = useState(window.location.pathname);
-
-  useEffect(() => {
-    const handlePopState = () => setPathname(window.location.pathname);
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  if (pathname === '/workspace-test') {
-    return <ProjectWorkspace />;
-  }
-
   return <GigsdaApp />;
 }
 
@@ -977,6 +970,10 @@ useEffect(() => {
   const isSheetPrintRoute =
     isStandaloneSheetRoute &&
     new URLSearchParams(window.location.search).get('print') === '1';
+  const isPortfolioPrintRoute =
+    view === 'portfolioRouter' &&
+    Boolean(getPortfolioIdFromPath(window.location.pathname)) &&
+    new URLSearchParams(window.location.search).get('print') === '1';
 
 
 
@@ -995,7 +992,7 @@ useEffect(() => {
       selection:text-slate-950 antialiased overflow-x-hidden flex flex-col justify-between font-mono">
  
       {/* BACKGROUND GLOW */}
-      {!isSheetPrintRoute && (
+      {!isSheetPrintRoute && !isPortfolioPrintRoute && (
         <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none z-0 overflow-hidden">
           <div className="absolute top-[-10%] left-[-20%] w-[60%] aspect-square rounded-full bg-purple-900/10 blur-[120px]" />
           <div className="absolute top-[20%] right-[-20%] w-[50%] aspect-square rounded-full bg-cyan-900/10 blur-[120px]" />
@@ -1007,7 +1004,7 @@ useEffect(() => {
         {/* NAVIGATIONSMENÜ & LOGO-HEADER                                             */}
         {/* ========================================================================= */}
         {/* 🌌 TEMPORÄRER VERGLEICHS-HEADER: KOMPLETT FLACH UND TIEFSCHWARZ OHNE NEON-RAHMEN */}
-        {!isStandaloneSheetRoute && (
+        {!isStandaloneSheetRoute && !isPortfolioPrintRoute && (
         <header className="fixed top-0 left-0 right-0 z-50 bg-[#0b0f19] border-b border-slate-900/60 shadow-lg font-mono">
           <div className="w-full bg-[#0b0f19]/95 backdrop-blur-md rounded-b-[14px]">
             {/* 🚨 DANIELS ORIGINALER ZENTRIER-CONTAINER: REPARIERT DAS LAYOUT DER RESTLICHEN SEITE! */}
@@ -1062,7 +1059,7 @@ useEffect(() => {
         {/* ========================================================================= */}
         {/* MAIN ROUTER PORT                                                          */}
         {/* ========================================================================= */}
-        <main className={`w-full ${isStandaloneSheetRoute ? '' : 'pt-13'} min-h-screen bg-[#070913] text-white`}>
+        <main className={`w-full ${isStandaloneSheetRoute || isPortfolioPrintRoute ? '' : 'pt-13'} min-h-screen bg-[#070913] text-white`}>
           {eventLinkError && (
             <p role="alert" className="mx-auto max-w-4xl px-6 py-4 text-red-300">
               {eventLinkError}
@@ -1186,7 +1183,7 @@ useEffect(() => {
                 return (
                   <LocationProfile
                     currentProfileId={activeGuestProfileId}
-                    onNavigate={setView}
+                    setView={setView}
                   />
                 );
               }
@@ -1406,7 +1403,15 @@ useEffect(() => {
           {view === 'mediaLibrary' && isLoggedIn && (
             <MediaLibraryPage />
           )}
+
+          {view === 'workspaceTest' && (
+            <ProjectWorkspace />
+          )}
  
+          {view === 'stagePlannerTest' && (
+            <StagePlannerTest />
+          )}
+
           {view === 'projects' && isLoggedIn && (
             <ProjectDashboard
               onNavigateToStep={setView}
@@ -1659,6 +1664,7 @@ useEffect(() => {
             <PortfolioRouter
               onBack={() => setView('radar')}
               setView={setView}
+              printMode={isPortfolioPrintRoute}
             />
           )}
 
@@ -1774,13 +1780,13 @@ useEffect(() => {
         </main>
  
 
-        {!isStandaloneSheetRoute && <Footer setView={setView} />}
+        {!isStandaloneSheetRoute && !isPortfolioPrintRoute && <Footer setView={setView} />}
 
 
         {/* ========================================================================= */}
         {/* FOOTER                                                                    */}
         {/* ========================================================================= */}
-        {!isStandaloneSheetRoute && (
+        {!isStandaloneSheetRoute && !isPortfolioPrintRoute && (
         <footer className="w-full border-t border-slate-900/60 bg-slate-950 py-3 text-center text-xm text-slate-600 mt-12">
           GIGSDA PROTOCOL V1.0 // OPERATOR: 
           <span className="text-cyan-400 font-bold"> {ticketName} </span> 

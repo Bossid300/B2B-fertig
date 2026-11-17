@@ -43,6 +43,9 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
   const ownerProfileId = localStorage.getItem('gigsda_profile_id');
 
   const favoriteKey = `gigsda_favorites_${ownerProfileId}`;
+  const isArtistProfile = ['künstler', 'artist'].includes(
+    String(profileData?.role || profileData?.type || '').trim().toLowerCase()
+  );
     
     // 1. DATABASE PIPELINE: Lädt die Profildaten, um Favoriten-Status zu prüfen
     useEffect(() => {
@@ -178,6 +181,15 @@ export default function UserProfile({ onBack, currentProfileId, isOwner, setView
             <ProfileEquipmentBox currentProfileId={currentProfileId} isOwner={isOwner} />
             <ProfileAvailBox currentProfileId={currentProfileId} isOwner={isOwner} />
             <ProfileHilfeBox currentProfileId={currentProfileId} isOwner={isOwner} />
+            {isArtistProfile && (
+              <button
+                type="button"
+                onClick={() => setView('stagePlannerTest')}
+                className="w-full rounded-2xl border border-cyan-500/40 bg-cyan-500/10 px-6 py-4 text-left font-mono text-sm font-bold uppercase tracking-wider text-cyan-300 transition hover:border-cyan-400 hover:bg-cyan-500/20 hover:text-white"
+              >
+                StagePlanner öffnen
+              </button>
+            )}
           </>
         }
         management={

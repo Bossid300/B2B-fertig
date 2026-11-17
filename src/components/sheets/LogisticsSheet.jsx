@@ -329,7 +329,7 @@ export default function LogisticsSheet({ profile }) {
   const website = canShow('website') ? profile.website : '';
   const description = canShow('description') ? profile.description : '';
 
-   console.log(profile); 
+
 
   return (
     <div className="min-h-screen bg-slate-900 p-4 font-sans text-slate-100 print:min-h-0 print:p-0">

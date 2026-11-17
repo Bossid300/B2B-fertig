@@ -21,8 +21,8 @@ const memberLabel =
 
   return (
     <section className="rounded-3xl bg-slate-950 border border-cyan-500/20 p-8">
-      <h2 className="text-2xl font-bold mb-8">
-        Gigsda Pass
+      <h2 className="text-2xl text-slate-600 font-bold mb-8">
+        Gigsda Pass || Be visible. Get connected....
       </h2>
       <div className="space-y-8">
         {/* VORDERSEITE */}
@@ -49,6 +49,7 @@ const memberLabel =
 
             {/* LINKE SEITE */}
             <div className="flex flex-col items-center justify-center">
+                {/* Bild-Container */}
                 <div className="w-42 h-42 rounded-full p-[4px]
                             bg-gradient-to-r
                             from-cyan-400
@@ -56,14 +57,16 @@ const memberLabel =
                             shadow-[0_0_20px_rgba(34,211,238,0.35)]"
                 >
                     <img
-                    src={profile.avatarMediaUrl || profile.avatarUrl}
-                    alt={profile.name}
-                    className="w-40 h-40 rounded-full mx-auto object-cover"
+                        src={profile.avatarMediaUrl || profile.avatarUrl}
+                        alt={profile.name}
+                        className="w-40 h-40 rounded-full mx-auto object-cover"
                     />
-                    <p className="text-cyan-400 mt-8 tracking-[0.25em] uppercase text-lg font-bold">
-                    GIGSDA PASS
-                    </p>
                 </div>
+
+                {/* Text jetzt außerhalb des Bild-Containers, aber zentriert im übergeordneten Flex-Container */}
+                <p className="text-cyan-400 mt-8 tracking-[0.25em] uppercase text-lg font-bold text-center">
+                    GIGSDA PASS
+                </p>
             </div>
 
             {/* TRENNLINIE */}
@@ -74,7 +77,7 @@ const memberLabel =
             <p className="text-cyan-400 tracking-[0.25em] uppercase text-lg font-bold mb-4">
                 VERIFIED MEMBER
             </p>
-            <h3 className="text-5xl font-black leading-none">
+            <h3 className="text-5xl text-white font-black leading-none">
                 {profile.name}
             </h3>
             <div className="mt-6 text-3xl font-mono font-bold text-cyan-400 tracking-widest">
@@ -136,10 +139,10 @@ const memberLabel =
                 <p className="text-cyan-400 tracking-[0.25em] uppercase text-lg font-bold mb-4">
                     GIGSDA
                 </p>
-                <h3 className="text-2xl md:text-4xl font-black leading-tight">
+                <h3 className="text-2xl text-white md:text-4xl font-black leading-tight">
                     MUSIK.
                 </h3>
-                <h3 className="text-2xl md:text-4xl font-black leading-tight">
+                <h3 className="text-2xl text-white md:text-4xl font-black leading-tight">
                     VERANSTALTUNGEN.
                 </h3>
                 <h3 className="text-2xl md:text-4xl font-black leading-tight text-cyan-400">

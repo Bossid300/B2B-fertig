@@ -193,9 +193,6 @@ export default function VerleiherSheet({ profile, showAllEvents = false }) {
 
 
 
-
-  console.log(profile);
-
   return (
     <div className="location-standard-sheet min-h-screen bg-slate-900 p-4 font-sans text-slate-100 print:min-h-0 print:p-0">
       <div className="mx-auto max-w-6xl overflow-hidden rounded-xl border border-slate-700 bg-slate-800 shadow-2xl print:max-w-none print:overflow-visible print:shadow-none">

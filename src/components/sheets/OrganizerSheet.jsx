@@ -177,7 +177,7 @@ export default function OrganizerSheet({ profile, showAllEvents = false }) {
     },
   ].filter(Boolean);
 
-    console.log(profile);
+
 
   return (
     <div className="location-standard-sheet min-h-screen bg-slate-900 text-slate-100 p-4 md:p-8 font-sans print:min-h-0 print:h-auto print:p-0   print:overflow-visible">

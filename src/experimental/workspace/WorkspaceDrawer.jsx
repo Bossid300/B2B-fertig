@@ -15,6 +15,30 @@ function profileCategory(profile) {
   return profile.role || profile.type || profile.gewerk || 'Kategorie nicht angegeben';
 }
 
+function getStatusIndicator(profile, profileStatuses) {
+  const status = profileStatuses?.get(String(profile.id)) || 'Nicht zugeordnet';
+  
+  // ROT: Offene Einträge
+  if (['Nicht zugeordnet', 'Favorit', 'Interessant'].includes(status)) return 'red';
+  
+  // GELB: Laufende Vorgänge
+  if (['Angefragt', 'In Verhandlung', 'Gegenangebot', 'Pending'].includes(status)) return 'yellow';
+  
+  // GRÜN: Bestätigt
+  if (['Bestätigt', 'Gebucht'].includes(status)) return 'green';
+  
+  return 'gray';
+}
+
+function getCrewStatusGroup(profile, profileStatuses) {
+  const status = profileStatuses?.get(String(profile.id)) || 'Nicht zugeordnet';
+  
+  if (['Bestätigt', 'Gebucht'].includes(status)) return 'Bestätigt';
+  if (['In Verhandlung', 'Gegenangebot'].includes(status)) return 'Verhandlung';
+  if (['Angefragt', 'Pending'].includes(status)) return 'Angefragt';
+  return 'Interessant';
+}
+
 export default function WorkspaceDrawer({
   collapsed,
   onToggle,
@@ -23,7 +47,10 @@ export default function WorkspaceDrawer({
   crew,
   loading,
   loadError,
-  hasActiveEvent
+  hasActiveEvent,
+  profileStatuses,
+  drawerStatus,
+  onProfileSelect
 }) {
   const [activeTab, setActiveTab] = useState('favorites');
   const [search, setSearch] = useState('');
@@ -57,6 +84,7 @@ export default function WorkspaceDrawer({
         >
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
+        <span className={`workspace-drawer__status workspace-drawer__status--${drawerStatus}`} title={`Status: ${drawerStatus}`} />
       </div>
 
       {!collapsed && (
@@ -100,37 +128,98 @@ export default function WorkspaceDrawer({
             {!loading && !loadError && activeTab === 'crew' && !hasActiveEvent && (
               <p className="workspace-empty">Kein aktives Event ausgewählt.</p>
             )}
-            {!loading && !loadError && visibleProfiles.map((profile) => (
-              <button
-                type="button"
-                className="workspace-source-card"
-                key={profile.id}
-                draggable
-                onDragStart={(event) => {
-                  event.dataTransfer.effectAllowed = 'copyMove';
-                  event.dataTransfer.setData('application/x-gigsda-workspace', JSON.stringify({
-                    type: 'profile',
-                    profile
-                  }));
-                }}
-              >
-                {profile.avatarMediaUrl || profile.avatarUrl ? (
-                  <img
-                    className="workspace-source-card__avatar"
-                    src={profile.avatarMediaUrl || profile.avatarUrl}
-                    alt=""
-                  />
-                ) : (
-                  <span className="workspace-source-card__avatar workspace-source-card__avatar--empty">
-                    {profileName(profile).slice(0, 1).toUpperCase()}
-                  </span>
-                )}
-                <span className="workspace-source-card__text">
-                  <strong>{profileName(profile)}</strong>
-                  <span>{profileCategory(profile)}</span>
-                </span>
-              </button>
-            ))}
+
+            {/* CREW TAB: Mit Gruppierung */}
+            {!loading && !loadError && activeTab === 'crew' && visibleProfiles.length > 0 && (
+              <div className="workspace-profile-groups">
+                {['Interessant', 'Angefragt', 'Verhandlung', 'Bestätigt'].map((groupName) => {
+                  const groupProfiles = visibleProfiles.filter(p => getCrewStatusGroup(p, profileStatuses) === groupName);
+                  if (groupProfiles.length === 0) return null;
+
+                  return (
+                    <div key={groupName} className="workspace-profile-group">
+                      <h4 className="workspace-profile-group__title">{groupName}</h4>
+                      {groupProfiles.map((profile) => (
+                        <button
+                          type="button"
+                          className="workspace-source-card"
+                          key={profile.id}
+                          draggable
+                          onClick={() => onProfileSelect?.(profile)}
+                          onDragStart={(event) => {
+                            event.dataTransfer.effectAllowed = 'copyMove';
+                            event.dataTransfer.setData('application/x-gigsda-workspace', JSON.stringify({
+                              type: 'profile',
+                              profile
+                            }));
+                          }}
+                        >
+                          <div className="workspace-source-card__wrapper">
+                            {profile.avatarMediaUrl || profile.avatarUrl ? (
+                              <img
+                                className="workspace-source-card__avatar"
+                                src={profile.avatarMediaUrl || profile.avatarUrl}
+                                alt=""
+                              />
+                            ) : (
+                              <span className="workspace-source-card__avatar workspace-source-card__avatar--empty">
+                                {profileName(profile).slice(0, 1).toUpperCase()}
+                              </span>
+                            )}
+                            <span className="workspace-source-card__text">
+                              <strong>{profileName(profile)}</strong>
+                              <span>{profileCategory(profile)}</span>
+                            </span>
+                          </div>
+                          <span className={`workspace-source-card__status workspace-source-card__status--${getStatusIndicator(profile, profileStatuses)}`} />
+                        </button>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* FAVORITEN & SUCHE TAB: Ohne Gruppierung, ohne Statuspunkte */}
+            {!loading && !loadError && (activeTab === 'favorites' || activeTab === 'search') && visibleProfiles.length > 0 && (
+              <div>
+                {visibleProfiles.map((profile) => (
+                  <button
+                    type="button"
+                    className="workspace-source-card"
+                    key={profile.id}
+                    draggable
+                    onClick={() => onProfileSelect?.(profile)}
+                    onDragStart={(event) => {
+                      event.dataTransfer.effectAllowed = 'copyMove';
+                      event.dataTransfer.setData('application/x-gigsda-workspace', JSON.stringify({
+                        type: 'profile',
+                        profile
+                      }));
+                    }}
+                  >
+                    <div className="workspace-source-card__wrapper">
+                      {profile.avatarMediaUrl || profile.avatarUrl ? (
+                        <img
+                          className="workspace-source-card__avatar"
+                          src={profile.avatarMediaUrl || profile.avatarUrl}
+                          alt=""
+                        />
+                      ) : (
+                        <span className="workspace-source-card__avatar workspace-source-card__avatar--empty">
+                          {profileName(profile).slice(0, 1).toUpperCase()}
+                        </span>
+                      )}
+                      <span className="workspace-source-card__text">
+                        <strong>{profileName(profile)}</strong>
+                        <span>{profileCategory(profile)}</span>
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+
             {!loading && !loadError && visibleProfiles.length === 0 && (
               <p className="workspace-empty">
                 {activeTab === 'favorites'
