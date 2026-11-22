@@ -36,7 +36,7 @@ export default function EventInfoBlock({ event, crew = [], profiles = [] }) {
       return date.toLocaleDateString('de-DE', {
         day: '2-digit',
         month: '2-digit',
-        year: 'numeric'
+        year: '2-digit'
       });
     } catch {
       return null;
@@ -44,52 +44,55 @@ export default function EventInfoBlock({ event, crew = [], profiles = [] }) {
   };
 
   const eventDate = formatDate(event.date || event.eventDate || event.startDate);
-  const location = event.location || event.ort || event.place;
-  const owner = event.owner || event.ownerName || event.organizer;
   const eventId = event.id || event.eventId || event._id;
+  const organizer = event.owner || event.ownerName || event.organizer;
+  const location = event.location || event.ort || event.place;
+  const address = event.address || event.adresse || event.street || '';
 
   return (
     <div className="workspace-event-info-block">
-      {/* Event Titel */}
-      <div className="event-info__header">
+      {/* Linke Spalte: Event-ID und Titel */}
+      <div className="event-info__left">
+        {eventId && (
+          <div className="event-info__id">
+            <span className="event-info__id-label">Event-ID</span>
+            <strong className="event-info__id-value">{eventId}</strong>
+          </div>
+        )}
         <h2 className="event-info__title">
           {event.title || event.name || 'Event'}
         </h2>
       </div>
 
-      {/* Event Details */}
-      <div className="event-info__details">
-        {eventId && (
-          <div className="event-info__detail-item">
-            <span className="event-info__detail-label">Event-ID</span>
-            <strong className="event-info__detail-value">{eventId}</strong>
-          </div>
-        )}
-
-        {eventDate && (
-          <div className="event-info__detail-item">
-            <span className="event-info__detail-label">Datum</span>
-            <strong className="event-info__detail-value">{eventDate}</strong>
+      {/* Mittlere Spalte: Veranstalter, Lokation, Adresse */}
+      <div className="event-info__middle">
+        {organizer && (
+          <div className="event-info__line">
+            <strong>Veranstalter:</strong> {organizer}
           </div>
         )}
 
         {location && (
-          <div className="event-info__detail-item">
-            <span className="event-info__detail-label">Ort</span>
-            <strong className="event-info__detail-value">{location}</strong>
+          <div className="event-info__line">
+            <strong>Lokation:</strong> {location}
           </div>
         )}
 
-        {owner && (
-          <div className="event-info__detail-item">
-            <span className="event-info__detail-label">Owner</span>
-            <strong className="event-info__detail-value">{owner}</strong>
+        {address && (
+          <div className="event-info__line">
+            <strong>Adresse:</strong> {address}
           </div>
-        )}
+)}
       </div>
 
-      {/* KPI Bereich */}
+      {/* Rechte Spalte: KPI Bereich mit Datum */}
       <div className="event-info__kpis">
+        {eventDate && (
+          <div className="event-info__kpi-card">
+            <span className="event-info__kpi-label">Datum</span>
+            <strong className="event-info__kpi-value">{eventDate}</strong>
+          </div>
+        )}
         <div className="event-info__kpi-card">
           <span className="event-info__kpi-label">Crew</span>
           <strong className="event-info__kpi-value">{kpis.crewCount}</strong>

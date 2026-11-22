@@ -40,11 +40,12 @@ export async function setProfileAvatar(mediaAssetId) {
   return readResponse(response);
 }
 
-export async function uploadMediaFile(file) {
+async function postMediaFile(file, eventId) {
   const formData = new FormData();
   formData.append('file', file);
+  if (eventId != null) formData.append('event_id', eventId);
 
-  const response = await fetch(MEDIA_API, {
+  const response = await fetch(eventId != null ? `${MEDIA_API}?action=event-banner` : MEDIA_API, {
     method: 'POST',
     credentials: 'same-origin',
     body: formData
@@ -52,6 +53,17 @@ export async function uploadMediaFile(file) {
 
   const data = await readResponse(response);
   return data.asset;
+}
+
+export async function uploadMediaFile(file) {
+  return postMediaFile(file);
+}
+
+export async function uploadEventBanner(file, eventId) {
+  if (eventId == null || String(eventId).trim() === '') {
+    throw new Error('Die Event-ID für den Banner-Upload fehlt.');
+  }
+  return postMediaFile(file, eventId);
 }
 
 export function getMediaDownloadUrl(assetId) {

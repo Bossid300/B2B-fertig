@@ -1421,6 +1421,10 @@ useEffect(() => {
             />
           )}
 
+          {view === 'workspace' && isLoggedIn && (
+            <ProjectWorkspace />
+          )}
+
           {/* 🎛️ REALTIME B2B RIDER & GEWERKE EXPRESS-PIPELINE (IMMUN GEGEN ID-FEHLER!) */}
           {view === 'riderzentrale' && (
             (() => {

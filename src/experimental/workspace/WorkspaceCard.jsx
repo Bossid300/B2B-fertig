@@ -7,7 +7,16 @@ function canDeleteCard(status) {
   return status === 'Interessant';
 }
 
-export default function WorkspaceCard({ profile, status, eventTitle, selected, style, onClick, onDragStart, onDelete }) {
+export default function WorkspaceCard({ 
+  profile, 
+  status, 
+  eventTitle, 
+  selected, 
+  style, 
+  onClick, 
+  onDragStart, 
+  onDelete 
+}) {
   const category = profile.role || profile.type || profile.gewerk || 'Kategorie nicht angegeben';
   const avatar = profile.avatarMediaUrl || profile.avatarUrl;
   const isDeletable = canDeleteCard(status);
@@ -51,7 +60,15 @@ export default function WorkspaceCard({ profile, status, eventTitle, selected, s
         </div>
       </div>
       <div className="workspace-card__status">
-        <span />
+<span
+  className={`workspace-source-card__status workspace-source-card__status--${
+    status === 'Bestätigt'
+      ? 'green'
+      : ['Angefragt', 'Verhandlung'].includes(status)
+        ? 'yellow'
+        : 'red'
+  }`}
+/>
         Status: {status}
       </div>
       {eventTitle && (

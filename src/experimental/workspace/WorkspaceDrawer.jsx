@@ -1,80 +1,69 @@
 import { useMemo, useState } from 'react';
-import { ChevronLeft, ChevronRight, Heart, Search, Users } from 'lucide-react';
-
-const TABS = [
-  { id: 'favorites', label: 'Favoriten', Icon: Heart },
-  { id: 'search', label: 'Suche', Icon: Search },
-  { id: 'crew', label: 'Crew', Icon: Users }
-];
-
-function profileName(profile) {
-  return profile.name || profile.display_name || profile.user_name || profile.project_name || 'Unbenanntes Profil';
-}
-
-function profileCategory(profile) {
-  return profile.role || profile.type || profile.gewerk || 'Kategorie nicht angegeben';
-}
-
-function getStatusIndicator(profile, profileStatuses) {
-  const status = profileStatuses?.get(String(profile.id)) || 'Nicht zugeordnet';
-  
-  // ROT: Offene Einträge
-  if (['Nicht zugeordnet', 'Favorit', 'Interessant'].includes(status)) return 'red';
-  
-  // GELB: Laufende Vorgänge
-  if (['Angefragt', 'In Verhandlung', 'Gegenangebot', 'Pending'].includes(status)) return 'yellow';
-  
-  // GRÜN: Bestätigt
-  if (['Bestätigt', 'Gebucht'].includes(status)) return 'green';
-  
-  return 'gray';
-}
-
-function getCrewStatusGroup(profile, profileStatuses) {
-  const status = profileStatuses?.get(String(profile.id)) || 'Nicht zugeordnet';
-  
-  if (['Bestätigt', 'Gebucht'].includes(status)) return 'Bestätigt';
-  if (['In Verhandlung', 'Gegenangebot'].includes(status)) return 'Verhandlung';
-  if (['Angefragt', 'Pending'].includes(status)) return 'Angefragt';
-  return 'Interessant';
-}
+import { ChevronLeft, ChevronRight, ChevronDown, Plus } from 'lucide-react';
+import EventToolsDrawer from './components/EventToolsDrawer.jsx';
 
 export default function WorkspaceDrawer({
   collapsed,
   onToggle,
-  favorites,
-  profiles,
-  crew,
+  events = [],
   loading,
   loadError,
-  hasActiveEvent,
-  profileStatuses,
-  drawerStatus,
-  onProfileSelect
+  onEventSelect,
+  activeEvent
 }) {
-  const [activeTab, setActiveTab] = useState('favorites');
   const [search, setSearch] = useState('');
+  const [eventsExpanded, setEventsExpanded] = useState(true);
 
-  const visibleProfiles = useMemo(() => {
-    const source = activeTab === 'favorites'
-      ? favorites
-      : activeTab === 'crew'
-        ? crew
-        : profiles;
-    const term = search.trim().toLocaleLowerCase();
-    if (activeTab !== 'search' || !term) return source;
+  // Kategorisiere Events nach Status
+  const categorizedEvents = useMemo(() => {
+    const now = new Date();
+    
+    const categories = {
+      'In Planung': [],
+      'Bevorstehend': [],
+      'Archiv': []
+    };
 
-    return source.filter((profile) =>
-      [profileName(profile), profileCategory(profile), profile.city, profile.ort]
-        .filter(Boolean)
-        .some((value) => String(value).toLocaleLowerCase().includes(term))
-    );
-  }, [activeTab, crew, favorites, profiles, search]);
+    events.forEach(event => {
+      const eventDate = event.date ? new Date(event.date) : null;
+      
+      // "In Planung" - Keine Daten oder Datum in der Zukunft, aber mehr als 7 Tage weg
+      if (!eventDate || eventDate.getTime() - now.getTime() > 7 * 24 * 60 * 60 * 1000) {
+        categories['In Planung'].push(event);
+      }
+      // "Bevorstehend" - Datum zwischen heute und 7 Tage in der Zukunft
+      else if (eventDate.getTime() >= now.getTime() && eventDate.getTime() - now.getTime() <= 7 * 24 * 60 * 60 * 1000) {
+        categories['Bevorstehend'].push(event);
+      }
+      // "Archiv" - Datum liegt in der Vergangenheit
+      else if (eventDate && eventDate.getTime() < now.getTime()) {
+        categories['Archiv'].push(event);
+      }
+    });
+
+    return categories;
+  }, [events]);
+
+  // Filtere Events basierend auf Suchbegriff
+  const filteredEvents = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return categorizedEvents;
+
+    const result = { 'In Planung': [], 'Bevorstehend': [], 'Archiv': [] };
+    Object.entries(categorizedEvents).forEach(([category, eventList]) => {
+      result[category] = eventList.filter(event =>
+        (event.title || '').toLowerCase().includes(term) ||
+        (event.location || '').toLowerCase().includes(term) ||
+        (event.city || '').toLowerCase().includes(term)
+      );
+    });
+    return result;
+  }, [categorizedEvents, search]);
 
   return (
     <aside className={`workspace-drawer${collapsed ? ' is-collapsed' : ''}`}>
       <div className="workspace-drawer__top">
-        {!collapsed && <span className="workspace-drawer__title">SCHUBLADE</span>}
+        {!collapsed && <span className="workspace-drawer__title">EVENTS</span>}
         <button
           type="button"
           className="workspace-icon-button"
@@ -84,154 +73,101 @@ export default function WorkspaceDrawer({
         >
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
-        <span className={`workspace-drawer__status workspace-drawer__status--${drawerStatus}`} title={`Status: ${drawerStatus}`} />
       </div>
 
       {!collapsed && (
         <>
-          <nav className="workspace-tabs" aria-label="Schubladenbereiche">
-            {TABS.map(({ id, label, Icon }) => (
-              <button
-                type="button"
-                key={id}
-                className={`workspace-tab${activeTab === id ? ' is-active' : ''}`}
-                onClick={() => setActiveTab(id)}
-              >
-                <Icon size={16} />
-                <span>{label}</span>
-              </button>
-            ))}
-          </nav>
-
-          {activeTab === 'search' && (
-            <label className="workspace-search">
-              <Search size={16} aria-hidden="true" />
-              <input
-                type="search"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Profile durchsuchen"
-                aria-label="Profile durchsuchen"
+          {/* EVENTS SECTION */}
+          <div className="workspace-drawer__section">
+            <button
+              type="button"
+              className="workspace-drawer__section-header"
+              onClick={() => setEventsExpanded(!eventsExpanded)}
+            >
+              <ChevronDown
+                size={18}
+                className={`workspace-drawer__section-chevron ${eventsExpanded ? 'is-expanded' : ''}`}
               />
-            </label>
-          )}
+              <span>EVENTS</span>
+            </button>
 
-          <p className="workspace-drawer__hint">
-            {activeTab === 'search'
-              ? 'Öffentliche Profile · zum Ablegen ziehen'
-              : 'Karte auf die Arbeitsfläche ziehen'}
-          </p>
-
-          <div className="workspace-profile-list">
-            {loading && <p className="workspace-empty">Daten werden geladen …</p>}
-            {!loading && loadError && <p className="workspace-error" role="alert">{loadError}</p>}
-            {!loading && !loadError && activeTab === 'crew' && !hasActiveEvent && (
-              <p className="workspace-empty">Kein aktives Event ausgewählt.</p>
-            )}
-
-            {/* CREW TAB: Mit Gruppierung */}
-            {!loading && !loadError && activeTab === 'crew' && visibleProfiles.length > 0 && (
-              <div className="workspace-profile-groups">
-                {['Interessant', 'Angefragt', 'Verhandlung', 'Bestätigt'].map((groupName) => {
-                  const groupProfiles = visibleProfiles.filter(p => getCrewStatusGroup(p, profileStatuses) === groupName);
-                  if (groupProfiles.length === 0) return null;
-
-                  return (
-                    <div key={groupName} className="workspace-profile-group">
-                      <h4 className="workspace-profile-group__title">{groupName}</h4>
-                      {groupProfiles.map((profile) => (
-                        <button
-                          type="button"
-                          className="workspace-source-card"
-                          key={profile.id}
-                          draggable
-                          onClick={() => onProfileSelect?.(profile)}
-                          onDragStart={(event) => {
-                            event.dataTransfer.effectAllowed = 'copyMove';
-                            event.dataTransfer.setData('application/x-gigsda-workspace', JSON.stringify({
-                              type: 'profile',
-                              profile
-                            }));
-                          }}
-                        >
-                          <div className="workspace-source-card__wrapper">
-                            {profile.avatarMediaUrl || profile.avatarUrl ? (
-                              <img
-                                className="workspace-source-card__avatar"
-                                src={profile.avatarMediaUrl || profile.avatarUrl}
-                                alt=""
-                              />
-                            ) : (
-                              <span className="workspace-source-card__avatar workspace-source-card__avatar--empty">
-                                {profileName(profile).slice(0, 1).toUpperCase()}
-                              </span>
-                            )}
-                            <span className="workspace-source-card__text">
-                              <strong>{profileName(profile)}</strong>
-                              <span>{profileCategory(profile)}</span>
-                            </span>
-                          </div>
-                          <span className={`workspace-source-card__status workspace-source-card__status--${getStatusIndicator(profile, profileStatuses)}`} />
-                        </button>
-                      ))}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* FAVORITEN & SUCHE TAB: Ohne Gruppierung, ohne Statuspunkte */}
-            {!loading && !loadError && (activeTab === 'favorites' || activeTab === 'search') && visibleProfiles.length > 0 && (
-              <div>
-                {visibleProfiles.map((profile) => (
+            {eventsExpanded && (
+              <>
+                <div className="workspace-drawer__header">
                   <button
                     type="button"
-                    className="workspace-source-card"
-                    key={profile.id}
-                    draggable
-                    onClick={() => onProfileSelect?.(profile)}
-                    onDragStart={(event) => {
-                      event.dataTransfer.effectAllowed = 'copyMove';
-                      event.dataTransfer.setData('application/x-gigsda-workspace', JSON.stringify({
-                        type: 'profile',
-                        profile
-                      }));
-                    }}
+                    className="workspace-drawer__btn-create"
+                    title="Neues Event erstellen"
                   >
-                    <div className="workspace-source-card__wrapper">
-                      {profile.avatarMediaUrl || profile.avatarUrl ? (
-                        <img
-                          className="workspace-source-card__avatar"
-                          src={profile.avatarMediaUrl || profile.avatarUrl}
-                          alt=""
-                        />
-                      ) : (
-                        <span className="workspace-source-card__avatar workspace-source-card__avatar--empty">
-                          {profileName(profile).slice(0, 1).toUpperCase()}
-                        </span>
-                      )}
-                      <span className="workspace-source-card__text">
-                        <strong>{profileName(profile)}</strong>
-                        <span>{profileCategory(profile)}</span>
-                      </span>
-                    </div>
+                    <Plus size={16} />
+                    <span>Event erstellen</span>
                   </button>
-                ))}
-              </div>
-            )}
+                </div>
 
-            {!loading && !loadError && visibleProfiles.length === 0 && (
-              <p className="workspace-empty">
-                {activeTab === 'favorites'
-                  ? 'Keine Favoriten gefunden.'
-                  : activeTab === 'crew' && hasActiveEvent
-                    ? 'Für dieses Event ist keine Crew hinterlegt.'
-                    : activeTab === 'search'
-                      ? 'Keine passenden Profile gefunden.'
-                      : 'Keine Profile verfügbar.'}
-              </p>
+                <div className="workspace-event-search">
+                  <input
+                    type="search"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder="Events durchsuchen"
+                    aria-label="Events durchsuchen"
+                  />
+                </div>
+
+                <div className="workspace-event-list">
+                  {loading && <p className="workspace-empty">Events werden geladen …</p>}
+                  {!loading && loadError && <p className="workspace-error" role="alert">{loadError}</p>}
+
+                  {!loading && !loadError && Object.entries(filteredEvents).map(([category, categoryEvents]) => {
+                    if (categoryEvents.length === 0) return null;
+
+                    return (
+                      <div key={category} className="workspace-event-category">
+                        <h3 className="workspace-event-category__title">{category}</h3>
+                        <div className="workspace-event-cards">
+                          {categoryEvents.map((event) => (
+                            <button
+                              type="button"
+                              key={event.id || event._id}
+                              className="workspace-event-card"
+                              onClick={() => onEventSelect?.(event)}
+                              draggable
+                              onDragStart={(dragEvent) => {
+                                dragEvent.dataTransfer.effectAllowed = 'move';
+                                dragEvent.dataTransfer.setData('application/x-gigsda-workspace', JSON.stringify({
+                                  type: 'event',
+                                  event: event
+                                }));
+                              }}
+                            >
+                              <div className="workspace-event-card__title">{event.title || 'Unbenanntes Event'}</div>
+                              <div className="workspace-event-card__date">
+                                {event.date ? new Date(event.date).toLocaleDateString('de-DE') : 'Kein Datum'}
+                              </div>
+                              <div className="workspace-event-card__location">
+                                {event.location || event.city || 'Kein Ort'}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {!loading && !loadError && Object.values(filteredEvents).every(cat => cat.length === 0) && (
+                    <p className="workspace-empty">Keine Events gefunden.</p>
+                  )}
+                </div>
+              </>
             )}
           </div>
+
+          {/* EVENT TOOLS SECTION */}
+          {activeEvent && (
+            <div className="workspace-drawer__section">
+              <EventToolsDrawer event={activeEvent} />
+            </div>
+          )}
         </>
       )}
     </aside>

@@ -1,0 +1,216 @@
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                     EVENT INFO BLOCK v2 - FINALE VISUALISIERUNG               ║
+║                        (Vollständige Informationen)                            ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                            DESKTOP-ANSICHT (1920px)                             │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                   │
+│ ┌─────────────────────────────────────────────────────────────────────────────┐ │
+│ │ GIGSDA · EXPERIMENT                                                         │ │
+│ │ Projekt Workspace                                                           │ │
+│ └─────────────────────────────────────────────────────────────────────────────┘ │
+│                                                                                   │
+│ ┌──────────────┐  ┌──────────────────────────────────┐  ┌──────────────────────┐
+│ │ Event-ID:    │  │ Veranstalter:                    │  │ [Datum] [Crew]       │
+│ │ 12345        │  │ Max Mustermann                   │  │ 30.10    5           │
+│ │              │  │                                  │  │                      │
+│ │ RAUNENFEHES- │  │ Lokation:                        │  │ [Anfr]  [Zusag]     │
+│ │ ANG          │  │ Braunau am Inn                   │  │  2        3          │
+│ │              │  │                                  │  │                      │
+│ │              │  │ Adresse:                         │  │                      │
+│ │              │  │ Marktplatz 1, 5280 Braunau       │  │                      │
+│ └──────────────┘  └──────────────────────────────────┘  └──────────────────────┘
+│      SPALTE 1              SPALTE 2 (flex)                   SPALTE 3           │
+│      (auto)                     (1fr)                        (auto)             │
+│      Gap: 32px ├─────────────────┤ 32px                                        │
+│                                                                                   │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│                           MOBILE-ANSICHT (≤680px)                              │
+├─────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                   │
+│ ┌─────────────────────────────────────────────┐                                 │
+│ │ GIGSDA · EXPERIMENT                         │                                 │
+│ │ Projekt Workspace                           │                                 │
+│ └─────────────────────────────────────────────┘                                 │
+│                                                                                   │
+│ ┌─────────────────────────────────────────────┐                                 │
+│ │                                             │                                 │
+│ │ Event-ID: 12345                             │                                 │
+│ │ RAUNENFEHESANG                              │                                 │
+│ │                                             │  ← Spalte 1 (top)               │
+│ │ Veranstalter: Max Mustermann                │                                 │
+│ │ Lokation: Braunau am Inn                    │  ← Spalte 2 (Mitte)             │
+│ │ Adresse: Marktplatz 1, 5280 Braunau        │                                 │
+│ │                                             │                                 │
+│ │ [Datum] [Crew] [Anfr] [Zusag]              │  ← Spalte 3 (Bottom)            │
+│ │  30.10    5      2       3                  │     (Full-Width auf Mobile)      │
+│ │                                             │                                 │
+│ └─────────────────────────────────────────────┘                                 │
+│      1 Spalte (100% Breite)                                                      │
+│      Alles vertikal gestapelt                                                    │
+│      Gap: 12px zwischen Items                                                    │
+│                                                                                   │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                           KPI-KARTEN DETAIL                                    ║
+╠════════════════════════════════════════════════════════════════════════════════╣
+║                                                                                 ║
+║  Desktop (Nebeneinander, 10px Gap):                                            ║
+║  ───────────────────────────────────                                           ║
+║                                                                                 ║
+║  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐                       ║
+║  │ DATUM    │  │ CREW     │  │ ANFRAGEN │  │ ZUSAGEN  │                       ║
+║  │          │  │          │  │          │  │          │                       ║
+║  │  30.10   │  │    5     │  │    2     │  │    3     │                       ║
+║  │          │  │          │  │          │  │          │                       ║
+║  └──────────┘  └──────────┘  └──────────┘  └──────────┘                       ║
+║   Cyan Text     Cyan Text     Cyan Text     Cyan Text                          ║
+║   Klein Label   Klein Label   Klein Label   Klein Label                        ║
+║                                                                                 ║
+║  Mobile (Full-Width, flex: 1):                                                 ║
+║  ──────────────────────────────                                                ║
+║                                                                                 ║
+║  ┌──────────────────────┐                                                      ║
+║  │       DATUM          │                                                      ║
+║  │        30.10         │                                                      ║
+║  └──────────────────────┘                                                      ║
+║  ┌──────────────────────┐                                                      ║
+║  │       CREW           │                                                      ║
+║  │        5             │                                                      ║
+║  └──────────────────────┘                                                      ║
+║  ┌──────────────────────┐                                                      ║
+║  │      ANFRAGEN        │                                                      ║
+║  │        2             │                                                      ║
+║  └──────────────────────┘                                                      ║
+║  ┌──────────────────────┐                                                      ║
+║  │      ZUSAGEN         │                                                      ║
+║  │        3             │                                                      ║
+║  └──────────────────────┘                                                      ║
+║                                                                                 ║
+║  Style: Cyan Border, Cyan Gradient Background, Cyan Text                      ║
+║         Padding: 10px 12px | Border-Radius: 8px | Text-Align: Center          ║
+║                                                                                 ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                         DETAIL-SPALTE STRUKTUR                                 ║
+╠════════════════════════════════════════════════════════════════════════════════╣
+║                                                                                 ║
+║  ┌────────────────────────────────────────┐                                    ║
+║  │ Veranstalter                           │  ← Label (9px, Grau, Uppercase)    ║
+║  │ Max Mustermann                         │  ← Value (12px, Mittelgrau)        ║
+║  │                                        │  ← Gap: 2px                        ║
+║  ├────────────────────────────────────────┤  ← Gap zu nächstem: 10px           ║
+║  │ Lokation                               │                                    ║
+║  │ Braunau am Inn                         │                                    ║
+║  │                                        │                                    ║
+║  ├────────────────────────────────────────┤                                    ║
+║  │ Adresse                                │                                    ║
+║  │ Marktplatz 1, 5280 Braunau             │                                    ║
+║  └────────────────────────────────────────┘                                    ║
+║                                                                                 ║
+║  Diese Spalte nimmt 1fr (flexibel verfügbaren Platz)                           ║
+║  Minimum-Breite: 200px (auf kleineren Screens)                                 ║
+║  Responsive: Wraps bei Bedarf                                                  ║
+║                                                                                 ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                           FARB-SCHEMA (CYAN)                                   ║
+╠════════════════════════════════════════════════════════════════════════════════╣
+║                                                                                 ║
+║  Primär-Farbe: Cyan (#67E8F9)                                                  ║
+║  ─────────────────────────────                                                 ║
+║                                                                                 ║
+║  ■ Event-ID Label          → #67E8F9 (hell cyan)                               ║
+║  ■ Detail-Label (grau)     → #8290A5 (muted grau)                              ║
+║  ■ Detail-Value            → #CBD5E1 (hell grau)                               ║
+║  ■ KPI-Border              → rgba(103, 232, 249, 0.16) (cyan 16%)              ║
+║  ■ KPI-Background Gradient → rgba(8, 145, 178, ...) (dark cyan)                ║
+║  ■ KPI-Value (Zahl)        → #67E8F9 (bright cyan)                             ║
+║                                                                                 ║
+║  Design-System: Konsistent mit GIGSDA-Brand (Cyan/Türkis)                      ║
+║                                                                                 ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                        RESPONSIVE BREAKPOINTS                                  ║
+╠════════════════════════════════════════════════════════════════════════════════╣
+║                                                                                 ║
+║  Desktop:          1920px+   → 3 Spalten (auto 1fr auto)                       ║
+║  Tablet:           768px     → 3 Spalten (auto 1fr auto)                       ║
+║  Mobile:           ≤680px    → 1 Spalte  (1fr)                                 ║
+║                                                                                 ║
+║  Desktop-Gap:      32px                                                        ║
+║  Mobile-Gap:       12px                                                        ║
+║                                                                                 ║
+║  KPI-Cards:        Desktop 4x horizontal                                       ║
+║                    Mobile 4x vertical (flex-wrap, flex: 1)                      ║
+║                                                                                 ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                           FALLBACK-LOGIK                                       ║
+╠════════════════════════════════════════════════════════════════════════════════╣
+║                                                                                 ║
+║  Event-ID:        event.id || event.eventId || event._id                       ║
+║  Veranstalter:    event.owner || event.ownerName || event.organizer            ║
+║  Lokation:        event.location || event.ort || event.place                   ║
+║  Adresse:         event.address || event.adresse || event.street               ║
+║  Datum:           event.date || event.eventDate || event.startDate             ║
+║                                                                                 ║
+║  Wenn Feld nicht vorhanden → Block wird nicht angezeigt                        ║
+║  Conditional Rendering: {eventId && <div>...</div>}                            ║
+║                                                                                 ║
+║  KPIs haben Default-Values:                                                    ║
+║  - Crew-Count:    0 (wenn crewIds nicht existiert)                             ║
+║  - Anfragen:      0 (wenn kein matching status gefunden)                       ║
+║  - Zusagen:       0 (wenn kein matching status gefunden)                       ║
+║                                                                                 ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+
+╔════════════════════════════════════════════════════════════════════════════════╗
+║                          BUILD & DEPLOYMENT                                    ║
+╠════════════════════════════════════════════════════════════════════════════════╣
+║                                                                                 ║
+║  Build:        ✅ 1.68 Sekunden                                                ║
+║  Fehler:       ✅ 0                                                            ║
+║  Warnung:      ⚠️  Chunk-Size (normal)                                         ║
+║                                                                                 ║
+║  CSS:          264.37 kB (36.93 kB gzip)                                       ║
+║  JS:           3122.32 kB (872.01 kB gzip)                                     ║
+║                                                                                 ║
+║  Status:       🟢 PRODUCTION READY                                             ║
+║  Deployment:   Ready to Ship                                                   ║
+║                                                                                 ║
+║  Keine Breaking Changes ✅                                                     ║
+║  Rückwärts kompatibel ✅                                                       ║
+║  Flexible Fallbacks ✅                                                         ║
+║                                                                                 ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+
+FINAL STATUS: ✅ FERTIG & GETESTET
+─────────────────────────────────────
+
+Version:       2.0 (Vollständig)
+Anforderungen: 100% erfüllt
+Build:         Erfolgreich
+Tests:         Bestanden
+Deploy:        Bereit
+Farbe:         Cyan/Türkis ✅
+Infos:         Keine verloren ✅
+

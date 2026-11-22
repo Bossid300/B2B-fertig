@@ -126,6 +126,9 @@ export default function LandingEventPromo() {
 
               startTime:
                 event.promotionData?.startTime,
+                
+              endTime:
+                event.promotionData?.endTime,
 
               ticketPrice:
                 event.promotionData?.ticketPrice,

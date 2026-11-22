@@ -270,74 +270,113 @@ currentEvents >= maxEvents;
         <span className="text-[9px] text-slate-500 uppercase tracking-widest font-black">// Ubersicht deiner Events</span>
       </div>
 
-      {isCreatingEvent ? (
-      <CreateEventForm
-        onBack={() => setIsCreatingEvent(false)}
-        onCreateEvent={async (newEvent) => {
-          const currentUserName =
-            localStorage.getItem('gigsda_user_name');
+      {isCreatingEvent && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'auto'
+        }}>
+          <div style={{
+            position: 'relative',
+            width: '90%',
+            maxHeight: '90vh',
+            backgroundColor: 'transparent'
+          }}>
+            <button
+              onClick={() => setIsCreatingEvent(false)}
+              style={{
+                position: 'absolute',
+                top: '-40px',
+                right: 0,
+                backgroundColor: 'transparent',
+                border: 'none',
+                color: '#67e8f9',
+                fontSize: '28px',
+                cursor: 'pointer',
+                zIndex: 1001
+              }}
+            >
+              ✕
+            </button>
+            <CreateEventForm
+              onBack={() => setIsCreatingEvent(false)}
+              onCreateEvent={async (newEvent) => {
+                  const currentUserName =
+                    localStorage.getItem('gigsda_user_name');
 
-          const currentUserId =
-            currentProfileData?.id ||
-            localStorage.getItem('gigsda_profile_id') ||
-            '';
+                  const currentUserId =
+                    currentProfileData?.id ||
+                    localStorage.getItem('gigsda_profile_id') ||
+                    '';
 
-          const eventCategory =
-            newEvent.category === 'Festivals'
-              ? 'Festival'
-              : newEvent.category === 'OpenAirs'
-                ? 'Open Air'
-                : 'Clubshow';
+                  const eventCategory =
+                    newEvent.category === 'Festivals'
+                      ? 'Festival'
+                      : newEvent.category === 'OpenAirs'
+                        ? 'Open Air'
+                        : 'Clubshow';
 
-          const fresh = {
-            id: newEvent.id || "EVT-" + Date.now().toString().slice(-4),
-            title: `${newEvent.title}`,
-            date: newEvent.date,
-            displayDate: newEvent.displayDate,
-            type: eventCategory,
-            category: eventCategory,
-            text: "Event frisch angelegt. Starte die Crew-Suche im Radar.",
-            venue: newEvent.venue || "Stadtpark Wiese, Braunau",
+                  const fresh = {
+                    id: newEvent.id || "EVT-" + Date.now().toString().slice(-4),
+                    title: `${newEvent.title}`,
+                    date: newEvent.date,
+                    displayDate: newEvent.displayDate,
+                    type: eventCategory,
+                    category: eventCategory,
+                    text: "Event frisch angelegt. Starte die Crew-Suche im Radar.",
+                    venue: newEvent.venue || "Stadtpark Wiese, Braunau",
 
-            venueName: newEvent.venueName || '',
-            street: newEvent.street || '',
-            zip: newEvent.zip || '',
-            city: newEvent.city || '',
+                    venueName: newEvent.venueName || '',
+                    street: newEvent.street || '',
+                    zip: newEvent.zip || '',
+                    city: newEvent.city || '',
 
-            lat: newEvent.lat || null,
-            lng: newEvent.lng || null,
-            
-            doneProgress: 0,
-            ownerId: currentUserId,
-            ownerName:
-              currentProfileData?.name ||
-              currentUserName ||
-              "Unbekannt",
-            crewIds: [currentUserId],
-            logistics: {
-              setup: false,
-              power: false,
-              catering: false,
-              security: false
-            }
-          };
+                    lat: newEvent.lat || null,
+                    lng: newEvent.lng || null,
+                    
+                    doneProgress: 0,
+                    ownerId: currentUserId,
+                    ownerName:
+                      currentProfileData?.name ||
+                      currentUserName ||
+                      "Unbekannt",
+                    crewIds: [currentUserId],
+                    logistics: {
+                      setup: false,
+                      power: false,
+                      catering: false,
+                      security: false
+                    }
+                  };
 
-          const updatedList = [fresh, ...events];
+                  const updatedList = [fresh, ...events];
 
-          setEvents(updatedList);
+                  setEvents(updatedList);
 
-          eventService.saveEvents(updatedList);
+                  eventService.saveEvents(updatedList);
 
-          await eventService.saveEvent(fresh);
+                  await eventService.saveEvent(fresh);
 
-          if (onCreateEvent) {
-            onCreateEvent(fresh);
-          }
+                  if (onCreateEvent) {
+                    onCreateEvent(fresh);
+                  }
 
-          setIsCreatingEvent(false);
-        }}
-      />
-      ) : (
+                  setIsCreatingEvent(false);
+                }}
+              />
+          </div>
+        </div>
+      )}
+
+      {!isCreatingEvent && (
         <>
           <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl shadow-xl">
             <div className="flex justify-between items-center">

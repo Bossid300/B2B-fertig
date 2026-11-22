@@ -225,6 +225,51 @@ function mediaServeImage($pdo, $assetId, $profileId = null, $avatarOnly = false)
     exit;
 }
 
+function mediaServeEventBanner($pdo, $assetId)
+{
+    if (!preg_match('/^[a-f0-9-]{36}$/i', $assetId)) {
+        mediaRespond(400, ['success' => false, 'error' => 'Ungültige Medien-ID.']);
+    }
+
+    $stmt = $pdo->prepare("
+        SELECT e.event_json, ma.owner_profile_id
+        FROM media_assets ma
+        INNER JOIN media_usages mu ON mu.media_asset_id = ma.id
+        INNER JOIN events e ON e.id = mu.entity_id AND BINARY e.owner_id = BINARY ma.owner_profile_id
+        WHERE ma.id = :id
+          AND ma.media_type = 'image'
+          AND ma.status = 'ready'
+          AND ma.deleted_at IS NULL
+          AND mu.entity_type = 'event'
+          AND mu.usage_role = 'banner'
+          AND mu.visibility = 'public'
+          AND mu.deleted_at IS NULL
+    ");
+    $stmt->execute([':id' => $assetId]);
+    $usages = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $bannerUrl = '/api/media.php?event_banner=' . rawurlencode($assetId);
+
+    foreach ($usages as $usage) {
+        $event = json_decode($usage['event_json'] ?? '', true);
+        if (is_array($event) && ($event['promotionData']['promoImage'] ?? null) === $bannerUrl) {
+            mediaServeImage($pdo, $assetId);
+        }
+    }
+
+    if ($usages && (session_status() === PHP_SESSION_ACTIVE || isset($_COOKIE[session_name()]))) {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+        $profileId = $_SESSION['profile_id'] ?? null;
+        $authUserId = $_SESSION['auth_user_id'] ?? null;
+        if ($profileId && $authUserId && (string) $profileId === (string) $usages[0]['owner_profile_id']) {
+            mediaServeImage($pdo, $assetId);
+        }
+    }
+
+    mediaRespond(404, ['success' => false, 'error' => 'Bannerbild nicht gefunden.']);
+}
+
 function mediaSetAvatar($pdo, $profileId, $authUserId)
 {
     $input = json_decode(file_get_contents('php://input'), true);
@@ -339,6 +384,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['avatar_asset'])) {
     }
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['event_banner'])) {
+    try {
+        mediaServeEventBanner($pdo, (string) $_GET['event_banner']);
+    } catch (Throwable $e) {
+        error_log('Media event banner delivery error: ' . $e->getMessage());
+        mediaRespond(500, ['success' => false, 'error' => 'Bannerbild konnte nicht geladen werden.']);
+    }
+}
+
 mediaCheckRequestOrigin();
 [$profileId, $authUserId] = mediaRequireSession();
 
@@ -435,6 +489,19 @@ try {
         mediaSetAvatar($pdo, $profileId, $authUserId);
     }
 
+    $isEventBanner = ($_GET['action'] ?? '') === 'event-banner';
+    if ($isEventBanner) {
+        $eventId = $_POST['event_id'] ?? '';
+        if (!is_string($eventId) || trim($eventId) === '' || strlen($eventId) > 128) {
+            mediaRespond(400, ['success' => false, 'error' => 'Ungültige Event-ID.']);
+        }
+        $eventStmt = $pdo->prepare('SELECT id FROM events WHERE id = :id AND BINARY owner_id = BINARY :owner_id LIMIT 1');
+        $eventStmt->execute([':id' => $eventId, ':owner_id' => $profileId]);
+        if (!$eventStmt->fetchColumn()) {
+            mediaRespond(403, ['success' => false, 'error' => 'Nur der Veranstalter kann ein Bannerbild hochladen.']);
+        }
+    }
+
     if (!isset($_FILES['file']) || !is_array($_FILES['file'])) {
         mediaRespond(400, ['success' => false, 'error' => 'Keine Datei empfangen.']);
     }
@@ -506,6 +573,9 @@ try {
     }
 
     [$mediaType, , $maxBytes] = $allowedTypes[$mimeType];
+    if ($isEventBanner && $mediaType !== 'image') {
+        mediaRespond(415, ['success' => false, 'error' => 'Bitte eine Bilddatei auswählen.']);
+    }
     if ($upload['size'] < 1 || $upload['size'] > $maxBytes) {
         mediaRespond(413, [
             'success' => false,
@@ -540,6 +610,9 @@ try {
     }
 
     try {
+        if ($isEventBanner) {
+            $pdo->beginTransaction();
+        }
         $stmt = $pdo->prepare("
             INSERT INTO media_assets (
                 id,
@@ -576,24 +649,53 @@ try {
             ':size_bytes' => $upload['size'],
             ':checksum_sha256' => $checksum
         ]);
+        if ($isEventBanner) {
+            $usageStmt = $pdo->prepare("
+                INSERT INTO media_usages (
+                    id, media_asset_id, entity_type, entity_id, usage_role,
+                    visibility, created_by_auth_user_id
+                )
+                SELECT :id, :asset_id, 'event', e.id, 'banner', 'public', :auth_user_id
+                FROM events e
+                WHERE e.id = :event_id AND BINARY e.owner_id = BINARY :owner_id
+            ");
+            $usageStmt->execute([
+                ':id' => mediaUuid(),
+                ':asset_id' => $assetId,
+                ':auth_user_id' => $authUserId,
+                ':event_id' => $eventId,
+                ':owner_id' => $profileId
+            ]);
+            if ($usageStmt->rowCount() !== 1) {
+                $pdo->rollBack();
+                unlink($targetPath);
+                mediaRespond(403, ['success' => false, 'error' => 'Event nicht gefunden oder keine Berechtigung.']);
+            }
+            $pdo->commit();
+        }
     } catch (Throwable $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
         if (is_file($targetPath)) {
             unlink($targetPath);
         }
         throw $e;
     }
 
-    mediaRespond(201, [
-        'success' => true,
-        'asset' => [
-            'id' => $assetId,
-            'media_type' => $mediaType,
-            'original_filename' => $originalFilename,
-            'mime_type' => $mimeType,
-            'size_bytes' => (int) $upload['size'],
-            'status' => 'ready'
-        ]
-    ]);
+    $asset = [
+        'id' => $assetId,
+        'media_type' => $mediaType,
+        'original_filename' => $originalFilename,
+        'mime_type' => $mimeType,
+        'size_bytes' => (int) $upload['size'],
+        'status' => 'ready'
+    ];
+    if ($isEventBanner) {
+        $asset['banner_url'] = '/api/media.php?event_banner=' . rawurlencode($assetId);
+    }
+
+    mediaRespond(201, ['success' => true, 'asset' => $asset]);
 } catch (Throwable $e) {
     error_log('Media API error: ' . $e->getMessage());
     mediaRespond(500, [

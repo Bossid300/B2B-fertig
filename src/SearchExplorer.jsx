@@ -6,7 +6,9 @@ import { saveCrewRequest } from './services/apiService';
 import { eventService } from './services/eventService';
 import { distanceKm, geocodeAddress } from './services/geoService';
 import SearchMap from './components/maps/SearchMap';
+
 import PortfolioRouter from './components/portfolio/PortfolioRouter';
+
 import UserProfile from './UserProfile';
 import LocationProfile from './LocationProfile';
 import VerleiherProfile from './VerleiherProfile';

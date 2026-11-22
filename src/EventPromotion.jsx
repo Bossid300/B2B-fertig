@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import EventCard from './components/cards/EventCard';
 import FahrplanMetrics from './FahrplanMetrics';
 import EventHeaderBox from "./components/EventHeaderBox";
@@ -10,6 +10,9 @@ from '../moduls/subscriptions/subscriptionService';
 
 import { FEATURES }
 from '../moduls/subscriptions/featureGates';
+import PromotionTab from './experimental/workspace/tabs/PromotionTab.jsx';
+import { getTicketPriceRows, getTicketPricing } from './utils/ticketPrices.js';
+import { AmenitySelector } from './components/AmenityTags.jsx';
 
 
 export default function EventPromotion({
@@ -17,7 +20,11 @@ export default function EventPromotion({
   progress,
   setProgress,
   onNavigateToStep, 
-  activeEvent
+  activeEvent,
+  workspace = false,
+  onPromotionSaved,
+  promotionCheckTarget,
+  promotionPreviewTarget
 }) {
 
 
@@ -58,6 +65,7 @@ const [promoData, setPromoData] = useState(
     ticketLink: '',
     entryTime: '',
     startTime: '',
+    endTime: '',
     ticketPrice: '',
     ticketStatus: '',
     fsk: '',
@@ -66,6 +74,25 @@ const [promoData, setPromoData] = useState(
     is_demo: false
   }
 );
+const [workspaceSaveError, setWorkspaceSaveError] = useState('');
+const workspaceSaveSequence = useRef(0);
+const [promotionDate, setPromotionDate] = useState(activeEvent?.date || activeEvent?.event_date || '');
+const promotionDateRef = useRef(promotionDate);
+const promotionDateDirty = useRef(false);
+const promotionDateValid = /^\d{4}-\d{2}-\d{2}$/.test(promotionDate) && promotionDate >= '1000-01-01';
+
+useEffect(() => {
+  if (!workspace || promotionDateDirty.current) return;
+  const date = activeEvent?.date || activeEvent?.event_date || '';
+  promotionDateRef.current = date;
+  setPromotionDate(date);
+}, [workspace, activeEvent?.id, activeEvent?.date, activeEvent?.event_date]);
+
+const handlePromotionDateChange = (date) => {
+  promotionDateDirty.current = true;
+  promotionDateRef.current = date;
+  setPromotionDate(date);
+};
 
 const promoChecks = [
   promoData.title,
@@ -80,7 +107,7 @@ const promoChecks = [
   promoData.description,
   promoData.ticketLink,
 
-  promoData.ticketPrice,
+  getTicketPriceRows({ promotionData: promoData }).length > 0,
   promoData.ticketStatus,
   promoData.fsk,
   promoData.lineup
@@ -102,11 +129,12 @@ useEffect(() => {
 
 
 useEffect(() => {
+  if (workspace && (!activeEvent?.ownerId || String(activeEvent.ownerId) !== localStorage.getItem('gigsda_profile_id'))) return;
   const timer = setTimeout(() => {
     handleSavePromotion();
   }, 1000);
   return () => clearTimeout(timer);
-}, [promoData]);
+}, [promoData, promotionDate]);
 
 
 useEffect(() => {
@@ -114,7 +142,13 @@ useEffect(() => {
   const promo =
     activeEvent?.promotionData || {};
 
+  const venueParts = workspace ? (activeEvent?.venue || '').split(',').map(part => part.trim()) : [];
+  const postalAddress = venueParts.length >= 2
+    ? venueParts[venueParts.length - 1].match(/^(\d{4,5})\s+(.+)$/)
+    : null;
+
     setPromoData({
+    ...promo,
     title:
       promo.title ||
       activeEvent?.title ||
@@ -127,18 +161,22 @@ useEffect(() => {
     venueName:
       promo.venueName ||
       activeEvent?.venueName ||
+      (workspace ? (postalAddress ? venueParts[0] : activeEvent?.venue) : '') ||
       '',
     street:
       promo.street ||
       activeEvent?.street ||
+      (postalAddress && venueParts.length >= 3 ? venueParts[1] : '') ||
       '',
     zip:
       promo.zip ||
       activeEvent?.zip ||
+      postalAddress?.[1] ||
       '',
     city:
       promo.city ||
       activeEvent?.city ||
+      postalAddress?.[2] ||
       '',      
     shortDescription:
       promo.shortDescription || '',
@@ -152,8 +190,10 @@ useEffect(() => {
       promo.entryTime || '',
     startTime:
       promo.startTime || '',
+    endTime:
+      promo.endTime || '',
     ticketPrice:
-      promo.ticketPrice || '',
+      promo.ticketPrice ?? '',
     ticketStatus:
       promo.ticketStatus || '',
     fsk:
@@ -172,6 +212,7 @@ useEffect(() => {
 const handleSavePromotion = () => {
 
   if (!activeEvent) return;
+  const savePromotionDate = workspace && promotionDateDirty.current && promotionDateValid;
   const events =
     eventService.getEvents();
 
@@ -182,6 +223,11 @@ const handleSavePromotion = () => {
       return {
         ...event,
 
+        ...(savePromotionDate ? {
+          date: promotionDate,
+          event_date: promotionDate,
+          displayDate: promotionDate.split('-').reverse().join('.')
+        } : {}),
         venueName: promoData.venueName,
         street: promoData.street,
         zip: promoData.zip,
@@ -192,7 +238,7 @@ const handleSavePromotion = () => {
           promoData.street,
           `${promoData.zip} ${promoData.city}`
         ]
-        .filter(Boolean)
+        .filter(workspace ? value => String(value).trim() : Boolean)
         .join(', '),
 
         promotionData: promoData
@@ -209,7 +255,27 @@ const handleSavePromotion = () => {
     );
 
   if (changedEvent) {
-    eventService.saveEvent(changedEvent);
+    const save = eventService.saveEvent(changedEvent);
+    if (workspace) {
+      const saveSequence = ++workspaceSaveSequence.current;
+      save.then((result) => {
+        if (saveSequence !== workspaceSaveSequence.current) return;
+        if (!result?.success) {
+          setWorkspaceSaveError('Die Promotion konnte nicht gespeichert werden.');
+          console.error('Workspace: Promotion konnte nicht gespeichert werden.', result?.error);
+          return;
+        }
+        setWorkspaceSaveError('');
+        if (savePromotionDate && promotionDateRef.current === promotionDate) {
+          promotionDateDirty.current = false;
+        }
+        onPromotionSaved?.(changedEvent);
+      }).catch((error) => {
+        if (saveSequence !== workspaceSaveSequence.current) return;
+        console.error('Workspace: Promotion konnte nicht aktualisiert werden.', error);
+        setWorkspaceSaveError('Die Promotion konnte nicht aktualisiert werden.');
+      });
+    }
   }
 
   setSaveMessage(true);
@@ -270,6 +336,23 @@ const formatPromotionDate = (value) => {
 
   return `${weekdays[date.getDay()]} ${day}.${month}.${year}`;
 };
+
+if (workspace) {
+  return (
+    <PromotionTab
+      activeEvent={activeEvent}
+      promoData={promoData}
+      setPromoData={setPromoData}
+      isOwner={Boolean(activeEvent?.ownerId) && String(activeEvent.ownerId) === currentUserId}
+      saveError={workspaceSaveError}
+      promotionDate={promotionDate}
+      promotionDateValid={promotionDateValid}
+      onPromotionDateChange={handlePromotionDateChange}
+      checkTarget={promotionCheckTarget}
+      previewTarget={promotionPreviewTarget}
+    />
+  );
+}
 
 
 
@@ -375,7 +458,7 @@ return (
 
             <div>{promoData.ticketLink ? '✅' : '🔴'} Ticketlink</div>
 
-            <div>{promoData.ticketPrice ? '✅' : '🔴'} Ticketpreis</div>
+            <div>{getTicketPriceRows({ promotionData: promoData }).length ? '✅' : '🔴'} Ticketpreis</div>
 
             <div>{promoData.ticketStatus ? '✅' : '🔴'} Eventstatus</div>
 
@@ -639,7 +722,6 @@ return (
 <div className="grid md:grid-cols-2 gap-5">
 
   <div>
-
     <label className="block text-xs uppercase text-slate-500 mb-2">
       Einlass
     </label>
@@ -679,6 +761,32 @@ return (
         setPromoData({
           ...promoData,
           startTime: e.target.value
+        })
+      }
+      className="
+        w-full
+        bg-slate-950
+        border
+        border-slate-800
+        rounded-xl
+        p-3
+        text-white
+      "
+    />
+  </div>
+
+  <div>
+    <label className="block text-xs uppercase text-slate-500 mb-2">
+      Ende
+    </label>
+    <input
+      type="time"
+      value={promoData.endTime}
+      disabled={!isOwner}
+      onChange={(e) =>
+        setPromoData({
+          ...promoData,
+          endTime: e.target.value
         })
       }
       className="
@@ -781,22 +889,65 @@ return (
 <div className="grid md:grid-cols-3 gap-5">
 
   <div>
-    <label className="block text-xs uppercase text-slate-500 mb-2">
-      Ticketpreis
+    <label className="block text-xs uppercase text-slate-500 mb-2" htmlFor="promotion-ticket-pricing">
+      Eintritt
+    </label>
+    <select
+      id="promotion-ticket-pricing"
+      value={getTicketPricing(promoData)}
+      disabled={!isOwner}
+      onChange={(e) => setPromoData({ ...promoData, ticketPricing: e.target.value })}
+      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white"
+    >
+      <option value="paid">Ticketpreise</option>
+      <option value="free">Eintritt frei</option>
+      <option value="donation">Freiwillige Spende</option>
+    </select>
+  </div>
+
+  {getTicketPricing(promoData) === 'paid' && (
+    <>
+  <div>
+    <label className="block text-xs uppercase text-slate-500 mb-2" htmlFor="promotion-presale-price">
+      Vorverkauf
     </label>
     <input
+      id="promotion-presale-price"
       type="text"
-      value={promoData.ticketPrice || ""}
+      value={promoData.ticketPrice ?? ""}
       onChange={(e) =>
         setPromoData({
           ...promoData,
+          ticketPricing: 'paid',
           ticketPrice: e.target.value
         })
       }
       className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white"
-      placeholder="z.B. 39,50 €"
+      placeholder="z.B. 39,50 € zzgl. Gebühren"
     />
   </div>
+  <div>
+    <label className="block text-xs uppercase text-slate-500 mb-2" htmlFor="promotion-box-office-price">
+      Abendkasse
+    </label>
+    <input
+      id="promotion-box-office-price"
+      type="text"
+      value={promoData.boxOfficePrice ?? ""}
+      readOnly={!isOwner}
+      onChange={(e) =>
+        setPromoData({
+          ...promoData,
+          ticketPricing: 'paid',
+          boxOfficePrice: e.target.value
+        })
+      }
+      className="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-white"
+      placeholder="z.B. 45,00 €"
+    />
+  </div>
+    </>
+  )}
 
 
 
@@ -893,11 +1044,17 @@ Local Heroes`}
 
 
 <div>
-  <label className="block text-xs uppercase text-slate-500 mb-2">
+  <div className="block text-xs uppercase text-slate-500 mb-2">
     Fan-Annehmlichkeiten
-  </label>
+  </div>
 
+  <AmenitySelector promoData={promoData} setPromoData={setPromoData} disabled={!isOwner} />
+
+  <label className="block text-xs uppercase text-slate-500 mt-3 mb-2" htmlFor="promotion-amenity-specials">
+    Weitere Annehmlichkeiten / Specials
+  </label>
   <textarea
+    id="promotion-amenity-specials"
     rows={3}
     value={promoData.amenities || ""}
     onChange={(e) =>
@@ -1019,7 +1176,7 @@ Local Heroes`}
 
     <div>{promoData.ticketLink ? '✅' : '🔴'} Ticketlink</div>
 
-    <div>{promoData.ticketPrice ? '✅' : '🔴'} Ticketpreis</div>
+    <div>{getTicketPriceRows({ promotionData: promoData }).length ? '✅' : '🔴'} Ticketpreis</div>
 
     <div>{promoData.ticketStatus ? '✅' : '🔴'} Eventstatus</div>
 
@@ -1062,6 +1219,7 @@ Local Heroes`}
         <EventCard
           event={{
             ...activeEvent,
+            promotionData: promoData,
 
             title: promoData.title || activeEvent?.title,
             category: promoData.category || activeEvent?.category,
@@ -1069,6 +1227,7 @@ Local Heroes`}
 
             entryTime: promoData.entryTime,
             startTime: promoData.startTime,
+            endTime: promoData.endTime,
 
             ticketPrice: promoData.ticketPrice,
             ticketStatus: promoData.ticketStatus,

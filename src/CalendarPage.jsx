@@ -1069,6 +1069,9 @@ export default function CalendarPage({
                       startTime:
                         event.promotionData?.startTime ||
                         event.startTime,
+                      endTime:
+                        event.promotionData?.endTime ||
+                        event.endTime,
                       ticketPrice:
                         event.promotionData?.ticketPrice ??
                         event.ticketPrice,

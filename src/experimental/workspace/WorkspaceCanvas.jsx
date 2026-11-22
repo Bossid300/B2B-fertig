@@ -1,4 +1,4 @@
-import { useRef, useMemo, useState } from 'react';
+import { useRef, useMemo, useState, useEffect } from 'react';
 import WorkspaceCard from './WorkspaceCard.jsx';
 
 function clamp(value, min, max) {
@@ -17,11 +17,35 @@ function getCategory(profile) {
   return profile?.role || 'Sonstige';
 }
 
-export default function WorkspaceCanvas({ selectedCardId, profileStatuses, onProfileSelect, activeEvent }) {
+export default function WorkspaceCanvas({ selectedCardId, profileStatuses, onProfileSelect, activeEvent, profiles, onEventOpen, hidden }) {
   const canvasRef = useRef(null);
   const [cards, setCards] = useState([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [sortMode, setSortMode] = useState(null); // null | 'status' | 'category'
+
+  useEffect(() => {
+    if (!activeEvent?.crew?.length) return;
+
+    setCards(
+      activeEvent.crew.map((member, index) => {
+
+        const fullProfile =
+          profiles?.find(
+            p => String(p.id) === String(member.id)
+          ) || member;
+
+        return {
+          instanceId: `crew-${member.id}`,
+          profile: fullProfile,
+          left: 40 + (index % 4) * 260,
+          top: 80 + Math.floor(index / 4) * 280,
+          eventId: activeEvent.id,
+          eventTitle: activeEvent.title,
+          placedAt: new Date().toISOString()
+        };
+      })
+    );
+  }, [activeEvent]);
 
   const groupedCards = useMemo(() => {
     if (sortMode === 'status') {
@@ -81,13 +105,21 @@ export default function WorkspaceCanvas({ selectedCardId, profileStatuses, onPro
     const CARD_HEIGHT = 260;
     const PADDING = 16;
     
-    // Mausposition relativ zum Canvas-Viewport
-    let left = event.clientX - bounds.left + canvas.scrollLeft - (CARD_WIDTH / 2);
-    let top = event.clientY - bounds.top + canvas.scrollTop - (CARD_HEIGHT / 2);
+    // Mausposition relativ zu Canvas-Scroll-Verhalten
+    // Für absolute Positionierung müssen wir die scrollLeft/scrollTop berücksichtigen
+    const scrollLeft = canvas.scrollLeft || 0;
+    const scrollTop = canvas.scrollTop || 0;
     
-    // In den sichtbaren Bereich begrenzen
-    left = clamp(left, PADDING, canvas.scrollWidth - CARD_WIDTH - PADDING);
-    top = clamp(top, PADDING, canvas.scrollHeight - CARD_HEIGHT - PADDING);
+    let left = event.clientX - bounds.left + scrollLeft - (CARD_WIDTH / 2);
+    let top = event.clientY - bounds.top + scrollTop - (CARD_HEIGHT / 2);
+    
+    // Stelle sicher, dass die Karte im sichtbaren Bereich bleibt
+    // scrollWidth ist die gesamte Breite des scrollbaren Inhalts
+    const maxLeft = Math.max(0, canvas.scrollWidth - CARD_WIDTH - PADDING);
+    const maxTop = Math.max(0, canvas.scrollHeight - CARD_HEIGHT - PADDING);
+    
+    left = clamp(left, PADDING, maxLeft);
+    top = clamp(top, PADDING, maxTop);
 
     if (payload?.type === 'profile' && payload.profile?.id != null) {
       setCards((current) => [
@@ -102,6 +134,13 @@ export default function WorkspaceCanvas({ selectedCardId, profileStatuses, onPro
           placedAt: new Date().toISOString()
         }
       ]);
+      return;
+    }
+
+    if (payload?.type === 'event' && payload.event?.id) {
+      console.log('Event auf Canvas gezogen:', payload.event.title);
+      // Öffne das Event sofort
+      onEventOpen?.(payload.event);
       return;
     }
 
@@ -121,6 +160,7 @@ export default function WorkspaceCanvas({ selectedCardId, profileStatuses, onPro
   return (
     <section
       className={`workspace-canvas${isDragOver ? ' is-drag-over' : ''}`}
+      style={{ display: hidden ? 'none' : undefined }}
       ref={canvasRef}
       onDragOver={(event) => {
         event.preventDefault();
@@ -155,7 +195,7 @@ export default function WorkspaceCanvas({ selectedCardId, profileStatuses, onPro
       {cards.length === 0 && (
         <div className="workspace-canvas__empty">
           <span>ARBEITSFLÄCHE</span>
-          <p>Ziehe Profile aus der Schublade hierher.</p>
+          <p>Ziehe ein Event auf den Tisch, um es zu aktivieren.</p>
         </div>
       )}
       

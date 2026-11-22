@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import ReportContentLink from '../ReportContentLink';
 import { distanceKm, geocodeAddress } from '../../services/geoService';
+import { getTicketPriceRows } from '../../utils/ticketPrices';
+import { AmenityBadges } from '../AmenityTags';
 
 const geocodeCache = new Map();
 
@@ -79,6 +81,9 @@ export default function EventCard({
   }, [eventLat, eventLng, eventLocation, distanceKey]);
 
   if (!event) return null;
+
+  const ticketPriceRows = getTicketPriceRows(event);
+  const amenityTags = event.promotionData?.amenityTags ?? event.amenityTags;
 
   const eventDate =
   event.date ||
@@ -200,6 +205,11 @@ export default function EventCard({
                   🎵 Beginn {event.startTime}
                 </div>
               )}
+              {event.endTime && (
+                <div className="text-sm text-slate-400">
+                  🕛 Ende {event.endTime}
+                </div>
+              )}
             </div>
             <p className="text-xs text-slate-600 uppercase mt-0.5">
               EVENT-ID: {event.id}
@@ -259,7 +269,11 @@ export default function EventCard({
               <div>
                 <span className="text-slate-500">Tickets</span>
                 <div className="text-white font-bold">
-                  {event.ticketPrice || "-"}
+                  {ticketPriceRows.length
+                    ? ticketPriceRows.map((row) => (
+                      <div key={row.label}>{row.label}: {row.value}</div>
+                    ))
+                    : "-"}
                 </div>
               </div>
 
@@ -291,8 +305,10 @@ export default function EventCard({
 
               <div>
                 <span className="text-slate-500 pt-10">Annehmlichkeiten</span>
-                <div className="text-xs text-white">
-                  {event.amenities || "-"}
+                <div className="mt-2 space-y-2 text-xs text-white">
+                  <AmenityBadges tags={amenityTags} />
+                  {event.amenities && <div className="whitespace-pre-line">{event.amenities}</div>}
+                  {!event.amenities && (!Array.isArray(amenityTags) || amenityTags.length === 0) && '-'}
                 </div>
               </div>
 

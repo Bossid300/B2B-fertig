@@ -16,6 +16,8 @@ $actorAuthUserId =
     ?? null;
 
 $input = json_decode(file_get_contents('php://input'), true);
+$updateOnly = !empty($input['updateOnly']);
+unset($input['updateOnly']);
 
 if (!$input || empty($input['id'])) {
     http_response_code(400);
@@ -106,6 +108,18 @@ try {
     $isOwner = $actorProfileId !== null
         && $existingEvent
         && (string)$existingEvent['owner_id'] === (string)$actorProfileId;
+
+    if ($updateOnly && (!$existingEvent || !$isOwner)) {
+        $pdo->rollBack();
+        http_response_code($existingEvent ? 403 : 404);
+        echo json_encode([
+            'success' => false,
+            'error' => $existingEvent
+                ? 'Nur der Veranstalter kann dieses Event bearbeiten.'
+                : 'Das Event wurde nicht gefunden.'
+        ]);
+        exit;
+    }
 
     if ($existingEvent && !$isOwner) {
         $storedEventData = json_decode(

@@ -426,6 +426,9 @@ return (
                 startTime:
                   event.promotionData?.startTime,
 
+                endTime:
+                  event.promotionData?.endTime,
+
                 ticketPrice:
                   event.promotionData?.ticketPrice,
 
@@ -515,12 +518,6 @@ return (
                     shortDescription:
                       selectedEvent?.promotionData?.shortDescription,
 
-
-
-
-
-                      
-
                     slide1_url:
                       selectedEvent?.promotionData?.promoImage ||
                       selectedEvent?.slide1_url,
@@ -530,6 +527,9 @@ return (
 
                     startTime:
                       selectedEvent?.promotionData?.startTime,
+                    
+                    endTime:
+                      selectedEvent?.promotionData?.endTime,
 
                     ticketPrice:
                       selectedEvent?.promotionData?.ticketPrice,

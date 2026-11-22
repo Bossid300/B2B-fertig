@@ -194,6 +194,21 @@ useEffect(() => {
         >
           PROJEKTE
         </span>
+
+{/* Freischaltung Arbeitsplatz erst wenn Feature fertig ist */}
+
+        <span
+          onClick={() => {
+            // Arbeitsplatz neutral öffnen: activeEvent zurücksetzen
+            localStorage.removeItem('gigsda_active_event');
+            triggerNav('workspace');
+          }}
+          className={`${desktopBase} ${view === 'workspace' ? activeClass : inactiveClass}`}
+        >
+          ARBEITSPLATZ
+        </span>
+
+
         <span
           onClick={() => triggerNav('mediaLibrary')}
           className={`${desktopBase} ${view === 'mediaLibrary' ? activeClass : inactiveClass}`}
@@ -347,6 +362,17 @@ useEffect(() => {
 
           <button onClick={() => triggerNav('projects')} className={`${mobileBase} ${view === 'projects' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}>
             📁 PROJEKTE
+          </button>
+
+          <button 
+            onClick={() => {
+              // Arbeitsplatz neutral öffnen: activeEvent zurücksetzen
+              localStorage.removeItem('gigsda_active_event');
+              triggerNav('workspace');
+            }}
+            className={`${mobileBase} ${view === 'workspace' ? "bg-purple-500/10 border-purple-500/40 text-purple-400 font-bold" : "text-slate-400 border-transparent"}`}
+          >
+            🏢 ARBEITSPLATZ
           </button>
 
           <button
