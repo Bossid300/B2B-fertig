@@ -22,16 +22,15 @@ function getStatusIndicator(profile, profileStatuses) {
     : statusMap[String(profile.id)];
   
   const normalizedStatus = status || 'Nicht zugeordnet';
-
   // ROT: Offene Einträge
   if (['Nicht zugeordnet', 'Favorit', 'Interessant'].includes(normalizedStatus)) return 'red';
-  
   // GELB: Laufende Vorgänge
   if (['Angefragt', 'In Verhandlung', 'Gegenangebot', 'Pending'].includes(normalizedStatus)) return 'yellow';
+
+  if (['Zusage'].includes(normalizedStatus)) return 'yellow';
   
   // GRÜN: Bestätigt
   if (['Bestätigt', 'Gebucht'].includes(normalizedStatus)) return 'green';
-  
   return 'gray';
 }
 
@@ -42,7 +41,7 @@ function getCrewStatusGroup(profile, profileStatuses) {
     : statusMap[String(profile.id)];
   
   const normalizedStatus = status || 'Nicht zugeordnet';
-
+  if (['Zusage'].includes(normalizedStatus)) return 'Zusage';
   if (['Bestätigt', 'Gebucht'].includes(normalizedStatus)) return 'Bestätigt';
   if (['In Verhandlung', 'Gegenangebot'].includes(normalizedStatus)) return 'Verhandlung';
   if (['Angefragt', 'Pending'].includes(normalizedStatus)) return 'Angefragt';
@@ -52,6 +51,7 @@ function getCrewStatusGroup(profile, profileStatuses) {
 export default function CrewTab({
   activeEvent,
   profiles = [],
+  requests = [],
   favoriteIds = [],
   profileStatuses = {},
   onProfileSelect
@@ -65,17 +65,67 @@ export default function CrewTab({
   const favoritesMap = new Map(favoriteIds.map(id => [String(id), true]));
 
   // Hole Favoriten und Crew aus Profilen
-  const favorites = profiles.filter(p => favoritesMap.has(String(p.id)));
-  const crew = (activeEvent.crew || []).map(crewMember => {
-    const profile = profiles.find(p => String(p.id) === String(crewMember.id));
-    return profile || crewMember;
-  }).filter(Boolean);
+  const favorites = profiles.filter(profile => {
+      if (!favoritesMap.has(String(profile.id))) {
+          return false;
+      }
+
+      const status = profileStatuses?.get(String(profile.id));
+
+      return ![
+          'Angefragt',
+          'Verhandlung',
+          'Zusage',
+          'Bestätigt'
+      ].includes(status);
+  });
+  const crew = (activeEvent.crew || [])
+      .map(crewMember => {
+          const profile = profiles.find(
+              p => String(p.id) === String(crewMember.id)
+          );
+
+          return profile || crewMember;
+      })
+      .filter(Boolean);
+
+  const eventRequests = requests.filter(
+      r => String(r.eventId) === String(activeEvent?.id)
+  );
+
+  const requestProfiles = eventRequests
+      .map(request =>
+          profiles.find(
+              p => String(p.id) === String(request.requestedProfileId)
+          )
+      )
+      .filter(Boolean);
+
+  const uniqueRequestProfiles = Array.from(
+    new Map(
+        requestProfiles.map(profile => [
+            String(profile.id),
+            profile
+        ])
+    ).values()
+  );
+
+  const crewIds = new Set(
+      crew.map(profile => String(profile.id))
+  );
+
+  const combinedCrew = [
+      ...crew,
+      ...uniqueRequestProfiles.filter(
+          profile => !crewIds.has(String(profile.id))
+      )
+  ];       
 
   const visibleProfiles = useMemo(() => {
     const source = activeTabLocal === 'favorites'
       ? favorites
       : activeTabLocal === 'crew'
-        ? crew
+        ? combinedCrew
         : profiles;
     const term = search.trim().toLocaleLowerCase();
     if (activeTabLocal !== 'search' || !term) return source;
@@ -85,7 +135,7 @@ export default function CrewTab({
         .filter(Boolean)
         .some((value) => String(value).toLocaleLowerCase().includes(term))
     );
-  }, [activeTabLocal, crew, favorites, profiles, search]);
+  }, [activeTabLocal, combinedCrew, favorites, profiles, search]);
 
   return (
     <div className="workspace-tab-panel workspace-crew-panel">
@@ -126,7 +176,7 @@ export default function CrewTab({
         {/* CREW TAB: Mit Gruppierung */}
         {activeTabLocal === 'crew' && visibleProfiles.length > 0 && (
           <div className="workspace-profile-groups">
-            {['Interessant', 'Angefragt', 'Verhandlung', 'Bestätigt'].map((groupName) => {
+            {['Interessant', 'Angefragt', 'Verhandlung', 'Zusage', 'Bestätigt'].map((groupName) => {
               const groupProfiles = visibleProfiles.filter(p => getCrewStatusGroup(p, profileStatuses) === groupName);
               if (groupProfiles.length === 0) return null;
 

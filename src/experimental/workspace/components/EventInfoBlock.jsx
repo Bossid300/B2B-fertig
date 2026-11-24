@@ -1,6 +1,11 @@
 import React, { useMemo } from 'react';
 
-export default function EventInfoBlock({ event, crew = [], profiles = [] }) {
+export default function EventInfoBlock({
+    event,
+    crew = [],
+    profiles = [],
+    requests = []
+}) {
   if (!event) {
     return null;
   }
@@ -10,16 +15,20 @@ export default function EventInfoBlock({ event, crew = [], profiles = [] }) {
     const crewCount = event.crewIds?.length || 0;
     
     // Anfragen: Crew-Mitglieder mit Status "pending/angefragt"
-    const requestsCount = (event.crew || []).filter(member => {
-      const status = String(member?.status || '').trim().toLowerCase();
-      return ['pending', 'angefragt', 'requested'].includes(status);
-    }).length;
+    const requestsCount = requests.filter(
+      r =>
+        String(r.eventId) === String(event.id) &&
+        ['pending', 'counter_offer'].includes(r.status) &&
+        !(event.crewIds || []).includes(r.requestedProfileId)
+    ).length;
 
     // Zusagen: Crew-Mitglieder mit Status "confirmed/bestätigt" oder acceptedDeals
-    const confirmedCount = (event.crew || []).filter(member => {
-      const status = String(member?.status || '').trim().toLowerCase();
-      return ['accepted', 'confirmed', 'gebucht'].includes(status) || member?.confirmed === true;
-    }).length;
+    const confirmedCount = requests.filter(
+        r =>
+            String(r.eventId) === String(event.id) &&
+            r.status === 'accepted' &&
+            !(event.crewIds || []).includes(r.requestedProfileId)
+    ).length;
 
     return {
       crewCount,

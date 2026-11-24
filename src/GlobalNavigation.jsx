@@ -195,7 +195,7 @@ useEffect(() => {
           PROJEKTE
         </span>
 
-{/* Freischaltung Arbeitsplatz erst wenn Feature fertig ist */}
+{/* Freischaltung Arbeitsplatz erst wenn Feature fertig ist 
 
         <span
           onClick={() => {
@@ -207,7 +207,7 @@ useEffect(() => {
         >
           ARBEITSPLATZ
         </span>
-
+*/}
 
         <span
           onClick={() => triggerNav('mediaLibrary')}

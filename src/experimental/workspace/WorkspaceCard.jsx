@@ -64,7 +64,7 @@ export default function WorkspaceCard({
   className={`workspace-source-card__status workspace-source-card__status--${
     status === 'Bestätigt'
       ? 'green'
-      : ['Angefragt', 'Verhandlung'].includes(status)
+      : ['Angefragt', 'Verhandlung', 'Zusage'].includes(status)
         ? 'yellow'
         : 'red'
   }`}

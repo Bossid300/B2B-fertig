@@ -83,7 +83,13 @@ export default function SearchExplorer({
   useEffect(() => {
     try {
       const savedEvents = eventService.getEvents();
-
+console.log(
+  'SEARCH EVENTS',
+  savedEvents.map(e => ({
+    id: e.id,
+    title: e.title || e.name
+  }))
+);
       const currentProfileId =
         currentProfileData?.id ||
         localStorage.getItem('gigsda_profile_id');

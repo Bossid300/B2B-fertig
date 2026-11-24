@@ -1572,6 +1572,20 @@
   background: var(--workspace-panel);
 }
 
+.workspace-tab-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-left: 6px;
+}
+
+.workspace-tab-indicator--green {
+    background: #22c55e;
+}
+
+.workspace-tab-indicator--yellow {
+    background: #f59e0b;
+}
 .workspace-tabs-header {
   display: flex;
   flex-direction: column;

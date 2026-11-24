@@ -17,17 +17,64 @@ function getCategory(profile) {
   return profile?.role || 'Sonstige';
 }
 
-export default function WorkspaceCanvas({ selectedCardId, profileStatuses, onProfileSelect, activeEvent, profiles, onEventOpen, hidden }) {
+export default function WorkspaceCanvas({ 
+  selectedCardId, 
+  profileStatuses, 
+  onProfileSelect, 
+  activeEvent, 
+  profiles, 
+  requests = [],
+  onEventOpen, 
+  hidden 
+}) {
   const canvasRef = useRef(null);
   const [cards, setCards] = useState([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [sortMode, setSortMode] = useState(null); // null | 'status' | 'category'
+  const eventRequests = requests.filter(
+      r => String(r.eventId) === String(activeEvent?.id)
+  );
+  const requestProfiles = eventRequests
+      .map(request =>
+          profiles.find(
+              p => String(p.id) === String(request.requestedProfileId)
+          )
+      )
+      .filter(Boolean);
+
+      const uniqueRequestProfiles = Array.from(
+    new Map(
+        requestProfiles.map(profile => [
+            String(profile.id),
+            profile
+        ])
+    ).values()
+);
+
+  const crewProfiles = (activeEvent?.crew || [])
+      .map(member =>
+          profiles.find(
+              p => String(p.id) === String(member.id)
+          ) || member
+      )
+      .filter(Boolean);
+
+  const crewIds = new Set(
+      crewProfiles.map(profile => String(profile.id))
+  );
+
+  const combinedCrew = [
+      ...crewProfiles,
+      ...uniqueRequestProfiles.filter(
+          profile => !crewIds.has(String(profile.id))
+      )
+  ];
 
   useEffect(() => {
     if (!activeEvent?.crew?.length) return;
 
     setCards(
-      activeEvent.crew.map((member, index) => {
+      combinedCrew.map((member, index) => {
 
         const fullProfile =
           profiles?.find(
@@ -35,7 +82,7 @@ export default function WorkspaceCanvas({ selectedCardId, profileStatuses, onPro
           ) || member;
 
         return {
-          instanceId: `crew-${member.id}`,
+          instanceId: `crew-${member.id}-${index}`,
           profile: fullProfile,
           left: 40 + (index % 4) * 260,
           top: 80 + Math.floor(index / 4) * 280,
@@ -156,6 +203,8 @@ export default function WorkspaceCanvas({ selectedCardId, profileStatuses, onPro
   const handleDeleteCard = (instanceId) => {
     setCards((current) => current.filter((card) => card.instanceId !== instanceId));
   };
+
+
 
   return (
     <section

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getEvents, getFavorites, getPublicProfiles, saveEvent } from '../../services/apiService.js';
+import { getEvents, getFavorites, getPublicProfiles, saveEvent, getCrewRequests, saveCrewRequest, updateCrewRequest } from '../../services/apiService.js';
 import { eventService } from '../../services/eventService.js';
 import WorkspaceCanvas from './WorkspaceCanvas.jsx';
 import WorkspaceDetailsPanel from './components/WorkspaceDetailsPanel.jsx';
@@ -47,12 +47,65 @@ function readActiveEvent() {
   }
 }
 
-function getProfileEventStatus(profile, activeEvent, favoriteIds) {
+function getProfileEventStatus(profile, activeEvent, favoriteIds, requests) {
   const profileId = String(profile.id);
+  
+  const request = requests.find(
+    r =>
+        String(r.eventId) === String(activeEvent?.id) &&
+        String(r.requestedProfileId) === profileId
+  );
+
   const crewMember = (activeEvent?.crew || []).find(
     (member) => member?.id != null && String(member.id) === profileId
   );
-  const memberStatus = String(crewMember?.status || '').trim().toLowerCase();
+  
+const memberStatus =
+    String(crewMember?.status || '')
+        .trim()
+        .toLowerCase();
+
+  if (['pending', 'angefragt', 'requested'].includes(memberStatus)) {
+      return 'Angefragt';
+  }
+
+  if (
+      ['counter_offer', 'gegenangebot', 'negotiation', 'in_verhandlung']
+          .includes(memberStatus)
+  ) {
+      return 'Verhandlung';
+  }
+
+  if (['removed'].includes(memberStatus)) {
+      return 'Nicht benötigt';
+  }
+
+  if (
+      crewMember?.confirmed === true ||
+      (activeEvent?.crewIds || []).includes(profileId)
+  ) {
+      return 'Bestätigt';
+  }
+
+  if (['accepted'].includes(memberStatus)) {
+      return 'Zusage';
+  }
+
+  if (request?.status === 'pending') {
+    return 'Angefragt';
+  }
+
+  if (request?.status === 'counter_offer') {
+      return 'Verhandlung';
+  }
+
+  if (request?.status === 'accepted') {
+      return 'Zusage';
+  }
+
+  if (request?.status === 'declined') {
+      return 'Abgesagt';
+  }
 
   // Abgesagt
   if (['rejected', 'abgesagt', 'declined', 'cancelled'].includes(memberStatus)) {
@@ -119,6 +172,7 @@ export default function ProjectWorkspace({
   const [profiles, setProfiles] = useState([]);
   const [favoriteIds, setFavoriteIds] = useState([]);
   const [events, setEvents] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [selectedProfile, setSelectedProfile] = useState(null);
@@ -151,16 +205,18 @@ export default function ProjectWorkspace({
 
     async function loadWorkspaceData() {
       try {
-        const [publicProfiles, eventList, favorites] = await Promise.all([
+        const [publicProfiles, eventList, favorites, requestsList] = await Promise.all([
           getPublicProfiles(),
           getEvents(),
-          profileId ? getFavorites(profileId) : Promise.resolve([])
+          profileId ? getFavorites(profileId) : Promise.resolve([]),
+          getCrewRequests()
         ]);
 
         if (cancelled) return;
         setProfiles(publicProfiles.map(parseProfile));
         setEvents(eventList);
         setFavoriteIds(favorites.map((item) => String(item.favorite_profile_id)));
+        setRequests(requestsList);
       } catch (error) {
         console.error('Workspace: Daten konnten nicht geladen werden.', error);
         if (!cancelled) setLoadError('Die Workspace-Daten konnten nicht geladen werden.');
@@ -193,12 +249,14 @@ export default function ProjectWorkspace({
     return profiles.filter((profile) => crewIdSet.has(String(profile.id)));
   }, [activeEvent, profiles]);
 
+
+  
   const profileStatuses = useMemo(() => new Map(
     profiles.map((profile) => [
       String(profile.id),
-      getProfileEventStatus(profile, activeEvent, favoriteIds)
+      getProfileEventStatus(profile, activeEvent, favoriteIds, requests)
     ])
-  ), [activeEvent, favoriteIds, profiles]);
+  ), [activeEvent, favoriteIds, profiles, requests]);
 
   const eventTitle =
     activeEvent?.title ||
@@ -314,6 +372,82 @@ export default function ProjectWorkspace({
     handleEventCreationClose();
   };
 
+  const handleAddToCrew = async (profile) => {
+      if (!activeEventRef) return;
+
+      if (
+          !window.confirm(
+              `${profile.name} wirklich in die Crew übernehmen?`
+          )
+      ) {
+          return;
+      }
+
+      const crewExists =
+          (activeEventRef.crew || []).some(
+              member => String(member.id) === String(profile.id)
+          );
+
+      const updatedEvent = {
+          ...activeEventRef,
+          crewIds: Array.from(
+              new Set([
+                  ...(activeEventRef.crewIds || []),
+                  profile.id
+              ])
+          ),
+          crew: crewExists
+              ? (activeEventRef.crew || [])
+              : [
+                  ...(activeEventRef.crew || []),
+                  {
+                      id: profile.id,
+                      name: profile.name,
+                      role:
+                          profile.role ||
+                          profile.type ||
+                          profile.gewerk ||
+                          'Crew',
+                      status: 'accepted',
+                      confirmed: true,
+                      changed: true,
+                      changedAt: Date.now()
+                  }
+              ]
+      };
+
+      await handleEventSave(updatedEvent);
+  };
+  
+  const handleNotNeeded = async (profile) => {
+      if (
+          !window.confirm(
+              `${profile.name} wirklich als nicht benötigt markieren?`
+          )
+      ) {
+          return;
+      }
+  const updatedEvent = {
+      ...activeEventRef,
+      crewIds: (activeEventRef.crewIds || []).filter(
+          id => String(id) !== String(profile.id)
+      ),
+      crew: (activeEventRef.crew || []).map(member =>
+          String(member.id) === String(profile.id)
+              ? {
+                  ...member,
+                  status: 'removed',
+                  changed: true,
+                  changedAt: Date.now()
+                }
+              : member
+      )
+  };
+    await handleEventSave(updatedEvent);
+
+  alert(`${profile.name} als nicht benötigt markiert`);
+  };
+
   return (
     <div className="workspace-app mt-2">
       <WorkspaceTabContainer
@@ -326,6 +460,7 @@ export default function ProjectWorkspace({
         profiles={profiles}
         favoriteIds={favoriteIds}
         profileStatuses={profileStatuses}
+        requests={requests}
         onCreateEvent={handleEventCreate}
         activeTab={activeTab}
         onTabChange={handleTabChange}
@@ -333,12 +468,13 @@ export default function ProjectWorkspace({
       />
       <div className="workspace-main">
         <header className="workspace-header">
-          <EventInfoBlock event={activeEvent} crew={crew} profiles={profiles} />
+          <EventInfoBlock event={activeEvent} crew={crew} profiles={profiles} requests={requests} />
         </header>
         <div className="workspace-workbench">
           <WorkspaceCanvas
             activeEvent={activeEvent}
             profiles={profiles}
+            requests={requests}
             selectedCardId={selectedCardId}
             profileStatuses={profileStatuses}
             onProfileSelect={(profile, cardId) => {
@@ -364,7 +500,14 @@ export default function ProjectWorkspace({
           {activeTab !== 'promotion' && (
             <WorkspaceDetailsPanel 
               profile={selectedProfile} 
-              event={selectedEvent}
+              event={activeEvent}
+              workspaceStatus={
+                selectedProfile
+                  ? profileStatuses?.get(String(selectedProfile.id))
+                  : null
+              }
+              onAddToCrew={handleAddToCrew}
+              onNotNeeded={handleNotNeeded}
               showEventPreview={activeTab === 'events'}
               onEventEdit={handleEventEdit}
               onSheetOpen={handleSheetOpen}

@@ -14,6 +14,7 @@ export default function WorkspaceTabContainer({
   profiles = [],
   favoriteIds = [],
   profileStatuses = {},
+  requests = [],
   onCreateEvent,
   activeTab,
   onTabChange,
@@ -31,6 +32,19 @@ export default function WorkspaceTabContainer({
 
   const visibleTabs = availableTabs.filter(tab => tab.alwaysVisible);
 
+  const crewProfiles = profiles.filter(profile => {
+      const status = profileStatuses instanceof Map
+          ? profileStatuses.get(String(profile.id))
+          : profileStatuses[String(profile.id)];
+
+      return ['Angefragt', 'Verhandlung', 'Zusage'].includes(status);
+  });
+
+  const crewIndicator =
+      crewProfiles.length > 0
+          ? 'yellow'
+          : 'green';
+
   return (
     <div className="workspace-tab-container">
       <div className="workspace-tabs-header">
@@ -41,7 +55,12 @@ export default function WorkspaceTabContainer({
             className={`workspace-tab ${activeTab === tab.id ? 'is-active' : ''}`}
             onClick={() => onTabChange(tab.id)}
           >
-            {tab.label}
+            <span>{tab.label}</span>
+            {tab.id === 'crew' && (
+                <span
+                    className={`workspace-tab-indicator workspace-tab-indicator--${crewIndicator}`}
+                />
+            )}
           </button>
         ))}
       </div>
@@ -62,6 +81,7 @@ export default function WorkspaceTabContainer({
           <CrewTab
             activeEvent={activeEvent}
             profiles={profiles}
+            requests={requests}
             favoriteIds={favoriteIds}
             profileStatuses={profileStatuses}
             onProfileSelect={onProfileSelect}

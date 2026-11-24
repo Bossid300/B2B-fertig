@@ -13,7 +13,7 @@ from '../moduls/subscriptions/featureGates';
 import PromotionTab from './experimental/workspace/tabs/PromotionTab.jsx';
 import { getTicketPriceRows, getTicketPricing } from './utils/ticketPrices.js';
 import { AmenitySelector } from './components/AmenityTags.jsx';
-
+import { geocodeAddress } from './services/geoService';
 
 export default function EventPromotion({
   onBack,
@@ -209,12 +209,23 @@ useEffect(() => {
 }, [activeEvent?.id]);
 
 
-const handleSavePromotion = () => {
+const handleSavePromotion = async () => {
 
   if (!activeEvent) return;
   const savePromotionDate = workspace && promotionDateDirty.current && promotionDateValid;
   const events =
     eventService.getEvents();
+
+
+    const address = [
+        promoData.street,
+        promoData.zip,
+        promoData.city
+    ]
+    .filter(Boolean)
+    .join(' ');
+
+    const geo = await geocodeAddress(address);
 
     const updatedEvents = events.map(event => {
       if (event.id !== activeEvent.id) {
@@ -240,6 +251,9 @@ const handleSavePromotion = () => {
         ]
         .filter(workspace ? value => String(value).trim() : Boolean)
         .join(', '),
+
+        lat: geo?.lat ?? event.lat,
+        lng: geo?.lng ?? event.lng,
 
         promotionData: promoData
       };

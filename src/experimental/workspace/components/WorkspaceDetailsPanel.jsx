@@ -3,6 +3,8 @@ import SheetRouter from '../../../components/sheets/SheetRouter';
 import { getRoleSheet } from '../../../components/sheets/roleSheetMap';
 import EventCard from '../../../components/cards/EventCard.jsx';
 import ProfileCard from '../../../components/cards/ProfileCard';
+import { saveCrewRequest } from '../../../services/apiService';
+
 function profileName(profile) {
   return profile.name || profile.display_name || profile.user_name || profile.project_name || 'Unbenanntes Profil';
 }
@@ -21,11 +23,12 @@ function getCrewMemberNames(event, allProfiles = []) {
   return crewMembers.join(', ');
 }
 
-const ACTIONS = ['DETAILS', 'SHEET', 'PORTFOLIO', 'CHAT', 'ANFRAGE', 'FAVORIT'];
-
 export default function WorkspaceDetailsPanel({ 
   profile, 
-  event, 
+  event,
+  workspaceStatus,
+  onAddToCrew,
+  onNotNeeded,
   onEventEdit,
   onSheetOpen,
   onPortfolioOpen,
@@ -33,6 +36,18 @@ export default function WorkspaceDetailsPanel({
   showEventPreview = false,
   allProfiles = [] 
 }) {
+
+  const ACTIONS = ['DETAILS', 'SHEET', 'PORTFOLIO', 'CHAT'];
+
+  if (workspaceStatus === 'Interessant') {
+      ACTIONS.push('ANFRAGE');
+      ACTIONS.push('FAVORIT');
+  }
+
+  if (workspaceStatus === 'Zusage') {
+      ACTIONS.push('IN CREW');
+      ACTIONS.push('NICHT BENÖTIGT');
+  }
 
   // FALLBACK: Wenn kein Profil und kein Event: leer
   if (!profile && !event) {
@@ -46,6 +61,7 @@ export default function WorkspaceDetailsPanel({
       </aside>
     );
   }
+
 
   // PRIORITÄT: Wenn Profil ausgewählt ist, zeige Profil-Details
   if (profile) {
@@ -76,14 +92,60 @@ export default function WorkspaceDetailsPanel({
         onProfileOpen?.(profile);
     }
 
-    const handleActionClick = (action) => {
+    const handleActionClick = async (action) => {
+      if (action === 'IN CREW') {
+          onAddToCrew?.(profile);
+          return;
+      }
+      if (action === 'NICHT BENÖTIGT') {
+          onNotNeeded?.(profile);
+          return;
+      }
       if (action === 'SHEET') {
         handleSheetClick();
       } else if (action === 'PORTFOLIO') {
         handlePortfolioClick();
       } else if (action === 'DETAILS') {
         handleProfileClick();
-    }
+      } else if (action === 'ANFRAGE') {
+          if (!event || !profile) return;
+          const requesterProfileId =
+              localStorage.getItem('gigsda_profile_id') || '';
+          const requesterProfileName =
+              localStorage.getItem('gigsda_user_name') || 'Veranstalter';
+          const now = Date.now();
+          const newRequest = {
+              requestId: 'REQ-' + Math.floor(Math.random() * 9000 + 1000),
+              eventId: event.id,
+              eventName: event.title,
+              date: event.date || 'Termin auf Anfrage',
+              requestedProfileId: profile.id,
+              requestedProfileName: profile.name,
+              requestedProfileRole:
+                  profile.role ||
+                  profile.type ||
+                  profile.gewerk ||
+                  'Crew',
+              requestedProfileCity:
+                  profile.city ||
+                  profile.ort ||
+                  '',
+              requesterProfileId,
+              requesterProfileName,
+              requesterName: requesterProfileName,
+              status: 'pending',
+              note: `Hallo ${profile.name},
+              wir möchten dich gerne für unser Event "${event.title}" anfragen.
+              Rolle: ${profile.role || profile.type || profile.gewerk || 'Crew'}
+              Viele Grüße
+              ${requesterProfileName}`,
+              source: 'workspace',
+              createdAt: now,
+              updatedAt: now
+          };
+          await saveCrewRequest(newRequest);
+          alert(`Anfrage an ${profile.name} gesendet`);
+      }
     };
 
     return (
