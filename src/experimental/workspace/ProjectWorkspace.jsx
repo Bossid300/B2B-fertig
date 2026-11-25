@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getEvents, getFavorites, getPublicProfiles, saveEvent, getCrewRequests, saveCrewRequest, updateCrewRequest } from '../../services/apiService.js';
+import { 
+  getEvents, 
+  getFavorites, 
+  getPublicProfiles, 
+  saveEvent, 
+  getCrewRequests, 
+  saveCrewRequest, 
+  updateCrewRequest,
+  deleteCrewRequest
+} from '../../services/apiService.js';
 import { eventService } from '../../services/eventService.js';
 import WorkspaceCanvas from './WorkspaceCanvas.jsx';
 import WorkspaceDetailsPanel from './components/WorkspaceDetailsPanel.jsx';
@@ -214,7 +223,12 @@ export default function ProjectWorkspace({
 
         if (cancelled) return;
         setProfiles(publicProfiles.map(parseProfile));
-        setEvents(eventList);
+        const myEvents = eventList.filter(event =>
+            String(event.ownerId || event.owner_id) === String(profileId)
+        );
+
+        setEvents(myEvents);
+        // setEvents(eventList);
         setFavoriteIds(favorites.map((item) => String(item.favorite_profile_id)));
         setRequests(requestsList);
       } catch (error) {
@@ -397,7 +411,17 @@ export default function ProjectWorkspace({
               ])
           ),
           crew: crewExists
-              ? (activeEventRef.crew || [])
+              ? (activeEventRef.crew || []).map(member =>
+                  String(member.id) === String(profile.id)
+                      ? {
+                          ...member,
+                          status: 'accepted',
+                          confirmed: true,
+                          changed: true,
+                          changedAt: Date.now()
+                      }
+                      : member
+                )
               : [
                   ...(activeEventRef.crew || []),
                   {
@@ -413,13 +437,28 @@ export default function ProjectWorkspace({
                       changed: true,
                       changedAt: Date.now()
                   }
-              ]
+      ]
       };
+      const existingRequest = requests.find(
+          request =>
+              String(request.eventId) === String(activeEventRef.id) &&
+              String(request.requestedProfileId) === String(profile.id)
+      );
+      if (existingRequest) {
+          await deleteCrewRequest(existingRequest.requestId);
 
+          setRequests(current =>
+              current.filter(
+                  request =>
+                      request.requestId !== existingRequest.requestId
+              )
+          );
+      }
       await handleEventSave(updatedEvent);
   };
   
   const handleNotNeeded = async (profile) => {
+
       if (
           !window.confirm(
               `${profile.name} wirklich als nicht benötigt markieren?`
@@ -427,26 +466,181 @@ export default function ProjectWorkspace({
       ) {
           return;
       }
-  const updatedEvent = {
-      ...activeEventRef,
-      crewIds: (activeEventRef.crewIds || []).filter(
-          id => String(id) !== String(profile.id)
-      ),
-      crew: (activeEventRef.crew || []).map(member =>
-          String(member.id) === String(profile.id)
-              ? {
-                  ...member,
-                  status: 'removed',
-                  changed: true,
-                  changedAt: Date.now()
-                }
-              : member
-      )
-  };
-    await handleEventSave(updatedEvent);
+      if (
+          !activeEventRef?.crew?.length ||
+          !activeEventRef?.crewIds?.length
+      ) {
+          alert(
+              'Crewdaten fehlen. Stornieren wurde zur Sicherheit abgebrochen.'
+          );
+          return;
+      }
+      // FALL 1:
+      // Profil ist eine Zusage (accepted Request),
+      // aber noch nicht in der Crew.
+      const targetRequest = requests.find(
+          request =>
+              String(request.eventId) === String(activeEventRef.id) &&
+              String(request.requestedProfileId) === String(profile.id) &&
+              request.status === 'accepted'
+      );
 
-  alert(`${profile.name} als nicht benötigt markiert`);
+      if (targetRequest) {
+
+          await deleteCrewRequest(
+              targetRequest.requestId
+          );
+
+          setRequests(current =>
+              current.filter(
+                  request =>
+                      request.requestId !== targetRequest.requestId
+              )
+          );
+          const eventList = await getEvents();
+          setEvents(eventList.filter(event =>
+              String(event.ownerId || event.owner_id) ===
+              String(localStorage.getItem('gigsda_profile_id'))
+          ));
+          alert(
+              `${profile.name} als nicht benötigt markiert`
+          );
+
+          return;
+      }
+
+      // FALL 2:
+      // Profil ist bereits bestätigte Crew.
+      const updatedEvent = {
+          ...activeEventRef,
+
+          crewIds: (activeEventRef.crewIds || []).filter(
+              id => String(id) !== String(profile.id)
+          ),
+
+          crew: (activeEventRef.crew || []).map(
+              member =>
+                  String(member.id) === String(profile.id)
+                      ? {
+                          ...member,
+                          status: 'removed',
+                          changed: true,
+                          changedAt: Date.now()
+                      }
+                      : member
+          )
+      };
+
+      await handleEventSave(updatedEvent);
+
+      alert(
+          `${profile.name} als nicht benötigt markiert`
+      );
   };
+
+  const handleRequest = async (profile) => {
+      if (!activeEventRef) return;
+
+      if (
+          !window.confirm(
+              `${profile.name} wirklich anfragen?`
+          )
+      ) {
+          return;
+      }
+
+      const alreadyRequested = requests.some(
+          request =>
+              String(request.eventId) === String(activeEventRef.id) &&
+              String(request.requestedProfileId) === String(profile.id) &&
+              ['pending', 'accepted'].includes(request.status)
+      );
+
+      if (alreadyRequested) {
+          alert(`${profile.name} wurde bereits angefragt`);
+          return;
+      }
+      const requesterProfileId =
+          localStorage.getItem('gigsda_profile_id') || '';
+
+      const requesterProfileName =
+          localStorage.getItem('gigsda_user_name') || 'Veranstalter';
+
+      const now = Date.now();
+
+      const newRequest = {
+          requestId: `REQ-${Math.floor(Math.random() * 9000 + 1000)}`,
+          eventId: activeEventRef.id,
+          eventName: activeEventRef.title,
+          date: activeEventRef.date || 'Termin auf Anfrage',
+          requestedProfileId: profile.id,
+          requestedProfileName: profile.name,
+          requesterProfileId,
+          requesterProfileName,
+          requesterName: requesterProfileName,
+          status: 'pending',
+          note: `Hallo ${profile.name},
+          wir möchten dich gerne für unser Event "${activeEventRef.title}" anfragen.
+          Rolle: ${profile.role || profile.type || profile.gewerk || 'Crew'}
+          Viele Grüße
+          ${requesterProfileName}`,
+          source: 'workspace',
+          createdAt: now,
+          updatedAt: now
+      };
+
+      await saveCrewRequest(newRequest);
+      setRequests(current => [
+          newRequest,
+          ...current
+      ]);
+      const eventList = await getEvents();
+      setEvents(eventList.filter(event =>
+          String(event.ownerId || event.owner_id) ===
+          String(localStorage.getItem('gigsda_profile_id'))
+      ));
+
+      alert(`Anfrage an ${profile.name} gesendet`);
+  };
+
+  const handleWithdrawRequest = async (profile) => {
+      if (
+          !window.confirm(
+              `Anfrage an ${profile.name} zurückziehen?`
+          )
+      ) {
+          return;
+      }
+      const targetRequest = requests.find(
+          request =>
+              String(request.eventId) === String(activeEventRef.id) &&
+              String(request.requestedProfileId) === String(profile.id) &&
+              request.status === 'pending'
+      );
+      if (!targetRequest) {
+          alert('Keine offene Anfrage gefunden');
+          return;
+      }
+      await deleteCrewRequest(
+          targetRequest.requestId
+      );
+
+      setRequests(current =>
+          current.filter(
+              request =>
+                  request.requestId !== targetRequest.requestId
+          )
+      );
+      const eventList = await getEvents();
+      setEvents(eventList.filter(event =>
+          String(event.ownerId || event.owner_id) ===
+          String(localStorage.getItem('gigsda_profile_id'))
+      ));
+      alert(
+          `Anfrage an ${profile.name} zurückgezogen`
+      );
+    };
+
 
   return (
     <div className="workspace-app mt-2">
@@ -481,6 +675,10 @@ export default function ProjectWorkspace({
               setSelectedProfile(profile);
               setSelectedCardId(cardId);
             }}
+            onRequest={handleRequest}
+            onWithdrawRequest={handleWithdrawRequest}
+            onAddToCrew={handleAddToCrew}
+            onNotNeeded={handleNotNeeded}
             onEventOpen={handleEventOpen}
             hidden={activeTab === 'promotion'}
           />

@@ -231,6 +231,24 @@ export async function updateCrewRequest(
   return await response.json();
 }
 
+export async function deleteCrewRequest(requestId) {
+
+    const response = await fetch(
+        `${API_BASE}/deleteCrewRequest.php`,
+        {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                requestId
+            })
+        }
+    );
+
+    return response.json();
+}
+
 export async function saveEvent(event) {
   const response = await fetch(
     `${API_BASE}/saveEvent.php`,

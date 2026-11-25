@@ -45,6 +45,7 @@ function getCrewStatusGroup(profile, profileStatuses) {
   if (['Bestätigt', 'Gebucht'].includes(normalizedStatus)) return 'Bestätigt';
   if (['In Verhandlung', 'Gegenangebot'].includes(normalizedStatus)) return 'Verhandlung';
   if (['Angefragt', 'Pending'].includes(normalizedStatus)) return 'Angefragt';
+  if (['Nicht benötigt', 'Removed'].includes(normalizedStatus)) return 'Nicht benötigt';
   return 'Interessant';
 }
 
@@ -176,7 +177,7 @@ export default function CrewTab({
         {/* CREW TAB: Mit Gruppierung */}
         {activeTabLocal === 'crew' && visibleProfiles.length > 0 && (
           <div className="workspace-profile-groups">
-            {['Interessant', 'Angefragt', 'Verhandlung', 'Zusage', 'Bestätigt'].map((groupName) => {
+            {['Interessant', 'Angefragt', 'Verhandlung', 'Zusage', 'Bestätigt', 'Nicht benötigt'].map((groupName) => {
               const groupProfiles = visibleProfiles.filter(p => getCrewStatusGroup(p, profileStatuses) === groupName);
               if (groupProfiles.length === 0) return null;
 

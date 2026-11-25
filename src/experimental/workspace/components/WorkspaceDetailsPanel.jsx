@@ -144,6 +144,10 @@ export default function WorkspaceDetailsPanel({
               updatedAt: now
           };
           await saveCrewRequest(newRequest);
+          setRequests(current => [
+              newRequest,
+              ...current
+          ]);
           alert(`Anfrage an ${profile.name} gesendet`);
       }
     };

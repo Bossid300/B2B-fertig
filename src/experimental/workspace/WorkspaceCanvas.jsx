@@ -24,6 +24,10 @@ export default function WorkspaceCanvas({
   activeEvent, 
   profiles, 
   requests = [],
+  onRequest,
+  onWithdrawRequest,
+  onAddToCrew,
+  onNotNeeded,
   onEventOpen, 
   hidden 
 }) {
@@ -204,7 +208,17 @@ export default function WorkspaceCanvas({
     setCards((current) => current.filter((card) => card.instanceId !== instanceId));
   };
 
+  const selectedCard =
+      cards.find(card =>
+          card.instanceId === selectedCardId
+      );
 
+  const selectedStatus =
+      selectedCard
+          ? profileStatuses?.get(
+              String(selectedCard.profile.id)
+            )
+          : null;    
 
   return (
     <section
@@ -238,8 +252,101 @@ export default function WorkspaceCanvas({
           >
             🗂 Kategorie
           </button>
+          {selectedCardId && (
+            <>
+              <button
+                className="workspace-canvas__action-btn"
+              >
+                Portfolio
+              </button>
+
+              <button
+                className="workspace-canvas__action-btn"
+              >
+                Sheet
+              </button>
+            </>
+          )}
+          {selectedStatus === 'Interessant' && (
+            <button
+                className="workspace-canvas__action-btn"
+                onClick={() =>
+                    onRequest?.(selectedCard.profile)
+                }
+            >
+                ANFRAGEN
+            </button>
+          )}
+          {selectedStatus === 'Angefragt' && (
+            <button
+              type="button"
+              className="workspace-canvas__toolbar-button workspace-canvas__toolbar-button--warning"
+              onClick={() =>
+              onWithdrawRequest?.(selectedCard.profile)
+            }
+            >
+            RÜCKZIEHEN
+            </button>
+          )}
+          {selectedStatus === 'Zusage' && (
+            <>
+              <button
+                type="button"
+                className="workspace-canvas__toolbar-button workspace-canvas__toolbar-button--success"
+                onClick={() =>
+                onAddToCrew?.(selectedCard.profile)
+                }
+              >
+                IN CREW
+              </button>
+
+              <button
+                type="button"
+                className="workspace-canvas__toolbar-button workspace-canvas__toolbar-button--danger"
+                onClick={() =>
+                onNotNeeded?.(selectedCard.profile)
+                }
+              >
+                NICHT BENÖTIGT
+              </button>
+            </>
+          )}
+          {selectedStatus === 'Bestätigt' && (
+            <>
+              <button
+                type="button"
+                className="workspace-canvas__toolbar-button"
+              >
+                CHAT
+              </button>
+
+              <button
+                type="button"
+                className="workspace-canvas__toolbar-button workspace-canvas__toolbar-button--danger"
+                onClick={() =>
+                  onNotNeeded?.(selectedCard.profile)
+                }
+              >
+                STORNIEREN
+              </button>
+            </>
+          )}
+          {selectedStatus === 'Nicht benötigt' && (
+            <button
+              type="button"
+              className="workspace-canvas__toolbar-button workspace-canvas__toolbar-button--success"
+              onClick={() =>
+                onAddToCrew(selectedCard.profile)
+              }
+            >
+              ERNEUT ÜBERNEHMEN
+            </button>
+          )}
+
         </div>
       )}
+
+
 
       {cards.length === 0 && (
         <div className="workspace-canvas__empty">
