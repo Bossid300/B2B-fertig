@@ -239,14 +239,14 @@ export default function WorkspaceCanvas({
       {cards.length > 0 && (
         <div className="workspace-canvas__toolbar">
           <button
-            className={`workspace-canvas__sort-btn${sortMode === 'status' ? ' is-active' : ''}`}
+            className={`workspace-canvas__sort-btn rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-5 py-2.5 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-500/20${sortMode === 'status' ? ' is-active' : ''}`}
             onClick={() => setSortMode(sortMode === 'status' ? null : 'status')}
             title="Nach Status sortieren"
           >
             📊 Status
           </button>
           <button
-            className={`workspace-canvas__sort-btn${sortMode === 'category' ? ' is-active' : ''}`}
+            className={`workspace-canvas__sort-btn rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-5 py-2.5 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-500/20${sortMode === 'category' ? ' is-active' : ''}`}
             onClick={() => setSortMode(sortMode === 'category' ? null : 'category')}
             title="Nach Kategorie sortieren"
           >
@@ -255,13 +255,13 @@ export default function WorkspaceCanvas({
           {selectedCardId && (
             <>
               <button
-                className="workspace-canvas__action-btn"
+                className="rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-5 py-2.5 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-500/20"
               >
                 Portfolio
               </button>
 
               <button
-                className="workspace-canvas__action-btn"
+                className="rounded-lg border border-cyan-500/40 bg-cyan-500/10 px-5 py-2.5 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-500/20"
               >
                 Sheet
               </button>
@@ -269,7 +269,7 @@ export default function WorkspaceCanvas({
           )}
           {selectedStatus === 'Interessant' && (
             <button
-                className="workspace-canvas__action-btn"
+                className="rounded-lg border border-orange-500/40 bg-orange-500/10 px-5 py-2.5 text-sm font-semibold text-orange-300 transition hover:bg-orange-500/20"
                 onClick={() =>
                     onRequest?.(selectedCard.profile)
                 }
@@ -280,7 +280,7 @@ export default function WorkspaceCanvas({
           {selectedStatus === 'Angefragt' && (
             <button
               type="button"
-              className="workspace-canvas__toolbar-button workspace-canvas__toolbar-button--warning"
+              className="rounded-lg border border-orange-500/40 bg-orange-500/10 px-5 py-2.5 text-sm font-semibold text-orange-300 transition hover:bg-orange-500/20"
               onClick={() =>
               onWithdrawRequest?.(selectedCard.profile)
             }
@@ -292,7 +292,7 @@ export default function WorkspaceCanvas({
             <>
               <button
                 type="button"
-                className="workspace-canvas__toolbar-button workspace-canvas__toolbar-button--success"
+                className="rounded-lg border border-green-500/40 bg-green-500/10 px-5 py-2.5 text-sm font-semibold text-green-300 transition hover:bg-green-500/20"
                 onClick={() =>
                 onAddToCrew?.(selectedCard.profile)
                 }
@@ -302,7 +302,7 @@ export default function WorkspaceCanvas({
 
               <button
                 type="button"
-                className="workspace-canvas__toolbar-button workspace-canvas__toolbar-button--danger"
+                className="rounded-lg border border-red-500/40 bg-red-500/10 px-5 py-2.5 text-sm font-semibold text-red-300 transition hover:bg-red-500/20"
                 onClick={() =>
                 onNotNeeded?.(selectedCard.profile)
                 }
@@ -311,18 +311,35 @@ export default function WorkspaceCanvas({
               </button>
             </>
           )}
-          {selectedStatus === 'Bestätigt' && (
+          {selectedStatus === 'Verhandlung' && (
             <>
               <button
                 type="button"
-                className="workspace-canvas__toolbar-button"
+                className="rounded-lg border border-green-500/40 bg-green-500/10 px-5 py-2.5 text-sm font-semibold text-green-300 transition hover:bg-green-500/20"
               >
                 CHAT
               </button>
 
               <button
                 type="button"
-                className="workspace-canvas__toolbar-button workspace-canvas__toolbar-button--danger"
+                className="rounded-lg border border-orange-500/40 bg-orange-500/10 px-5 py-2.5 text-sm font-semibold text-orange-300 transition hover:bg-orange-500/20"
+              >
+                NACHRICHTEN
+              </button>
+            </>
+          )}
+          {selectedStatus === 'Bestätigt' && (
+            <>
+              <button
+                type="button"
+                className="rounded-lg border border-green-500/40 bg-green-500/10 px-5 py-2.5 text-sm font-semibold text-green-300 transition hover:bg-green-500/20"
+              >
+                CHAT
+              </button>
+
+              <button
+                type="button"
+                className="rounded-lg border border-red-500/40 bg-red-500/10 px-5 py-2.5 text-sm font-semibold text-red-300 transition hover:bg-red-500/20"
                 onClick={() =>
                   onNotNeeded?.(selectedCard.profile)
                 }
@@ -334,7 +351,7 @@ export default function WorkspaceCanvas({
           {selectedStatus === 'Nicht benötigt' && (
             <button
               type="button"
-              className="workspace-canvas__toolbar-button workspace-canvas__toolbar-button--success"
+              className="rounded-lg border border-green-500/40 bg-green-500/10 px-5 py-2.5 text-sm font-semibold text-green-300 transition hover:bg-green-500/20"
               onClick={() =>
                 onAddToCrew(selectedCard.profile)
               }

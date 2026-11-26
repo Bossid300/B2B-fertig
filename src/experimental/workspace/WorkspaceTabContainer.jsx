@@ -1,7 +1,7 @@
 import EventsTab from './tabs/EventsTab.jsx';
 import CrewTab from './tabs/CrewTab.jsx';
-import BudgetTab from './tabs/BudgetTab.jsx';
 import CommunicationTab from './tabs/CommunicationTab.jsx';
+import BudgetTab from './tabs/BudgetTab.jsx';
 import DocumentsTab from './tabs/DocumentsTab.jsx';
 
 export default function WorkspaceTabContainer({
@@ -25,8 +25,8 @@ export default function WorkspaceTabContainer({
     { id: 'events', label: 'Events', alwaysVisible: true },
     { id: 'promotion', label: 'Promotion', alwaysVisible: activeEvent },
     { id: 'crew', label: 'Crew', alwaysVisible: activeEvent },
-    { id: 'budget', label: 'Budget', alwaysVisible: activeEvent },
     { id: 'communication', label: 'Kommunikation', alwaysVisible: activeEvent },
+    { id: 'budget', label: 'Budget', alwaysVisible: activeEvent },
     { id: 'documents', label: 'Dokumente', alwaysVisible: activeEvent }
   ];
 
@@ -88,12 +88,12 @@ export default function WorkspaceTabContainer({
           />
         )}
 
-        {activeTab === 'budget' && activeEvent && (
-          <BudgetTab />
-        )}
-
         {activeTab === 'communication' && activeEvent && (
           <CommunicationTab />
+        )}
+
+        {activeTab === 'budget' && activeEvent && (
+          <BudgetTab />
         )}
 
         {activeTab === 'documents' && activeEvent && (

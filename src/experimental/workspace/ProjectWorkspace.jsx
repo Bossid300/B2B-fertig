@@ -19,6 +19,8 @@ import SheetRouter from '../../components/sheets/SheetRouter.jsx';
 import CreateEventForm from '../../CreateEventForm.jsx';
 import EventPromotion from '../../EventPromotion.jsx';
 import './workspace.css';
+import CommunityChat from '../../CommunityChat.jsx';
+import BudgetPlanner from '../../components/BudgetPlanner.jsx';
 
 import UserProfile from '../../UserProfile.jsx';
 import LocationProfile from '../../LocationProfile.jsx';
@@ -665,23 +667,31 @@ export default function ProjectWorkspace({
           <EventInfoBlock event={activeEvent} crew={crew} profiles={profiles} requests={requests} />
         </header>
         <div className="workspace-workbench">
-          <WorkspaceCanvas
-            activeEvent={activeEvent}
-            profiles={profiles}
-            requests={requests}
-            selectedCardId={selectedCardId}
-            profileStatuses={profileStatuses}
-            onProfileSelect={(profile, cardId) => {
-              setSelectedProfile(profile);
-              setSelectedCardId(cardId);
-            }}
-            onRequest={handleRequest}
-            onWithdrawRequest={handleWithdrawRequest}
-            onAddToCrew={handleAddToCrew}
-            onNotNeeded={handleNotNeeded}
-            onEventOpen={handleEventOpen}
-            hidden={activeTab === 'promotion'}
-          />
+          {activeTab === 'communication' && (
+              <CommunityChat />
+          )}
+          {activeTab === 'budget' && (
+              <BudgetPlanner />
+          )}
+          {['crew', 'documents', 'events'].includes(activeTab) && (
+              <WorkspaceCanvas
+                  activeEvent={activeEvent}
+                  profiles={profiles}
+                  requests={requests}
+                  selectedCardId={selectedCardId}
+                  profileStatuses={profileStatuses}
+                  onProfileSelect={(profile, cardId) => {
+                      setSelectedProfile(profile);
+                      setSelectedCardId(cardId);
+                  }}
+                  onRequest={handleRequest}
+                  onWithdrawRequest={handleWithdrawRequest}
+                  onAddToCrew={handleAddToCrew}
+                  onNotNeeded={handleNotNeeded}
+                  onEventOpen={handleEventOpen}
+                  hidden={activeTab === 'promotion'}
+              />
+          )}
           {activeEvent && String(activeEvent.id) === String(promotionEventId) && (
             <div className="workspace-promotion-container" style={{ display: activeTab === 'promotion' ? undefined : 'none' }}>
               <EventPromotion
